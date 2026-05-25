@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Notion PRD Export",
+  "type": "object",
+  "required": ["status", "source_prd", "target", "approval_required", "fallback_markdown_path"],
+  "properties": {
+    "status": { "enum": ["draft", "ready_for_approval", "published", "blocked"] },
+    "source_prd": { "type": "string" },
+    "target": { "type": "string" },
+    "approval_required": { "type": "boolean" },
+    "approval_record": { "type": "string" },
+    "published_url": { "type": "string" },
+    "fallback_markdown_path": { "type": "string" },
+    "risks": { "type": "array", "items": { "type": "string" } }
+  }
+}

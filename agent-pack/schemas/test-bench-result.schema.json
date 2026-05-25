@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Test Bench Result",
+  "type": "object",
+  "required": ["status", "inputs_used", "main_funnel", "analytics_spec", "pii_risk", "result"],
+  "properties": {
+    "status": { "enum": ["draft", "partial", "blocked", "ready"] },
+    "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "main_funnel": { "type": "array", "items": { "type": "object" } },
+    "analytics_spec": { "type": "array", "items": { "type": "object" } },
+    "pii_risk": { "enum": ["none", "low", "medium", "high"] },
+    "executable_checks": { "type": "array", "items": { "type": "object" } },
+    "result": { "enum": ["pass", "fail", "blocked"] }
+  }
+}

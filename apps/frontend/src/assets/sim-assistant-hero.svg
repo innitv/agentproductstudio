@@ -1,0 +1,35 @@
+<svg width="760" height="620" viewBox="0 0 760 620" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Virtual assistant for SIM activation</title>
+  <desc id="desc">A phone screen with eSIM cards, assistant messages and mobile connection indicators.</desc>
+  <rect width="760" height="620" rx="36" fill="#E9EFE8"/>
+  <circle cx="617" cy="111" r="72" fill="#F4A261"/>
+  <circle cx="154" cy="506" r="86" fill="#2C6E49"/>
+  <path d="M157 125C207 54 317 58 376 104C431 147 502 129 552 161C625 207 633 331 584 404C531 485 409 482 335 449C262 416 198 445 145 395C91 344 107 196 157 125Z" fill="#F8FBF7"/>
+  <rect x="257" y="74" width="247" height="472" rx="42" fill="#19231E"/>
+  <rect x="274" y="101" width="213" height="418" rx="30" fill="#F7FAF7"/>
+  <rect x="335" y="87" width="91" height="9" rx="4.5" fill="#2F3D34"/>
+  <rect x="304" y="130" width="153" height="48" rx="16" fill="#223027"/>
+  <path d="M329 149H393" stroke="#F7FAF7" stroke-width="7" stroke-linecap="round"/>
+  <path d="M329 163H374" stroke="#F4A261" stroke-width="7" stroke-linecap="round"/>
+  <rect x="303" y="207" width="86" height="72" rx="18" fill="#2C6E49"/>
+  <path d="M321 229H371" stroke="#F7FAF7" stroke-width="6" stroke-linecap="round"/>
+  <path d="M321 248H351" stroke="#F7FAF7" stroke-width="6" stroke-linecap="round"/>
+  <path d="M372 207V279" stroke="#F7FAF7" stroke-width="4"/>
+  <path d="M303 243H389" stroke="#F7FAF7" stroke-width="4"/>
+  <rect x="405" y="207" width="53" height="72" rx="18" fill="#F4A261"/>
+  <circle cx="431.5" cy="243" r="13" fill="#223027"/>
+  <rect x="304" y="309" width="154" height="42" rx="16" fill="#E1E9E2"/>
+  <rect x="304" y="365" width="118" height="42" rx="16" fill="#E1E9E2"/>
+  <rect x="329" y="438" width="104" height="42" rx="21" fill="#223027"/>
+  <path d="M354 459H408" stroke="#F7FAF7" stroke-width="6" stroke-linecap="round"/>
+  <rect x="489" y="182" width="168" height="96" rx="24" fill="#FFFFFF"/>
+  <path d="M522 215H610" stroke="#223027" stroke-width="9" stroke-linecap="round"/>
+  <path d="M522 237H631" stroke="#748579" stroke-width="8" stroke-linecap="round"/>
+  <rect x="104" y="271" width="180" height="104" rx="26" fill="#FFFFFF"/>
+  <circle cx="144" cy="323" r="19" fill="#2C6E49"/>
+  <path d="M176 308H245" stroke="#223027" stroke-width="9" stroke-linecap="round"/>
+  <path d="M176 332H229" stroke="#748579" stroke-width="8" stroke-linecap="round"/>
+  <path d="M598 344C617 344 633 360 633 379" stroke="#2C6E49" stroke-width="10" stroke-linecap="round"/>
+  <path d="M571 344C606 344 633 372 633 407" stroke="#2C6E49" stroke-width="10" stroke-linecap="round" opacity=".45"/>
+  <path d="M544 344C594 344 633 384 633 434" stroke="#2C6E49" stroke-width="10" stroke-linecap="round" opacity=".22"/>
+</svg>

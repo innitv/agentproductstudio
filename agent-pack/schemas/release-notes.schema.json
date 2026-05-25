@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Release Notes",
+  "type": "object",
+  "required": ["status", "inputs_used", "changed_files", "what_changed", "validation", "rollback_notes"],
+  "properties": {
+    "status": { "enum": ["ready", "blocked", "released"] },
+    "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "changed_files": { "type": "array", "items": { "type": "string" } },
+    "what_changed": { "type": "array", "items": { "type": "string" } },
+    "validation": { "type": "array", "items": { "type": "object" } },
+    "deployment_notes": { "type": "array", "items": { "type": "string" } },
+    "rollback_notes": { "type": "array", "items": { "type": "string" } }
+  }
+}

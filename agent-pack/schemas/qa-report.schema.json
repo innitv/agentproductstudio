@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QA Report",
+  "type": "object",
+  "required": ["status", "inputs_used", "research_integrity", "prd_fit", "accessibility", "responsive", "validation"],
+  "properties": {
+    "status": { "enum": ["pass", "pass_with_known_limitations", "fail", "blocked"] },
+    "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "research_integrity": { "type": "object" },
+    "prd_fit": { "type": "string" },
+    "accessibility": { "type": "string" },
+    "responsive": { "type": "string" },
+    "validation": { "type": "array", "items": { "type": "object" } },
+    "blockers": { "type": "array", "items": { "type": "string" } }
+  }
+}

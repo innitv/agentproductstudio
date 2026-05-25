@@ -1,0 +1,30 @@
+<svg width="760" height="620" viewBox="0 0 760 620" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Prepaid game code vault</title>
+  <desc id="desc">A custom gaming commerce interface with prepaid code cards, region badges and secure delivery indicators.</desc>
+  <rect width="760" height="620" rx="34" fill="#0F121A"/>
+  <path d="M90 108H670V512H90V108Z" fill="#171B25"/>
+  <path d="M90 108H670V167H90V108Z" fill="#242A38"/>
+  <circle cx="132" cy="138" r="9" fill="#FF5C7A"/>
+  <circle cx="162" cy="138" r="9" fill="#3BE0D0"/>
+  <circle cx="192" cy="138" r="9" fill="#F9D44A"/>
+  <path d="M238 137H457" stroke="#D9E0EA" stroke-width="12" stroke-linecap="round" opacity=".75"/>
+  <path d="M121 204H375L334 337H121V204Z" fill="#FF4D6D"/>
+  <path d="M159 244H301" stroke="#FFF6F0" stroke-width="16" stroke-linecap="round"/>
+  <path d="M159 283H264" stroke="#171B25" stroke-width="12" stroke-linecap="round" opacity=".55"/>
+  <path d="M154 330L325 330" stroke="#FFF6F0" stroke-width="11" stroke-linecap="round" opacity=".8"/>
+  <rect x="407" y="204" width="232" height="62" rx="10" fill="#222938"/>
+  <path d="M432 234H541" stroke="#D9E0EA" stroke-width="12" stroke-linecap="round"/>
+  <path d="M432 254H587" stroke="#6B7486" stroke-width="8" stroke-linecap="round"/>
+  <rect x="407" y="286" width="232" height="62" rx="10" fill="#222938"/>
+  <path d="M432 316H527" stroke="#D9E0EA" stroke-width="12" stroke-linecap="round"/>
+  <path d="M432 336H578" stroke="#6B7486" stroke-width="8" stroke-linecap="round"/>
+  <rect x="407" y="368" width="232" height="62" rx="10" fill="#222938"/>
+  <path d="M432 398H553" stroke="#D9E0EA" stroke-width="12" stroke-linecap="round"/>
+  <path d="M432 418H594" stroke="#6B7486" stroke-width="8" stroke-linecap="round"/>
+  <path d="M119 390H335V455H119V390Z" fill="#2CE4D2"/>
+  <path d="M151 423H244" stroke="#0F121A" stroke-width="13" stroke-linecap="round"/>
+  <path d="M533 457L575 499H491L533 457Z" fill="#FF4D6D"/>
+  <path d="M246 477L275 506H217L246 477Z" fill="#F9D44A"/>
+  <path d="M620 96L684 31" stroke="#2CE4D2" stroke-width="10" stroke-linecap="round"/>
+  <path d="M97 535L40 594" stroke="#FF4D6D" stroke-width="10" stroke-linecap="round"/>
+</svg>

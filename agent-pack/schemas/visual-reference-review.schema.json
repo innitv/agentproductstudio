@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Visual Reference Review",
+  "type": "object",
+  "required": [
+    "status",
+    "inputs_used",
+    "reference_url",
+    "local_url",
+    "screenshots",
+    "comparison_areas",
+    "gaps_found",
+    "corrections_made",
+    "gate_result"
+  ],
+  "properties": {
+    "status": { "enum": ["passed", "passed_with_notes", "blocked"] },
+    "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "reference_url": { "type": "string" },
+    "local_url": { "type": "string" },
+    "screenshots": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["label", "path", "viewport", "capture_type"],
+        "properties": {
+          "label": { "type": "string" },
+          "path": { "type": "string" },
+          "viewport": { "enum": ["desktop", "mobile"] },
+          "capture_type": { "enum": ["full_page", "viewport", "section", "scroll_through"] }
+        }
+      }
+    },
+    "comparison_areas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["area", "reference_pattern", "local_result", "status"],
+        "properties": {
+          "area": { "type": "string" },
+          "reference_pattern": { "type": "string" },
+          "local_result": { "type": "string" },
+          "status": { "enum": ["passed", "passed_with_notes", "accepted_difference", "blocked"] }
+        }
+      }
+    },
+    "gaps_found": { "type": "array", "items": { "type": "string" } },
+    "corrections_made": { "type": "array", "items": { "type": "string" } },
+    "remaining_differences": { "type": "array", "items": { "type": "string" } },
+    "gate_result": { "enum": ["passed", "passed_with_notes", "blocked"] }
+  }
+}

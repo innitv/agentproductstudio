@@ -1,0 +1,274 @@
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+
+const root = process.cwd();
+
+const requiredFiles = [
+  "AGENTS.md",
+  ".codex/config.example.toml",
+  "integrations/mcp/mcp-servers.example.json",
+  "integrations/mcp/notion-local-token.mcp.example.json",
+  "runtime/typescript/run-landing-workflow.ts",
+  "runtime/typescript/route.config.ts",
+  "runtime/typescript/research.config.ts",
+  "runtime/typescript/env.ts",
+  "runtime/typescript/tavily-research.ts",
+  "runtime/typescript/deepseek-research.ts",
+  "runtime/typescript/multi-source-research.ts",
+  "agent-pack/templates/agent-output-contract.schema.md",
+  "agent-pack/guardrails/guardrails.policy.md",
+  "agent-pack/guardrails/approval-matrix.md",
+];
+
+const scannedFiles = [
+  ".codex/config.example.toml",
+  "integrations/mcp/mcp-servers.example.json",
+  "integrations/mcp/notion-local-token.mcp.example.json",
+  ".env.example",
+];
+
+const projectTextFilesForPackageManagerPolicy = [
+  "AGENTS.md",
+  "README.md",
+  "PROJECT_CONNECTION_WORK_PLAN.md",
+  "integrations/mcp/mcp-servers.example.json",
+  ".codex/config.example.toml",
+  ".codex/rules/safe-commands.example.toml",
+  ".gitignore",
+  ".idea/workspace.xml",
+  "integrations/mcp/repository-and-browser-mcp.md",
+  "runtime/typescript/README.md",
+  "agent-pack/agents/frontend.agent.md",
+];
+
+const researchEnforcementFiles = [
+  {
+    file: "agent-pack/agents/research.agent.md",
+    requiredSnippets: ["proto_personas", "simulated_interviews", "synthetic", "tavily", "deepseek", "providers", "browser scan", "Required provider skipped"],
+  },
+  {
+    file: "agent-pack/artifacts/research/research-summary.template.md",
+    requiredSnippets: ["Proto Personas", "Synthetic Interviews", "Research Validation Plan", "skipped_with_reason", "Provider Coverage", "deepseek"],
+  },
+  {
+    file: "agent-pack/artifacts/research/proto-personas.template.md",
+    requiredSnippets: ["Required", "Evidence status", "Validation Plan"],
+  },
+  {
+    file: "agent-pack/artifacts/research/synthetic-interviews.template.md",
+    requiredSnippets: ["Evidence status: `synthetic`", "Required", "Needs validation"],
+  },
+  {
+    file: "agent-pack/schemas/research-summary.schema.json",
+    requiredSnippets: ["proto_personas", "simulated_interviews", "\"const\": \"synthetic\"", "provider_coverage", "deepseek"],
+  },
+  {
+    file: "agent-pack/quality/quality-gates.md",
+    requiredSnippets: ["прото-персоны", "synthetic interviews", "validation plan", "Provider Coverage", "Tavily", "DeepSeek"],
+  },
+  {
+    file: "agent-pack/agents/qa-review.agent.md",
+    requiredSnippets: ["Research integrity", "proto-personas", "synthetic interviews", "synthetic-as-fact"],
+  },
+  {
+    file: "agent-pack/workflows/artifact-driven-pipeline.md",
+    requiredSnippets: ["proto_personas", "simulated_interviews", "skipped_with_reason", "evidence_status: synthetic"],
+  },
+  {
+    file: "agent-pack/workflows/deep-research.workflow.md",
+    requiredSnippets: ["tavily", "deepseek", "Multi-Source Default", "needs_validation"],
+  },
+  {
+    file: "agent-pack/workflows/artifact-driven-pipeline.md",
+    requiredSnippets: ["Notion Research Publication Gate", "Reference-Driven Visual Spec Gate", "section-by-section visual spec", "research-only human-readable", "publish-notion-research-page", "stage-gate-ledger.md", "release-notes.md"],
+  },
+  {
+    file: "agent-pack/agents/design.agent.md",
+    requiredSnippets: ["Visual Reference Rule", "section-by-section visual spec", "frontend stage is blocked"],
+  },
+  {
+    file: "agent-pack/agents/frontend.agent.md",
+    requiredSnippets: ["Visual Reference Rule", "section-by-section structural mapping", "generic landing template"],
+  },
+  {
+    file: "agent-pack/agents/notion-publisher.agent.md",
+    requiredSnippets: ["research-only child page publication is mandatory", "separate Notion child page", "notion-research-export-ru.md", "stage-gate-ledger.md", "release-notes.md"],
+  },
+  {
+    file: "AGENTS.md",
+    requiredSnippets: ["публикация research в Notion обязательна", "section-by-section visual spec", "шаблонный стиль", "Не заменяй требуемый источник", "Не обходи approval", "человекочитаемый research pack", "отдельную child page", "Notion research page publication record"],
+  },
+  {
+    file: "agent-pack/guardrails/guardrails.policy.md",
+    requiredSnippets: ["Не подменяй required provider", "documented failure", "Assumptions не могут заменять Findings"],
+  },
+  {
+    file: "agent-pack/guardrails/approval-matrix.md",
+    requiredSnippets: ["External research API call", "Required provider unavailable"],
+  },
+  {
+    file: "tooling/scripts/publish-notion-research-page.mjs",
+    requiredSnippets: ["page-title", "createChildPage", "markdownToBlocks"],
+  },
+  {
+    file: "runtime/typescript/research.config.ts",
+    requiredSnippets: ["defaultMultiSourceResearchProviders", "researchProviders.tavily", "researchProviders.deepseek"],
+  },
+  {
+    file: "runtime/typescript/multi-source-research.ts",
+    requiredSnippets: ["runMultiSourceResearch", "loadLocalEnv", "runDeepSeekResearch", "validateMultiSourceCoverage", "needs_validation"],
+  },
+  {
+    file: "runtime/typescript/deepseek-research.ts",
+    requiredSnippets: ["runDeepSeekResearch", "DEEPSEEK_API_KEY", "deepseek-v4-flash", "claimsToValidate"],
+  },
+  {
+    file: "runtime/typescript/env.ts",
+    requiredSnippets: ["loadLocalEnv", ".env", "process.env"],
+  },
+];
+
+const secretPatterns = [
+  {
+    name: "OpenAI API key",
+    pattern: /sk-[A-Za-z0-9_-]{20,}/g,
+  },
+  {
+    name: "Tavily API key",
+    pattern: /tvly-[A-Za-z0-9_-]{20,}/g,
+  },
+  {
+    name: "GitHub token",
+    pattern: /gh[pousr]_[A-Za-z0-9_]{20,}/g,
+  },
+  {
+    name: "Notion token",
+    pattern: /secret_[A-Za-z0-9]{20,}/g,
+  },
+];
+
+const errors = [];
+
+for (const file of requiredFiles) {
+  if (!existsSync(join(root, file))) {
+    errors.push(`Missing required file: ${file}`);
+  }
+}
+
+for (const file of scannedFiles) {
+  const path = join(root, file);
+  if (!existsSync(path)) {
+    continue;
+  }
+
+  const content = readFileSync(path, "utf8");
+
+  for (const { name, pattern } of secretPatterns) {
+    const matches = content.match(pattern);
+    if (matches?.length) {
+      errors.push(`${file}: contains ${name}-like value (${matches.length} match).`);
+    }
+  }
+}
+
+const forbiddenPackageManagerNames = ["n" + "pm", "n" + "px"];
+const forbiddenLockfiles = [
+  "package-" + "lock.json",
+  "n" + "pm-shrinkwrap.json",
+  "p" + "n" + "pm-lock.yaml",
+];
+const forbiddenPackageManagerPattern = new RegExp(
+  `\\b(${forbiddenPackageManagerNames.join("|")})\\b|package-${"lock"}`,
+  "i",
+);
+
+for (const forbiddenLockfile of forbiddenLockfiles) {
+  if (existsSync(join(root, forbiddenLockfile))) {
+    errors.push(`Forbidden lockfile found: ${forbiddenLockfile}. This project uses yarn.lock only.`);
+  }
+}
+
+for (const file of projectTextFilesForPackageManagerPolicy) {
+  const path = join(root, file);
+  if (!existsSync(path)) {
+    continue;
+  }
+
+  const content = readFileSync(path, "utf8");
+  if (forbiddenPackageManagerPattern.test(content)) {
+    errors.push(`${file}: package manager policy violation. Use yarn only.`);
+  }
+}
+
+for (const { file, requiredSnippets } of researchEnforcementFiles) {
+  const path = join(root, file);
+  if (!existsSync(path)) {
+    errors.push(`Research enforcement file missing: ${file}`);
+    continue;
+  }
+
+  const content = readFileSync(path, "utf8");
+  for (const snippet of requiredSnippets) {
+    if (!content.includes(snippet)) {
+      errors.push(`${file}: missing research enforcement snippet: ${snippet}`);
+    }
+  }
+}
+
+const configPath = join(root, ".codex/config.example.toml");
+if (existsSync(configPath)) {
+  const config = readFileSync(configPath, "utf8");
+  if (!config.includes("https://mcp.tavily.com/mcp/?tavilyApiKey=${TAVILY_API_KEY}")) {
+    errors.push(".codex/config.example.toml: Tavily MCP URL must be https://mcp.tavily.com/mcp/?tavilyApiKey=${TAVILY_API_KEY}.");
+  }
+}
+
+const mcpExamplePath = join(root, "integrations/mcp/mcp-servers.example.json");
+if (existsSync(mcpExamplePath)) {
+  const mcpExample = readFileSync(mcpExamplePath, "utf8");
+  if (!mcpExample.includes("https://mcp.tavily.com/mcp/?tavilyApiKey=${TAVILY_API_KEY}")) {
+    errors.push("integrations/mcp/mcp-servers.example.json: Tavily MCP URL must use the official /mcp/ endpoint.");
+  }
+}
+
+const packagePath = join(root, "package.json");
+if (existsSync(packagePath)) {
+  const packageJson = JSON.parse(readFileSync(packagePath, "utf8"));
+  const dependencyBlocks = [
+    ["dependencies", packageJson.dependencies ?? {}],
+    ["devDependencies", packageJson.devDependencies ?? {}],
+  ];
+
+  for (const [blockName, dependencies] of dependencyBlocks) {
+    for (const [name, version] of Object.entries(dependencies)) {
+      if (version === "latest") {
+        errors.push(`package.json: ${blockName}.${name} must be pinned, not latest.`);
+      }
+    }
+  }
+}
+
+const envExamplePath = join(root, ".env.example");
+if (existsSync(envExamplePath)) {
+  const envExample = readFileSync(envExamplePath, "utf8");
+  for (const snippet of [
+    "TAVILY_API_KEY=",
+    "DEEPSEEK_API_KEY=",
+    "DEEPSEEK_RESEARCH_MODEL=deepseek-v4-flash",
+    "RESEARCH_PROVIDER_ORDER=tavily,deepseek",
+  ]) {
+    if (!envExample.includes(snippet)) {
+      errors.push(`.env.example: missing multi-source research env snippet: ${snippet}`);
+    }
+  }
+}
+
+if (errors.length) {
+  console.error("Config validation failed:");
+  for (const error of errors) {
+    console.error(`- ${error}`);
+  }
+  process.exit(1);
+}
+
+console.log("Config validation passed.");

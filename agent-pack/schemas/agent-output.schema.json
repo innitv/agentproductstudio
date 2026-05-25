@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://product-agent-studio.local/schemas/agent-output.schema.json",
+  "title": "Agent Output",
+  "type": "object",
+  "required": ["agent_name", "status", "summary", "inputs_used", "outputs", "assumptions", "risks", "open_questions", "recommended_next_step"],
+  "properties": {
+    "agent_name": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["success", "partial", "blocked"] },
+    "summary": { "type": "string" },
+    "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "outputs": { "type": "object" },
+    "assumptions": { "type": "array", "items": { "type": "string" } },
+    "risks": { "type": "array", "items": { "type": "string" } },
+    "open_questions": { "type": "array", "items": { "type": "string" } },
+    "recommended_next_step": { "type": "string" }
+  },
+  "additionalProperties": false
+}

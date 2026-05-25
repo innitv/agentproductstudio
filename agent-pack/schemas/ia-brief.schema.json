@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IA Brief",
+  "type": "object",
+  "required": ["status", "inputs_used", "primary_screen", "primary_action", "sitemap", "primary_user_flow"],
+  "properties": {
+    "status": { "enum": ["draft", "partial", "blocked", "ready"] },
+    "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "primary_screen": { "type": "string" },
+    "primary_action": { "type": "string" },
+    "completion_step": { "type": "string" },
+    "sitemap": { "type": "array", "items": { "type": "object" } },
+    "primary_user_flow": { "type": "array", "items": { "type": "string" } }
+  }
+}

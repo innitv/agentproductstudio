@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Prototype Report",
+  "type": "object",
+  "required": ["status", "inputs_used", "prototype_type", "start_screen", "transition_map", "completion_step"],
+  "properties": {
+    "status": { "enum": ["draft", "partial", "blocked", "ready"] },
+    "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "prototype_type": { "type": "string" },
+    "start_screen": { "type": "string" },
+    "transition_map": { "type": "array", "items": { "type": "object" } },
+    "completion_step": { "type": "string" },
+    "missing_interactions": { "type": "array", "items": { "type": "string" } }
+  }
+}

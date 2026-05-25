@@ -1,0 +1,74 @@
+{
+  "mcpServers": {
+    "openaiDeveloperDocs": {
+      "url": "https://developers.openai.com/mcp"
+    },
+    "codex": {
+      "command": "codex",
+      "args": ["mcp-server"]
+    },
+    "browser": {
+      "command": "yarn",
+      "args": ["dlx", "@playwright/mcp@latest"]
+    },
+    "browserPuppeteerLegacy": {
+      "command": "yarn",
+      "args": ["dlx", "@modelcontextprotocol/server-puppeteer"]
+    },
+    "search": {
+      "command": "yarn",
+      "args": ["dlx", "REPLACE_WITH_SEARCH_MCP_PACKAGE"]
+    },
+    "deepResearch": {
+      "command": "yarn",
+      "args": ["dlx", "REPLACE_WITH_DEEP_RESEARCH_MCP_PACKAGE"]
+    },
+    "tavily": {
+      "type": "http",
+      "url": "https://mcp.tavily.com/mcp/?tavilyApiKey=${TAVILY_API_KEY}"
+    },
+    "notion": {
+      "command": "yarn",
+      "args": ["notion:mcp"],
+      "env": {
+        "NOTION_TOKEN": "${NOTION_TOKEN}"
+      }
+    },
+    "filesystem": {
+      "command": "yarn",
+      "args": ["dlx", "@modelcontextprotocol/server-filesystem", "./"]
+    },
+    "github": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "-e",
+        "GITHUB_READ_ONLY=1",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}",
+        "GITHUB_READ_ONLY": "1"
+      }
+    },
+    "gitlab": {
+      "type": "http",
+      "url": "https://gitlab.com/api/v4/mcp",
+      "headers": {
+        "X-Gitlab-Mcp-Server-Tool-Name-Prefix": "gitlab_"
+      }
+    },
+    "figma": {
+      "type": "http",
+      "url": "https://mcp.figma.com/mcp"
+    },
+    "figmaDesktop": {
+      "type": "http",
+      "url": "http://127.0.0.1:3845/mcp"
+    }
+  }
+}

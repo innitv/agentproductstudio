@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Screens",
+  "type": "object",
+  "required": ["status", "inputs_used", "screen_list", "mobile_specification"],
+  "properties": {
+    "status": { "enum": ["draft", "partial", "blocked", "ready"] },
+    "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "screen_list": { "type": "array", "items": { "type": "object" } },
+    "desktop_specification": { "type": "string" },
+    "mobile_specification": { "type": "string" },
+    "states": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Copy Deck",
+  "type": "object",
+  "required": ["status", "inputs_used", "hero", "sections", "faq", "seo", "claims_to_validate"],
+  "properties": {
+    "status": { "enum": ["draft", "partial", "blocked", "ready"] },
+    "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "hero": {
+      "type": "object",
+      "required": ["h1", "lead", "primary_cta"],
+      "properties": {
+        "eyebrow": { "type": "string" },
+        "h1": { "type": "string" },
+        "lead": { "type": "string" },
+        "primary_cta": { "type": "string" },
+        "secondary_cta": { "type": "string" }
+      }
+    },
+    "sections": { "type": "array", "items": { "type": "object" } },
+    "faq": { "type": "array", "items": { "type": "object" } },
+    "seo": { "type": "object" },
+    "claims_to_validate": { "type": "array", "items": { "type": "object" } }
+  }
+}

@@ -1,0 +1,49 @@
+# Example command and action rules for Codex.
+# This file is documentation-oriented and contains no secrets.
+
+[safe_commands]
+read_files = [
+  "Get-Content",
+  "Get-ChildItem",
+  "Select-String",
+  "rg"
+]
+
+local_validation = [
+  "yarn lint",
+  "yarn typecheck",
+  "yarn test",
+  "yarn build",
+  "yarn qa:playwright"
+]
+
+json_validation = [
+  "ConvertFrom-Json"
+]
+
+[approval_required_actions]
+actions = [
+  "deploy",
+  "delete_data",
+  "external_send",
+  "mass_change",
+  "change_secrets",
+  "connect_broad_mcp",
+  "github_write",
+  "gitlab_write",
+  "figma_write",
+  "browser_external_action"
+]
+
+[blocked_patterns]
+commands = [
+  "git reset --hard",
+  "git checkout --",
+  "Remove-Item -Recurse -Force",
+  "rm -rf",
+  "format",
+  "diskpart"
+]
+
+[notes]
+policy = "Prefer native shell commands, narrow scopes, and workspace-only edits. Destructive actions require explicit user approval."

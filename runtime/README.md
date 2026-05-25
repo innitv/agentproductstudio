@@ -1,0 +1,30 @@
+# Runtime
+
+Эта папка предназначена для исполняемого слоя системы продуктовой оркестрации.
+
+Документы в `agent-pack/agents/`, `agent-pack/workflows/`, `agent-pack/artifacts/`, `agent-pack/templates/`, `agent-pack/guardrails/` и `agent-pack/schemas/` задают продуктовую и архитектурную спецификацию. Runtime должен реализовать эти правила через OpenAI Agents SDK или другой совместимый агентный слой.
+
+## Рекомендуемый старт
+
+Основной вариант для будущей реализации: TypeScript.
+
+Причины:
+
+- удобно связывать агентный workflow с frontend-инструментами;
+- Zod-схемы хорошо подходят для structured outputs;
+- проще интегрировать будущий web UI для продуктового дизайнера.
+
+## Требования к runtime
+
+- `orchestrator` владеет финальным ответом;
+- специалисты вызываются как agents-as-tools;
+- `orchestrator` строит dependency graph и сам выбирает порядок запуска субагентов;
+- IA, screens, prototype report и test bench result являются частью базового продуктового pipeline;
+- route tools описаны в `runtime/typescript/route.config.ts`;
+- adaptive research layer описан в `runtime/typescript/research.config.ts` и `integrations/mcp/research-providers.md`;
+- lifecycle hooks описаны в `runtime/typescript/hooks.ts` и `.codex/hooks/README.md`;
+- command/action rules описаны в `.codex/rules/safe-commands.example.toml`;
+- handoff используется только по правилам `agent-pack/workflows/landing-agent-orchestration.workflow.md`;
+- outputs валидируются по схемам из `agent-pack/schemas/`;
+- рискованные действия проходят approval matrix;
+- tracing настроен по `integrations/observability/tracing.policy.md`.

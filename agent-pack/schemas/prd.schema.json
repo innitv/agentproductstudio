@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://product-agent-studio.local/schemas/prd.schema.json",
+  "title": "PRD",
+  "type": "object",
+  "required": ["status", "inputs_used", "problem", "goals", "non_goals", "requirements", "moscow", "acceptance_criteria", "analytics"],
+  "properties": {
+    "status": { "enum": ["draft", "partial", "blocked", "ready"] },
+    "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "problem": { "type": "string", "minLength": 1 },
+    "goals": { "type": "array", "items": { "type": "string" } },
+    "non_goals": { "type": "array", "items": { "type": "string" } },
+    "requirements": { "type": "array", "items": { "$ref": "#/$defs/requirement" } },
+    "moscow": {
+      "type": "object",
+      "required": ["must", "should", "could", "wont"],
+      "properties": {
+        "must": { "type": "array", "items": { "type": "string" } },
+        "should": { "type": "array", "items": { "type": "string" } },
+        "could": { "type": "array", "items": { "type": "string" } },
+        "wont": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "acceptance_criteria": { "type": "array", "items": { "type": "string" } },
+    "analytics": { "type": "array", "items": { "$ref": "#/$defs/analytics_event" } }
+  },
+  "$defs": {
+    "requirement": {
+      "type": "object",
+      "required": ["id", "description", "priority"],
+      "properties": {
+        "id": { "type": "string" },
+        "description": { "type": "string" },
+        "priority": { "enum": ["must", "should", "could", "wont"] },
+        "evidence_status": { "type": "string" }
+      }
+    },
+    "analytics_event": {
+      "type": "object",
+      "required": ["event", "trigger", "pii_risk"],
+      "properties": {
+        "event": { "type": "string" },
+        "trigger": { "type": "string" },
+        "properties": { "type": "array", "items": { "type": "string" } },
+        "pii_risk": { "enum": ["none", "low", "medium", "high"] }
+      }
+    }
+  }
+}

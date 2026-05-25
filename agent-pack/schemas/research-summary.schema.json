@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://product-agent-studio.local/schemas/research-summary.schema.json",
+  "title": "Research Summary",
+  "type": "object",
+  "required": ["status", "inputs_used", "research_questions", "audience", "jobs_to_be_done", "proto_personas", "simulated_interviews", "findings", "sources", "validation_plan", "unknowns"],
+  "properties": {
+    "status": { "enum": ["draft", "partial", "blocked", "ready"] },
+    "inputs_used": { "$ref": "#/$defs/string_list" },
+    "provider_coverage": { "type": "array", "items": { "$ref": "#/$defs/provider_coverage_item" } },
+    "provider_failures": { "type": "array", "items": { "$ref": "#/$defs/provider_failure" } },
+    "research_questions": { "$ref": "#/$defs/non_empty_string_list" },
+    "audience": { "type": "array", "items": { "$ref": "#/$defs/audience_segment" } },
+    "jobs_to_be_done": { "type": "array", "items": { "$ref": "#/$defs/jtbd" } },
+    "proto_personas": { "type": "array", "items": { "$ref": "#/$defs/proto_persona" } },
+    "simulated_interviews": { "type": "array", "items": { "$ref": "#/$defs/simulated_interview" } },
+    "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+    "sources": { "type": "array", "items": { "$ref": "#/$defs/source" } },
+    "validation_plan": { "type": "array", "items": { "$ref": "#/$defs/validation_item" } },
+    "unknowns": { "$ref": "#/$defs/string_list" },
+    "skipped_with_reason": { "type": "string" }
+  },
+  "$defs": {
+    "string_list": { "type": "array", "items": { "type": "string" } },
+    "non_empty_string_list": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "research_provider": { "enum": ["tavily", "deepseek", "openai_docs", "web_search", "browser", "file_search", "user_sources", "deep_research_mcp", "custom_mcp"] },
+    "provider_validation_state": { "enum": ["pass", "needs_validation", "failed", "skipped"] },
+    "provider_coverage_item": {
+      "type": "object",
+      "required": ["provider", "requested", "used", "sources_count", "validation_state"],
+      "properties": {
+        "provider": { "$ref": "#/$defs/research_provider" },
+        "requested": { "type": "boolean" },
+        "used": { "type": "boolean" },
+        "sources_count": { "type": "integer", "minimum": 0 },
+        "validation_state": { "$ref": "#/$defs/provider_validation_state" },
+        "notes": { "type": "string" }
+      }
+    },
+    "provider_failure": {
+      "type": "object",
+      "required": ["provider", "error", "impact", "follow_up"],
+      "properties": {
+        "provider": { "$ref": "#/$defs/research_provider" },
+        "error": { "type": "string" },
+        "impact": { "type": "string" },
+        "follow_up": { "type": "string" }
+      }
+    },
+    "evidence_status": { "enum": ["source-backed", "proto", "synthetic", "hypothesis", "needs validation"] },
+    "audience_segment": {
+      "type": "object",
+      "required": ["segment", "context", "motivation", "barrier", "evidence_status"],
+      "properties": {
+        "segment": { "type": "string" },
+        "context": { "type": "string" },
+        "motivation": { "type": "string" },
+        "barrier": { "type": "string" },
+        "evidence_status": { "$ref": "#/$defs/evidence_status" }
+      }
+    },
+    "jtbd": {
+      "type": "object",
+      "required": ["segment", "job", "trigger", "pain", "desired_outcome", "evidence_status"],
+      "properties": {
+        "segment": { "type": "string" },
+        "job": { "type": "string" },
+        "trigger": { "type": "string" },
+        "pain": { "type": "string" },
+        "desired_outcome": { "type": "string" },
+        "evidence_status": { "$ref": "#/$defs/evidence_status" }
+      }
+    },
+    "proto_persona": {
+      "type": "object",
+      "required": ["name", "segment", "jtbd", "pain", "desired_outcome", "evidence_status"],
+      "properties": {
+        "name": { "type": "string" },
+        "segment": { "type": "string" },
+        "jtbd": { "type": "string" },
+        "pain": { "type": "string" },
+        "desired_outcome": { "type": "string" },
+        "evidence_status": { "enum": ["proto", "source-backed", "needs validation"] }
+      }
+    },
+    "simulated_interview": {
+      "type": "object",
+      "required": ["persona", "scenario", "summary", "evidence_status", "needs_validation"],
+      "properties": {
+        "persona": { "type": "string" },
+        "scenario": { "type": "string" },
+        "summary": { "type": "string" },
+        "evidence_status": { "const": "synthetic" },
+        "needs_validation": { "type": "boolean" }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "required": ["finding", "evidence", "confidence"],
+      "properties": {
+        "finding": { "type": "string" },
+        "evidence": { "type": "string" },
+        "confidence": { "enum": ["high", "medium", "low"] }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["title", "url_or_path", "type", "used_for"],
+      "properties": {
+        "title": { "type": "string" },
+        "provider": { "$ref": "#/$defs/research_provider" },
+        "url_or_path": { "type": "string" },
+        "type": { "type": "string" },
+        "used_for": { "type": "string" },
+        "retrieved_at": { "type": "string" },
+        "confidence": { "enum": ["high", "medium", "low"] }
+      }
+    },
+    "validation_item": {
+      "type": "object",
+      "required": ["hypothesis", "method", "minimum_evidence", "status"],
+      "properties": {
+        "hypothesis": { "type": "string" },
+        "method": { "type": "string" },
+        "minimum_evidence": { "type": "string" },
+        "status": { "enum": ["open", "validated", "rejected"] }
+      }
+    }
+  }
+}

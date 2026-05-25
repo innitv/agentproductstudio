@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Frontend Result",
+  "type": "object",
+  "required": ["status", "inputs_used", "changed_files", "implementation_notes", "commands_run", "known_limitations"],
+  "properties": {
+    "status": { "enum": ["success", "partial", "blocked"] },
+    "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "changed_files": { "type": "array", "items": { "type": "string" } },
+    "implementation_notes": { "type": "array", "items": { "type": "string" } },
+    "commands_run": { "type": "array", "items": { "type": "object" } },
+    "known_limitations": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Design Brief",
+  "type": "object",
+  "required": ["status", "inputs_used", "visual_direction", "sections", "components", "responsive_notes", "accessibility_notes"],
+  "properties": {
+    "status": { "enum": ["draft", "partial", "blocked", "ready"] },
+    "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "visual_direction": { "type": "string" },
+    "sections": { "type": "array", "items": { "type": "object" } },
+    "components": { "type": "array", "items": { "type": "string" } },
+    "responsive_notes": { "type": "array", "items": { "type": "string" } },
+    "accessibility_notes": { "type": "array", "items": { "type": "string" } }
+  }
+}

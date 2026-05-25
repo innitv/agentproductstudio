@@ -1,0 +1,57 @@
+{
+  "name": "product-agent-studio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "yarn@1.22.22",
+  "description": "Manager-style product landing workflow pack for Codex and OpenAI Agents SDK.",
+  "scripts": {
+    "agents:inspect": "tsx runtime/typescript/agents.sdk.ts",
+    "dev": "vite --config apps/frontend/vite.config.ts --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build --config apps/frontend/vite.config.ts",
+    "preview": "vite preview --config apps/frontend/vite.config.ts --host 127.0.0.1",
+    "qa:playwright": "yarn build && playwright test",
+    "qa:playwright:install": "playwright install chromium",
+    "docs:audit": "node tooling/scripts/audit-docs.mjs",
+    "qa:quick": "yarn typecheck && yarn validate:config && yarn docs:audit",
+    "qa:all": "yarn qa:quick && yarn qa:playwright",
+    "project:audit": "yarn qa:all",
+    "notion:check": "node tooling/scripts/check-notion-token.mjs",
+    "notion:mcp": "notion-mcp-server --transport stdio",
+    "validate:config": "node tooling/scripts/validate-config.mjs",
+    "workflow:validate": "tsx runtime/typescript/validate-workflow-run.ts",
+    "typecheck": "tsc --noEmit",
+    "landing:run": "tsx runtime/typescript/run-landing-workflow.ts"
+  },
+  "dependencies": {
+    "@openai/agents": "0.11.4",
+    "@radix-ui/react-slot": "1.2.4",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "framer-motion": "12.40.0",
+    "lucide-react": "1.16.0",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "tailwind-merge": "3.6.0",
+    "tw-animate-css": "1.4.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@notionhq/notion-mcp-server": "2.2.1",
+    "@playwright/test": "1.60.0",
+    "@tailwindcss/vite": "4.3.0",
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.2",
+    "js-yaml": "4.1.1",
+    "shadcn": "4.8.0",
+    "tailwindcss": "4.3.0",
+    "tsx": "4.22.3",
+    "typescript": "6.0.3",
+    "vite": "8.0.14"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
