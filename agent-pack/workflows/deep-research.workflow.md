@@ -11,6 +11,7 @@ mode: deep_research
 prefer:
   - tavily
   - deepseek
+  - gemini
   - user_sources
   - official_sources
   - competitor_sites
@@ -19,6 +20,7 @@ allow:
   - local_files
   - tavily
   - deepseek
+  - gemini
   - web_search
   - browser
 deny:
@@ -29,9 +31,9 @@ fallback: needs_validation
 
 ## Multi-Source Default
 
-Для полного `deep_research` используются оба default providers: `tavily` и `deepseek`.
+Для полного `deep_research` используются все default providers: `tavily`, `deepseek` и `gemini`.
 Одиночный provider не считается успешным research gate: если один из них недоступен, упал или не вернул источники, stage получает статус `partial`, а причина фиксируется в `research-summary.md`, `handoff-bundle.md` и `stage-gate-ledger.md`.
-`deepseek` используется обязательно как API cross-check provider для поиска противоречий, рисков и claims-to-validate. Его вывод не заменяет source-backed evidence из Tavily/источников, но отсутствие DeepSeek блокирует полный статус `success`.
+`deepseek` и `gemini` используются обязательно как API cross-check/strategy providers для поиска противоречий, рисков и claims-to-validate. Их выводы не заменяют source-backed evidence из Tavily/источников, но отсутствие DeepSeek/Gemini блокирует полный статус `success`.
 ## Required Outputs
 
 - `research-summary.md`
@@ -44,7 +46,7 @@ fallback: needs_validation
 
 1. Read `recursive-brief.md`.
 2. Define research questions and assumptions.
-3. Run multi-source research according to policy: Tavily + DeepSeek by default.
+3. Run multi-source research according to policy: Tavily + DeepSeek + Gemini by default.
 4. Cross-check findings across providers and mark contradictions as `claims_to_validate`.
 5. Gather sources according to policy with provider name, retrieved_at and confidence.
 6. Build audience and JTBD.
@@ -62,7 +64,7 @@ Research is COMPLETE only when:
 - all required artifacts exist;
 - evidence log exists;
 - providers requested/used/unavailable/failures are recorded;
-- Tavily and DeepSeek both returned usable results for `success`; otherwise status is `partial`;
+- Tavily, DeepSeek and Gemini all returned usable results for `success`; otherwise status is `partial`;
 - validation plan exists;
 - unknowns are documented;
 - `skipped_with_reason` is present for any missing research unit;

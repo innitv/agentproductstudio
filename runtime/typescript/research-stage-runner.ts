@@ -178,6 +178,8 @@ function buildResearchSummaryPayload(result: MultiSourceResearchResult): Researc
       validation_state: isUsed ? "pass" as const : failure ? "failed" as const : isUnavailable ? "skipped" as const : "needs_validation" as const,
       notes: provider === researchProviders.deepseek
         ? "DeepSeek is a check provider and not source-backed evidence."
+        : provider === researchProviders.gemini
+        ? "Gemini is a strategy and cross-check provider."
         : failure?.error ?? (isUnavailable ? "Provider was requested but not configured or executable locally." : "Provider returned usable output."),
     };
   });
@@ -204,6 +206,9 @@ function buildResearchSummaryPayload(result: MultiSourceResearchResult): Researc
     .slice(0, 5);
   const deepSeekSummary = result.results.find((item) => item.provider === "deepseek")?.provider === "deepseek"
     ? result.results.find((item) => item.provider === "deepseek")?.summary
+    : undefined;
+  const geminiSummary = result.results.find((item) => item.provider === "gemini")?.provider === "gemini"
+    ? (result.results.find((item) => item.provider === "gemini") as any)?.summary
     : undefined;
 
   return {
@@ -302,7 +307,12 @@ function buildResearchSummaryPayload(result: MultiSourceResearchResult): Researc
         evidence: "DeepSeek cross-check only; not source-backed evidence.",
         confidence: "low" as const,
       }] : []),
-    ].slice(0, 6),
+      ...(geminiSummary ? [{
+        finding: geminiSummary.slice(0, 500),
+        evidence: "Gemini deep strategy synthesis & cross-check.",
+        confidence: "medium" as const,
+      }] : []),
+    ].slice(0, 7),
     sources: result.sources.map((source) => ({
       title: source.title ?? source.url,
       provider: source.provider,
@@ -357,7 +367,7 @@ function renderResearchSummary(result: MultiSourceResearchResult, payload: Resea
     "",
     "## Source Policy",
     "",
-    "- Allowed sources: Tavily, DeepSeek, Firecrawl/browser fallback when configured.",
+    "- Allowed sources: Tavily, DeepSeek, Gemini, Firecrawl/browser fallback when configured.",
     "- Denied sources: external write actions without approval.",
     "- Citation requirement: required for market and competitor claims.",
     "- External write: denied unless approval exists.",
@@ -448,8 +458,8 @@ function renderResearchSummary(result: MultiSourceResearchResult, payload: Resea
     "",
     "## Readiness Checklist",
     "",
-    `- [${payload.status === "ready" ? "x" : " "}] Tavily and DeepSeek coverage is sufficient for ready status.`,
-    "- [x] DeepSeek output is marked as cross-check/synthesis and not source-backed evidence.",
+    `- [${payload.status === "ready" ? "x" : " "}] Tavily, DeepSeek and Gemini coverage is sufficient for ready status.`,
+    "- [x] DeepSeek and Gemini outputs are marked as cross-check/synthesis and not source-backed evidence.",
     "- [x] Proto personas and synthetic interviews are marked as validation inputs, not facts.",
     "",
   ].join("\n");
@@ -609,7 +619,7 @@ function renderSwot(result: MultiSourceResearchResult): string {
     "",
     "## Strategic Notes",
     "",
-    "- Treat Tavily as source-backed evidence provider and DeepSeek as contradiction/check provider.",
+    "- Treat Tavily as source-backed evidence provider, and DeepSeek/Gemini as contradiction, check and strategic synthesis providers.",
     "- Use Firecrawl/reference scan for public competitor/reference pages when URLs are known.",
     "",
     "## Strategic Decisions",

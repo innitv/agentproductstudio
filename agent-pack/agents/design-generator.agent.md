@@ -24,6 +24,7 @@ Converts IA, design direction and copy into screen-level specifications.
 - Screens must preserve the PRD primary flow.
 - Do not invent copy that conflicts with `copy-deck.md`.
 - If Figma is unavailable, text screen specs are valid fallback.
+- **Figma Integration**: Draw layouts on the Figma canvas using Figma MCP *only* when explicitly requested by the user, `write_allowed` is `true`, and human approval is granted. Otherwise, stick to text specifications in `screens.md`.
 
 ## Required Output
 

@@ -29,7 +29,8 @@ url = "https://mcp.tavily.com/mcp/?tavilyApiKey=${TAVILY_API_KEY}"
 ```env
 TAVILY_API_KEY=tvly-your-key-here
 DEEPSEEK_API_KEY=your-deepseek-key-here
-RESEARCH_PROVIDER_ORDER=tavily,deepseek
+GEMINI_API_KEY=your-gemini-key-here
+RESEARCH_PROVIDER_ORDER=tavily,deepseek,gemini
 ```
 
 ## Secret Handling
@@ -48,11 +49,13 @@ source_policy:
   prefer:
     - tavily
     - deepseek
+    - gemini
     - official_sources
     - competitor_sites
   allow:
     - tavily
     - deepseek
+    - gemini
     - web_search
     - browser
     - user_sources

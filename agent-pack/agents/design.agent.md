@@ -34,6 +34,7 @@ The design brief must translate this spec into concrete layout decisions for the
 - Design must not promise unvalidated outcomes.
 - Avoid decorative complexity that weakens task completion.
 - Accessibility and responsive behavior are required, not optional.
+- **Figma Layouts Guardrail**: Do not create or edit layouts on the Figma canvas unless the user explicitly requests it, `write_allowed` is `true` in Figma MCP configuration, and explicit human approval is granted. By default, specify design decisions only in local text files (`design-brief.md`, `reference-analysis.md`).
 
 ## Required Output
 

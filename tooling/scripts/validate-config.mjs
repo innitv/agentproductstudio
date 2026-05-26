@@ -14,6 +14,7 @@ const requiredFiles = [
   "runtime/typescript/env.ts",
   "runtime/typescript/tavily-research.ts",
   "runtime/typescript/deepseek-research.ts",
+  "runtime/typescript/gemini-research.ts",
   "runtime/typescript/multi-source-research.ts",
   "runtime/typescript/firecrawl.ts",
   "runtime/typescript/reference-scan.ts",
@@ -47,11 +48,11 @@ const projectTextFilesForPackageManagerPolicy = [
 const researchEnforcementFiles = [
   {
     file: "agent-pack/agents/research.agent.md",
-    requiredSnippets: ["proto_personas", "simulated_interviews", "synthetic", "tavily", "deepseek", "providers", "browser scan", "Required provider skipped"],
+    requiredSnippets: ["proto_personas", "simulated_interviews", "synthetic", "tavily", "deepseek", "gemini", "providers", "browser scan", "Required provider skipped"],
   },
   {
     file: "agent-pack/artifacts/research/research-summary.template.md",
-    requiredSnippets: ["Proto Personas", "Synthetic Interviews", "Research Validation Plan", "skipped_with_reason", "Provider Coverage", "deepseek"],
+    requiredSnippets: ["Proto Personas", "Synthetic Interviews", "Research Validation Plan", "skipped_with_reason", "Provider Coverage", "deepseek", "gemini"],
   },
   {
     file: "agent-pack/artifacts/research/proto-personas.template.md",
@@ -63,11 +64,11 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/schemas/research-summary.schema.json",
-    requiredSnippets: ["proto_personas", "simulated_interviews", "\"const\": \"synthetic\"", "provider_coverage", "deepseek"],
+    requiredSnippets: ["proto_personas", "simulated_interviews", "\"const\": \"synthetic\"", "provider_coverage", "deepseek", "gemini"],
   },
   {
     file: "agent-pack/quality/quality-gates.md",
-    requiredSnippets: ["прото-персоны", "synthetic interviews", "validation plan", "Provider Coverage", "Tavily", "DeepSeek"],
+    requiredSnippets: ["прото-персоны", "synthetic interviews", "validation plan", "Provider Coverage", "Tavily", "DeepSeek", "Gemini"],
   },
   {
     file: "agent-pack/agents/qa-review.agent.md",
@@ -79,7 +80,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/workflows/deep-research.workflow.md",
-    requiredSnippets: ["tavily", "deepseek", "Multi-Source Default", "needs_validation"],
+    requiredSnippets: ["tavily", "deepseek", "gemini", "Multi-Source Default", "needs_validation"],
   },
   {
     file: "agent-pack/workflows/artifact-driven-pipeline.md",
@@ -115,7 +116,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "runtime/typescript/research.config.ts",
-    requiredSnippets: ["defaultMultiSourceResearchProviders", "researchProviders.tavily", "researchProviders.deepseek", "researchProviders.firecrawl"],
+    requiredSnippets: ["defaultMultiSourceResearchProviders", "researchProviders.tavily", "researchProviders.deepseek", "researchProviders.gemini", "researchProviders.firecrawl"],
   },
   {
     file: "runtime/typescript/route.config.ts",
@@ -131,15 +132,19 @@ const researchEnforcementFiles = [
   },
   {
     file: "runtime/typescript/multi-source-research.ts",
-    requiredSnippets: ["runMultiSourceResearch", "loadLocalEnv", "runDeepSeekResearch", "validateMultiSourceCoverage", "needs_validation"],
+    requiredSnippets: ["runMultiSourceResearch", "loadLocalEnv", "runDeepSeekResearch", "runGeminiResearch", "validateMultiSourceCoverage", "needs_validation"],
   },
   {
     file: "runtime/typescript/research-stage-runner.ts",
-    requiredSnippets: ["runResearchStage", "runMultiSourceResearch", "research-summary.md", "stage_gate_ledger", "validateWorkflowRun"],
+    requiredSnippets: ["runResearchStage", "runMultiSourceResearch", "research-summary.md", "stage_gate_ledger", "validateWorkflowRun", "gemini"],
   },
   {
     file: "runtime/typescript/deepseek-research.ts",
     requiredSnippets: ["runDeepSeekResearch", "DEEPSEEK_API_KEY", "deepseek-v4-flash", "claimsToValidate"],
+  },
+  {
+    file: "runtime/typescript/gemini-research.ts",
+    requiredSnippets: ["runGeminiResearch", "GEMINI_API_KEY", "gemini-2.5-flash", "claimsToValidate"],
   },
   {
     file: "runtime/typescript/tavily-research.ts",
@@ -290,15 +295,18 @@ if (existsSync(packagePath)) {
 const envExamplePath = join(root, ".env.example");
 if (existsSync(envExamplePath)) {
   const envExample = readFileSync(envExamplePath, "utf8");
-  for (const snippet of [
+  const requiredSnippets = [
     "TAVILY_API_KEY=",
     "DEEPSEEK_API_KEY=",
     "DEEPSEEK_RESEARCH_MODEL=deepseek-v4-flash",
-    "RESEARCH_PROVIDER_ORDER=tavily,deepseek",
-  ]) {
+  ];
+  for (const snippet of requiredSnippets) {
     if (!envExample.includes(snippet)) {
       errors.push(`.env.example: missing multi-source research env snippet: ${snippet}`);
     }
+  }
+  if (!envExample.includes("RESEARCH_PROVIDER_ORDER=tavily,deepseek") && !envExample.includes("RESEARCH_PROVIDER_ORDER=tavily,deepseek,gemini")) {
+    errors.push(`.env.example: missing multi-source research env snippet: RESEARCH_PROVIDER_ORDER=tavily,deepseek`);
   }
 }
 

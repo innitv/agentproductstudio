@@ -17,6 +17,7 @@ export const researchProviders = {
   firecrawl: "firecrawl",
   deepseek: "deepseek",
   tavily: "tavily",
+  gemini: "gemini",
   deepResearchMcp: "deep_research_mcp",
   userSources: "user_sources",
   customMcp: "custom_mcp",
@@ -27,6 +28,7 @@ export type ResearchProvider = (typeof researchProviders)[keyof typeof researchP
 export const defaultMultiSourceResearchProviders = [
   researchProviders.tavily,
   researchProviders.deepseek,
+  researchProviders.gemini,
 ] as const satisfies readonly ResearchProvider[];
 
 export interface SourcePolicy {
@@ -55,6 +57,7 @@ export const defaultSourcePolicy: SourcePolicy = {
     researchProviders.openaiDocs,
     researchProviders.deepseek,
     researchProviders.tavily,
+    researchProviders.gemini,
     researchProviders.deepResearchMcp,
     researchProviders.firecrawl,
     researchProviders.webSearch,
@@ -76,6 +79,7 @@ export const sourcePoliciesByMode: Record<ResearchMode, SourcePolicy> = {
       researchProviders.browser,
       researchProviders.deepseek,
       researchProviders.tavily,
+      researchProviders.gemini,
       researchProviders.deepResearchMcp,
       researchProviders.customMcp,
     ],
@@ -91,6 +95,7 @@ export const sourcePoliciesByMode: Record<ResearchMode, SourcePolicy> = {
       researchProviders.browser,
       researchProviders.deepseek,
       researchProviders.tavily,
+      researchProviders.gemini,
       researchProviders.deepResearchMcp,
       researchProviders.customMcp,
     ],
@@ -118,7 +123,7 @@ export const sourcePoliciesByMode: Record<ResearchMode, SourcePolicy> = {
     mode: researchModes.officialDocs,
     prefer: [researchProviders.openaiDocs, researchProviders.userSources],
     allow: [researchProviders.openaiDocs, researchProviders.userSources, researchProviders.fileSearch],
-    deny: [researchProviders.webSearch, researchProviders.browser, researchProviders.firecrawl, researchProviders.deepResearchMcp, researchProviders.deepseek],
+    deny: [researchProviders.webSearch, researchProviders.browser, researchProviders.firecrawl, researchProviders.deepResearchMcp, researchProviders.deepseek, researchProviders.gemini],
     require_citations: true,
     fallback: "blocked",
   },

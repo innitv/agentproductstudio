@@ -24,13 +24,14 @@
 
 ## Provider Coverage
 
-Required for `deep_research`: `tavily` must return usable sources and `deepseek` must return usable cross-check/check results for `ready`.
+Required for `deep_research`: `tavily` must return usable sources, `deepseek` must return usable cross-check/check results, and `gemini` must return usable strategic cross-check results for `ready`.
 If either default provider is unavailable, failed or empty, set Status to `partial` and record `needs_validation`.
 
 | Provider | Requested | Used | Sources count | Validation state | Notes |
 |---|---:|---:|---:|---|---|
 | tavily | yes / no | yes / no |  | pass / needs_validation / failed |  |
 | deepseek | yes / no | yes / no | 0 | pass / needs_validation / failed | required cross-check; not source-backed evidence |
+| gemini | yes / no | yes / no | 0 | pass / needs_validation / failed | required strategy cross-check; not source-backed evidence |
 
 ## Provider Failures
 
@@ -104,6 +105,8 @@ Guardrail: synthetic interviews are used only for hypothesis generation, intervi
 - [ ] Tavily returned usable sources or Status is `partial`.
 - [ ] DeepSeek returned usable cross-check/check output or Status is `partial`.
 - [ ] DeepSeek output is marked as cross-check/synthesis and not treated as evidence.
+- [ ] Gemini returned usable strategic cross-check output or Status is `partial`.
+- [ ] Gemini output is marked as cross-check/synthesis and not treated as evidence.
 - [ ] Audience segments are defined.
 - [ ] JTBD is complete.
 - [ ] Proto Personas are present or `skipped_with_reason`.

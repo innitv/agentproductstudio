@@ -1,5 +1,6 @@
 import { runDeepSeekResearch, type DeepSeekResearchResult } from "./deepseek-research";
 import { loadLocalEnv } from "./env";
+import { runGeminiResearch, type GeminiResearchResult } from "./gemini-research";
 import {
   defaultMultiSourceResearchProviders,
   researchModes,
@@ -30,7 +31,7 @@ export interface MultiSourceResearchResult {
   providersUsed: ResearchProvider[];
   unavailableProviders: ResearchProvider[];
   failures: ProviderFailure[];
-  results: Array<TavilyResearchResult | DeepSeekResearchResult>;
+  results: Array<TavilyResearchResult | DeepSeekResearchResult | GeminiResearchResult>;
   sources: Array<{ provider: ResearchProvider; url: string; title?: string }>;
   validation: {
     status: "pass" | "needs_validation";
@@ -42,6 +43,7 @@ export interface MultiSourceResearchResult {
 const executableProviders = [
   researchProviders.tavily,
   researchProviders.deepseek,
+  researchProviders.gemini,
 ] as const satisfies readonly ResearchProvider[];
 
 export async function runMultiSourceResearch(input: MultiSourceResearchInput): Promise<MultiSourceResearchResult> {
@@ -66,6 +68,15 @@ export async function runMultiSourceResearch(input: MultiSourceResearchInput): P
 
       if (provider === researchProviders.deepseek) {
         return runDeepSeekResearch({
+          query: input.query,
+          productContext: input.productContext,
+          geography: input.geography,
+          language: input.language,
+        });
+      }
+
+      if (provider === researchProviders.gemini) {
+        return runGeminiResearch({
           query: input.query,
           productContext: input.productContext,
           geography: input.geography,
@@ -139,6 +150,10 @@ function isProviderConfigured(provider: ResearchProvider): boolean {
 
   if (provider === researchProviders.deepseek) {
     return Boolean(process.env.DEEPSEEK_API_KEY);
+  }
+
+  if (provider === researchProviders.gemini) {
+    return Boolean(process.env.GEMINI_API_KEY);
   }
 
   return false;

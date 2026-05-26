@@ -24,14 +24,14 @@
 1. Проверить, что required artifacts существуют.
 2. Проверить, что `recursive-brief.md` содержит expansion, deepening, consolidation, assumptions и open questions.
 3. Проверить, что source policy разрешает выбранный research mode.
-4. Для `deep_research` проверить, что source policy включает multi-source providers: `tavily` и `deepseek`.
+4. Для `deep_research` проверить, что source policy включает multi-source providers: `tavily`, `deepseek` и `gemini`.
 5. Если один из default providers недоступен или упал, продолжать только со статусом `partial`, фиксировать provider failure и помечать market claims как `needs validation`.
 
 ## Internal Pipeline
 
 1. Превратить brief в research questions.
 2. Определить source policy и evidence classes: official/source-backed, competitor, community/review, internal, hypothesis, synthetic.
-3. Запустить multi-source research: `tavily` + `deepseek` по умолчанию, затем разрешённые fallback providers (`user_sources`, `openai_docs`, `web_search`, `browser`) по необходимости.
+3. Запустить multi-source research: `tavily` + `deepseek` + `gemini` по умолчанию, затем разрешённые fallback providers (`user_sources`, `openai_docs`, `web_search`, `browser`) по необходимости.
 4. Сверить результаты между providers: совпадающие claims получают более высокий confidence, противоречия фиксируются в `unknowns` / `claims_to_validate`.
 5. Собрать sources и зафиксировать source URLs или local file paths, provider name, retrieved_at и confidence.
 6. Синтезировать audience segments и Jobs To Be Done.
@@ -58,6 +58,7 @@
 - Web search/browser, если source policy это разрешает
 - Tavily research provider, если source policy это разрешает
 - DeepSeek API provider для обязательного cross-check/synthesis, если source policy это разрешает
+- Gemini API provider для обязательного стратегического анализа, если source policy это разрешает
 - Official documentation
 - Competitor site review
 - Structured synthesis
@@ -72,15 +73,15 @@
 ## Guardrails
 
 - Каждый важный market claim должен иметь source или `needs validation`.
-- Для `deep_research` успешный статус требует результатов минимум от `tavily` и `deepseek`; иначе статус `partial`.
-- DeepSeek обязателен для research-проверок и cross-check, но не является source-backed evidence сам по себе: его вывод используется для поиска противоречий, рисков и `claims_to_validate`.
+- Для `deep_research` успешный статус требует результатов минимум от `tavily`, `deepseek` и `gemini`; иначе статус `partial`.
+- DeepSeek и Gemini обязательны для research-проверок, cross-check и стратегического анализа, но не являются source-backed evidence сами по себе: их выводы используются для поиска противоречий, рисков, гипотез и `claims_to_validate`.
 - `research-summary.md` обязан фиксировать providers requested, providers used, unavailable providers, failures и validation state.
 - Нельзя заменять обязательный multi-source provider browser scan'ом или synthetic synthesis. Browser/user sources могут быть fallback только с `needs_validation`, если provider output отсутствует.
-- Если Tavily/DeepSeek требуют approval на внешний API call, research agent должен запросить approval через orchestrator; без approval stage остается `partial`/`blocked`.
+- Если Tavily/DeepSeek/Gemini требуют approval на внешний API call, research agent должен запросить approval через orchestrator; без approval stage остается `partial`/`blocked`.
 - Каждая proto persona должна включать `Evidence status`.
 - Каждый synthetic interview должен включать `Evidence status: `synthetic`` в artifact.
 - Synthetic interviews разрешены для prompts, edge cases и validation questions, но не как proof.
-- Если данных нет, создай artifact со статусом `skipped_with_reason` или `blocked`, а не пропускай его.
+- If data is missing, create the artifact with Status `skipped_with_reason` or `blocked`, do not just skip it.
 
 ## Evidence Notes
 
@@ -112,7 +113,7 @@ recommended_next_step:
 
 - Missing brief: `blocked`.
 - Missing sources: `partial` с `needs validation`.
-- Missing Tavily/DeepSeek in `deep_research`: `partial` с provider failure в handoff и ledger.
+- Missing Tavily/DeepSeek/Gemini in `deep_research`: `partial` с provider failure в handoff и ledger.
 - Required provider skipped by agent decision: `blocked` до исправления или явного user-approved scope change.
 - No real user evidence: держать personas как `proto`.
 - Synthetic-as-fact detected: `blocked` до исправления.

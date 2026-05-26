@@ -12,7 +12,7 @@ Research layer должен выбирать режим исследования
 | `user_sources_only` | Пользователь дал ссылки/файлы и запретил остальное. | user_sources, file_search |
 | `web_search` | Нужна быстрая проверка актуальных фактов. | web_search, browser |
 | `browser_scan` | Нужно изучить конкретные сайты, конкурентов или UX. | firecrawl, browser, web_search |
-| `deep_research` | Нужен широкий конкурентный/рыночный research. | tavily, deepseek, firecrawl, deep_research_mcp, web_search, browser, user_sources |
+| `deep_research` | Нужен широкий конкурентный/рыночный research. | tavily, deepseek, gemini, firecrawl, deep_research_mcp, web_search, browser, user_sources |
 | `official_docs` | Нужны только официальные источники. | openai_docs, official user sources |
 
 ## Provider Registry
@@ -27,6 +27,7 @@ Research layer должен выбирать режим исследования
 | `firecrawl` | Scrape/crawl/reference scan: markdown, metadata, links, screenshots for competitor/reference pages. | `FIRECRAWL_API_KEY`, `runtime/typescript/firecrawl.ts`, `runtime/typescript/reference-scan.ts` | browser/web_search |
 | `deepseek` | Обязательный model-based cross-check/check provider через DeepSeek Chat Completions API. | DeepSeek API key | tavily/web_search/browser |
 | `tavily` | Web/deep research с источниками и competitor discovery. | Tavily MCP или `runtime/typescript/tavily-research.ts` | web_search/browser |
+| `gemini` | Обязательный model-based strategy/cross-check provider для contradiction review и claims-to-validate. | Gemini API key, `runtime/typescript/gemini-research.ts` | tavily/web_search/browser |
 | `deep_research_mcp` | Многошаговый deep research. | Tavily/Exa/Perplexity/Firecrawl/custom MCP | web_search/browser |
 | `custom_mcp` | Доменные источники клиента. | project-specific MCP | ask user |
 
@@ -46,6 +47,7 @@ source_policy:
     - browser
     - tavily
     - deepseek
+    - gemini
     - deep_research_mcp
     - custom_mcp
   deny:
@@ -57,9 +59,9 @@ source_policy:
 ## Rules
 
 - User prompt wins over defaults.
-- Full `deep_research` defaults to multi-source execution with `tavily` and `deepseek`.
-- `tavily` is the source-backed provider; `deepseek` is required for contradiction checks, risks and `claims_to_validate`, but does not count as source-backed evidence by itself.
-- If either default provider is unavailable, failed, or returns no usable sources, the research gate is `partial` and must record `needs_validation`.
+- Full `deep_research` defaults to multi-source execution with `tavily`, `deepseek` and `gemini`.
+- `tavily` is the source-backed provider; `deepseek` and `gemini` are required check/synthesis providers for contradiction checks, risks and `claims_to_validate`, but do not count as source-backed evidence by themselves.
+- If any default provider is unavailable, failed, or returns no usable output, the research gate is `partial` and must record `needs_validation`.
 - Do not use broad web if user requests `local_only`, `user_sources_only`, or `official_docs`.
 - If provider is unavailable, switch only to an allowed fallback.
 - If no allowed provider is available, return `partial` with `needs validation` or `blocked` if policy requires it.
@@ -78,6 +80,7 @@ Recommended deep research providers:
 
 - Tavily MCP
 - DeepSeek API provider
+- Gemini API provider
 - Exa MCP
 - Perplexity MCP
 - Firecrawl MCP
@@ -96,7 +99,9 @@ DeepSeek setup details: `integrations/mcp/deepseek-api.md`.
 TAVILY_API_KEY=tvly-your-key-here
 DEEPSEEK_API_KEY=your-deepseek-key-here
 DEEPSEEK_RESEARCH_MODEL=deepseek-v4-flash
-RESEARCH_PROVIDER_ORDER=tavily,deepseek
+GEMINI_API_KEY=your-gemini-key-here
+GEMINI_RESEARCH_MODEL=gemini-2.5-flash
+RESEARCH_PROVIDER_ORDER=tavily,deepseek,gemini
 FIRECRAWL_API_KEY=fc-your-key-here
 ```
 

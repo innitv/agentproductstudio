@@ -9,9 +9,9 @@
 ## Gate 1: Research Integrity
 
 - Research questions существуют.
-- Для `deep_research` есть Provider Coverage по `tavily` и `deepseek`.
-- Для `deep_research` статус `ready/success` допустим только если Tavily вернул usable sources, а DeepSeek вернул usable cross-check/check results; иначе `partial` и `needs_validation`.
-- DeepSeek API обязателен для research checks/cross-check, но его вывод отмечен как synthesis и не используется как source-backed evidence без внешнего источника.
+- Для `deep_research` есть Provider Coverage по `tavily`, `deepseek` и `gemini`.
+- Для `deep_research` статус `ready/success` допустим только если Tavily вернул usable sources, а DeepSeek и Gemini вернули usable cross-check/check/strategy results; иначе `partial` и `needs_validation`.
+- DeepSeek и Gemini обязательны для research checks/cross-check, но их выводы отмечены как synthesis/strategy и не используются как source-backed evidence без внешнего источника.
 - Provider failures, unavailable providers и empty-source cases записаны в research summary, handoff и ledger.
 - Audience и JTBD существуют.
 - Есть минимум 2 proto personas или `skipped_with_reason`.

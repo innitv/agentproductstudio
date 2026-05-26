@@ -22,7 +22,7 @@ const requiredProjectFiles = [
   "agent-pack/quality/quality-gates.md",
 ] as const;
 
-export async function runLandingWorkflow(input: LandingWorkflowInput): Promise<void> {
+export async function runLandingWorkflow(input: LandingWorkflowInput): Promise<string> {
   if (!input.goal.trim()) {
     throw new Error("Landing workflow requires a non-empty goal.");
   }
@@ -92,6 +92,8 @@ export async function runLandingWorkflow(input: LandingWorkflowInput): Promise<v
 
   console.log(`Workflow scaffold created: outputs/${slug}/${date}/workflow-scaffold.md`);
   console.log(`Run setup artifacts created: outputs/${slug}/${date}/run-plan.md`);
+
+  return outputDir;
 }
 
 async function main(): Promise<void> {

@@ -148,14 +148,32 @@ runtime/
   typescript/
     README.md
     agents.registry.ts
+    agents.sdk.ts
+    deepseek-research.ts
+    env.ts
+    firecrawl.ts
+    gemini-research.ts
     guardrails.ts
     hooks.ts
+    multi-source-research.ts
+    reference-scan.ts
     research.config.ts
+    research-stage-runner.ts
     route.config.ts
     run-landing-workflow.ts
+    run-local-workflow.ts
+    run-workflow-engine.ts
     schemas.ts
+    tavily-research.ts
     tools.ts
     tracing.ts
+    validate-workflow-run.ts
+    visual-diff.ts
+    visual-reference-review.ts
+    visual-section-diff.ts
+    workflow-engine.ts
+    workflow-stages.ts
+    workflow-state.ts
 apps/
   frontend/
     index.html
@@ -164,8 +182,16 @@ apps/
       App.tsx
       main.tsx
       styles.css
+design/
+  figma/
+    a3-design-system/
+      README.md
+      token-map.md
+      component-map.md
+      design-system-audit.md
 tests/
   playwright/
+    firecrawl.spec.ts
     frontend.spec.ts
 agent-pack/guardrails/
   guardrails.policy.md
@@ -248,7 +274,7 @@ Command and action rules live in:
 
 Основной режим проекта — использовать эту папку как Codex agent pack: `AGENTS.md`, `agent-pack/agents/`, `agent-pack/templates/`, `agent-pack/workflows/`, `agent-pack/schemas/`, `agent-pack/guardrails/` и `agent-pack/quality/` задают правила работы. В этом режиме отдельный `OPENAI_API_KEY` не нужен.
 
-В проект также добавлен минимальный Node/TypeScript scaffold для будущего standalone OpenAI Agents SDK runtime:
+В проект также добавлен Node/TypeScript runtime layer: Agents SDK scaffold, локальные research/reference adapters, workflow validation и persisted workflow engine:
 
 ```bash
 yarn install
@@ -261,6 +287,11 @@ yarn qa:firecrawl
 yarn reference:scan <reference-url> [slug]
 yarn landing:run "<цель workflow>"
 yarn research:run outputs/<project-slug>/<YYYY-MM-DD> ["research query"]
+yarn workflow:run-local "<цель workflow>"
+yarn workflow:start "<цель workflow>"
+yarn workflow:resume outputs/<project-slug>/<YYYY-MM-DD>
+yarn workflow:status outputs/<project-slug>/<YYYY-MM-DD>
+yarn workflow:run-stage outputs/<project-slug>/<YYYY-MM-DD> 01-research --force
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through 01-research
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
@@ -288,14 +319,17 @@ schema_payload:
 
 Текущий статус:
 
-- `runtime/typescript/` остаётся skeleton-слоем для OpenAI Agents SDK integration.
+- `runtime/typescript/` содержит Agents SDK integration scaffold, executable research adapters, visual-reference tooling and local workflow engine.
 - `runtime/typescript/agents.sdk.ts` создаёт Agents SDK слой: orchestrator, specialists и specialists-as-tools.
 - `runtime/typescript/workflow-stages.ts` описывает обязательные stage gates и артефакты каждого шага.
 - `runtime/typescript/validate-workflow-run.ts` проверяет, что run-папка содержит все обязательные артефакты и ключевые секции.
 - `runtime/typescript/route.config.ts` использует standard route без visual reference review; reference route добавляет `visualReferenceReview` только для задач с референсом.
+- `runtime/typescript/workflow-engine.ts` и `workflow-state.ts` дают persisted standard workflow: `run-state.json`, `stage-results/`, `start/resume/status/run-stage`.
 - `runtime/typescript/firecrawl.ts` подключает Firecrawl SDK как opt-in scrape/interact provider.
 - `runtime/typescript/reference-scan.ts` собирает reference pack: Firecrawl markdown/json и Playwright desktop/mobile full-page screenshots в `reports/visual-review/<slug>/`.
-- `runtime/typescript/research-stage-runner.ts` запускает Tavily + DeepSeek research provider flow и пишет обязательные research artifacts в `outputs/<project>/<date>/`.
+- `runtime/typescript/visual-diff.ts`, `visual-section-diff.ts` и `visual-reference-review.ts` создают pixel/section evidence и `visual-reference-review.md` для reference-driven QA.
+- `runtime/typescript/research-stage-runner.ts` запускает Tavily + DeepSeek + Gemini research provider flow и пишет обязательные research artifacts в `outputs/<project>/<date>/`.
+- `design/figma/a3-design-system/` хранит долгоживущую карту Figma design-system tokens/components; workflow outputs должны ссылаться на неё через `Inputs Used`, а не дублировать как run output.
 - `tooling/scripts/validate-config.mjs` проверяет обязательные файлы и secret-like values без внешней сети.
 - React, Vite, Tailwind CSS, shadcn/ui и Framer Motion подключены как frontend stack в `apps/frontend/`.
 - `yarn build` собирает frontend в `dist/frontend`.

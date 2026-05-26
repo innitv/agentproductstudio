@@ -1,0 +1,16 @@
+{
+  "stage_id": "03-ia",
+  "title": "Information Architecture",
+  "status": "completed",
+  "artifacts_created": [
+    "ia-brief.md"
+  ],
+  "inputs_used": [
+    "prd.md",
+    "research-summary.md",
+    "proto-personas.md"
+  ],
+  "warnings": [],
+  "errors": [],
+  "completed_at": "2026-05-26T11:54:30.775Z"
+}

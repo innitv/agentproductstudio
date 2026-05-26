@@ -2,7 +2,7 @@
 
 ## Назначение
 
-DeepSeek подключается как обязательный API provider для cross-check/synthesis внутри default `deep_research` pipeline вместе с Tavily. Он помогает найти противоречия, риски, альтернативные формулировки JTBD и claims to validate, но не заменяет source-backed evidence.
+DeepSeek подключается как обязательный API provider для cross-check/synthesis внутри default `deep_research` pipeline вместе с Tavily и Gemini. Он помогает найти противоречия, риски, альтернативные формулировки JTBD и claims to validate, но не заменяет source-backed evidence.
 
 ## Endpoint
 
@@ -29,4 +29,4 @@ Default model в runtime: `deepseek-v4-flash`.
 
 ## Research Rule
 
-Default `deep_research` requires Tavily + DeepSeek. DeepSeek output has `confidence: low` until validated against Tavily, official sources or user sources. It can create `claims_to_validate`, but cannot be used as a cited market fact by itself.
+Default `deep_research` requires Tavily + DeepSeek + Gemini. DeepSeek output has `confidence: low` until validated against Tavily, official sources or user sources. It can create `claims_to_validate`, but cannot be used as a cited market fact by itself.

@@ -17,7 +17,7 @@ Owns the user request, route, quality gates and final response. The orchestrator
 1. Normalize the request and create a project slug.
 2. Create `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md` and `recursive-brief.md`.
 3. Perform recursive briefing: expansion, deepening, consolidation.
-4. For `deep_research`, set source policy to multi-source by default: `tavily` + `deepseek`, then user sources / official docs / browser fallback as allowed.
+4. For `deep_research`, set source policy to multi-source by default: `tavily` + `deepseek` + `gemini`, then user sources / official docs / browser fallback as allowed.
 5. Route each stage to the correct specialist capability.
 6. After each stage, update handoff and ledger.
 7. Run `yarn workflow:validate ... --through <stage-id>` when a stage is claimed complete.
@@ -28,7 +28,7 @@ Owns the user request, route, quality gates and final response. The orchestrator
 
 - Run independent specialist work in parallel only when dependencies are satisfied and artifacts have disjoint ownership.
 - Research sub-artifacts may be parallelized inside the research stage, but PRD is blocked until the complete research gate passes.
-- Deep research must use multi-source research by default. If Tavily or DeepSeek is unavailable, the research stage remains `partial` and records the missing provider in sources, risks and gate notes.
+- Deep research must use multi-source research by default. If Tavily, DeepSeek or Gemini is unavailable, the research stage remains `partial` and records the missing provider in sources, risks and gate notes.
 - Test Bench can start as companion work after brief, but must refresh after frontend and visual reference review.
 - QA and release are never parallel with unfinished upstream gates.
 - Visual reference review is mandatory before QA/release whenever the user provides a visual reference.

@@ -1,0 +1,15 @@
+{
+  "stage_id": "07-prototype",
+  "title": "Prototype",
+  "status": "completed",
+  "artifacts_created": [
+    "prototype-report.md"
+  ],
+  "inputs_used": [
+    "ia-brief.md",
+    "screens.md"
+  ],
+  "warnings": [],
+  "errors": [],
+  "completed_at": "2026-05-26T11:54:30.796Z"
+}
