@@ -46,12 +46,20 @@ codex mcp add figma --url https://mcp.figma.com/mcp
 
 ## Output Artifacts
 
-Рекомендуемые локальные результаты:
+Рекомендуемые долгоживущие design-source результаты:
+
+- `design/figma/<design-system-slug>/design-system-audit.md`.
+- `design/figma/<design-system-slug>/token-map.md`.
+- `design/figma/<design-system-slug>/component-map.md`.
+
+Рекомендуемые workflow-specific результаты:
 
 - `agent-pack/artifacts/design/design-brief.template.md` или `outputs/<slug>/<date>/design-brief.md`.
 - `outputs/<slug>/<date>/figma-design-system-audit.md`.
-- `outputs/<slug>/<date>/figma-token-map.md`.
-- `outputs/<slug>/<date>/figma-component-map.md`.
+- `outputs/<slug>/<date>/figma-token-map.md` только для task-specific Figma frames, не для общей библиотеки.
+- `outputs/<slug>/<date>/figma-component-map.md` только для task-specific Figma frames, не для общей библиотеки.
+
+Если Figma library является общей дизайн-системой, не дублируй её в каждом `outputs/` run. Сохраняй её в `design/figma/`, а workflow artifacts должны ссылаться на эти файлы в `Inputs Used`.
 
 ## Design System Audit Template
 

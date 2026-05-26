@@ -7,6 +7,7 @@ const pathLikePrefixes = [
   ".codex/",
   "agent-pack/",
   "apps/",
+  "design/",
   "integrations/",
   "outputs/",
   "runtime/",
