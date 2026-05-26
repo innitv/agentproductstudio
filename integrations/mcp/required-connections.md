@@ -28,6 +28,7 @@
 | Connection | Purpose | Required secret | Default mode |
 |---|---|---:|---|
 | Browser/Playwright MCP | QA, screenshots, responsive checks, competitor page scan | no | opt-in |
+| Firecrawl API | Scrape/crawl/reference scan, markdown/metadata/links for competitor and visual reference pages | `FIRECRAWL_API_KEY` | opt-in |
 | Tavily | Source-backed research с источниками и конкурентный анализ | `TAVILY_API_KEY` | default for deep_research when approved |
 | DeepSeek API | Research checks, contradiction review, claims-to-validate | `DEEPSEEK_API_KEY` | default for deep_research when approved |
 | Notion MCP | Публикация PRD / notion export | `NOTION_TOKEN` | disabled |
@@ -39,6 +40,7 @@
 
 - Реальные tokens не сохраняются в репозиторий, outputs, traces или AGENTS.md.
 - `OPENAI_API_KEY` не является обязательным для Codex agent pack режима.
+- Firecrawl используется для публичных reference/competitor URLs; локальный preview проверяется Playwright, если нет публичного tunnel.
 - Write-действия во внешних системах требуют human approval.
 - Если provider недоступен, agent возвращает `partial` с `needs_validation` или использует разрешённый fallback из `runtime/typescript/research.config.ts`.
 - Для OpenAI-related задач используется OpenAI Docs MCP или официальный fallback.

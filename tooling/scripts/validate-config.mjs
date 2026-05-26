@@ -15,6 +15,9 @@ const requiredFiles = [
   "runtime/typescript/tavily-research.ts",
   "runtime/typescript/deepseek-research.ts",
   "runtime/typescript/multi-source-research.ts",
+  "runtime/typescript/firecrawl.ts",
+  "runtime/typescript/reference-scan.ts",
+  "runtime/typescript/research-stage-runner.ts",
   "agent-pack/templates/agent-output-contract.schema.md",
   "agent-pack/guardrails/guardrails.policy.md",
   "agent-pack/guardrails/approval-matrix.md",
@@ -112,15 +115,47 @@ const researchEnforcementFiles = [
   },
   {
     file: "runtime/typescript/research.config.ts",
-    requiredSnippets: ["defaultMultiSourceResearchProviders", "researchProviders.tavily", "researchProviders.deepseek"],
+    requiredSnippets: ["defaultMultiSourceResearchProviders", "researchProviders.tavily", "researchProviders.deepseek", "researchProviders.firecrawl"],
+  },
+  {
+    file: "runtime/typescript/route.config.ts",
+    requiredSnippets: ["standardRoutePlan", "referenceRoutePlan", "getRoutePlanForProfile", "referenceBundleArtifacts"],
+  },
+  {
+    file: "runtime/typescript/workflow-stages.ts",
+    requiredSnippets: ["WorkflowProfile", "getWorkflowStagesForProfile", "getRequiredArtifactsForStage", "profile: \"reference\""],
+  },
+  {
+    file: "runtime/typescript/validate-workflow-run.ts",
+    requiredSnippets: ["--profile", "detectWorkflowProfile", "standard", "reference"],
   },
   {
     file: "runtime/typescript/multi-source-research.ts",
     requiredSnippets: ["runMultiSourceResearch", "loadLocalEnv", "runDeepSeekResearch", "validateMultiSourceCoverage", "needs_validation"],
   },
   {
+    file: "runtime/typescript/research-stage-runner.ts",
+    requiredSnippets: ["runResearchStage", "runMultiSourceResearch", "research-summary.md", "stage_gate_ledger", "validateWorkflowRun"],
+  },
+  {
     file: "runtime/typescript/deepseek-research.ts",
     requiredSnippets: ["runDeepSeekResearch", "DEEPSEEK_API_KEY", "deepseek-v4-flash", "claimsToValidate"],
+  },
+  {
+    file: "runtime/typescript/tavily-research.ts",
+    requiredSnippets: ["runTavilyResearch", "TAVILY_API_KEY", "MAX_TAVILY_QUERY_LENGTH", "truncateQuery"],
+  },
+  {
+    file: "runtime/typescript/firecrawl.ts",
+    requiredSnippets: ["createFirecrawlClient", "FIRECRAWL_API_KEY", "scrapeForPlaywright", "runFirecrawlPlaywrightCode"],
+  },
+  {
+    file: "runtime/typescript/reference-scan.ts",
+    requiredSnippets: ["scanReference", "captureReferenceScreenshots", "firecrawl-markdown.md", "reference-desktop-full.png"],
+  },
+  {
+    file: "README.md",
+    requiredSnippets: ["yarn research:run", "yarn reference:scan", "--profile standard", "--profile reference", "FIRECRAWL_API_KEY"],
   },
   {
     file: "runtime/typescript/env.ts",
@@ -144,6 +179,10 @@ const secretPatterns = [
   {
     name: "Notion token",
     pattern: /secret_[A-Za-z0-9]{20,}/g,
+  },
+  {
+    name: "Firecrawl API key",
+    pattern: /fc-[A-Za-z0-9_-]{20,}/g,
   },
 ];
 

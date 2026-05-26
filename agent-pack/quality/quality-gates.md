@@ -64,4 +64,5 @@
 - Release notes включают changed files, validation и rollback notes.
 - Notion research-only child page publication выполнена для полного workflow и записана в `stage-gate-ledger.md` + `release-notes.md`, либо workflow явно помечен `partial/blocked` с причиной.
 - Notion publication не содержит full workflow dump, schema/frontmatter, raw JSON payloads или code-block копии всех артефактов.
-- Полный `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD>` возвращает no errors для complete workflow.
+- Полный `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard` возвращает no errors для complete workflow без visual reference.
+- Полный `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference` возвращает no errors для complete workflow с visual reference.

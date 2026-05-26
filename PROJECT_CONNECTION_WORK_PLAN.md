@@ -24,7 +24,7 @@ Status: completed
 Acceptance criteria:
 
 - В репозитории нет явных API keys.
-- Tavily, GitHub, Notion и optional OpenAI runtime ключи описаны только как env variables.
+- Tavily, DeepSeek, Firecrawl, GitHub, Notion и optional OpenAI runtime ключи описаны только как env variables.
 - Подключения с внешней передачей данных требуют approval по существующим guardrails.
 
 ## Фаза 2. Node/TypeScript runtime scaffold
@@ -117,12 +117,14 @@ Status: pending
 - [ ] Подключить OpenAI Docs MCP.
 - [ ] Подключить filesystem/local file provider.
 - [ ] Подключить browser/Playwright MCP для QA.
-- [ ] Настроить web/deep research provider: Tavily или fallback на web/browser.
+- [x] Подключить Firecrawl как opt-in scrape/reference scan provider вместе с Playwright.
+- [x] Добавить end-to-end research stage runner для Tavily + DeepSeek artifacts.
+- [x] Настроить локальный web/deep research provider flow: Tavily + DeepSeek, Firecrawl/browser как fallback/reference layer.
 - [ ] Оставить Notion, GitHub/GitLab, Figma как opt-in providers с approval.
 
 Acceptance criteria:
 
-- Research может работать минимум в `local_only` и `web_search`/`browser_scan`.
+- Research может работать минимум в `local_only` и `web_search`/`browser_scan`; Firecrawl покрывает публичный scrape/reference scan, Playwright — screenshots/responsive QA.
 - OpenAI-related задачи используют official docs.
 - Write-действия во внешних системах требуют human approval.
 

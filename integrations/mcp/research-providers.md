@@ -11,8 +11,8 @@ Research layer должен выбирать режим исследования
 | `local_only` | Нельзя использовать web/external tools. | file_search |
 | `user_sources_only` | Пользователь дал ссылки/файлы и запретил остальное. | user_sources, file_search |
 | `web_search` | Нужна быстрая проверка актуальных фактов. | web_search, browser |
-| `browser_scan` | Нужно изучить конкретные сайты, конкурентов или UX. | browser, web_search |
-| `deep_research` | Нужен широкий конкурентный/рыночный research. | tavily, deepseek, deep_research_mcp, web_search, browser, user_sources |
+| `browser_scan` | Нужно изучить конкретные сайты, конкурентов или UX. | firecrawl, browser, web_search |
+| `deep_research` | Нужен широкий конкурентный/рыночный research. | tavily, deepseek, firecrawl, deep_research_mcp, web_search, browser, user_sources |
 | `official_docs` | Нужны только официальные источники. | openai_docs, official user sources |
 
 ## Provider Registry
@@ -24,6 +24,7 @@ Research layer должен выбирать режим исследования
 | `openai_docs` | OpenAI API/Codex/agent-pack/agents/MCP docs. | OpenAI Docs MCP | official OpenAI web docs |
 | `web_search` | Быстрый поиск актуальных источников. | web/search tool | `needs_validation` |
 | `browser` | Проверка страниц, UX, competitor pages. | browser/Playwright MCP | text-only notes |
+| `firecrawl` | Scrape/crawl/reference scan: markdown, metadata, links, screenshots for competitor/reference pages. | `FIRECRAWL_API_KEY`, `runtime/typescript/firecrawl.ts`, `runtime/typescript/reference-scan.ts` | browser/web_search |
 | `deepseek` | Обязательный model-based cross-check/check provider через DeepSeek Chat Completions API. | DeepSeek API key | tavily/web_search/browser |
 | `tavily` | Web/deep research с источниками и competitor discovery. | Tavily MCP или `runtime/typescript/tavily-research.ts` | web_search/browser |
 | `deep_research_mcp` | Многошаговый deep research. | Tavily/Exa/Perplexity/Firecrawl/custom MCP | web_search/browser |
@@ -96,6 +97,7 @@ TAVILY_API_KEY=tvly-your-key-here
 DEEPSEEK_API_KEY=your-deepseek-key-here
 DEEPSEEK_RESEARCH_MODEL=deepseek-v4-flash
 RESEARCH_PROVIDER_ORDER=tavily,deepseek
+FIRECRAWL_API_KEY=fc-your-key-here
 ```
 
 Для Codex-сессии без локального standalone runtime это остается opt-in конфигурацией проекта. Реальные ключи хранятся только в локальном `.env`, не в `.env.example`, outputs или traces.

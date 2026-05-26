@@ -2,11 +2,11 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import type { LandingWorkflowInput } from "./schemas";
-import { coreBundleArtifacts, routePlan } from "./route.config";
+import { getCoreBundleArtifactsForProfile, getRoutePlanForProfile, type RouteProfile } from "./route.config";
 import { agentInstructionFiles } from "./agents.registry";
 import { createAgentsSdkLayer } from "./agents.sdk";
 import { pathToFileURL } from "node:url";
-import { artifactFiles, workflowStages } from "./workflow-stages";
+import { artifactFiles, getRequiredArtifactsForStage, workflowStages } from "./workflow-stages";
 
 // Local no-API-key runner for Codex agent pack mode.
 // It validates the workflow structure and creates an output scaffold without
@@ -27,6 +27,9 @@ export async function runLandingWorkflow(input: LandingWorkflowInput): Promise<v
     throw new Error("Landing workflow requires a non-empty goal.");
   }
 
+  const profile = detectRouteProfile(input);
+  const routePlan = getRoutePlanForProfile(profile);
+
   if (!routePlan.length) {
     throw new Error("Landing workflow requires a non-empty route plan.");
   }
@@ -44,13 +47,14 @@ export async function runLandingWorkflow(input: LandingWorkflowInput): Promise<v
   const date = new Date().toISOString().slice(0, 10);
   const outputDir = join(process.cwd(), "outputs", slug, date);
   await mkdir(outputDir, { recursive: true });
-  const agentsSdkLayer = await createAgentsSdkLayer();
+  const agentsSdkLayer = await createAgentsSdkLayer(profile);
 
   const scaffold = [
     "# Landing Workflow Scaffold",
     "",
     `Goal: ${input.goal}`,
     `Date: ${date}`,
+    `Profile: ${profile}`,
     "",
     "Mode: no-api-key Codex agent pack scaffold.",
     "",
@@ -63,13 +67,13 @@ export async function runLandingWorkflow(input: LandingWorkflowInput): Promise<v
     `- Route tools: ${agentsSdkLayer.routeToolNames.join(", ")}`,
     "",
     "Required artifacts:",
-    ...coreBundleArtifacts.map((artifact) => `- ${artifact}`),
+    ...getCoreBundleArtifactsForProfile(profile).map((artifact) => `- ${artifact}`),
     "",
     "Stage gates:",
     ...workflowStages.flatMap((stage) => [
       `- ${stage.id}: ${stage.title}`,
       `  owner: ${stage.owner}`,
-      `  artifacts: ${stage.requiredArtifacts.map((artifact) => artifactFiles[artifact]).join(", ")}`,
+      `  artifacts: ${getRequiredArtifactsForStage(stage, profile).map((artifact) => artifactFiles[artifact]).join(", ")}`,
     ]),
     "",
     "Validation:",
@@ -81,9 +85,9 @@ export async function runLandingWorkflow(input: LandingWorkflowInput): Promise<v
   ].join("\n");
 
   await writeFile(join(outputDir, "workflow-scaffold.md"), scaffold, "utf8");
-  await writeFile(join(outputDir, "run-plan.md"), createRunPlan(input.goal, date), "utf8");
-  await writeFile(join(outputDir, "handoff-bundle.md"), createHandoffBundle(input.goal), "utf8");
-  await writeFile(join(outputDir, "stage-gate-ledger.md"), createStageGateLedger(slug, date, input.goal), "utf8");
+  await writeFile(join(outputDir, "run-plan.md"), createRunPlan(input.goal, date, profile), "utf8");
+  await writeFile(join(outputDir, "handoff-bundle.md"), createHandoffBundle(input.goal, profile), "utf8");
+  await writeFile(join(outputDir, "stage-gate-ledger.md"), createStageGateLedger(slug, date, input.goal, profile), "utf8");
   await writeFile(join(outputDir, "recursive-brief.md"), createRecursiveBriefScaffold(input.goal), "utf8");
 
   console.log(`Workflow scaffold created: outputs/${slug}/${date}/workflow-scaffold.md`);
@@ -108,7 +112,7 @@ function createSlug(value: string): string {
     .slice(0, 80) || "landing-workflow";
 }
 
-function createRunPlan(goal: string, date: string): string {
+function createRunPlan(goal: string, date: string, profile: RouteProfile): string {
   return [
     "# Run Plan",
     "",
@@ -124,9 +128,13 @@ function createRunPlan(goal: string, date: string): string {
     "",
     date,
     "",
+    "## Workflow Profile",
+    "",
+    profile,
+    "",
     "## План этапов",
     "",
-    ...workflowStages.map((stage) => `- ${stage.id}: ${stage.title} -> ${stage.requiredArtifacts.map((artifact) => artifactFiles[artifact]).join(", ")}`),
+    ...workflowStages.map((stage) => `- ${stage.id}: ${stage.title} -> ${getRequiredArtifactsForStage(stage, profile).map((artifact) => artifactFiles[artifact]).join(", ")}`),
     "",
     "## Ограничения",
     "",
@@ -136,13 +144,21 @@ function createRunPlan(goal: string, date: string): string {
   ].join("\n");
 }
 
-function createHandoffBundle(goal: string): string {
+function createHandoffBundle(goal: string, profile: RouteProfile): string {
   return [
     "# Handoff Bundle",
     "",
     "## Goal",
     "",
     goal,
+    "",
+    "## Workflow Profile",
+    "",
+    profile,
+    "",
+    "## Visual Reference Required",
+    "",
+    profile === "reference" ? "true" : "false",
     "",
     "## Inputs Used",
     "",
@@ -183,7 +199,7 @@ function createHandoffBundle(goal: string): string {
   ].join("\n");
 }
 
-function createStageGateLedger(slug: string, date: string, goal: string): string {
+function createStageGateLedger(slug: string, date: string, goal: string, profile: RouteProfile): string {
   return [
     "# Stage Gate Ledger",
     "",
@@ -192,6 +208,7 @@ function createStageGateLedger(slug: string, date: string, goal: string): string
     `- Project slug: ${slug}`,
     `- Date: ${date}`,
     `- Goal: ${goal}`,
+    `- Workflow profile: ${profile}`,
     "",
     "## Rule",
     "",
@@ -203,7 +220,7 @@ function createStageGateLedger(slug: string, date: string, goal: string): string
     "|---|---|---|---|---|",
     ...workflowStages.map((stage, index) => {
       const status = index === 0 ? "partial" : "pending";
-      return `| ${stage.id} ${stage.title} | ${stage.owner} | ${stage.requiredArtifacts.map((artifact) => `\`${artifactFiles[artifact]}\``).join(", ")} | ${status} | Scaffold initialized |`;
+      return `| ${stage.id} ${stage.title} | ${stage.owner} | ${getRequiredArtifactsForStage(stage, profile).map((artifact) => `\`${artifactFiles[artifact]}\``).join(", ")} | ${status} | Scaffold initialized |`;
     }),
     "",
     "## Validation Runs",
@@ -212,6 +229,19 @@ function createStageGateLedger(slug: string, date: string, goal: string): string
     "|---|---|---|---|",
     "",
   ].join("\n");
+}
+
+function detectRouteProfile(input: LandingWorkflowInput): RouteProfile {
+  const haystack = [
+    input.goal,
+    input.context,
+    ...(input.constraints ?? []),
+    ...(input.sources ?? []),
+  ].filter(Boolean).join("\n");
+
+  return /https?:\/\/|visual reference|reference url|как этот сайт|референс/i.test(haystack)
+    ? "reference"
+    : "standard";
 }
 
 function createRecursiveBriefScaffold(goal: string): string {

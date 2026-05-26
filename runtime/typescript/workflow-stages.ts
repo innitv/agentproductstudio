@@ -5,10 +5,14 @@ export interface WorkflowStage {
   title: string;
   owner: string;
   requiredArtifacts: readonly string[];
+  requiredArtifactsByProfile?: Partial<Record<WorkflowProfile, readonly string[]>>;
   requiredSectionsByArtifact: Readonly<Record<string, readonly string[]>>;
   mustUpdateHandoff: boolean;
   blocksFrontendUntilComplete?: boolean;
+  profile?: "standard" | "reference";
 }
+
+export type WorkflowProfile = "standard" | "reference";
 
 export const artifactSchemas: Readonly<Record<string, string>> = {
   [artifactNames.researchSummary]: "agent-pack/schemas/research-summary.schema.json",
@@ -126,7 +130,10 @@ export const workflowStages: readonly WorkflowStage[] = [
     id: "04-design",
     title: "Design Brief",
     owner: "design",
-    requiredArtifacts: [artifactNames.referenceAnalysis, artifactNames.designBrief],
+    requiredArtifacts: [artifactNames.designBrief],
+    requiredArtifactsByProfile: {
+      reference: [artifactNames.referenceAnalysis, artifactNames.designBrief],
+    },
     requiredSectionsByArtifact: {
       [artifactNames.referenceAnalysis]: ["## Inputs Used", "## References", "## Allowed Patterns", "## Disallowed Copying", "## Design Implications"],
       [artifactNames.designBrief]: ["## Visual Direction", "## Sections", "## Components", "## Responsive Notes", "## Accessibility Notes"],
@@ -193,6 +200,7 @@ export const workflowStages: readonly WorkflowStage[] = [
       ],
     },
     mustUpdateHandoff: true,
+    profile: "reference",
   },
   {
     id: "10-test-bench",
@@ -229,3 +237,11 @@ export const workflowStages: readonly WorkflowStage[] = [
 export const frontendPrerequisiteArtifacts = workflowStages
   .filter((stage) => stage.blocksFrontendUntilComplete)
   .flatMap((stage) => stage.requiredArtifacts);
+
+export function getWorkflowStagesForProfile(profile: WorkflowProfile): readonly WorkflowStage[] {
+  return workflowStages.filter((stage) => !stage.profile || stage.profile === profile);
+}
+
+export function getRequiredArtifactsForStage(stage: WorkflowStage, profile: WorkflowProfile): readonly string[] {
+  return stage.requiredArtifactsByProfile?.[profile] ?? stage.requiredArtifacts;
+}

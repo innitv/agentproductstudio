@@ -81,7 +81,8 @@ export const routeTools = {
     tool: toolNames.createDesignBrief,
     agent: agentNames.design,
     inputs: [artifactNames.prd, artifactNames.researchSummary, artifactNames.iaBrief],
-    outputs: [artifactNames.referenceAnalysis, artifactNames.designBrief],
+    outputs: [artifactNames.designBrief],
+    referenceOutputs: [artifactNames.referenceAnalysis],
     dependsOn: [artifactNames.prd, artifactNames.iaBrief],
   },
   copywriting: {
@@ -156,7 +157,6 @@ export const routeTools = {
       artifactNames.iaBrief,
       artifactNames.prototypeReport,
       artifactNames.frontendResult,
-      artifactNames.visualReferenceReview,
     ],
     outputs: [artifactNames.testBenchResult],
     dependsOn: [
@@ -164,8 +164,9 @@ export const routeTools = {
       artifactNames.iaBrief,
       artifactNames.prototypeReport,
       artifactNames.frontendResult,
-      artifactNames.visualReferenceReview,
     ],
+    referenceInputs: [artifactNames.visualReferenceReview],
+    referenceDependsOn: [artifactNames.visualReferenceReview],
     companionMode: {
       canStartAfter: [artifactNames.recursiveBrief],
       mustRefreshAfter: [
@@ -174,8 +175,8 @@ export const routeTools = {
         artifactNames.iaBrief,
         artifactNames.prototypeReport,
         artifactNames.frontendResult,
-        artifactNames.visualReferenceReview,
       ],
+      referenceMustRefreshAfter: [artifactNames.visualReferenceReview],
     },
   },
   qaReview: {
@@ -191,7 +192,6 @@ export const routeTools = {
       artifactNames.copyDeck,
       artifactNames.prototypeReport,
       artifactNames.frontendResult,
-      artifactNames.visualReferenceReview,
       artifactNames.testBenchResult,
     ],
     outputs: [artifactNames.qaReport],
@@ -205,9 +205,10 @@ export const routeTools = {
       artifactNames.copyDeck,
       artifactNames.prototypeReport,
       artifactNames.frontendResult,
-      artifactNames.visualReferenceReview,
       artifactNames.testBenchResult,
     ],
+    referenceInputs: [artifactNames.visualReferenceReview],
+    referenceDependsOn: [artifactNames.visualReferenceReview],
   },
   release: {
     tool: toolNames.createReleaseNotes,
@@ -222,7 +223,22 @@ export type RouteStepName = keyof typeof routeTools;
 
 export type OptionalRouteStepName = "notionPrdExport";
 
-export const routePlan = [
+export const standardRoutePlan = [
+  "intake",
+  "research",
+  "prd",
+  "ia",
+  "design",
+  "copywriting",
+  "screens",
+  "prototype",
+  "frontend",
+  "testBench",
+  "qaReview",
+  "release",
+] as const satisfies readonly RouteStepName[];
+
+export const referenceRoutePlan = [
   "intake",
   "research",
   "prd",
@@ -238,6 +254,14 @@ export const routePlan = [
   "release",
 ] as const satisfies readonly RouteStepName[];
 
+export const routePlan = standardRoutePlan;
+
+export type RouteProfile = "standard" | "reference";
+
+export function getRoutePlanForProfile(profile: RouteProfile): readonly RouteStepName[] {
+  return profile === "reference" ? referenceRoutePlan : standardRoutePlan;
+}
+
 export const optionalRoutePlan = ["notionPrdExport"] as const satisfies readonly OptionalRouteStepName[];
 
 export const coreBundleArtifacts = [
@@ -252,18 +276,24 @@ export const coreBundleArtifacts = [
   artifactNames.swot,
   artifactNames.prd,
   artifactNames.iaBrief,
-  artifactNames.referenceAnalysis,
   artifactNames.designBrief,
   artifactNames.screens,
   artifactNames.copyDeck,
   artifactNames.prototypeReport,
   artifactNames.frontendResult,
-  artifactNames.visualReferenceReview,
   artifactNames.testBenchResult,
   artifactNames.qaReport,
   artifactNames.releaseNotes,
 ] as const;
 
-export const optionalBundleArtifacts = [artifactNames.notionPrdExport] as const;
+export const referenceBundleArtifacts = [artifactNames.referenceAnalysis, artifactNames.visualReferenceReview] as const;
+
+export const optionalBundleArtifacts = [artifactNames.notionPrdExport, ...referenceBundleArtifacts] as const;
 
 export const fullBundleArtifacts = [...coreBundleArtifacts, ...optionalBundleArtifacts] as const;
+
+export function getCoreBundleArtifactsForProfile(profile: RouteProfile): readonly string[] {
+  return profile === "reference"
+    ? [...coreBundleArtifacts, ...referenceBundleArtifacts]
+    : coreBundleArtifacts;
+}

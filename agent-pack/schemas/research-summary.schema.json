@@ -23,7 +23,7 @@
   "$defs": {
     "string_list": { "type": "array", "items": { "type": "string" } },
     "non_empty_string_list": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
-    "research_provider": { "enum": ["tavily", "deepseek", "openai_docs", "web_search", "browser", "file_search", "user_sources", "deep_research_mcp", "custom_mcp"] },
+    "research_provider": { "enum": ["tavily", "deepseek", "firecrawl", "openai_docs", "web_search", "browser", "file_search", "user_sources", "deep_research_mcp", "custom_mcp"] },
     "provider_validation_state": { "enum": ["pass", "needs_validation", "failed", "skipped"] },
     "provider_coverage_item": {
       "type": "object",

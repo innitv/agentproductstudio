@@ -52,6 +52,7 @@ interface TavilySearchResponse {
 }
 
 const DEFAULT_ENDPOINT = "https://api.tavily.com/search";
+const MAX_TAVILY_QUERY_LENGTH = 380;
 
 export async function runTavilyResearch(input: TavilyResearchInput): Promise<TavilyResearchResult> {
   loadLocalEnv();
@@ -131,7 +132,17 @@ function buildTavilyQuery(input: TavilyResearchInput): string {
     input.language ? `Preferred language: ${input.language}` : undefined,
   ].filter(Boolean);
 
-  return parts.join("\n");
+  return truncateQuery(parts.join("\n"));
+}
+
+function truncateQuery(query: string): string {
+  const normalized = query.replace(/\s+/g, " ").trim();
+
+  if (normalized.length <= MAX_TAVILY_QUERY_LENGTH) {
+    return normalized;
+  }
+
+  return `${normalized.slice(0, MAX_TAVILY_QUERY_LENGTH - 1).trim()}…`;
 }
 
 function normalizeTavilySources(results: NonNullable<TavilySearchResponse["results"]>): TavilyEvidence[] {

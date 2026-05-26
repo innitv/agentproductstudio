@@ -235,11 +235,14 @@ Command and action rules live in:
    Для GitHub, GitLab и Playwright/browser MCP используй `integrations/mcp/repository-and-browser-mcp.md`.
    Для Figma design system MCP используй `integrations/mcp/figma-design-system-mcp.md`.
    Для Tavily deep research MCP используй `integrations/mcp/tavily-deep-research-mcp.md`.
+   Для Firecrawl scrape/reference scan используй локальный `.env` с `FIRECRAWL_API_KEY` и команду `yarn reference:scan`.
 5. Для каждой задачи используй маршрут из `agent-pack/workflows/artifact-driven-pipeline.md` и контракт `agent-pack/templates/agent-output-contract.schema.md`.
 6. Для ревью используй правила из `AGENTS.md`, `agent-pack/quality/quality-gates.md` и `/review` в Codex.
 7. Для вопросов по OpenAI API, Codex, Agents SDK, Apps SDK и MCP используй OpenAI Docs MCP: `https://developers.openai.com/mcp`.
 8. Для будущей исполняемой реализации используй каркас `runtime/typescript/`.
 9. Для проверки качества workflow используй `agent-pack/quality/quality-gates.md` и `yarn workflow:validate`.
+
+Краткий справочник команд: `COMMANDS.md`.
 
 ## Локальный runtime scaffold
 
@@ -254,9 +257,13 @@ yarn typecheck
 yarn agents:inspect
 yarn build
 yarn qa:playwright
+yarn qa:firecrawl
+yarn reference:scan <reference-url> [slug]
 yarn landing:run "<цель workflow>"
+yarn research:run outputs/<project-slug>/<YYYY-MM-DD> ["research query"]
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through 01-research
-yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD>
+yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
+yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
 ```
 
 Schema-aware artifact validation:
@@ -264,6 +271,7 @@ Schema-aware artifact validation:
 - Markdown artifacts can include YAML frontmatter with `schema_payload`.
 - Alternatively, include a fenced code block labeled `artifact-json`.
 - `workflow:validate` checks required Markdown sections and validates structured payloads against `agent-pack/schemas/*.schema.json` when a schema is mapped in `runtime/typescript/workflow-stages.ts`.
+- `workflow:validate` supports `--profile standard|reference|auto`; `reference` requires `visual-reference-review.md`, while `standard` does not.
 
 Example:
 
@@ -276,7 +284,7 @@ schema_payload:
 ---
 ```
 
-Ключи для опциональных внешних providers хранятся только в локальном `.env`, созданном по `.env.example`. Не сохраняй реальные значения `OPENAI_API_KEY`, `TAVILY_API_KEY`, `NOTION_TOKEN` или repository tokens в конфиги, outputs, traces или документацию.
+Ключи для опциональных внешних providers хранятся только в локальном `.env`, созданном по `.env.example`. Не сохраняй реальные значения `OPENAI_API_KEY`, `TAVILY_API_KEY`, `DEEPSEEK_API_KEY`, `FIRECRAWL_API_KEY`, `NOTION_TOKEN` или repository tokens в конфиги, outputs, traces или документацию.
 
 Текущий статус:
 
@@ -284,14 +292,19 @@ schema_payload:
 - `runtime/typescript/agents.sdk.ts` создаёт Agents SDK слой: orchestrator, specialists и specialists-as-tools.
 - `runtime/typescript/workflow-stages.ts` описывает обязательные stage gates и артефакты каждого шага.
 - `runtime/typescript/validate-workflow-run.ts` проверяет, что run-папка содержит все обязательные артефакты и ключевые секции.
+- `runtime/typescript/route.config.ts` использует standard route без visual reference review; reference route добавляет `visualReferenceReview` только для задач с референсом.
+- `runtime/typescript/firecrawl.ts` подключает Firecrawl SDK как opt-in scrape/interact provider.
+- `runtime/typescript/reference-scan.ts` собирает reference pack: Firecrawl markdown/json и Playwright desktop/mobile full-page screenshots в `reports/visual-review/<slug>/`.
+- `runtime/typescript/research-stage-runner.ts` запускает Tavily + DeepSeek research provider flow и пишет обязательные research artifacts в `outputs/<project>/<date>/`.
 - `tooling/scripts/validate-config.mjs` проверяет обязательные файлы и secret-like values без внешней сети.
 - React, Vite, Tailwind CSS, shadcn/ui и Framer Motion подключены как frontend stack в `apps/frontend/`.
 - `yarn build` собирает frontend в `dist/frontend`.
 - Playwright QA подключён через `@playwright/test`; `yarn qa:playwright` собирает frontend и проверяет desktop/mobile Chromium.
+- Firecrawl QA подключён через `@mendable/firecrawl-js`; `yarn qa:firecrawl` проверяет Firecrawl scrape вместе с Playwright, а `yarn reference:scan <url> [slug]` создает пакет для visual reference review.
 - Notion MCP установлен как opt-in provider через `@notionhq/notion-mcp-server`; запуск: `yarn notion:mcp` при наличии локального `NOTION_TOKEN`.
 - Локальная token-инструкция для Notion: `integrations/mcp/notion-local-token.md`.
 - `OPENAI_API_KEY` нужен только для standalone runtime, который сам вызывает OpenAI API вне Codex-интерфейса.
-- OpenAI Docs MCP, Playwright/browser MCP, Tavily, Notion, GitHub/GitLab и Figma подключаются через пользовательский Codex/MCP config, а не через committed secrets.
+- OpenAI Docs MCP, Playwright/browser MCP, Tavily, DeepSeek, Firecrawl, Notion, GitHub/GitLab и Figma подключаются через пользовательский Codex/MCP config или локальный `.env`, а не через committed secrets.
 
 ## Базовый принцип маршрутизации
 

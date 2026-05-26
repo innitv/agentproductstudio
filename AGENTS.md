@@ -96,7 +96,7 @@
 - Успешный lint/typecheck/test/build, если команды доступны.
 - Соответствие `agent-pack/quality/quality-gates.md`.
 - Соответствие guardrails из `agent-pack/guardrails/guardrails.policy.md`.
-- Успешный `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD>` для полного workflow; errors блокируют финальный статус `success`.
+- Успешный `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard` для полного workflow без visual reference или `--profile reference` для reference-driven workflow; errors блокируют финальный статус `success`.
 - Наличие Notion research page publication record в `stage-gate-ledger.md` и `release-notes.md`; отсутствие research-only child page публикации блокирует финальный статус `success`, кроме случая явного blocker/partial с причиной.
 - Если задача OpenAI-related, сверку с OpenAI Docs MCP или официальной документацией.
 

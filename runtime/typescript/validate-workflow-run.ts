@@ -2,7 +2,13 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import YAML from "js-yaml";
-import { artifactFiles, artifactSchemas, workflowStages } from "./workflow-stages";
+import {
+  artifactFiles,
+  artifactSchemas,
+  getRequiredArtifactsForStage,
+  getWorkflowStagesForProfile,
+  type WorkflowProfile,
+} from "./workflow-stages";
 
 interface Finding {
   level: "error" | "warning";
@@ -13,7 +19,11 @@ type JsonObject = Record<string, unknown>;
 
 const minimumArtifactBytes = 160;
 
-export function validateWorkflowRun(outputDirInput: string, throughStageId?: string): Finding[] {
+export function validateWorkflowRun(
+  outputDirInput: string,
+  throughStageId?: string,
+  profileInput?: WorkflowProfile | "auto",
+): Finding[] {
   const outputDir = resolve(process.cwd(), outputDirInput);
   const findings: Finding[] = [];
 
@@ -23,17 +33,23 @@ export function validateWorkflowRun(outputDirInput: string, throughStageId?: str
 
   const handoffPath = join(outputDir, artifactFiles.handoff_bundle);
   const handoff = existsSync(handoffPath) ? readFileSync(handoffPath, "utf8") : "";
+  const profile = profileInput && profileInput !== "auto"
+    ? profileInput
+    : detectWorkflowProfile(outputDir, handoff);
+  const stages = getWorkflowStagesForProfile(profile);
 
   const stageLimit = throughStageId
-    ? workflowStages.findIndex((stage) => stage.id === throughStageId)
-    : workflowStages.length - 1;
+    ? stages.findIndex((stage) => stage.id === throughStageId)
+    : stages.length - 1;
 
   if (stageLimit < 0) {
-    return [{ level: "error", message: `Unknown stage id: ${throughStageId}` }];
+    return [{ level: "error", message: `Unknown stage id for '${profile}' profile: ${throughStageId}` }];
   }
 
-  for (const stage of workflowStages.slice(0, stageLimit + 1)) {
-    for (const artifact of stage.requiredArtifacts) {
+  for (const stage of stages.slice(0, stageLimit + 1)) {
+    const requiredArtifacts = getRequiredArtifactsForStage(stage, profile);
+
+    for (const artifact of requiredArtifacts) {
       const fileName = artifactFiles[artifact];
       const filePath = join(outputDir, fileName);
 
@@ -108,7 +124,7 @@ export function validateWorkflowRun(outputDirInput: string, throughStageId?: str
     }
 
     if (stage.mustUpdateHandoff && handoff) {
-      for (const artifact of stage.requiredArtifacts) {
+      for (const artifact of requiredArtifacts) {
         if (["run_plan", "handoff_bundle", "stage_gate_ledger"].includes(artifact)) {
           continue;
         }
@@ -125,6 +141,28 @@ export function validateWorkflowRun(outputDirInput: string, throughStageId?: str
   }
 
   return findings;
+}
+
+function detectWorkflowProfile(outputDir: string, handoff: string): WorkflowProfile {
+  const runPlan = readIfExists(join(outputDir, artifactFiles.run_plan));
+  const recursiveBrief = readIfExists(join(outputDir, artifactFiles.recursive_brief));
+  const haystack = `${runPlan}\n${handoff}\n${recursiveBrief}`.toLowerCase();
+
+  if (
+    /visual_reference_required\s*:\s*true/.test(haystack) ||
+    /reference_url\s*:\s*https?:\/\//.test(haystack) ||
+    /visual reference required/.test(haystack) ||
+    /визуальн[а-я\s-]*референс обязател/.test(haystack) ||
+    /как этот сайт/.test(haystack)
+  ) {
+    return "reference";
+  }
+
+  return "standard";
+}
+
+function readIfExists(filePath: string): string {
+  return existsSync(filePath) ? readFileSync(filePath, "utf8") : "";
 }
 
 function extractStructuredPayload(markdown: string): unknown | undefined {
@@ -261,12 +299,18 @@ async function main(): Promise<void> {
 
   const throughIndex = args.indexOf("--through");
   const throughStageId = throughIndex >= 0 ? args[throughIndex + 1] : undefined;
+  const profileIndex = args.indexOf("--profile");
+  const profile = profileIndex >= 0 ? args[profileIndex + 1] : "auto";
 
   if (throughIndex >= 0 && !throughStageId) {
     throw new Error("--through requires a stage id, for example --through 01-research");
   }
 
-  const findings = validateWorkflowRun(outputDir, throughStageId);
+  if (!["auto", "standard", "reference"].includes(profile)) {
+    throw new Error("--profile must be one of: auto, standard, reference");
+  }
+
+  const findings = validateWorkflowRun(outputDir, throughStageId, profile as WorkflowProfile | "auto");
   for (const finding of findings) {
     const prefix = finding.level === "error" ? "ERROR" : "WARN";
     console.log(`${prefix}: ${finding.message}`);

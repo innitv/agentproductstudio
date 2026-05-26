@@ -14,7 +14,8 @@
 - каждый артефакт содержит `## Inputs Used`, кроме `run-plan.md` и `handoff-bundle.md`;
 - `handoff-bundle.md` обновлен после stage;
 - unknowns, assumptions, risks и next artifact явно перенесены дальше;
-- `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD>` не возвращает ошибок для complete bundle.
+- `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard` не возвращает ошибок для complete bundle без visual reference.
+- `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference` не возвращает ошибок для complete bundle с visual reference.
 
 ## Stage Status
 

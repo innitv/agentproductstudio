@@ -45,12 +45,12 @@ Notion publication is an external write and requires target page/database plus h
 | 01-research | research | `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md` |
 | 02-prd | prd | `prd.md` |
 | 03-ia | ia | `ia-brief.md` |
-| 04-design | design | `reference-analysis.md`, `design-brief.md` |
+| 04-design | design | `design-brief.md`; plus `reference-analysis.md` only for reference profile |
 | 05-copy | copywriting | `copy-deck.md` |
 | 06-screens | design-generator | `screens.md` |
 | 07-prototype | prototype | `prototype-report.md` |
 | 08-frontend | frontend | `frontend-result.md` |
-| 09-visual-reference-review | qa-review | `visual-reference-review.md` |
+| 09-visual-reference-review | qa-review | `visual-reference-review.md` only for reference profile |
 | 10-test-bench | test-bench | `test-bench-result.md` |
 | 11-qa | qa-review | `qa-report.md` |
 | 12-release | release | `release-notes.md` |
@@ -76,7 +76,8 @@ Blocked parallelism:
 
 - Source of stage definitions: `runtime/typescript/workflow-stages.ts`.
 - Partial validation: `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through <stage-id>`.
-- Full validation: `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD>`.
+- Full standard validation: `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard`.
+- Full reference validation: `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference`.
 - Errors block downstream completion.
 - Warnings must be carried into risks/TODO.
 

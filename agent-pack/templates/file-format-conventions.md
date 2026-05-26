@@ -32,7 +32,8 @@ outputs/<project-slug>/<YYYY-MM-DD>/
 Перед финальным ответом полного workflow:
 
 ```text
-yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD>
+yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
+yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
 ```
 
 ## Structured Payload

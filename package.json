@@ -11,6 +11,7 @@
     "build": "tsc --noEmit && vite build --config apps/frontend/vite.config.ts",
     "preview": "vite preview --config apps/frontend/vite.config.ts --host 127.0.0.1",
     "qa:playwright": "yarn build && playwright test",
+    "qa:firecrawl": "yarn build && playwright test tests/playwright/firecrawl.spec.ts",
     "qa:playwright:install": "playwright install chromium",
     "docs:audit": "node tooling/scripts/audit-docs.mjs",
     "qa:quick": "yarn typecheck && yarn validate:config && yarn docs:audit",
@@ -20,6 +21,8 @@
     "notion:mcp": "notion-mcp-server --transport stdio",
     "validate:config": "node tooling/scripts/validate-config.mjs",
     "workflow:validate": "tsx runtime/typescript/validate-workflow-run.ts",
+    "reference:scan": "tsx runtime/typescript/reference-scan.ts",
+    "research:run": "tsx runtime/typescript/research-stage-runner.ts",
     "typecheck": "tsc --noEmit",
     "landing:run": "tsx runtime/typescript/run-landing-workflow.ts"
   },
@@ -37,6 +40,7 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@mendable/firecrawl-js": "4.25.0",
     "@notionhq/notion-mcp-server": "2.2.1",
     "@playwright/test": "1.60.0",
     "@tailwindcss/vite": "4.3.0",

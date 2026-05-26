@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { Agent, run } from "@openai/agents";
 import { agentInstructionFiles, agentNames } from "./agents.registry";
-import { routePlan, routeTools } from "./route.config";
+import { getRoutePlanForProfile, routeTools, type RouteProfile } from "./route.config";
 
 export type AgentRegistryKey = keyof typeof agentInstructionFiles;
 
@@ -43,10 +43,10 @@ export async function loadAgentInstructions(): Promise<Record<AgentRegistryKey, 
   return Object.fromEntries(entries) as Record<AgentRegistryKey, string>;
 }
 
-export async function createAgentsSdkLayer(): Promise<AgentsSdkLayer> {
+export async function createAgentsSdkLayer(profile: RouteProfile = "standard"): Promise<AgentsSdkLayer> {
   const instructions = await loadAgentInstructions();
   const specialists = createSpecialistAgents(instructions);
-  const orchestrator = createOrchestratorAgent(instructions.orchestrator, specialists);
+  const orchestrator = createOrchestratorAgent(instructions.orchestrator, specialists, profile);
 
   return {
     orchestrator,
@@ -78,8 +78,9 @@ export function createSpecialistAgents(
 export function createOrchestratorAgent(
   instructions: string,
   specialists: Partial<Record<AgentRegistryKey, Agent>>,
+  profile: RouteProfile = "standard",
 ): Agent {
-  const routeToolsAsAgentTools = routePlan.flatMap((step) => {
+  const routeToolsAsAgentTools = getRoutePlanForProfile(profile).flatMap((step) => {
     const route = routeTools[step];
 
     if (route.agent === agentNames.orchestrator) {
@@ -93,9 +94,14 @@ export function createOrchestratorAgent(
       throw new Error(`Missing specialist agent for route step '${step}'.`);
     }
 
+    const referenceOutputs = profile === "reference" && "referenceOutputs" in route && Array.isArray(route.referenceOutputs)
+      ? route.referenceOutputs
+      : [];
+    const outputs = [...route.outputs, ...referenceOutputs];
+
     return [specialist.asTool({
       toolName: route.tool,
-      toolDescription: `${specialistDescriptions[specialistKey] ?? route.agent} Inputs: ${route.inputs.join(", ")}. Outputs: ${route.outputs.join(", ")}.`,
+      toolDescription: `${specialistDescriptions[specialistKey] ?? route.agent} Inputs: ${route.inputs.join(", ")}. Outputs: ${outputs.join(", ")}.`,
     })];
   });
 
@@ -112,7 +118,7 @@ export async function runStandaloneAgentsSdkWorkflow(goal: string): Promise<Stan
     throw new Error("Standalone Agents SDK mode requires OPENAI_API_KEY. Use Codex agent pack mode when no API key is available.");
   }
 
-  const { orchestrator } = await createAgentsSdkLayer();
+  const { orchestrator } = await createAgentsSdkLayer(detectRouteProfile(goal));
   const result = await run(orchestrator, goal);
 
   return { finalOutput: result.finalOutput };
@@ -134,10 +140,29 @@ async function inspectLayer(): Promise<void> {
     throw new Error(`Missing agent instruction files: ${missingInstructionFiles.join(", ")}`);
   }
 
-  const layer = await createAgentsSdkLayer();
+  const profile = parseInspectProfile();
+  const layer = await createAgentsSdkLayer(profile);
+  console.log(`Profile: ${profile}`);
   console.log(`Orchestrator: ${layer.orchestrator.name}`);
   console.log(`Specialists: ${Object.keys(layer.specialists).length}`);
   console.log(`Route tools: ${layer.routeToolNames.join(", ")}`);
+}
+
+function detectRouteProfile(goal: string): RouteProfile {
+  return /https?:\/\/|visual reference|reference url|как этот сайт|референс/i.test(goal)
+    ? "reference"
+    : "standard";
+}
+
+function parseInspectProfile(): RouteProfile {
+  const profileIndex = process.argv.indexOf("--profile");
+  const profile = profileIndex >= 0 ? process.argv[profileIndex + 1] : process.env.WORKFLOW_PROFILE;
+
+  if (profile === "reference" || profile === "standard") {
+    return profile;
+  }
+
+  return "standard";
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {

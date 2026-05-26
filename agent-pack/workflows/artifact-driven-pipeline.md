@@ -13,7 +13,8 @@ raw request
   -> research-summary.md + competitive-analysis.md + proto-personas.md + synthetic-interviews.md + swot.md
   -> prd.md
   -> ia-brief.md
-  -> reference-analysis.md + design-brief.md
+  -> design-brief.md
+  -> reference-analysis.md, если был visual reference
   -> copy-deck.md
   -> screens.md
   -> prototype-report.md
@@ -189,7 +190,8 @@ Workflow завершается только когда все mandatory artifac
 
 ```bash
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through <stage-id>
-yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD>
+yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
+yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
 ```
 
 Любая validation error блокирует финальный `success`.
