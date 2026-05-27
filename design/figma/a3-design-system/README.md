@@ -18,6 +18,12 @@ This folder stores long-lived design-system source artifacts extracted from Figm
 - `design-system-audit.md` — current audit status for tokens, components, frontend mapping, risks and next actions.
 - `raw/` — optional sanitized node summaries. Do not store private full file dumps or tokens.
 
+## Frontend Preview
+
+- Local component playground: `http://127.0.0.1:5173/components` when `yarn dev --port 5173` is running.
+- Playground source: `apps/frontend/src/components-playground.tsx`.
+- Current landing page remains available at `/`.
+
 ## Update Rules
 
 - Keep Figma access tokens only in local `.env`.

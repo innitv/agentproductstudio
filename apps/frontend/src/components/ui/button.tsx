@@ -5,18 +5,24 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2c6e49] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
+  "a3-button",
   {
     variants: {
       variant: {
-        default: "bg-[#223027] text-white hover:bg-[#2c6e49]",
-        secondary: "border border-[#cbd7cf] bg-white text-[#223027] hover:bg-[#e9efe8]",
-        ghost: "text-[#223027] hover:bg-[#e9efe8]",
+        default: "a3-button--primary",
+        primary: "a3-button--primary",
+        secondary: "a3-button--secondary",
+        outline: "a3-button--outline",
+        ghost: "a3-button--ghost",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-5",
+        default: "a3-button--m",
+        s: "a3-button--s",
+        sm: "a3-button--s",
+        m: "a3-button--m",
+        l: "a3-button--l",
+        lg: "a3-button--l",
+        xl: "a3-button--xl",
       },
     },
     defaultVariants: {
@@ -30,18 +36,32 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  leadingIcon?: React.ReactNode;
+  actionIcon?: React.ReactNode;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ actionIcon, children, className, leadingIcon, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
+    const content =
+      asChild && !leadingIcon && !actionIcon ? (
+        children
+      ) : (
+        <>
+          {leadingIcon ? <span className="a3-button__icon">{leadingIcon}</span> : null}
+          <span className="a3-button__label">{children}</span>
+          {actionIcon ? <span className="a3-button__icon">{actionIcon}</span> : null}
+        </>
+      );
 
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
-      />
+      >
+        {content}
+      </Comp>
     );
   },
 );

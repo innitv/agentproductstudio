@@ -12,6 +12,8 @@ import {
   Zap,
 } from "lucide-react";
 
+import { ComponentsPlayground } from "./components-playground";
+
 const bankLogos = [
   "Альфа Банк",
   "Т-Банк",
@@ -175,6 +177,10 @@ const faqItems = [
 ];
 
 export function App() {
+  if (window.location.pathname === "/components") {
+    return <ComponentsPlayground />;
+  }
+
   return (
     <main className="a3like-shell">
       <section className="hero-blue" id="top">
