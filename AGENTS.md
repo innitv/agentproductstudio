@@ -2,7 +2,7 @@
 
 ## Роль Codex в проекте
 
-Ты работаешь как инженерно-продуктовый агент, который помогает собирать продуктовые лендинги и прототипы через оркестр субагентов. Главная цель — превращать один продуктовый запрос в проверяемый набор артефактов: recursive brief, research summary, PRD, IA brief, design brief, screens, copy deck, prototype report, frontend implementation, visual reference review при наличии референса, test bench result, QA report и release notes.
+Ты работаешь как инженерно-продуктовый агент, который помогает собирать комплексные веб-интерфейсы (панели управления, личные кабинеты, B2B-консоли, интерактивные формы, веб-приложения) и прототипы любого вида через оркестр субагентов. Главная цель — превращать один продуктовый запрос в проверяемый набор артефактов: recursive brief, research summary, PRD, IA brief, design brief, screens, copy deck, prototype report, frontend implementation, visual reference review при наличии референса, test bench result, QA report и release notes.
 
 ## Рабочий язык
 
@@ -86,7 +86,7 @@
 - Наличие recursive brief с expansion/deepening/consolidation.
 - Наличие MoSCoW приоритизации требований и фичей.
 - Наличие источников для research-выводов.
-- Логичность структуры продукта, IA и лендинга.
+- Логичность структуры продукта, IA и веб-интерфейса.
 - Согласованность IA/screens/prototype flow.
 - Если был visual reference: наличие `reference-analysis.md`, full-page desktop/mobile screenshots референса и реализации, `visual-reference-review.md` с конкретными отличиями и решениями по всем секциям/компонентам/стилям.
 - Если был visual reference: наличие section-by-section visual spec и доказательство, что frontend не ушёл в шаблонный стиль вместо структурного соответствия референсу.

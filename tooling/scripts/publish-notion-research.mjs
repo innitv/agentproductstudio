@@ -9,8 +9,10 @@ if (!pageArg) {
 }
 
 const token = readNotionToken();
-const pageId = extractPageId(pageArg);
+const parentPageId = extractPageId(pageArg);
 const outputDir = resolve(process.cwd(), outputDirArg);
+const pageTitle = `Research Review Pack: AgentFlow (SaaS AI Agents)`;
+const pageId = await createChildPage(parentPageId, pageTitle);
 
 if (!existsSync(outputDir)) {
   console.error(`Output directory not found: ${outputDir}`);
@@ -18,18 +20,18 @@ if (!existsSync(outputDir)) {
 }
 
 const researchArtifacts = [
-  ["Research Summary", "research-summary.md"],
-  ["Competitive Analysis", "competitive-analysis.md"],
-  ["Proto Personas", "proto-personas.md"],
-  ["Synthetic Interviews", "synthetic-interviews.md"],
-  ["SWOT", "swot.md"],
-  ["Reference Analysis", "reference-analysis.md"],
+  ["Резюме исследований", "research-summary.md"],
+  ["Конкурентный анализ", "competitive-analysis.md"],
+  ["Прото-персоны", "proto-personas.md"],
+  ["Синтетические интервью", "synthetic-interviews.md"],
+  ["SWOT-анализ", "swot.md"],
+  ["Анализ референса", "reference-analysis.md"],
 ];
 
 const children = [
-  heading(1, "Research Review Pack: VP Nexus"),
-  paragraph("Human-readable research artifacts only. Local markdown files remain the source of truth."),
-  paragraph("Synthetic interviews in this pack are hypothesis-generation artifacts only, not evidence of real user behavior."),
+  heading(1, "Пакет обзора исследований: AgentFlow (SaaS для продажи ИИ-агентов)"),
+  paragraph("Только человекочитаемые артефакты исследований. Локальные файлы Markdown остаются первоисточником истины."),
+  paragraph("Синтетические интервью в этом пакете предназначены исключительно для генерации гипотез и не являются свидетельством реального поведения пользователей."),
 ];
 
 for (const [title, fileName] of researchArtifacts) {
@@ -37,7 +39,7 @@ for (const [title, fileName] of researchArtifacts) {
   children.push(heading(2, title));
 
   if (!existsSync(filePath)) {
-    children.push(callout(`Missing artifact: ${fileName}`));
+    children.push(callout(`Отсутствующий артефакт: ${fileName}`));
     continue;
   }
 
@@ -272,4 +274,31 @@ async function appendChildren(blockId, blocks) {
       throw new Error(`Notion append failed (${response.status}): ${body}`);
     }
   }
+}
+
+async function createChildPage(parentPageId, title) {
+  const response = await fetch("https://api.notion.com/v1/pages", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      "Notion-Version": "2022-06-28",
+    },
+    body: JSON.stringify({
+      parent: { type: "page_id", page_id: parentPageId },
+      properties: {
+        title: {
+          title: [{ type: "text", text: { content: title } }],
+        },
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Notion page creation failed (${response.status}): ${body}`);
+  }
+
+  const json = await response.json();
+  return json.id;
 }

@@ -1,24 +1,62 @@
 import { expect, test } from "@playwright/test";
 
-test("renders the A3 payment reference landing page", async ({ page }) => {
+test("renders the AgentFlow SaaS Console dashboard", async ({ page }) => {
   await page.goto("/");
 
+  // 1. Проверяем заголовок в топбаре
   await expect(
-    page.getByRole("heading", { name: "Приём платежей в топ-банках страны" }),
+    page.getByRole("heading", { name: "SaaS-платформа для создания и продажи ИИ-агентов" }),
   ).toBeVisible();
-  await expect(page.locator("#top").getByRole("link", { name: "Оставить заявку" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Попробовать бесплатно" }).first()).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Платёжный сервис с уникальной и умной технологией" })).toBeVisible();
+
+  // 2. Проверяем наличие сайдбара и навигационных вкладок
+  await expect(page.locator(".console-sidebar")).toBeVisible();
+  await expect(page.locator(".console-sidebar").getByRole("button", { name: "Панель управления" })).toBeVisible();
+  await expect(page.locator(".console-sidebar").getByRole("button", { name: "Создать ИИ-агента" })).toBeVisible();
+  await expect(page.locator(".console-sidebar").getByRole("button", { name: "Тарифы и биллинг" })).toBeVisible();
+  await expect(page.locator(".console-sidebar").getByRole("button", { name: "Частые вопросы" })).toBeVisible();
+
+  // 3. Проверяем карточки метрик
+  await expect(page.locator(".metric-card")).toHaveCount(3);
+  await expect(page.getByText("Лидов обработано")).toBeVisible();
+  await expect(page.getByText("Конверсия в Демо")).toBeVisible();
+  await expect(page.getByText("Сэкономлено костов")).toBeVisible();
+
+  // 4. Проверяем таблицу агентов и чат-симулятор
+  await expect(page.locator(".agents-table")).toBeVisible();
+  await expect(page.locator(".agent-row")).toHaveCount(3); // По умолчанию 3 агента
+  await expect(page.locator(".chat-messages-box")).toBeVisible();
 });
 
-test("keeps the payment service flow readable", async ({ page }) => {
+test("supports interacting with chat simulator and switching tabs", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page.locator(".operator-row span")).toHaveCount(7);
-  await expect(page.locator(".route-row")).toHaveCount(5);
-  await expect(page.locator(".module-card")).toHaveCount(6);
+  // 1. Тестируем отправку сообщения в симулятор
+  const chatInput = page.getByPlaceholder("Спросите агента про тарифы, ошибки или регламент...");
+  await expect(chatInput).toBeVisible();
+  await chatInput.fill("Привет! Какая цена?");
+  
+  const submitBtn = page.locator(".chat-submit-btn");
+  await submitBtn.click({ force: true });
+
+  // Проверяем, что сообщение добавилось
+  await expect(page.getByText("Привет! Какая цена?")).toBeVisible();
+
+  // 2. Переключаемся на вкладку Создать ИИ-агента
+  await page.locator(".console-sidebar").getByRole("button", { name: "Создать ИИ-агента" }).click();
+  await expect(page.getByRole("heading", { name: "No-code конструктор нового ИИ-агента" })).toBeVisible();
+
+  // Проверяем наличие полей формы
+  await expect(page.getByLabel("Имя ИИ-агента")).toBeVisible();
+  await expect(page.getByLabel("Роль ИИ-агента")).toBeVisible();
+  await expect(page.getByLabel("Регламент ИИ-агента и база знаний")).toBeVisible();
+
+  // 3. Переключаемся на вкладку Тарифы и биллинг
+  await page.locator(".console-sidebar").getByRole("button", { name: "Тарифы и биллинг" }).click();
+  await expect(page.getByRole("heading", { name: "Гибкие SaaS тарифы под любой масштаб" })).toBeVisible();
   await expect(page.locator(".tariff-card")).toHaveCount(3);
+
+  // 4. Переключаемся на вкладку Частые вопросы
+  await page.locator(".console-sidebar").getByRole("button", { name: "Частые вопросы" }).click();
+  await expect(page.getByRole("heading", { name: "Часто задаваемые вопросы" })).toBeVisible();
   await expect(page.locator(".faq-item")).toHaveCount(3);
-  await expect(page.locator(".request-form")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Остались вопросы?" })).toBeVisible();
 });
