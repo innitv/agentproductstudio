@@ -1,153 +1,153 @@
 # Project Connection Work Plan
 
-Дата: 2026-05-22
+Дата создания: 2026-05-22
+Последняя синхронизация: 2026-05-27
 
-Цель: довести `product-agent-studio` до рабочей папки Codex agent pack без обязательного OpenAI API key, сохранив возможность позже развивать standalone OpenAI Agents SDK runtime.
+Цель: довести `product-agent-studio` до рабочей папки Codex agent pack без обязательного OpenAI API key, сохранив возможность развивать standalone OpenAI Agents SDK runtime.
 
-## Статус
+## Текущий статус
 
-- Overall: in_progress
-- Последнее обновление: 2026-05-22
+- Overall: completed_with_optional_followups
+- Основной режим: Codex agent pack / no-API-key workflow.
+- Standalone Agents SDK mode: optional.
+- Рабочий package manager: `yarn` 1.22.22.
 
-## Фаза 1. Базовая безопасность и конфигурация
+## Что уже закрыто
 
-Status: completed
-
-Задачи:
-
-- [x] Убрать реальные/похожие на реальные secrets из конфигов.
-- [x] Заменить секреты на env placeholders.
-- [x] Добавить `.env.example` с обязательными и опциональными переменными.
-- [x] Добавить `.gitignore` для локальных секретов и зависимостей.
-- [x] Зафиксировать, какие MCP серверы обязательны, а какие опциональны.
-
-Acceptance criteria:
-
-- В репозитории нет явных API keys.
-- Tavily, DeepSeek, Firecrawl, GitHub, Notion и optional OpenAI runtime ключи описаны только как env variables.
-- Подключения с внешней передачей данных требуют approval по существующим guardrails.
-
-## Фаза 2. Node/TypeScript runtime scaffold
+### Базовая безопасность и конфигурация
 
 Status: completed
 
-Задачи:
+- `.env.example` содержит placeholders для optional providers.
+- `.env`, `.env.*`, `node_modules`, `dist`, reports и test outputs игнорируются.
+- Реальные secrets не коммитятся; `validate-config` проверяет secret-like values.
+- Approval и sensitive-data правила описаны в `agent-pack/guardrails/`.
 
-- [x] Добавить `package.json`.
-- [x] Добавить `tsconfig.json`.
-- [x] Добавить scripts: `typecheck`, `validate:config`, `landing:run`.
-- [x] Подключить зависимости для будущего runtime: `@openai/agents`, `zod`.
-- [x] Подключить frontend animation dependency: `framer-motion`.
-- [x] Подключить frontend build stack: React, React DOM, Vite, Vite React plugin.
-- [x] Подключить shadcn/ui foundation: Tailwind CSS, `components.json`, `@/*` alias, базовый `Button`.
-- [x] Перенести frontend app в `apps/frontend` без включения Yarn workspaces.
-- [x] Подключить Playwright QA: `@playwright/test`, Chromium browser, desktop/mobile smoke tests.
-- [x] Подключить Notion MCP opt-in provider: `@notionhq/notion-mcp-server`.
-- [x] Подключить dev dependencies: `typescript`, `tsx`, `@types/node`.
-- [x] Перейти на Yarn 1.22.22 как рабочий package manager в текущем окружении.
-
-Acceptance criteria:
-
-- Проект имеет воспроизводимую точку входа для runtime.
-- `yarn typecheck` и `yarn validate:config` определены и проходят.
-- `yarn build` собирает React/Vite frontend в `dist/frontend`.
-- `yarn qa:playwright` выполняет Playwright QA против production preview.
-- `landing:run` указывает на `runtime/typescript/run-landing-workflow.ts`.
-
-## Фаза 3. Config validation
+### Node/TypeScript runtime scaffold
 
 Status: completed
 
-Задачи:
+- Есть `package.json`, `tsconfig.json`, Yarn lock и runtime в `runtime/typescript/`.
+- Основные scripts: `typecheck`, `validate:config`, `qa:quick`, `qa:playwright`, `qa:all`.
+- Frontend живёт в `apps/frontend`.
+- Playwright QA подключён для desktop/mobile.
+- Optional Notion MCP установлен через `@notionhq/notion-mcp-server`.
 
-- [x] Добавить локальный validator для проверки опасных значений в `.codex/config.example.toml` и MCP examples.
-- [x] Проверять наличие запрещенных hardcoded keys.
-- [x] Проверять, что Tavily config использует `${TAVILY_API_KEY}`.
-- [x] Добавить проверку обязательных файлов runtime.
+### Workflow engine
 
-Acceptance criteria:
+Status: completed
 
-- `yarn validate:config` падает при hardcoded secret-like values.
-- Validator не требует внешней сети.
-- Validator можно запускать до установки MCP.
+- Persisted workflow engine реализован:
+  - `runtime/typescript/workflow-engine.ts`
+  - `runtime/typescript/workflow-state.ts`
+  - `runtime/typescript/run-workflow-engine.ts`
+- Команды:
+  - `yarn workflow:start`
+  - `yarn workflow:resume`
+  - `yarn workflow:status`
+  - `yarn workflow:run-stage`
+  - `yarn workflow:run-local`
+- Runner пишет `run-state.json`, `stage-results/`, `handoff-bundle.md`, `stage-gate-ledger.md` и обязательные stage artifacts.
 
-## Фаза 4. Codex Agent Pack Runtime
+### Artifact and schema validation
 
-Status: in_progress
+Status: completed
 
-Задачи:
+- `yarn workflow:validate` подключён через `runtime/typescript/validate-workflow-run.ts`.
+- JSON Schemas лежат в `agent-pack/schemas/`.
+- Validation поддерживает `--through`, `--profile standard`, `--profile reference`, `--profile auto`.
+- Quality gates описаны в `agent-pack/quality/quality-gates.md`.
 
-- [ ] Подключить официальную документацию OpenAI Docs MCP. Blocked: `codex` CLI не найден в текущем окружении.
-- [x] Зафиксировать no-API-key режим как основной способ работы.
-- [x] Реализовать локальный scaffold runner, который проверяет структуру workflow без вызова OpenAI API.
-- [x] Реализовать загрузку agent instructions из `agent-pack/agents/*.agent.md`.
-- [x] Создать optional Agents SDK слой: orchestrator, specialists и specialists-as-tools.
-- [ ] Реализовать передачу `handoff_bundle` между локальными проверками/артефактами.
-- [ ] Подключить tracing с `includeSensitiveData: false`.
-- [ ] Оставить OpenAI Agents SDK integration как optional standalone mode.
+### Research providers
 
-Acceptance criteria:
+Status: completed
 
-- Runtime без API key умеет проверить структуру и подготовить outputs scaffold.
-- Agents SDK слой строится без вызова модели через `yarn agents:inspect`.
-- Orchestrator сохраняет финальную ответственность в Codex workflow.
-- Все specialists возвращают результат по `agent-pack/templates/agent-output-contract.schema.md`.
+- Tavily + DeepSeek + Gemini default flow зафиксирован в docs и runtime.
+- Реализации:
+  - `runtime/typescript/tavily-research.ts`
+  - `runtime/typescript/deepseek-research.ts`
+  - `runtime/typescript/gemini-research.ts`
+  - `runtime/typescript/multi-source-research.ts`
+  - `runtime/typescript/research-stage-runner.ts`
+- DeepSeek/Gemini помечены как cross-check/synthesis providers, а не source-backed evidence.
 
-## Фаза 5. Schema validation
+### Reference and visual review providers
 
-Status: in_progress
+Status: completed
 
-Задачи:
+- Firecrawl opt-in adapter: `runtime/typescript/firecrawl.ts`.
+- Reference scan: `runtime/typescript/reference-scan.ts`.
+- Visual diff tooling:
+  - `runtime/typescript/visual-diff.ts`
+  - `runtime/typescript/visual-section-diff.ts`
+  - `runtime/typescript/visual-reference-review.ts`
+- Команды:
+  - `yarn reference:scan`
+  - `yarn reference:diff`
+  - `yarn reference:section-diff`
+  - `yarn reference:review`
 
-- [ ] Перенести JSON Schema контракты из `agent-pack/schemas/*.schema.json` в Zod или подключить JSON Schema validator.
-- [ ] Валидировать каждый artifact перед передачей следующему этапу.
-- [ ] Валидировать финальный bundle перед QA и release.
+### Figma design source layer
 
-Acceptance criteria:
+Status: completed_for_tokens
 
-- Невалидный artifact блокирует следующий этап.
-- Ошибка валидации возвращает понятный diagnostic.
+- Общая Figma design-system библиотека хранится в `design/figma/a3-design-system/`.
+- Приняты и задокументированы tokens: colors, typography, effects, radius, spacing, component sizes.
+- Component extraction остаётся отдельной продуктовой задачей, не blocker для project connection.
 
-## Фаза 6. MCP providers
+### Notion provider
 
-Status: pending
+Status: completed_as_approval_gated_optional_provider
 
-Задачи:
+- Локальная инструкция: `integrations/mcp/notion-local-token.md`.
+- Scripts:
+  - `yarn notion:check`
+  - `yarn notion:mcp`
+- Publication remains approval-gated by design.
 
-- [ ] Подключить OpenAI Docs MCP.
-- [ ] Подключить filesystem/local file provider.
-- [ ] Подключить browser/Playwright MCP для QA.
-- [x] Подключить Firecrawl как opt-in scrape/reference scan provider вместе с Playwright.
-- [x] Добавить end-to-end research stage runner для Tavily + DeepSeek artifacts.
-- [x] Настроить локальный web/deep research provider flow: Tavily + DeepSeek, Firecrawl/browser как fallback/reference layer.
-- [ ] Оставить Notion, GitHub/GitLab, Figma как opt-in providers с approval.
+### Tracing policy
 
-Acceptance criteria:
+Status: completed_baseline
 
-- Research может работать минимум в `local_only` и `web_search`/`browser_scan`; Firecrawl покрывает публичный scrape/reference scan, Playwright — screenshots/responsive QA.
-- OpenAI-related задачи используют official docs.
-- Write-действия во внешних системах требуют human approval.
+- Runtime defaults: `runtime/typescript/tracing.ts`.
+- `includeSensitiveData: false` задан как baseline.
+- Policy docs: `integrations/observability/tracing.policy.md`.
 
-## Фаза 7. Verification
+## Что осталось не как blocker, а как optional follow-up
 
-Status: pending
+### OpenAI Docs MCP
 
-Задачи:
+Status: optional_manual_setup
 
-- [x] Запустить config validator напрямую через `node tooling/scripts/validate-config.mjs`.
-- [x] Запустить `yarn validate:config`.
-- [x] Запустить `yarn typecheck`.
-- [x] После установки зависимостей запустить smoke workflow на fixture.
-- [x] Проверить отсутствие secrets.
-- [x] Обновить README с фактическим способом запуска.
+- Проектные правила требуют использовать official OpenAI documentation для OpenAI-related задач.
+- В текущей среде это делается через доступный OpenAI docs skill / official docs flow.
+- Автоматическая команда `codex mcp add openaiDeveloperDocs --url https://developers.openai.com/mcp` зависит от пользовательского Codex CLI/MCP окружения и не является частью committed runtime.
 
-Acceptance criteria:
+### Component mapping from Figma
 
-- Все доступные локальные проверки проходят.
-- Недоступные проверки явно описаны как blocked с причиной.
+Status: pending_product_task
 
-Current blockers:
+- Следующий слой после tokens: извлечь component variants/states из Figma.
+- Source files:
+  - `design/figma/a3-design-system/component-map.md`
+  - `design/figma/a3-design-system/design-system-audit.md`
+- Это не blocker для подключения проекта; это отдельная design-system implementation задача.
 
-- Проектный package manager: только `yarn` 1.22.22.
-- `codex` CLI не найден в PATH, поэтому OpenAI Docs MCP нельзя подключить автоматически командой `codex mcp add openaiDeveloperDocs --url https://developers.openai.com/mcp`.
-- `yarn landing:run "Smoke landing workflow"` работает без API key и создает `outputs/smoke-landing-workflow/2026-05-23/workflow-scaffold.md`.
+### Production observability
+
+Status: optional_future_runtime_task
+
+- Baseline tracing defaults есть.
+- Если standalone runtime станет production-like, нужно добавить run-log storage policy, redaction tests и trace review gate.
+
+## Проверки
+
+Последние обязательные проверки проходят:
+
+- `yarn qa:quick`
+- `yarn qa:playwright`
+- `yarn build`
+
+## Решение
+
+План подключения проекта считается закрытым. Файл оставлен как синхронизированный status record, потому что `tooling/scripts/validate-config.mjs` ожидает его наличие. Новые работы по Figma components, OpenAI Docs MCP setup или production observability нужно вести отдельными планами, если они начнутся.
