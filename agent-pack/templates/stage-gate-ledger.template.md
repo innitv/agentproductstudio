@@ -1,25 +1,26 @@
-# Stage Gate Ledger
+# Реестр ворот качества (Stage Gate Ledger)
 
-## Run
+## Запуск (Run)
 
 - Project slug:
 - Date:
 - Goal:
 
-## Rule
+## Правило (Rule)
 
-Каждый stage считается завершенным только когда:
+Каждый этап считается завершенным только когда:
 
-- обязательные артефакты stage записаны в `outputs/<project-slug>/<YYYY-MM-DD>/`;
-- каждый артефакт содержит `## Inputs Used`, кроме `run-plan.md` и `handoff-bundle.md`;
-- `handoff-bundle.md` обновлен после stage;
-- unknowns, assumptions, risks и next artifact явно перенесены дальше;
-- `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard` не возвращает ошибок для complete bundle без visual reference.
-- `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference` не возвращает ошибок для complete bundle с visual reference.
+- обязательные артефакты этапа записаны в `outputs/<project-slug>/<YYYY-MM-DD>/`;
+- каждый артефакт содержит раздел `## Inputs Used`, кроме `run-plan.md` и `handoff-bundle.md`;
+- `handoff-bundle.md` обновлен после завершения этапа;
+- неизвестные аспекты (unknowns), предположения (assumptions), риски (risks) и следующий требуемый артефакт (next required artifact) явно перенесены дальше;
+- `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard` не возвращает ошибок для пакета стандартного профиля (standard profile) без визуального референса;
+- `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference` не возвращает ошибок для пакета профиля референса (reference profile) с визуальным референсом;
+- в случае настройки интеграции с Notion на стадии релиза выполнен автоматический экспорт Agile-доски (базы Персон и связанных с ними через Relation Пользовательских историй с чек-листами критериев приемки Acceptance Criteria).
 
-## Stage Status
+## Статус этапов (Stage Status)
 
-| Stage | Owner | Required artifacts | Status | Gate notes |
+| Этап | Владелец | Обязательные артефакты | Статус | Заметки ворот качества |
 |---|---|---|---|---|
 | 00-intake | orchestrator | `run-plan.md`, `handoff-bundle.md`, `recursive-brief.md` | pending |  |
 | 01-research | research | `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md` | pending |  |
@@ -34,7 +35,7 @@
 | 10-qa | qa-review | `qa-report.md` | pending |  |
 | 11-release | release | `release-notes.md` | pending |  |
 
-## Validation Runs
+## Запуски валидации (Validation Runs)
 
-| Time | Command | Result | Notes |
+| Время | Команда | Результат | Заметки |
 |---|---|---|---|

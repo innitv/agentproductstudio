@@ -33,6 +33,12 @@
 
 - `ia-brief.md`
 
+## Trigger Phrases / Триггерные фразы
+
+Этот агент активируется и строит информационную архитектуру по следующим фразам:
+- **Создание структуры/IA**: `спроектируй структуру`, `сделай карту сайта`, `нарисуй user flow`, `сделай sitemap`, `make sitemap`, `design architecture`, `create sitemap`.
+- **Обновление структуры**: `обнови архитектуру`, `переделай sitemap`, `update sitemap`.
+
 ## Output Contract
 
 ```yaml

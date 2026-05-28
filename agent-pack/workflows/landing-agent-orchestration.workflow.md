@@ -1,105 +1,108 @@
-# Landing Agent Orchestration Workflow
+# Рабочий процесс оркестрации лендинга субагентами
 
-## Goal
+## Цель
 
-Turn one product request into a validated artifact bundle and, when allowed by gates, a frontend implementation.
+Превратить один продуктовый запрос пользователя в проверенный пакет артефактов и, если разрешено пропускными воротами (gates), в готовую реализацию фронтенда.
 
-## Manager-Style Orchestration
+## Оркестрация в стиле менеджера (Manager-Style)
 
-- `orchestrator` owns the user dialogue, routing, gate enforcement and final response.
-- Specialists are bounded capabilities, usually exposed as tools.
-- Handoff is allowed only when a specialist must own a separate branch of work.
-- The final answer is assembled by `orchestrator`, not by a specialist.
+- `orchestrator` владеет диалогом с пользователем, маршрутизацией, контролем пропускных ворот и финальным ответом.
+- Специалисты — это ограниченные возможности (capabilities), которые обычно вызываются как инструменты (tools).
+- Передача управления (handoff) допускается только тогда, когда специалист должен владеть отдельной веткой работы.
+- Финальный ответ собирает только `orchestrator`, а не специалист.
 
-## Stage Graph
-
-```text
-00-intake
-  -> 01-research
-  -> 02-prd
-  -> 03-ia
-  -> 04-design
-  -> 05-copy
-  -> 06-screens
-  -> 07-prototype
-  -> 08-frontend
-  -> 09-visual-reference-review, если был visual reference
-  -> 10-test-bench
-  -> 11-qa
-  -> 12-release
-```
-
-Optional:
+## Граф этапов (Stage Graph)
 
 ```text
-02-prd -> notion-prd-export.md
+00-intake (Вводные данные)
+  -> 01-research (Исследование)
+  -> 02-prd (Продуктовые требования)
+  -> 03-ia (Информационная архитектура)
+  -> 04-design (Дизайн-бриф)
+  -> 05-copy (Копирайтинг)
+  -> 06-screens (Экраны)
+  -> 07-prototype (Прототип)
+  -> 08-frontend (Фронтенд)
+  -> 09-visual-reference-review (Сверка с визуальным референсом, если задан референс)
+  -> 10-test-bench (Тест-бенч)
+  -> 11-qa (QA-ревью)
+  -> 12-release (Релиз)
 ```
 
-Notion publication is an external write and requires target page/database plus human approval.
+Опционально:
 
-## Capabilities
+```text
+02-prd -> notion-prd-export.md (Плоская публикация PRD)
+```
 
-| Stage | Agent | Required outputs |
+Экспорт интерактивной Agile-доски и пользовательских историй в Notion:
+На этапе `12-release`, если в окружении, файле `.env` или scaffold-файлах обнаружены `NOTION_TOKEN` и родительский ID/URL страницы, движок автоматически создает интерактивную Agile-доску, содержащую базы данных Персон и связанных с ними через Relation Пользовательских историй с чек-листами Acceptance Criteria.
+
+Публикация в Notion — это внешняя запись, которая требует целевой страницы/базы данных и явного подтверждения человека (human approval).
+
+## Возможности (Capabilities)
+
+| Этап | Агент | Обязательные артефакты |
 |---|---|---|
 | 00-intake | orchestrator | `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, `recursive-brief.md` |
 | 01-research | research | `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md` |
 | 02-prd | prd | `prd.md` |
 | 03-ia | ia | `ia-brief.md` |
-| 04-design | design | `design-brief.md`; plus `reference-analysis.md` only for reference profile |
+| 04-design | design | `design-brief.md`; плюс `reference-analysis.md` только для профиля референса |
 | 05-copy | copywriting | `copy-deck.md` |
 | 06-screens | design-generator | `screens.md` |
 | 07-prototype | prototype | `prototype-report.md` |
 | 08-frontend | frontend | `frontend-result.md` |
-| 09-visual-reference-review | qa-review | `visual-reference-review.md` only for reference profile |
+| 09-visual-reference-review | qa-review | `visual-reference-review.md` только для профиля референса |
 | 10-test-bench | test-bench | `test-bench-result.md` |
 | 11-qa | qa-review | `qa-report.md` |
 | 12-release | release | `release-notes.md` |
 
-## Parallelism Rules
+## Правила параллельного выполнения
 
-`orchestrator` may run specialists in parallel only when their inputs are already complete and their write scopes do not conflict.
+`orchestrator` может запускать специалистов параллельно только тогда, когда их входные данные уже готовы и их области записи не конфликтуют.
 
-Allowed parallelism:
+Разрешенный параллелизм:
 
-- Test Bench may start after `recursive-brief.md` as companion work, but final `test-bench-result.md` must refresh after PRD, IA, prototype, frontend and visual reference review.
-- Research sub-work can split into source research, competitive analysis, proto-personas, synthetic interviews and SWOT, but the research stage is not complete until all required research artifacts exist.
-- IA and early design exploration may be prepared in parallel only after PRD/research inputs exist, but downstream `screens`, `prototype` and `frontend` must use the final handed-off artifacts.
+- Тест-бенч может стартовать после `recursive-brief.md` как сопутствующая работа, но финальный `test-bench-result.md` обязан обновиться после завершения PRD, IA, прототипа, фронтенда и сверки с референсом.
+- Работа над исследованием может разделяться параллельно на поиск источников, конкурентный анализ, составление персон, синтетические интервью и SWOT, но этап исследования не считается завершенным, пока не созданы все обязательные артефакты исследования.
+- IA и раннее исследование дизайна могут готовиться параллельно только после готовности PRD и результатов исследования, но последующие этапы `screens`, `prototype` и `frontend` должны использовать финальные переданные артефакты.
 
-Blocked parallelism:
+Запрещенный параллелизм:
 
-- Frontend cannot start before PRD, IA, design, copy, screens and prototype are complete, except explicit `quick draft`.
-- QA cannot start before frontend, visual reference review when applicable, and final test bench are complete.
-- Release cannot start before QA passes or records a blocker.
-- Specialists do not own final user response; `orchestrator` synthesizes final status.
+- Фронтенд не может начаться до завершения этапов PRD, IA, дизайна, копирайта, экранов и прототипа, за исключением явного режима быстрого наброска (`quick draft`).
+- QA не может начаться до завершения фронтенда, сверки с референсом (если применимо) и финального тест-бенча.
+- Релиз не может начаться, пока QA не пройдет успешно или не зафиксирует блокировку.
+- Специалисты не формируют финальный ответ пользователю; `orchestrator` обобщает статус.
 
-## Runtime Enforcement
+## Контроль во время выполнения (Runtime Enforcement)
 
-- Source of stage definitions: `runtime/typescript/workflow-stages.ts`.
-- Partial validation: `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through <stage-id>`.
-- Full standard validation: `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard`.
-- Full reference validation: `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference`.
-- Errors block downstream completion.
-- Warnings must be carried into risks/TODO.
+- Источник определений этапов: `runtime/typescript/workflow-stages.ts`.
+- Частичная валидация: `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through <stage-id>`.
+- Полная валидация стандартного профиля: `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard`.
+- Полная валидация профиля референса: `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference`.
+- Ошибки блокируют завершение последующих этапов.
+- Предупреждения (warnings) должны переноситься в риски/TODO.
 
-## Research Lock
+## Исследовательская блокировка (Research Lock)
 
-PRD and downstream stages are blocked until research outputs include JTBD, proto_personas, simulated_interviews, competitor analysis, SWOT, source/evidence status and validation plan.
+PRD и последующие этапы заблокированы, пока результаты исследования не будут включать JTBD, персон (proto personas), симулированные интервью (simulated interviews), конкурентный анализ, SWOT, статус источников/доказательств и план валидации.
 
-## Frontend Lock
+## Блокировка фронтенда (Frontend Lock)
 
-Frontend is blocked until PRD, IA, design, copy, screens and prototype artifacts are complete, except explicit `quick draft`.
+Фронтенд заблокирован до тех пор, пока артефакты PRD, IA, дизайна, копирайта, экранов и прототипа не будут полностью готовы, за исключением режима быстрого наброска (`quick draft`).
 
-## Visual Reference Lock
+## Блокировка референса (Visual Reference Lock)
 
-If the user provides a visual reference or asks to match a site, visual reference review is blocked until frontend exists and must complete before test bench finalization, QA and release.
+Если пользователь предоставляет визуальный референс или просит соответствовать сайту, сверка с визуальным референсом блокируется до создания фронтенда и должна завершиться до финализации тест-бенча, QA и релиза.
 
-## Failure Handling
+## Обработка ошибок (Failure Handling)
 
-- `partial`: continue only when risks are explicit and downstream claims preserve `needs validation`.
-- `blocked`: stop and request the missing input, approval or source.
-- `qa fail`: return to the responsible stage, then re-run validation.
+- `partial`: продолжение работы возможно только тогда, когда риски явно зафиксированы, а последующие утверждения сохраняют пометку `needs validation` (требует валидации).
+- `blocked`: остановка работы и запрос недостающих данных, подтверждения или источника.
+- `qa fail`: возврат к соответствующему этапу с последующим повторным запуском валидации.
 
-## Sources
+## Источники
 
-- OpenAI Agents SDK describes handoffs as tools and `Agent.asTool()` for specialist capabilities: https://openai.github.io/openai-agents-js/guides/handoffs/
-- Atlassian product discovery emphasizes continuously updated discovery from new data: https://www.atlassian.com/agile/product-management/discovery
+- OpenAI Agents SDK описывает передачи управления как инструменты и использование `Agent.asTool()` для специалистов: https://openai.github.io/openai-agents-js/guides/handoffs/
+- Atlassian product discovery подчеркивает непрерывный, ориентированный на доказательства процесс discovery: https://www.atlassian.com/agile/product-management/discovery

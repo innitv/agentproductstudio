@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { appendFile, readFile } from "node:fs/promises";
 import { basename, join, relative } from "node:path";
+import { execSync } from "node:child_process";
 import { runLandingWorkflow } from "./run-landing-workflow";
 import { buildLocalDownstreamArtifacts, writeLocalStageArtifact } from "./run-local-workflow";
 import { runResearchStage } from "./research-stage-runner";
@@ -267,6 +268,67 @@ function createInitialState(outputDir: string, goal: string, profile: WorkflowPr
   };
 }
 
+async function detectNotionConfig(outputDir: string): Promise<{ token?: string; pageId?: string }> {
+  let token = process.env.NOTION_TOKEN;
+  let pageId = process.env.NOTION_PAGE_ID || process.env.NOTION_PARENT_PAGE_ID || process.env.NOTION_TARGET;
+
+  // 1. Попробуем прочитать из .env
+  const envPath = join(process.cwd(), ".env");
+  if (existsSync(envPath)) {
+    try {
+      const envContent = await readFile(envPath, "utf8");
+      if (!token) {
+        const tokenMatch = envContent.match(/^NOTION_TOKEN=(.+)$/m);
+        if (tokenMatch?.[1]?.trim()) {
+          token = tokenMatch[1].trim();
+        }
+      }
+      if (!pageId) {
+        const pageIdMatch = envContent.match(/^(?:NOTION_PAGE_ID|NOTION_PARENT_PAGE_ID|NOTION_TARGET)=(.+)$/m);
+        if (pageIdMatch?.[1]?.trim()) {
+          pageId = pageIdMatch[1].trim();
+        }
+      }
+    } catch (e) {
+      // Игнорируем ошибки чтения .env
+    }
+  }
+
+  // 2. Попробуем найти в workflow-scaffold.md
+  if (!pageId) {
+    const scaffoldPath = join(outputDir, "workflow-scaffold.md");
+    if (existsSync(scaffoldPath)) {
+      try {
+        const scaffoldContent = await readFile(scaffoldPath, "utf8");
+        const match = scaffoldContent.match(/(?:notion_target|Notion Target|Page ID):\s*(.+)$/im);
+        if (match?.[1]?.trim()) {
+          pageId = match[1].trim();
+        }
+      } catch (e) {
+        // Игнорируем ошибки чтения scaffold
+      }
+    }
+  }
+
+  // 3. Попробуем найти в run-state.json
+  if (!pageId) {
+    const runStatePath = join(outputDir, "run-state.json");
+    if (existsSync(runStatePath)) {
+      try {
+        const runStateContent = await readFile(runStatePath, "utf8");
+        const parsed = JSON.parse(runStateContent);
+        if (parsed.notion_target) {
+          pageId = parsed.notion_target;
+        }
+      } catch (e) {
+        // Игнорируем ошибки чтения JSON
+      }
+    }
+  }
+
+  return { token, pageId };
+}
+
 async function runStage(
   outputDir: string,
   goal: string,
@@ -288,8 +350,29 @@ async function runStage(
   }
 
   await writeLocalStageArtifact(outputDir, artifact);
+
+  const warnings: string[] = [];
+  if (stageId === "12-release") {
+    try {
+      const config = await detectNotionConfig(outputDir);
+      if (config.token && config.pageId) {
+        console.log(`[Notion Auto-Publish] Обнаружены NOTION_TOKEN и родительский Page ID (${config.pageId}).`);
+        console.log(`[Notion Auto-Publish] Запускаем автоматический экспорт Agile Board...`);
+        const scriptPath = join(process.cwd(), "tooling", "scripts", "publish-notion-stories.mjs");
+        execSync(`node "${scriptPath}" "${config.pageId}" "${outputDir}"`, { stdio: "inherit" });
+        console.log(`[Notion Auto-Publish] Экспорт завершен успешно!`);
+      } else {
+        warnings.push("Automatic Notion Agile Board export skipped: NOTION_TOKEN or parent page ID is not configured in .env or environment.");
+      }
+    } catch (publishError) {
+      const msg = publishError instanceof Error ? publishError.message : String(publishError);
+      warnings.push(`Automatic Notion Agile Board export failed: ${msg}`);
+      console.error(`[Notion Auto-Publish] Ошибка при автоматическом экспорте:`, publishError);
+    }
+  }
+
   const status = detectArtifactStatus(artifact.content, "completed");
-  return stageResult(stageId, artifact.title, status, [artifact.file], inferInputsUsed(artifact.content), []);
+  return stageResult(stageId, artifact.title, status, [artifact.file], inferInputsUsed(artifact.content), warnings);
 }
 
 async function validateThroughStage(outputDir: string, stageId: string, profile: WorkflowProfile): Promise<void> {

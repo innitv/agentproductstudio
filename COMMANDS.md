@@ -243,3 +243,35 @@ yarn reference:review reports/visual-review/example-reference http://127.0.0.1:4
 yarn research:run outputs/<project-slug>/<YYYY-MM-DD>
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through 01-research --profile reference
 ```
+
+## Trigger Phrases / Триггер-фразы (Natural Language Intents)
+
+Вместо технических CLI-команд в терминале можно использовать естественный язык. Движок распознает семантические триггеры и автоматически выполняет соответствующие действия на последнем активном проекте.
+
+### Использование в терминале:
+```bash
+yarn workflow:start "<фраза-триггер>"
+```
+
+### Список поддерживаемых триггеров:
+
+#### 1. Глобальное управление:
+- **Начало нового проекта**: `начать воркфлоу`, `новый проект`, `новый лендинг`, `start landing`, `create project`.
+- **Продолжение воркфлоу**: `продолжить запуск`, `resume workflow`, `поехали дальше`, `погнали дальше`.
+- **Проверка статуса**: `покажи статус`, `workflow status`, `что готово`, `status check`.
+
+#### 2. Запуск и перезапуск этапов (Stage Execution):
+- **Research (01-research)**: `сделай ресерч`, `проведи исследование`, `исследуй конкурентов`, `run research`, `update research`.
+- **PRD Requirements (02-prd)**: `напиши prd`, `сформируй требования`, `подготовь тз`, `generate prd`, `update prd`.
+- **Architecture (03-ia)**: `спроектируй структуру`, `сделай карту сайта`, `нарисуй user flow`, `sitemap`, `make sitemap`.
+- **Design spec (04-design)**: `подготовь дизайн-бриф`, `создай дизайн`, `сделай дизайн-спеку`, `analyze reference`.
+- **Copy deck (05-copy)**: `напиши тексты`, `сделай copy deck`, `копирайт`, `write copywriting deck`, `generate copy`.
+- **Screens (06-screens)**: `сгенерируй спецификацию экранов`, `создай экраны`, `опиши экраны`, `generate screens`.
+- **Prototype (07-prototype)**: `создай прототип`, `transition map`, `карту переходов`, `make transition map`.
+- **Frontend UI (08-frontend)**: `напиши код`, `сверстай лендинг`, `реализуй фронтенд`, `собери интерфейс`, `update ui`.
+- **Visual Diff (09-visual-reference)**: `сравни с референсом`, `проверь скриншоты`, `visual diff`, `compare screens`.
+- **Test Bench (10-test-bench)**: `запусти тест-бенч`, `протестируй воронку`, `проверь аналитику`, `run test bench`.
+- **QA Review (11-qa)**: `проверь качество`, `запусти qa`, `проведи аудит качества`, `run qa review`.
+- **Release (12-release)**: `выкатывай релиз`, `подготовь релиз`, `сделай релиз-ноутс`, `release now`.
+- **Notion Export**: `опубликуй в notion`, `выложи в ноушен`, `publish to notion`.
+

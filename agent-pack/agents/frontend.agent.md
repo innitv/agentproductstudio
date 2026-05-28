@@ -42,6 +42,12 @@ Before handoff, verify hero/nav/color/typography/spacing/card/CTA/form/footer pa
 
 - `frontend-result.md`
 
+## Trigger Phrases / Триггерные фразы
+
+Этот агент активируется и разрабатывает/собирает фронтенд по следующим фразам:
+- **Разработка фронтенда**: `напиши код`, `сверстай лендинг`, `реализуй фронтенд`, `собери интерфейс`, `implement frontend`, `create ui code`, `build frontend`.
+- **Обновление верстки**: `обнови верстку`, `поправь стили`, `исправь фронтенд`, `update ui`.
+
 ## Output Contract
 
 ```yaml

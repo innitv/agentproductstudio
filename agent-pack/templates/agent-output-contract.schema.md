@@ -1,22 +1,27 @@
-# Agent Output Contract
+# Контракт выходных данных агента (Agent Output Contract)
 
-Каждый specialist возвращает структурированный результат:
+Каждый специалист (specialist) возвращает структурированный результат в следующем формате:
 
 ```yaml
-agent_name:
+agent_name: <имя_агента>
 status: success|partial|blocked
-summary:
+summary: <краткое_описание_выполненной_работы>
 inputs_used:
+  - <использованные_входные_артефакты>
 outputs:
+  <имя_артефакта>: <содержимое_или_метаданные>
 assumptions:
+  - <допущения>
 risks:
+  - <риски>
 open_questions:
-recommended_next_step:
+  - <открытые_вопросы>
+recommended_next_step: <рекомендуемый_следующий_шаг>
 ```
 
 Правила:
 
-- `inputs_used` обязан ссылаться на файлы из `outputs/<project-slug>/<YYYY-MM-DD>/`.
-- `outputs` обязан содержать созданный артефакт stage.
-- `partial` допустим только с risks/open_questions.
-- `blocked` требует конкретного blocker и next required action.
+- `inputs_used` обязан ссылаться на файлы из каталога `outputs/<project-slug>/<YYYY-MM-DD>/`.
+- `outputs` обязан содержать созданный артефакт текущего этапа (stage).
+- Статус `partial` (частичный успех) допустим только при наличии заполненных полей `risks` и/или `open_questions`.
+- Статус `blocked` (заблокирован) требует указания конкретного блокирующего фактора (`blocker`) и следующего необходимого действия (`next required action`).

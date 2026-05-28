@@ -1,60 +1,60 @@
-# Artifact-Driven Pipeline
+# Артефакт-ориентированный конвейер (Artifact-Driven Pipeline)
 
-## Source Of Truth
+## Источник истины (Source Of Truth)
 
-Источник истины: файлы в `outputs/<project-slug>/<YYYY-MM-DD>/`.
+Источником истины являются файлы, расположенные в каталоге: `outputs/<project-slug>/<YYYY-MM-DD>/`.
 
-## Required Sequence
+## Обязательная последовательность этапов
 
 ```text
-raw request
+исходный запрос
   -> run-plan.md + handoff-bundle.md + stage-gate-ledger.md
   -> recursive-brief.md
   -> research-summary.md + competitive-analysis.md + proto-personas.md + synthetic-interviews.md + swot.md
   -> prd.md
   -> ia-brief.md
   -> design-brief.md
-  -> reference-analysis.md, если был visual reference
+  -> reference-analysis.md (если был задан визуальный референс)
   -> copy-deck.md
   -> screens.md
   -> prototype-report.md
   -> frontend-result.md
-  -> visual-reference-review.md, если был visual reference
+  -> visual-reference-review.md (если был задан визуальный референс)
   -> test-bench-result.md
   -> qa-report.md
   -> release-notes.md
-  -> Notion research page publication record (mandatory for full workflow)
-  -> notion-prd-export.md, если нужен отдельный PRD export
+  -> Запись о публикации исследования в Notion (обязательно для полного воркфлоу)
+  -> notion-prd-export.md (если требуется отдельный плоский экспорт PRD)
 ```
 
-## Hard Stage Enforcement
+## Жесткий контроль этапов (Hard Stage Enforcement)
 
-Каждый stage обязан:
+На каждом этапе (stage) исполнитель обязан:
 
-1. Проверить required inputs.
-2. Убедиться, что previous stage имеет статус complete.
-3. Создать required artifacts.
-4. Обновить `handoff-bundle.md`.
-5. Обновить `stage-gate-ledger.md`.
-6. Пройти validation.
+1. Проверить наличие обязательных входных данных (required inputs).
+2. Убедиться, что предыдущий этап имеет статус `complete` (завершен).
+3. Создать обязательные артефакты этапа.
+4. Обновить файл `handoff-bundle.md`.
+5. Обновить файл `stage-gate-ledger.md`.
+6. Успешно пройти валидацию (validation).
 
-Failure означает статус `blocked`; next stage не может начаться.
+Невыполнение любого из пунктов переводит этап в статус `blocked` (заблокирован); следующий этап не может быть начат.
 
-## Stage State Machine
+## Конечно-разностный автомат состояний этапа (Stage State Machine)
 
 ```text
 NOT_STARTED -> IN_PROGRESS -> GENERATED -> VALIDATED -> HANDED_OFF -> COMPLETE
 ```
 
-Запрещенные transitions:
+Запрещенные переходы состояний:
 
 - GENERATED -> COMPLETE
-- GENERATED -> NEXT_STAGE
+- GENERATED -> NEXT_STAGE (переход к следующему этапу)
 - IN_PROGRESS -> COMPLETE
 
-## Research Lock
+## Исследовательская блокировка (Research Lock)
 
-PRD и downstream stages запрещены, пока эти artifacts не существуют и не проходят validation:
+Этап PRD и все последующие этапы строго запрещены до тех пор, пока данные артефакты не будут созданы и успешно не пройдут валидацию:
 
 - `research-summary.md`
 - `competitive-analysis.md`
@@ -62,131 +62,141 @@ PRD и downstream stages запрещены, пока эти artifacts не су
 - `synthetic-interviews.md`
 - `swot.md`
 
-Structured research output должен включать:
+Структурированные результаты исследования должны обязательно включать:
 
 - `proto_personas`
 - `simulated_interviews`
-- `skipped_with_reason`, когда required research невозможно подготовить
-- `evidence_status: synthetic` для каждого simulated interview
+- `skipped_with_reason` (с указанием веской причины, если обязательное исследование подготовить невозможно)
+- `evidence_status: synthetic` для каждого сгенерированного (симулированного) интервью
 
-## Research Gate
+## Исследовательские ворота качества (Research Gate)
 
-Research должен включать:
+Исследование должно содержать:
 
-- research questions;
-- sources/evidence log;
-- audience segments;
-- JTBD;
-- `proto_personas`: 2-4 proto personas, or `skipped_with_reason`;
-- `simulated_interviews`: 3-5 synthetic interviews, or `skipped_with_reason`;
-- each persona has `Evidence status`;
-- each synthetic interview has `evidence_status: synthetic`;
-- competitive analysis;
-- SWOT;
-- validation plan;
-- unknowns и claims to validate.
+- исследовательские вопросы (research questions);
+- журнал источников и доказательств (sources/evidence log);
+- сегменты целевой аудитории (audience segments);
+- Jobs To Be Done (JTBD);
+- `proto_personas`: от 2 до 4 прото-персон (или `skipped_with_reason`);
+- `simulated_interviews`: от 3 до 5 синтетических интервью (или `skipped_with_reason`);
+- у каждой персоны должен быть указан `Evidence status`;
+- у каждого синтетического интервью должен быть статус `evidence_status: synthetic`;
+- конкурентный анализ;
+- SWOT-анализ;
+- план валидации;
+- неизвестные аспекты (unknowns) и гипотезы для проверки (claims to validate).
 
-Research получает fail, если:
+Исследование получает статус `fail` (ошибка), если:
 
-- proto personas отсутствуют без `skipped_with_reason`;
-- simulated interviews отсутствуют без `skipped_with_reason`;
-- synthetic interviews используются как real evidence;
-- claims из synthetic interviews появляются в PRD/copy без `needs validation`.
+- прото-персоны отсутствуют без указания причины `skipped_with_reason`;
+- симулированные интервью отсутствуют без указания причины `skipped_with_reason`;
+- синтетические интервью используются как реальные доказательства;
+- утверждения из симулированных интервью переносятся в PRD или копирайт без пометки `needs validation` (требует валидации).
 
-## Handoff Enforcement
+## Контроль передачи данных (Handoff Enforcement)
 
-Каждый stage должен обновлять `handoff-bundle.md`, фиксируя:
+Каждый этап обязан обновлять файл `handoff-bundle.md`, фиксируя следующие данные:
 
-- outputs;
-- decisions;
-- assumptions;
-- risks;
-- unresolved questions;
-- next required artifact.
+- результаты (outputs);
+- принятые решения (decisions);
+- предположения (assumptions);
+- риски (risks);
+- нерешенные вопросы (unresolved questions);
+- следующий требуемый артефакт (next required artifact).
 
-## Ledger Enforcement
+## Ведение реестра ворот качества (Ledger Enforcement)
 
-Каждый stage должен обновлять `stage-gate-ledger.md`, фиксируя:
+Каждый этап обязан обновлять реестр в файле `stage-gate-ledger.md`, фиксируя:
 
-- stage;
-- owner;
-- status;
-- timestamp;
-- artifacts;
-- validation;
-- `handoff_updated=true`.
+- идентификатор этапа (stage);
+- владельца/исполнителя (owner);
+- текущий статус (status);
+- метку времени (timestamp);
+- созданные артефакты (artifacts);
+- результаты валидации (validation);
+- подтверждение обновления handoff: `handoff_updated=true`.
 
-Next stage требует:
+Переход к следующему этапу требует соблюдения условий:
 
 - `status=complete`;
 - `validation=passed`;
 - `handoff_updated=true`.
 
-## Frontend Lock
+## Блокировка фронтенда (Frontend Lock)
 
-Frontend не может начаться до completion PRD, IA, design, copy, screens и prototype artifacts, кроме явного режима `quick draft`.
+Разработка фронтенда не может быть начата до завершения этапов PRD, информационной архитектуры (IA), дизайна, копирайтинга, спецификации экранов и прототипа, за исключением специального демонстрационного режима быстрого наброска (`quick draft`).
 
-Если пользователь дает visual references или просит соответствовать известному site, `reference-analysis.md` обязателен до `design-brief.md`.
-Reference analysis должен разделять allowed patterns, disallowed copying, trade dress и IP risks.
+Если пользователь передает визуальные референсы или требует соответствия определенному сайту, создание `reference-analysis.md` является строго обязательным до начала работы над `design-brief.md`.
+Анализ референса должен четко разделять разрешенные паттерны (allowed patterns), запрещенное копирование (disallowed copying), фирменный стиль и риски нарушения интеллектуальной собственности (IP risks).
 
-## Reference-Driven Visual Spec Gate
+## Ворота спецификации визуального референса (Reference-Driven Visual Spec Gate)
 
-Для задач с visual reference frontend не может начаться, пока `reference-analysis.md` не содержит section-by-section visual spec:
+Для задач с визуальным референсом фронтенд не может быть начат до тех пор, пока `reference-analysis.md` не будет содержать подробную поблочную визуальную спецификацию (section-by-section visual spec):
 
-- hero/nav;
-- background and color system;
-- typography scale and font weight rhythm;
-- spacing, max-width and layout grid;
-- section order and scroll rhythm;
-- cards/list rows/tables;
-- CTA style, forms and controls;
-- media/illustration treatment;
-- footer;
-- mobile behavior;
-- explicit allowed/disallowed patterns.
+- первый экран и шапка (hero/nav);
+- фоновые решения и цветовая система;
+- масштаб типографики и ритм начертаний шрифтов;
+- отступы, максимальная ширина блоков и сетка макета (layout grid);
+- порядок секций и вертикальный ритм прокрутки;
+- карточки, строки списков и таблицы;
+- стиль CTA (призывов к действию), формы и элементы управления (controls);
+- правила обработки медиа-контента и иллюстраций;
+- подвал сайта (footer);
+- адаптивное поведение на мобильных устройствах (mobile behavior);
+- явный список разрешенных и запрещенных паттернов.
 
-`design-brief.md` и `screens.md` обязаны читать этот spec и переводить его в конкретные layout decisions. Нельзя использовать reference только как "inspiration" без structural mapping.
+`design-brief.md` и `screens.md` обязаны считывать эту спецификацию и транслировать её в конкретные проектные решения. Использование референса исключительно как «источника абстрактного вдохновения» без структурного маппинга строго запрещено.
 
-## Visual Reference Screenshot Gate
+## Ворота скриншот-сверки с референсом (Visual Reference Screenshot Gate)
 
-Если пользователь дает visual reference, URL референса или просит "как этот сайт", workflow не может завершиться без `visual-reference-review.md`.
+Если пользователь предоставляет визуальный референс, ссылку на него или просит сделать сайт «как этот», рабочий процесс не может быть успешно завершен без создания артефакта `visual-reference-review.md`.
 
-`visual-reference-review.md` обязан включать:
+Артефакт `visual-reference-review.md` обязан содержать:
 
-- `inputs_used`;
-- ссылки/пути на full-page desktop и mobile screenshots референса;
-- ссылки/пути на full-page desktop и mobile screenshots текущей реализации;
-- ссылки/пути на scroll-through или section screenshots, если lazy loading / scroll animations могут скрывать блоки в full-page capture;
-- сравнение первого экрана как high-priority зоны;
-- сравнение всех видимых блоков/секций, компонентов, стилей, сетки, типографики, визуальной плотности, CTA, карточек, форм/контролов, media, footer и mobile layout;
-- список concrete gaps;
-- список corrections или `skipped_with_reason`;
-- section-by-section mapping: reference block -> local block -> status -> correction;
-- explicit check that implementation did not fall back to generic/default template style;
-- gate result: `passed`, `passed_with_notes` или `blocked`.
+- использованные входные данные (`inputs_used`);
+- ссылки или пути к полноразмерным скриншотам (full-page desktop & mobile screenshots) референса;
+- ссылки или пути к полноразмерным скриншотам текущей реализации;
+- ссылки или пути к скриншотам отдельных секций или экранов прокрутки, если эффекты ленивой загрузки (lazy loading) или scroll-анимации могут скрывать элементы при общем захвате страницы;
+- детальное сравнение первого экрана как критически важной зоны;
+- сравнение всех видимых блоков, компонентов, стилей, сетки, шрифтов, плотности контента, CTA, карточек, форм, подвала и мобильного отображения;
+- список выявленных расхождений (gaps);
+- список внесенных исправлений (corrections) или `skipped_with_reason`;
+- поблочную таблицу соответствия: блок референса -> локальный блок -> статус соответствия -> исправление;
+- явное подтверждение того, что реализация не скатилась в дефолтный или шаблонный стиль;
+- финальный вердикт ворот качества (gate result): `passed` (пройдено), `passed_with_notes` или `blocked`.
 
-QA/release не могут получить финальный `success`, если visual reference был задан, но screenshot-сверка не выполнена или не зафиксирована в `stage-gate-ledger.md`.
+Этапы QA и релиза не могут получить статус успешного завершения (`success`), если визуальный референс был задан, но скриншот-сверка не была проведена или не зафиксирована в реестре `stage-gate-ledger.md`.
 
-## Completion Gate
+## Финальные ворота завершения конвейера (Completion Gate)
 
-Workflow завершается только когда все mandatory artifacts существуют и final validation проходит.
+Вся цепочка воркфлоу завершается только тогда, когда созданы все обязательные артефакты конвейера и финальная скриншот-сверка/валидация успешно пройдены.
 
-## Notion Research Publication Gate
+## Ворота публикации исследования в Notion (Notion Research Publication Gate)
 
-Для полного workflow публикация research в Notion обязательна перед финальным ответом.
+Для полного воркфлоу публикация результатов исследования в Notion является строго обязательной перед подготовкой финального ответа.
+
+Требования к публикации:
+- публикуется исключительно пакет результатов исследования (research-only human-readable pack): `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`, а также `reference-analysis.md` (при наличии);
+- публикация осуществляется в виде отдельной дочерней страницы (child page) внутри родительской страницы Notion, а не путем вставки всего воркфлоу на одну страницу;
+- категорически запрещено публиковать машиночитаемые схемы, frontmatter, сырые JSON-данные, полный системный дамп воркфлоу, файлы фронтенда, логов или релизов, а также копии файлов в виде блоков кода;
+- если `NOTION_TOKEN` и родительская страница доступны, оркестратор запрашивает подтверждение пользователя (human approval) на внешнюю запись и запускает скрипт `tooling/scripts/publish-notion-research-page.mjs <parent-page> <research-export-md> "<page-title>"`;
+- реестр `stage-gate-ledger.md` фиксирует команду публикации страницы исследования, результат, ID/URL созданной дочерней страницы и количество переданных блоков;
+- `release-notes.md` фиксирует итоговый URL дочерней страницы Notion или явную блокировку;
+- если целевая страница Notion, токен, доступы или подтверждение пользователя отсутствуют, воркфлоу получает статус `partial` или `blocked` с детальной фиксацией причин в `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md` и `release-notes.md`;
+- запрещено возвращать успешный финальный статус (`success`), если публикация результатов исследования была пропущена молча.
+
+## Ворота автоматического Agile-экспорта (Notion Agile Board & User Stories Export Gate)
+
+В ходе релизной фазы (`12-release`) движок или Агент публикации выполняют интерактивный экспорт пользовательских историй и персон в Notion.
 
 Требования:
+- Экспорт парсит файлы `proto-personas.md` и `prd.md` для автоматического извлечения профилей персон, историй и критериев приемки (Acceptance Criteria).
+- Создает две взаимосвязанные базы данных: **Proto Personas** и **User Stories** (с Relation-связью между ними).
+- Каждая карточка пользовательской истории внутри наполняется интерактивным чек-листом Acceptance Criteria в виде блоков задач `to_do`.
+- В случае автоматического запуска движком, экспорт срабатывает на стадии `12-release`, если обнаружены секреты `NOTION_TOKEN` и родительский ID/URL страницы в переменных окружения, `.env` или scaffold-файлах.
+- Результаты экспорта и статус фиксируются в `stage-gate-ledger.md` и `release-notes.md`.
 
-- публикуется только research-only human-readable pack: `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`, `reference-analysis.md` если есть;
-- публикация выполняется в отдельную child page внутри Notion parent page, а не append всего workflow в одну страницу;
-- запрещено публиковать machine-readable schema/frontmatter, raw JSON payloads, full workflow dump, frontend/result/release artifacts и code-block копии всех файлов;
-- если `NOTION_TOKEN` и parent page доступны, orchestrator запрашивает human approval на внешнюю запись и запускает `tooling/scripts/publish-notion-research-page.mjs <parent-page> <research-export-md> "<page-title>"`;
-- `stage-gate-ledger.md` фиксирует команду research-page публикации, result, child page id/url и количество human-readable blocks;
-- `release-notes.md` фиксирует Notion research child page URL или explicit blocker;
-- если Notion target, token, permissions или approval недоступны, workflow получает `partial`/`blocked`, а причина фиксируется в `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md` и `release-notes.md`;
-- нельзя давать финальный статус `success`, если Notion research page publication была пропущена молча.
-
-## Runtime Validation
+## Валидация во время выполнения (Runtime Validation)
 
 ```bash
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through <stage-id>
@@ -194,12 +204,12 @@ yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
 ```
 
-Любая validation error блокирует финальный `success`.
+Любая ошибка валидации блокирует финальный статус `success`.
 
-## Evidence References
+## Ссылки на первоисточники и методологии
 
-- Atlassian product discovery подчеркивает continuous, evidence-oriented discovery: https://www.atlassian.com/agile/product-management/discovery
-- Материал Intercom по JTBD формулирует product work вокруг customer job/progress: https://www.intercom.com/books/jobs-to-be-done
-- Synthetic users/interviews рискованны как replacement evidence и должны явно маркироваться/ограничиваться hypothesis work:
+- Atlassian product discovery подчеркивает непрерывный, ориентированный на доказательства процесс discovery: https://www.atlassian.com/agile/product-management/discovery
+- Материал Intercom по JTBD формулирует создание продуктов вокруг задач и прогресса клиентов: https://www.intercom.com/books/jobs-to-be-done
+- Использование синтетических пользователей и интервью несет риски и должно быть строго ограничено гипотетической работой с обязательной явной маркировкой:
   - https://www.uxatlas.io/articles/synthetic-users-evidence
   - https://uxarmy.com/blog/synthetic-participants-ux-research/

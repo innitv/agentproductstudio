@@ -91,6 +91,12 @@
   - https://www.uxatlas.io/articles/synthetic-users-evidence
   - https://uxarmy.com/blog/synthetic-participants-ux-research/
 
+## Trigger Phrases / Триггерные фразы
+
+Этот агент активируется и запускает процесс исследования по следующим фразам:
+- **Запуск исследования**: `сделай ресерч`, `проведи исследование`, `исследуй конкурентов`, `run research`, `start research stage`.
+- **Перезапуск/обновление**: `обнови исследование`, `переделай ресерч`, `update research`.
+
 ## Output Contract (Контракт вывода)
 
 ```yaml

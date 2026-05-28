@@ -19,6 +19,7 @@
     "project:audit": "yarn qa:all",
     "notion:check": "node tooling/scripts/check-notion-token.mjs",
     "notion:mcp": "notion-mcp-server --transport stdio",
+    "notion:publish-stories": "node tooling/scripts/publish-notion-stories.mjs",
     "validate:config": "node tooling/scripts/run-and-log.mjs validate-config \"node tooling/scripts/validate-config.mjs\"",
     "workflow:validate": "tsx runtime/typescript/validate-workflow-run.ts",
     "workflow:sync": "node tooling/scripts/sync-run-state.mjs",

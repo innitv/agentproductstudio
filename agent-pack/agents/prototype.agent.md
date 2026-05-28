@@ -33,6 +33,12 @@
 
 - `prototype-report.md`
 
+## Trigger Phrases / Триггерные фразы
+
+Этот агент активируется и строит интерактивный прототип по следующим фразам:
+- **Создание прототипа**: `создай прототип`, `сделай transition map`, `разработай карту переходов`, `make transition map`, `create prototype instructions`.
+- **Обновление прототипа**: `обнови прототип`, `переделай карту переходов`, `update prototype`.
+
 ## Output Contract
 
 ```yaml
