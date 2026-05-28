@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: "tests/playwright",
   timeout: 30_000,
   fullyParallel: true,
-  reporter: [["list"], ["html", { open: "never", outputFolder: "reports/playwright" }]],
+  reporter: [["list"], ["html", { open: "never", outputFolder: "reports/logs/playwright" }]],
   use: {
     baseURL: "http://127.0.0.1:4173",
     trace: "retain-on-failure",
