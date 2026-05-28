@@ -117,10 +117,24 @@ codex mcp add figma --url https://mcp.figma.com/mcp
 - 
 ```
 
+## Write to Canvas (Запись на холст)
+
+Для создания и редактирования макетов на холсте Figma используется универсальный инструмент **`use_figma`**. Подробное описание формата запросов, структуры нод и привязки к дизайн-токенам системы A3 изложено в документе:
+
+- [figma-canvas-write-guide.md](file:///c:/Project/product-agent-studio/integrations/mcp/figma-canvas-write-guide.md)
+
+При использовании записи на холст:
+1. Агент обязан скомпилировать JSON-структуру элементов в соответствии с дизайн-системой A3.
+2. Перед выполнением запроса в Figma MCP агент должен вывести payload в чат и запросить явное текстовое подтверждение пользователя.
+3. Инструмент `use_figma` выполняет операции создания фреймов (`FRAME`), текстовых полей (`TEXT`) и Auto Layout групп.
+
 ## Guardrails
 
-- Read-only by default.
-- `write to canvas`, `create file`, `update components`, variable edits and comments require separate approval.
+- Read-only по умолчанию.
+- Активация режима записи требует `write_allowed: true` во входном контракте и явного подтверждения от пользователя перед каждым MCP-запросом.
+- `write to canvas`, `create file`, `update components`, редактирование переменных и добавление комментариев требуют отдельной `figma_write` авторизации (human approval).
+- Запрещается несанкционированно перезаписывать или удалять существующие элементы дизайна вне области макета, предоставленной пользователем.
+- При записи строго следовать руководству [figma-canvas-write-guide.md](file:///c:/Project/product-agent-studio/integrations/mcp/figma-canvas-write-guide.md).
 - Не прогоняй весь тяжелый файл целиком, если достаточно frame/node link.
 - Не сохраняй private file dumps в публичные artifacts.
 - Claims из Figma не считаются research evidence без отдельной проверки.

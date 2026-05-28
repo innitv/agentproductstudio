@@ -16,6 +16,7 @@ The design brief must translate this spec into concrete layout decisions for the
 - `research-summary.md`
 - `ia-brief.md`
 - `copy-deck.md`, if available
+- `integrations/mcp/figma-canvas-write-guide.md`
 
 ## Internal Pipeline
 
@@ -28,13 +29,14 @@ The design brief must translate this spec into concrete layout decisions for the
 7. Define responsive behavior for mobile/tablet/desktop.
 8. Define accessibility notes: headings, labels, contrast, focus, motion.
 9. Identify risks and design decisions needed before frontend.
+10. If drawing mockup in Figma is requested and `write_allowed=true`, prepare layout structure mapping coordinates, sizes, and design system tokens (colors, font sizing, spacing) based on `figma-canvas-write-guide.md`.
 
 ## Guardrails
 
 - Design must not promise unvalidated outcomes.
 - Avoid decorative complexity that weakens task completion.
 - Accessibility and responsive behavior are required, not optional.
-- **Figma Layouts Guardrail**: Do not create or edit layouts on the Figma canvas unless the user explicitly requests it, `write_allowed` is `true` in Figma MCP configuration, and explicit human approval is granted. By default, specify design decisions only in local text files (`design-brief.md`, `reference-analysis.md`).
+- **Figma Layouts Guardrail**: Do not create or edit layouts on the Figma canvas unless the user explicitly requests it, `write_allowed` is `true` in Figma MCP configuration, and explicit human approval is granted. When enabled, design must strictly follow [figma-canvas-write-guide.md](file:///c:/Project/product-agent-studio/integrations/mcp/figma-canvas-write-guide.md) to structure frames, layers, and visual components using A3 design tokens.
 
 ## Required Output
 

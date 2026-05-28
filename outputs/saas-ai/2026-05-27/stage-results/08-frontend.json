@@ -1,0 +1,19 @@
+{
+  "stage_id": "08-frontend",
+  "title": "Frontend",
+  "status": "completed",
+  "artifacts_created": [
+    "frontend-result.md"
+  ],
+  "inputs_used": [
+    "prd.md",
+    "ia-brief.md",
+    "design-brief.md",
+    "screens.md",
+    "copy-deck.md",
+    "prototype-report.md"
+  ],
+  "warnings": [],
+  "errors": [],
+  "completed_at": "2026-05-27T14:25:01.331Z"
+}

@@ -10,13 +10,17 @@ Owns the user request, route, quality gates and final response. The orchestrator
 - `AGENTS.md`
 - `agent-pack/workflows/artifact-driven-pipeline.md`
 - `runtime/typescript/workflow-stages.ts`
+- `agent-pack/artifacts/brief/recursive-brief.template.md`
 - Existing `outputs/<project-slug>/<YYYY-MM-DD>/` artifacts, if any
 
 ## Internal Pipeline
 
 1. Normalize the request and create a project slug.
 2. Create `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md` and `recursive-brief.md`.
-3. Perform recursive briefing: expansion, deepening, consolidation.
+3. Perform recursive briefing (Intake) in 3 phases following the Senior UX Lead role (10+ years B2B enterprise experience):
+   - **Phase 1 (Expansion)**: Ask questions spanning across Users/Audience, Functionality, Technical Constraints, UI/UX (Design system, UI-patterns, accessibility, Figma, animations), Business goals/Monetization, and Sources. Ask questions in structured sets of 4-5.
+   - **Phase 2 (Deepening)**: Analyze replies for missing context or contradictions. Ask targeted follow-up questions (repeat 2-3 times). Always attach concrete examples or options to complex questions to ease user decisions.
+   - **Phase 3 (Consolidation)**: Consolidate verified facts into a comprehensive `recursive-brief.md` structured exactly like [recursive-brief.template.md](file:///c:/Project/product-agent-studio/agent-pack/artifacts/brief/recursive-brief.template.md), compiling the audience segment table, UI system rules, OKR success metrics, and open questions.
 4. For `deep_research`, set source policy to multi-source by default: `tavily` + `deepseek` + `gemini`, then user sources / official docs / browser fallback as allowed.
 5. Route each stage to the correct specialist capability.
 6. After each stage, update handoff and ledger.
@@ -40,6 +44,14 @@ Owns the user request, route, quality gates and final response. The orchestrator
 - Never publish externally, including Notion, without approval.
 - Do not let specialist output become the final answer without orchestrator synthesis.
 - If a prior run violates the pipeline, backfill missing artifacts and mark the violation in `run-plan.md`.
+- **Recursive Briefing Guardrails**:
+  - Never dump long, intimidating lists of questions. Ask them strictly in portions of 4-5.
+  - Always provide concrete examples or suggestions/choices for complex questions.
+  - If the user replies with "I don't know", immediately transfer that topic to Open Questions or Assumptions under hypotheses — do not press or insist.
+  - At the end of each round/response, output a concise status summary:
+    - **`[x] Что понятно`** (What is clear and validated)
+    - **`[?] Что осталось выяснить`** (What still requires clarification)
+  - Fill the final Consolidated Brief only with verified/approved data. Label unconfirmed elements as hypotheses.
 
 ## Required Outputs
 

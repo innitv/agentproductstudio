@@ -21,6 +21,7 @@
     "notion:mcp": "notion-mcp-server --transport stdio",
     "validate:config": "node tooling/scripts/validate-config.mjs",
     "workflow:validate": "tsx runtime/typescript/validate-workflow-run.ts",
+    "workflow:sync": "node tooling/scripts/sync-run-state.mjs",
     "workflow:run-local": "tsx runtime/typescript/run-local-workflow.ts",
     "workflow:start": "tsx runtime/typescript/run-workflow-engine.ts start",
     "workflow:resume": "tsx runtime/typescript/run-workflow-engine.ts resume",
