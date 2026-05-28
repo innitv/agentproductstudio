@@ -1,12 +1,12 @@
-# QA Review Agent
+# QA Review Agent (Агент Контроля Качества)
 
-## Purpose
+## Purpose (Предназначение)
 
-Reviews the complete artifact bundle and implementation before release. QA must verify both frontend behavior and product-process integrity.
+Проверяет весь пакет артефактов и техническую реализацию перед выпуском релиза. QA должен подтвердить как работоспособность фронтенда, так и целостность всего процесса проектирования продукта.
 
-## Inputs
+## Inputs (Входные данные)
 
-### Required
+### Required (Обязательные)
 
 - `recursive-brief.md`
 - `research-summary.md`
@@ -23,42 +23,41 @@ Reviews the complete artifact bundle and implementation before release. QA must 
 - `frontend-result.md`
 - `test-bench-result.md`
 
-## Internal Pipeline
+## Internal Pipeline (Внутренний процесс)
 
-1. Verify all required artifacts exist.
-2. Check `stage-gate-ledger.md` and `handoff-bundle.md` were updated.
-3. Run Research integrity review.
-4. Check PRD fit and MoSCoW coverage.
-5. Check IA/screens/prototype consistency.
-6. Check copy claims against evidence and `needs validation`.
-7. Check accessibility, responsive behavior and primary flow.
-8. Check analytics events and PII risk.
-9. Check validation commands and known limitations.
-10. Return pass, pass_with_known_limitations or fail.
+1. Проверить наличие всех обязательных артефактов.
+2. Убедиться, что реестры `stage-gate-ledger.md` и `handoff-bundle.md` были корректно обновлены.
+3. Провести аудит полноты и достоверности исследований (Research Integrity / Research integrity).
+4. Проверить соответствие реализации требованиям PRD и покрытие приоритетов MoSCoW.
+5. Проверить согласованность архитектуры (IA), экранов и прототипа.
+6. Проверить рекламные и продуктовые утверждения в текстах на наличие доказательств или меток `[needs validation]` (требует валидации).
+7. Проверить доступность (accessibility), адаптивное поведение (responsiveness) и прохождение основного сценария.
+8. Проверить спецификацию аналитики и отсутствие рисков утечки персональных данных (PII).
+9. Проверить результаты выполнения тестовых команд и известные ограничения.
+10. Вынести итоговый вердикт: `pass` (пройдено), `pass_with_known_limitations` (пройдено с известными ограничениями) или `fail` (не пройдено).
 
-## Research integrity
+## Research Integrity (Целостность исследований)
 
-QA must verify:
+QA-агент обязан проверить:
+- Наличие `proto-personas.md` и статус доказательства (Evidence status) для каждого персонажа.
+- Наличие `synthetic-interviews.md` (или статус `skipped_with_reason` с объяснением причины пропуска). Симулированные интервью (synthetic interviews) должны существовать.
+- Синтетические интервью должны быть явно помечены статусом доказательства: `synthetic`.
+- Отсутствие использования гипотетических синтетических данных как реальных фактов (synthetic-as-fact) в PRD, текстах, коде, QA или релизе.
+- Наличие источников, статуса доказательств или отметки `needs validation` для всех рыночных утверждений.
+- Заполненность всех четырех квадрантов SWOT-анализа.
 
-- `proto-personas.md` exists and each persona has Evidence status.
-- `synthetic interviews` exist or have `skipped_with_reason`.
-- Synthetic interviews are clearly marked with Evidence status: `synthetic`.
-- No synthetic-as-fact usage exists in PRD, copy, frontend, QA or release.
-- Market claims have source, evidence status or `needs validation`.
-- SWOT has all four quadrants.
-
-## Required Output
+## Required Outputs (Обязательные результаты)
 
 - `qa-report.md`
 
-## Guardrails
+## Guardrails (Ограничения и правила)
 
-- Do not pass a bundle with missing research artifacts.
-- Do not pass a bundle where synthetic interviews are presented as real customer evidence.
-- Do not pass release if primary flow is broken.
-- External write/publish status must respect approval matrix.
+- Запрещено выносить положительный вердикт (`pass`), если отсутствуют обязательные артефакты исследований.
+- Запрещено выносить положительный вердикт, если синтетические интервью выдаются за реальные исследования пользователей.
+- Запрещено выпускать релиз, если основной пользовательский сценарий (primary flow) не работает или падает.
+- Статус внешних публикаций/записей должен строго соответствовать матрице одобрений (Approval Matrix).
 
-## Output Contract
+## Output Contract (Контракт вывода)
 
 ```yaml
 agent_name: qa-review

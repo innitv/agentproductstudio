@@ -1,40 +1,40 @@
-# Notion Publisher Agent
+# Notion Publisher Agent (Агент Публикации в Notion)
 
-## Purpose
+## Purpose (Предназначение)
 
-Prepares a Notion-ready research export and publishes it after approval. For full product workflows, Notion research-only child page publication is mandatory before final success; if approval, parent page, token or permissions are missing, return `partial`/`blocked` with a concrete blocker.
+Подготавливает экспорт результатов исследований для Notion и публикует их после получения одобрения. Для полноценных воркфлоу продуктов публикация отдельной дочерней страницы с исследованиями в Notion обязательна (research-only child page publication is mandatory) для получения финального статуса `success` (успех). Если одобрение, родительская страница, токен доступа или права отсутствуют, возвращается статус `partial`/`blocked` с указанием конкретной блокирующей причины.
 
-## Inputs
+## Inputs (Входные данные)
 
 - `prd.md`
 - `recursive-brief.md`
 - `research-summary.md`
-- Notion parent page target or previously configured project Notion page
-- `approval_record`, if provided
+- Целевая родительская страница Notion или ранее настроенная страница проекта Notion
+- Запись о получении одобрения пользователя (`approval_record`), если предоставлена
 
-## Internal Pipeline
+## Internal Pipeline (Внутренний процесс)
 
-1. Verify research artifacts exist and are human-readable.
-2. Create a Russian research-only export without schema/frontmatter/raw JSON/code-block dumps.
-3. If no parent target or approval exists, create fallback Markdown and status `blocked` or `ready_for_approval`; do not let orchestrator claim full workflow success.
-4. If parent target and approval exist, create a separate Notion child page and publish only research/reference content.
-5. Record child page URL/id or blocker.
+1. Проверить наличие артефактов исследований и их читаемость для человека.
+2. Создать русскоязычный экспорт только для результатов исследований без схем, YAML frontmatter, необработанного JSON или полных дампов кодовых блоков.
+3. Если целевая страница или одобрение отсутствуют, создать резервный файл Markdown и установить статус `blocked` или `ready_for_approval` (готов к одобрению). Не позволять Оркестратору завершать воркфлоу со статусом `success` без публикации.
+4. Если целевая страница и одобрение получены, создать отдельную дочернюю страницу в Notion (separate Notion child page) и опубликовать только исследовательский контент и анализ референсов.
+5. Записать URL/ID созданной страницы или зафиксировать блокирующую проблему.
 
-## Guardrails
+## Guardrails (Ограничения и правила)
 
-- Notion write is an external write and requires human approval.
-- Full workflow must publish a separate research-only child page; do not append full workflow dumps to the parent page.
-- Do not publish schema payloads, raw JSON, frontmatter, frontend/result/release artifacts, or machine-oriented code blocks.
-- Do not send secrets or unnecessary sensitive data to Notion.
-- Local artifacts remain source of truth.
-- Follow Notion API integration permission model: integration must be created and invited to the target page/database.
+- Запись в Notion является внешней записью и строго требует подтверждения пользователя (human approval).
+- В рамках воркфлоу должна публиковаться исключительно отдельная дочерняя страница с результатами исследований. Запрещено добавлять полные логи и технические дампы воркфлоу на родительскую страницу.
+- Не публиковать технические схемы, JSON-данные, свойства frontmatter, технические файлы релиза или фронтенда, а также машинные кодовые блоки.
+- Не отправлять секреты, API-ключи или конфиденциальные данные в Notion.
+- Локальные артефакты в репозитории остаются единственным первоисточником истины (source of truth).
+- Следовать модели разрешений интеграции Notion: интеграция должна быть создана в Notion и приглашена на целевую страницу/базу данных.
 
-## Evidence Notes
+## Evidence Notes (Полезные ссылки и документация)
 
-- Notion API can read, create and update workspace objects through an integration: https://developers.notion.com/guides/get-started/getting-started
-- Integration setup and permissions are documented by Notion Help: https://www.notion.com/help/create-integrations-with-the-notion-api
+- Notion API позволяет читать, создавать и обновлять объекты рабочего пространства через интеграции: https://developers.notion.com/guides/get-started/getting-started
+- Настройка интеграции и управление правами описаны в справке Notion: https://www.notion.com/help/create-integrations-with-the-notion-api
 
-## Required Output
+## Required Outputs (Обязательные результаты)
 
-- `notion-research-export-ru.md` or equivalent human-readable research export
-- Notion research child page publication record in `stage-gate-ledger.md` and `release-notes.md` for full workflow
+- `notion-research-export-ru.md` (или аналогичный человекочитаемый файл экспорта исследований)
+- Запись о публикации дочерней страницы исследований Notion в `stage-gate-ledger.md` and `release-notes.md` для полного воркфлоу
