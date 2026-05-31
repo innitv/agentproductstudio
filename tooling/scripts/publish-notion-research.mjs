@@ -11,7 +11,7 @@ if (!pageArg) {
 const token = readNotionToken();
 const parentPageId = extractPageId(pageArg);
 const outputDir = resolve(process.cwd(), outputDirArg);
-const pageTitle = `Research Review Pack: AgentFlow (SaaS AI Agents)`;
+const pageTitle = `Research Review Pack: VK Cloud Servers Light Landing`;
 const pageId = await createChildPage(parentPageId, pageTitle);
 
 if (!existsSync(outputDir)) {
@@ -29,7 +29,7 @@ const researchArtifacts = [
 ];
 
 const children = [
-  heading(1, "Пакет обзора исследований: AgentFlow (SaaS для продажи ИИ-агентов)"),
+  heading(1, "Пакет обзора исследований: VK Cloud Servers (Светлый B2B-лендинг)"),
   paragraph("Только человекочитаемые артефакты исследований. Локальные файлы Markdown остаются первоисточником истины."),
   paragraph("Синтетические интервью в этом пакете предназначены исключительно для генерации гипотез и не являются свидетельством реального поведения пользователей."),
 ];

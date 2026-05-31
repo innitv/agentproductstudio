@@ -2,7 +2,7 @@
 
 ## Источник истины (Source Of Truth)
 
-Источником истины являются файлы, расположенные в каталоге: `outputs/<project-slug>/<YYYY-MM-DD>/`.
+Источником истины являются файлы, расположенные в каталоге: `outputs/products/<project-slug>/<YYYY-MM-DD>/`. Для временных проверочных запусков и тестов используется каталог `outputs/temp/`.
 
 ## Обязательная последовательность этапов
 
@@ -199,9 +199,9 @@ NOT_STARTED -> IN_PROGRESS -> GENERATED -> VALIDATED -> HANDED_OFF -> COMPLETE
 ## Валидация во время выполнения (Runtime Validation)
 
 ```bash
-yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through <stage-id>
-yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
-yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
+yarn workflow:validate outputs/products/<project-slug>/<YYYY-MM-DD> --through <stage-id>
+yarn workflow:validate outputs/products/<project-slug>/<YYYY-MM-DD> --profile standard
+yarn workflow:validate outputs/products/<project-slug>/<YYYY-MM-DD> --profile reference
 ```
 
 Любая ошибка валидации блокирует финальный статус `success`.

@@ -17,6 +17,9 @@
 - `ia-brief.md`
 - `copy-deck.md` (при наличии)
 - `integrations/mcp/figma-canvas-write-guide.md`
+- `agent-pack/workflows/ds-baseline.workflow.md`
+- `design/figma/a3-design-system/variants-and-states-policy.md`
+- `design/figma/a3-design-system/ds-baseline-policy.md`
 
 ## Internal Pipeline (Внутренний процесс)
 
@@ -29,14 +32,16 @@
 7. Определить адаптивное поведение для мобильных устройств, планшетов и десктопа.
 8. Сформировать примечания по доступности (accessibility): иерархия заголовков, aria-labels, контрастность, фокус ввода, управление движением.
 9. Идентифицировать риски и ключевые дизайн-решения, необходимые перед переходом к фронтенду.
-10. Если запрошена отрисовка макета в Figma и параметр `write_allowed=true` в Figma MCP, подготовить структуру макета с координатами, размерами и токенами дизайн-системы (цвета, шрифты, отступы) на основе `figma-canvas-write-guide.md`.
+10. Если запрошена отрисовка макета в Figma и параметр `write_allowed=true` в Figma MCP, подготовить структуру макета с координатами, размерами и токенами дизайн-системы на основе `figma-canvas-write-guide.md`, а также регламентов `variants-and-states-policy.md`, глобального процесса `ds-baseline.workflow.md` и локальной политики `ds-baseline-policy.md`.
 
 ## Guardrails (Ограничения и правила)
 
+- **Правило интерактивных опросов (Interactive Choice Rule):** При выборе визуального стиля, сеток отступов, радиусов, цветовых схем или утверждении референсов, Агент Дизайна обязан использовать инструмент `ask_question` для предоставления пользователю интерактивных опросов.
+- **Кастомное проектирование (Bespoke UI by Default):** Агент Дизайна полностью исключает любые шаблонные дизайн-библиотеки и заготовки из процесса проектирования и спецификации экранов. Все визуальные решения проектируются как полностью уникальные (Bespoke UI), ориентируясь исключительно на визуальные токены референсов и создавая собственные сетки и структуры компонентов.
 - Дизайн не должен гарантировать неподтвержденные результаты.
 - Избегать декоративной сложности, которая снижает удобство выполнения целевых задач пользователя.
 - Доступность (A11y) и адаптивное поведение обязательны, а не опциональны.
-- **Правило Figma-макетов**: Не создавать и не изменять макеты на холсте Figma без явного запроса пользователя, включенного параметра `write_allowed=true` в Figma MCP и получения явного согласия пользователя. В случае включения строго следовать инструкциям [figma-canvas-write-guide.md](file:///c:/Project/product-agent-studio/integrations/mcp/figma-canvas-write-guide.md) для структурирования фреймов, слоев и визуальных компонентов с использованием токенов дизайн-системы A3.
+- **Правило Figma-макетов**: Не создавать и не изменять макеты на холсте Figma без явного запроса пользователя, включенного параметра `write_allowed=true` в Figma MCP и получения явного согласия пользователя. В случае включения строго следовать инструкциям [figma-canvas-write-guide.md](file:///c:/Project/product-agent-studio/integrations/mcp/figma-canvas-write-guide.md), [variants-and-states-policy.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/variants-and-states-policy.md) (для правильного масштабирования вариантов и состояний), глобальному процессу [ds-baseline.workflow.md](file:///c:/Project/product-agent-studio/agent-pack/workflows/ds-baseline.workflow.md) и локальной политике [ds-baseline-policy.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/ds-baseline-policy.md) (при генерации ДС с нуля) для структурирования фреймов, слоев и визуальных компонентов с использованием токенов дизайн-системы A3.
 
 ## Required Outputs (Обязательные результаты)
 

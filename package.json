@@ -34,7 +34,8 @@
     "reference:review": "tsx runtime/typescript/visual-reference-review.ts",
     "research:run": "tsx runtime/typescript/research-stage-runner.ts",
     "typecheck": "node tooling/scripts/run-and-log.mjs typecheck \"tsc --noEmit\"",
-    "landing:run": "tsx runtime/typescript/run-landing-workflow.ts"
+    "landing:run": "tsx runtime/typescript/run-landing-workflow.ts",
+    "outputs:cleanup": "node tooling/scripts/cleanup-outputs.mjs"
   },
   "dependencies": {
     "@openai/agents": "0.11.4",
@@ -59,7 +60,6 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.2",
     "js-yaml": "4.1.1",
-    "shadcn": "4.8.0",
     "tailwindcss": "4.3.0",
     "tsx": "4.22.3",
     "typescript": "6.0.3",

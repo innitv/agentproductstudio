@@ -74,9 +74,9 @@ async function main() {
 
     // Генерируем чек-лист Acceptance Criteria в теле страницы
     const blocks = [
-      heading(2, "User Story Description"),
+      heading(2, "Описание пользовательской истории"),
       paragraph(`**Как** ${story.role},\n**Я хочу** ${story.want},\n**Чтобы** ${story.soThat}.`),
-      heading(2, "Acceptance Criteria")
+      heading(2, "Критерии приемки")
     ];
 
     // Добавляем чек-боксы
@@ -107,8 +107,11 @@ function parsePersonas(content) {
     const trimmed = line.trim();
     if (trimmed.startsWith("|") && trimmed.endsWith("|")) {
       const parts = trimmed.split("|").map(p => p.trim()).slice(1, -1);
-      if (parts[0] === "Persona" || parts[0].startsWith("---")) {
+      if (parts[0] === "Persona" || (parts[0] === "Персона" && parts[1] === "Сегмент аудитории")) {
         isTable = true;
+        continue;
+      }
+      if (parts[0].startsWith("---")) {
         continue;
       }
       if (isTable) {
@@ -142,7 +145,7 @@ function parseUserStories(content) {
 
   for (const item of items) {
     const lines = item.split(/\r?\n/);
-    const titleLine = lines[0].replace(/^\*\*|\*\*$/g, "").replace(/:$/, "").trim();
+    const titleLine = lines[0].replace(/:$/, "").replace(/^\*\*|\*\*$/g, "").trim();
     if (!titleLine || titleLine.startsWith("##")) continue;
 
     let role = "";
@@ -243,17 +246,17 @@ async function createPersonasDatabase(parentId) {
     headers: notionHeaders(),
     body: JSON.stringify({
       parent: { type: "page_id", page_id: parentId },
-      title: [{ type: "text", text: { content: "Proto Personas (Персоны)" } }],
+      title: [{ type: "text", text: { content: "Прото-персоны" } }],
       properties: {
-        Persona: { title: {} },
-        Segment: { rich_text: {} },
-        JTBD: { rich_text: {} },
-        Pain: { rich_text: {} },
-        "Desired Outcome": { rich_text: {} },
-        "Evidence Status": {
+        "Персона": { title: {} },
+        "Сегмент аудитории": { rich_text: {} },
+        "Задача (JTBD)": { rich_text: {} },
+        "Боль / Барьер": { rich_text: {} },
+        "Желаемый результат": { rich_text: {} },
+        "Статус доказательств": {
           select: {
             options: [
-              { name: "proto", color: "orange" },
+              { name: "proto (гипотеза)", color: "orange" },
               { name: "needs validation", color: "red" },
               { name: "validated", color: "green" }
             ]
@@ -279,12 +282,12 @@ async function createPersonaPage(dbId, persona) {
     body: JSON.stringify({
       parent: { database_id: dbId },
       properties: {
-        Persona: { title: [{ text: { content: persona.name } }] },
-        Segment: { rich_text: [{ text: { content: persona.segment || "" } }] },
-        JTBD: { rich_text: [{ text: { content: persona.jtbd || "" } }] },
-        Pain: { rich_text: [{ text: { content: persona.pain || "" } }] },
-        "Desired Outcome": { rich_text: [{ text: { content: persona.desiredOutcome || "" } }] },
-        "Evidence Status": { select: { name: persona.evidenceStatus === "validated" ? "validated" : persona.evidenceStatus === "needs validation" ? "needs validation" : "proto" } }
+        "Персона": { title: [{ text: { content: persona.name } }] },
+        "Сегмент аудитории": { rich_text: [{ text: { content: persona.segment || "" } }] },
+        "Задача (JTBD)": { rich_text: [{ text: { content: persona.jtbd || "" } }] },
+        "Боль / Барьер": { rich_text: [{ text: { content: persona.pain || "" } }] },
+        "Желаемый результат": { rich_text: [{ text: { content: persona.desiredOutcome || "" } }] },
+        "Статус доказательств": { select: { name: persona.evidenceStatus === "validated" ? "validated" : persona.evidenceStatus === "needs validation" ? "needs validation" : persona.evidenceStatus || "proto (гипотеза)" } }
       }
     })
   });
@@ -304,27 +307,27 @@ async function createStoriesDatabase(parentId, personasDbId) {
     headers: notionHeaders(),
     body: JSON.stringify({
       parent: { type: "page_id", page_id: parentId },
-      title: [{ type: "text", text: { content: "User Stories (Агиль-доска)" } }],
+      title: [{ type: "text", text: { content: "Пользовательские истории" } }],
       properties: {
-        Story: { title: {} },
-        ID: { rich_text: {} },
-        Persona: { relation: { database_id: personasDbId, single_property: {} } },
-        Priority: {
+        "Пользовательская история": { title: {} },
+        "ID": { rich_text: {} },
+        "Связанная персона": { relation: { database_id: personasDbId, single_property: {} } },
+        "Приоритет": {
           select: {
             options: [
-              { name: "Must", color: "red" },
-              { name: "Should", color: "yellow" },
-              { name: "Could", color: "blue" },
-              { name: "Won't", color: "gray" }
+              { name: "Must (Обязательно)", color: "red" },
+              { name: "Should (Желательно)", color: "yellow" },
+              { name: "Could (Возможно)", color: "blue" },
+              { name: "Won't (Не сейчас)", color: "gray" }
             ]
           }
         },
-        Status: {
+        "Статус": {
           status: {
             options: [
-              { name: "Not started", color: "gray" },
-              { name: "In progress", color: "blue" },
-              { name: "Completed", color: "green" }
+              { name: "Не начато", color: "gray" },
+              { name: "В работе", color: "blue" },
+              { name: "Готово", color: "green" }
             ]
           }
         }
@@ -343,14 +346,14 @@ async function createStoriesDatabase(parentId, personasDbId) {
 
 async function createStoryPage(dbId, storyId, story, relatedPersonaPageId) {
   const properties = {
-    Story: { title: [{ text: { content: story.title } }] },
-    ID: { rich_text: [{ text: { content: storyId } }] },
-    Priority: { select: { name: "Must" } }, // По умолчанию Must для MVP
-    Status: { status: { name: "Not started" } }
+    "Пользовательская история": { title: [{ text: { content: story.title } }] },
+    "ID": { rich_text: [{ text: { content: storyId } }] },
+    "Приоритет": { select: { name: "Must (Обязательно)" } }, // По умолчанию Must для MVP
+    "Статус": { status: { name: "Не начато" } }
   };
 
   if (relatedPersonaPageId) {
-    properties.Persona = { relation: [{ id: relatedPersonaPageId }] };
+    properties["Связанная персона"] = { relation: [{ id: relatedPersonaPageId }] };
   }
 
   const response = await fetch("https://api.notion.com/v1/pages", {

@@ -19,3 +19,7 @@ Thumbs.db
 
 runs/**/*.log
 *.trace
+
+# Ignore temporary and test workflow runs
+outputs/temp/
+

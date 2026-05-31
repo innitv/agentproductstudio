@@ -1,32 +1,28 @@
-# Outputs
+# Outputs (Результаты запусков)
 
-Эта папка предназначена для результатов конкретных запусков workflow.
+Эта папка предназначена для хранения результатов запусков workflow и разделена на две основные зоны во избежание захламления:
 
-Рекомендуемая структура:
+## Структура папки
 
 ```text
 outputs/
-  <project-slug>/
-    <YYYY-MM-DD>/
-      recursive-brief.md
-      research-summary.md
-      prd.md
-      ia-brief.md
-      design-brief.md
-      screens.md
-      copy-deck.md
-      prototype-report.md
-      frontend-result.md
-      test-bench-result.md
-      qa-report.md
-      release-notes.md
+  registry.json          # Единый реестр активных продуктов (B2B/B2C)
+  products/              # Долгоживущие, одобренные пользователем продукты
+    <project-slug>/
+      <YYYY-MM-DD>/
+        recursive-brief.md
+        research-summary.md
+        prd.md
+        ...
+  temp/                  # Временные папки проверок, тестов и дымовых (smoke) запусков
+    <test-run-slug>/
 ```
 
-Правила:
+## Правила и регламенты
 
-- Не сохранять секреты.
-- Не сохранять приватные данные без необходимости.
-- Claims без источников помечать `needs validation`.
-- Prototype report должен содержать transition map и completion step.
-- Test bench result не должен сохранять PII в событиях.
-- Если проверка не запускалась, указывать причину в соответствующем отчёте.
+1. **Реестр (`registry.json`):** Все реальные продукты регистрируются в массиве `activeProducts` в `registry.json`.
+2. **Очистка (`yarn outputs:cleanup`):** Для наведения порядка в корне `outputs/` используйте команду `yarn outputs:cleanup`. Она безопасно перенесет все незарегистрированные папки в `outputs/temp/`.
+3. **Безопасность:** Категорически запрещено сохранять секреты, пароли или токены доступа в отчетах.
+4. **Достоверность:** Все утверждения (claims) без явных внешних источников обязаны помечаться статусом `needs validation`.
+5. **Согласованность:** Каждый отчет `prototype-report` обязан содержать transition map и конкретный completion step.
+

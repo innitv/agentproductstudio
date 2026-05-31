@@ -1,34 +1,36 @@
-# A3 Design System Figma Source
+# Исходный код Figma дизайн-системы A3
 
-## Source
+## Источник
 
-- Figma file: https://www.figma.com/design/4ufM1XdtXzSwbCNpulxETA/A3-Design-System
-- Color base token node: `16:203`
-- Color palette token node: `16:292`
-- Access mode: Figma REST API through local `FIGMA_API_TOKEN`
+- Файл Figma: https://www.figma.com/design/4ufM1XdtXzSwbCNpulxETA/A3-Design-System
+- Нода базовых токенов цвета (Color base): `16:203`
+- Нода палитры цветов (Color palette): `16:292`
+- Режим доступа: Figma REST API с использованием локального `FIGMA_API_TOKEN`
 
-## Purpose
+## Назначение
 
-This folder stores long-lived design-system source artifacts extracted from Figma. These files are not single workflow outputs; product runs in `outputs/<project-slug>/<YYYY-MM-DD>/` should reference them through `Inputs Used`.
+В этой папке хранятся долгоживущие исходные артефакты дизайн-системы, извлеченные из Figma. Эти файлы не являются результатами одного прогона; продуктовые запуски в `outputs/<project-slug>/<YYYY-MM-DD>/` должны ссылаться на них через раздел `Inputs Used`.
 
-## Files
+## Файлы
 
-- `token-map.md` — accepted design-system token map: colors, typography, effects, radius, spacing and component sizes.
-- `component-map.md` — component mapping status, extraction plan and frontend migration targets.
-- `design-system-audit.md` — current audit status for tokens, components, frontend mapping, risks and next actions.
-- `raw/` — optional sanitized node summaries. Do not store private full file dumps or tokens.
+- `token-map.md` — принятая карта токенов дизайн-системы: цвета, типографика, эффекты, скругления (radius), отступы (spacing) и размеры компонентов (size).
+- `component-map.md` — статус маппинга компонентов, план извлечения и цели миграции фронтенда.
+- `design-system-audit.md` — текущий статус аудита токенов, компонентов, маппинга фронтенда, рисков и следующих шагов.
+- `variants-and-states-policy.md` — директива по расширению вариантов и состояний компонентов в Figma.
+- `ds-baseline-policy.md` — директива по созданию стартовой дизайн-системы с нуля в новом проекте.
+- `raw/` — опциональные очищенные сводные данные нод. Не сохраняйте здесь приватные дампы файлов или токены.
 
-## Frontend Preview
+## Предпросмотр фронтенда
 
-- Local component playground: `http://127.0.0.1:5173/components` when `yarn dev --port 5173` is running.
-- Playground source: `apps/frontend/src/components-playground.tsx`.
-- Current landing page remains available at `/`.
+- Локальная песочница компонентов: `http://127.0.0.1:5173/components` при запущенном `yarn dev --port 5173`.
+- Исходный код песочницы: `apps/frontend/src/components-playground.tsx`.
+- Текущий лендинг остаётся доступным по адресу `/`.
 
-## Update Rules
+## Правила обновления
 
-- Keep Figma access tokens only in local `.env`.
-- Do not commit raw private Figma dumps.
-- Prefer Figma Variables API when token scope includes `file_variables:read`.
-- When Variables API is unavailable, extract token values from specific frame/node evidence and record the limitation.
-- User-provided Figma exports may be used as source evidence when the export is recorded in `token-map.md`.
-- Downstream workflow artifacts should cite `design/figma/a3-design-system/token-map.md` and, when components are involved, `design/figma/a3-design-system/component-map.md`.
+- Храните токены доступа Figma только в локальном `.env`.
+- Не коммитьте сырые приватные дампы Figma.
+- Отдавайте предпочтение Figma Variables API, когда область действия токена включает `file_variables:read`.
+- Если Variables API недоступен, извлекайте значения токенов на основе визуальных фреймов/нод и фиксируйте это ограничение.
+- Пользовательские экспорты из Figma могут использоваться в качестве исходных данных, если этот экспорт зафиксирован в `token-map.md`.
+- Артефакты последующих этапов работы должны ссылаться на `design/figma/a3-design-system/token-map.md`, а если задействованы компоненты — на `design/figma/a3-design-system/component-map.md`.

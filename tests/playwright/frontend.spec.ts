@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test("renders the AgentFlow SaaS Console dashboard", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/#console");
 
   // 1. Проверяем заголовок в топбаре
   await expect(
@@ -28,7 +28,7 @@ test("renders the AgentFlow SaaS Console dashboard", async ({ page }) => {
 });
 
 test("supports interacting with chat simulator and switching tabs", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/#console");
 
   // 1. Тестируем отправку сообщения в симулятор
   const chatInput = page.getByPlaceholder("Спросите агента про тарифы, ошибки или регламент...");

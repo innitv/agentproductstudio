@@ -213,6 +213,7 @@ agent-pack/workflows/
   artifact-driven-pipeline.md
   deep-research.workflow.md
   landing-agent-orchestration.workflow.md
+  ds-baseline.workflow.md
 agent-pack/templates/
   agent-output-contract.schema.md
   file-format-conventions.md
@@ -331,7 +332,7 @@ schema_payload:
 - `runtime/typescript/research-stage-runner.ts` запускает Tavily + DeepSeek + Gemini research provider flow и пишет обязательные research artifacts в `outputs/<project>/<date>/`.
 - `design/figma/a3-design-system/` хранит долгоживущую карту Figma design-system tokens/components; workflow outputs должны ссылаться на неё через `Inputs Used`, а не дублировать как run output.
 - `tooling/scripts/validate-config.mjs` проверяет обязательные файлы и secret-like values без внешней сети.
-- React, Vite, Tailwind CSS, shadcn/ui и Framer Motion подключены как frontend stack в `apps/frontend/`.
+- React, Vite, Tailwind CSS и Framer Motion подключены как frontend stack в `apps/frontend/`.
 - `yarn build` собирает frontend в `dist/frontend`.
 - Playwright QA подключён через `@playwright/test`; `yarn qa:playwright` собирает frontend и проверяет desktop/mobile Chromium.
 - Firecrawl QA подключён через `@mendable/firecrawl-js`; `yarn qa:firecrawl` проверяет Firecrawl scrape вместе с Playwright, а `yarn reference:scan <url> [slug]` создает пакет для visual reference review.

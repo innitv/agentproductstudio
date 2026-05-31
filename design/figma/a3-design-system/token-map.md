@@ -1,28 +1,28 @@
-# Figma Token Map
+# Карта токенов Figma
 
-## Source
+## Источник
 
-- Figma URL: https://www.figma.com/design/4ufM1XdtXzSwbCNpulxETA/A3-Design-System?node-id=16-203&m=dev
-- Scope: A3 design-system tokens
-- Date: 2026-05-26
-- Access mode: Figma REST file node API with local `FIGMA_API_TOKEN`
+- Файл Figma: https://www.figma.com/design/4ufM1XdtXzSwbCNpulxETA/A3-Design-System?node-id=16-203&m=dev
+- Область действия: Токены дизайн-системы A3
+- Дата: 2026-05-26
+- Режим доступа: Figma REST file node API с использованием локального `FIGMA_API_TOKEN`
 
-## Inputs Used
+## Использованные исходные данные (Inputs Used)
 
-- Figma node `16:203`
-- Figma node `16:292`
-- User-provided Figma exports for typography, effects, radius, spacing and component size tokens
-- `apps/frontend/src/styles.css`
+- Нода Figma `16:203`
+- Нода Figma `16:292`
+- Пользовательские экспорты из Figma для токенов типографики, эффектов, скруглений, отступов и размеров компонентов
+- [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css)
 
-## Notes
+## Примечания (Notes)
 
-- Figma Variables API was not available for the current token because it requires the `file_variables:read` scope.
-- Color token values were extracted from visible frame structure: token names, table rows and color swatches.
-- Typography, effect, radius, spacing and component size values were extracted from user-provided Figma CSS/token exports.
+- Figma Variables API был недоступен для текущих токенов, так как он требует область действия `file_variables:read`.
+- Значения токенов цвета были извлечены из структуры видимых фреймов: названий токенов, строк таблиц и образцов цвета.
+- Значения типографики, эффектов, скруглений, отступов и размеров компонентов были извлечены из предоставленных пользователем CSS/токен экспортов Figma.
 
-## Color Base Tokens
+## Базовые токены цвета (Color Base Tokens)
 
-| Token | RGBA | CSS variable |
+| Токен (Token) | RGBA | CSS-переменная |
 |---|---|---|
 | `base.accent` | `rgba(83, 151, 235, 1)` | `--base-accent` |
 | `base.neutral` | `rgba(112, 124, 142, 1)` | `--base-neutral` |
@@ -37,25 +37,25 @@
 | `base.status-05` | `rgba(227, 58, 130, 1)` | `--base-status-05` |
 | `base.status-06` | `rgba(250, 83, 0, 1)` | `--base-status-06` |
 
-## Frontend Mapping
+## Маппинг фронтенда (Frontend Mapping)
 
-| Figma token | Current semantic alias | Usage |
+| Токен Figma | Текущий семантический алиас | Использование (Usage) |
 |---|---|---|
-| `base.accent` | `--a3-brand-surface` -> `--base-accent` | Page blue surface |
-| `base.info` | `--a3-brand-action` -> `--base-info` | CTA/action blue |
-| `base.neutral` | `--base-neutral` | Neutral foundation for future text/border scales |
-| `base.success` | `--base-success` | Success states |
-| `base.warning` | `--base-warning` | Warning states |
-| `base.error` | `--base-error` | Error states |
-| `base.status-*` | `--base-status-*` | Additional status palettes |
+| `base.accent` | `--a3-brand-surface` -> `--base-accent` | Синяя поверхность страницы |
+| `base.info` | `--a3-brand-action` -> `--base-info` | Синий цвет для CTA/действий |
+| `base.neutral` | `--base-neutral` | Нейтральная основа для будущих шкал текста/границ |
+| `base.success` | `--base-success` | Состояния успеха |
+| `base.warning` | `--base-warning` | Состояния предупреждения |
+| `base.error` | `--base-error` | Состояния ошибки |
+| `base.status-*` | `--base-status-*` | Дополнительные палитры статусов |
 
-## Color Palette Tokens
+## Токены палитры цветов (Color Palette Tokens)
 
-Source node: `16:292`
+Исходная нода: `16:292`
 
-### Core Palettes
+### Основные палитры (Core Palettes)
 
-| Step | Accent | Neutral | Success | Warning | Error | Info |
+| Шаг (Step) | Accent | Neutral | Success | Warning | Error | Info |
 |---:|---|---|---|---|---|---|
 | 0 | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` |
 | 10 | `#F4F7FC` | `#F8F9FA` | `#EAF8F1` | `#FFF8EF` | `#FEEEEE` | `#F8FCFF` |
@@ -75,9 +75,9 @@ Source node: `16:292`
 | 990 | `#0F1D2D` | `#0C0E10` | `#04120B` | `#332412` | `#180909` | `#051E33` |
 | 1000 | `#0A151F` | `#2C2E2B` | `#000000` | `#000000` | `#000000` | `#000000` |
 
-### Status Palettes
+### Палитры статусов (Status Palettes)
 
-| Step | Status 01 | Status 02 | Status 03 | Status 04 | Status 05 | Status 06 |
+| Шаг (Step) | Status 01 | Status 02 | Status 03 | Status 04 | Status 05 | Status 06 |
 |---:|---|---|---|---|---|---|
 | 0 | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` |
 | 10 | `#F7FDFB` | `#F8FCFD` | `#FAFAFF` | `#FCF8FF` | `#FEF9FB` | `#FFFAF7` |
@@ -87,7 +87,7 @@ Source node: `16:292`
 | 200 | `#80D8C4` | `#88C8DD` | `#B4A9FA` | `#CC92FF` | `#F19DC1` | `#FCA980` |
 | 300 | `#59CDB2` | `#64B8D3` | `#9E8FF9` | `#BD71FF` | `#ED7FAE` | `#FC8F59` |
 | 400 | `#33C1A0` | `#41A8C9` | `#8775F7` | `#AD50FF` | `#E9619B` | `#FB7533` |
-| 500 | `#00B288` | `#1192BB` | `#6952F5` | `#9924FF` | `#E33A82` | `#FA5300` |
+| 500 | `#00B288` | `#1192BB` | `#6952F5` | `#9924FF` | `--base-status-05` -> `rgba(227, 58, 130, 1)` | `#FA5300` |
 | 600 | `#009774` | `#0E7C9F` | `#5946D0` | `#821FD9` | `#C1316E` | `#D44700` |
 | 700 | `#007D5F` | `#0C6683` | `#4939AC` | `#6B19B3` | `#9F295B` | `#AF3A00` |
 | 800 | `#006B52` | `#0A5870` | `#3F3193` | `#5C1699` | `#88234E` | `#963200` |
@@ -97,20 +97,20 @@ Source node: `16:292`
 | 990 | `#00241B` | `#031D25` | `#151031` | `#1F0733` | `#2D0C1A` | `#321100` |
 | 1000 | `#000000` | `#000000` | `#000000` | `#000000` | `#000000` | `#000000` |
 
-Canonical CSS variable naming:
+Каноническое именование CSS-переменных:
 
-- Base tokens: `--base-{accent|neutral|success|warning|error|info|status-01..06}`.
-- Core palettes: `--{accent|neutral|success|warning|error|info}-{step}`.
-- Status palettes: `--status-{01..06}-{step}`.
-- Compatibility aliases: `--a3-base-*` and `--a3-palette-*` remain in CSS for existing frontend styles.
+- Базовые токены: `--base-{accent|neutral|success|warning|error|info|status-01..06}`.
+- Основные палитры: `--{accent|neutral|success|warning|error|info}-{step}`.
+- Палитры статусов: `--status-{01..06}-{step}`.
+- Совместимые алиасы: `--a3-base-*` и `--a3-palette-*` остаются в CSS для существующих стилей фронтенда.
 
-## Typography Tokens
+## Токены типографики (Typography Tokens)
 
-Source: user-provided Figma text style export.
+Источник: предоставленный пользователем экспорт стилей текста из Figma.
 
-All typography utilities are implemented in `apps/frontend/src/styles.css` with `font-family: var(--font-family-mont)`, `font-style: normal`, `text-decoration: none` and `text-transform: none`.
+Все служебные классы типографики реализованы в [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css) с правилами `font-family: var(--font-family-mont)`, `font-style: normal`, `text-decoration: none` и `text-transform: none`.
 
-| Class | Size | Line height | Weight | CSS variables |
+| Класс (Class) | Размер (Size) | Высота строки (Line height) | Насыщенность (Weight) | CSS-переменные |
 |---|---:|---:|---:|---|
 | `.text-style-font-display-l` | `48px` | `52px` | `400` | `--font-display-l-size`, `--font-display-l-line` |
 | `.text-style-font-display-l-strong` | `48px` | `52px` | `600` | `--font-display-l-size`, `--font-display-l-line` |
@@ -133,17 +133,17 @@ All typography utilities are implemented in `apps/frontend/src/styles.css` with 
 | `.text-style-font-description-s-strong` | `12px` | `16px` | `600` | `--font-description-s-size`, `--font-description-s-line` |
 | `.text-style-mobile-font-font` | `12px` | `16px` | `400` | `--font-mobile-font-size`, `--font-mobile-font-line` |
 
-Shared typography variables:
+Общие переменные типографики:
 
 - `--font-family-mont`: `"Mont", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`.
 - `--font-weight-regular`: `400`.
 - `--font-weight-strong`: `600`.
 
-## Effect Tokens
+## Токены эффектов (Effect Tokens)
 
-Source: user-provided Figma effect style export.
+Источник: предоставленный пользователем экспорт стилей эффектов из Figma.
 
-| Class | CSS variable | Box shadow |
+| Класс (Class) | CSS-переменная | Тень (Box shadow) |
 |---|---|---|
 | `.effect-style-shadow-none` | `--shadow-none` | `inset 0px 0px 0px rgba(0, 0, 0, 0)` |
 | `.effect-style-shadow-bottom-s` | `--shadow-bottom-s` | `0px 2px 4px rgba(44, 46, 43, 0.05), 0px 0px 8px rgba(44, 46, 43, 0.1)` |
@@ -157,31 +157,31 @@ Source: user-provided Figma effect style export.
 | `.effect-style-shadow-top-xl` | `--shadow-top-xl` | `0px -32px 32px rgba(44, 46, 43, 0.05), 0px 0px 32px rgba(44, 46, 43, 0.1)` |
 | `.effect-style-shadow-top-controls` | `--shadow-top-controls` | `0px -2px 2px rgba(44, 46, 43, 0.2), 0px 0px 1px rgba(44, 46, 43, 0.1)` |
 
-## Border Radius Tokens
+## Токены скругления границ (Border Radius Tokens)
 
-Source: user-provided Figma radius token export.
+Источник: предоставленный пользователем экспорт токенов радиусов из Figma.
 
-| Token | Value | Purpose |
+| Токен (Token) | Значение | Назначение (Purpose) |
 |---|---:|---|
-| `--border-radius-base` | `6px` | Base radius |
-| `--border-radius-none` | `0px` | No radius |
-| `--border-radius-2xs` | `2px` | Extra small radius |
-| `--border-radius-xs` | `3px` | Small control radius |
-| `--border-radius-s` | `4px` | Small radius |
-| `--border-radius-m` | `var(--border-radius-base)` | Medium/default radius |
-| `--border-radius-l` | `8px` | Large radius |
-| `--border-radius-xl` | `12px` | Extra large radius |
-| `--border-radius-2xl` | `24px` | Large container radius |
-| `--border-radius-inputs` | `var(--border-radius-m)` | Inputs and input-based components |
-| `--border-radius-buttons` | `var(--border-radius-m)` | Buttons |
-| `--border-radius-controls` | `var(--border-radius-xs)` | Controls |
-| `--border-radius-full` | `9999px` | Full/pill radius |
+| `--border-radius-base` | `6px` | Базовое скругление |
+| `--border-radius-none` | `0px` | Без скругления |
+| `--border-radius-2xs` | `2px` | Сверхмалое скругление |
+| `--border-radius-xs` | `3px` | Малое скругление элементов управления |
+| `--border-radius-s` | `4px` | Малое скругление |
+| `--border-radius-m` | `var(--border-radius-base)` | Среднее/стандартное скругление |
+| `--border-radius-l` | `8px` | Большое скругление |
+| `--border-radius-xl` | `12px` | Сверхбольшое скругление |
+| `--border-radius-2xl` | `24px` | Большое скругление контейнеров |
+| `--border-radius-inputs` | `var(--border-radius-m)` | Поля ввода и компоненты на их основе |
+| `--border-radius-buttons` | `var(--border-radius-m)` | Кнопки |
+| `--border-radius-controls` | `var(--border-radius-xs)` | Переключатели/элементы управления |
+| `--border-radius-full` | `9999px` | Полное скругление (пилюля) |
 
-## Spacing Tokens
+## Токены отступов (Spacing Tokens)
 
-Source: user-provided Figma spacing token export.
+Источник: предоставленный пользователем экспорт токенов отступов из Figma.
 
-| Token | Value |
+| Токен (Token) | Значение |
 |---|---:|
 | `--spacing-base` | `16px` |
 | `--spacing-none` | `0px` |
@@ -203,35 +203,35 @@ Source: user-provided Figma spacing token export.
 | `--spacing-32x` | `128px` |
 | `--spacing-48x` | `192px` |
 
-## Size Tokens
+## Токены размеров компонентов (Size Tokens)
 
-Source: user-provided Figma component size token export.
+Источник: предоставленный пользователем экспорт токенов размеров компонентов из Figma.
 
-| Token | Value | Purpose |
+| Токен (Token) | Значение | Назначение (Purpose) |
 |---|---:|---|
-| `--size-base` | `16px` | Base component size value |
-| `--size-2xs` | `var(--size-base)` | Component height, 2xs |
-| `--size-xs` | `20px` | Component height, xs |
-| `--size-s` | `24px` | Component height, s |
-| `--size-m-tag` | `28px` | Tag component height, m |
-| `--size-m-chip` | `32px` | Chip component height, m |
-| `--size-m` | `36px` | Component height, m |
-| `--size-l` | `48px` | Component height, l |
-| `--size-xl` | `56px` | Component height, xl |
+| `--size-base` | `16px` | Базовый размер компонента |
+| `--size-2xs` | `var(--size-base)` | Высота компонента, 2xs |
+| `--size-xs` | `20px` | Высота компонента, xs |
+| `--size-s` | `24px` | Высота компонента, s |
+| `--size-m-tag` | `28px` | Высота компонента тега (Tag), m |
+| `--size-m-chip` | `32px` | Высота компонента чипа (Chip), m |
+| `--size-m` | `36px` | Высота компонента, m |
+| `--size-l` | `48px` | Высота компонента, l |
+| `--size-xl` | `56px` | Высота компонента, xl |
 
-## Implementation
+## Реализация (Implementation)
 
-- Added canonical Figma base color variables to `apps/frontend/src/styles.css` in RGBA format.
-- Added canonical Figma color palette variables to `apps/frontend/src/styles.css` in RGBA format.
-- Added typography variables and utility classes to `apps/frontend/src/styles.css`.
-- Added effect/shadow variables and utility classes to `apps/frontend/src/styles.css`.
-- Added border radius variables to `apps/frontend/src/styles.css`.
-- Added spacing and component size variables to `apps/frontend/src/styles.css`.
-- Kept `--a3-*` compatibility aliases for existing frontend styles.
-- Replaced common hard-coded UI colors with semantic CSS variables where safe.
-- Added `FIGMA_API_TOKEN` to `.env.example`.
+- Добавлены канонические базовые переменные цвета Figma в [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css) в формате RGBA.
+- Добавлены канонические переменные палитры цветов Figma в [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css) в формате RGBA.
+- Добавлены переменные типографики и служебные классы в [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css).
+- Добавлены переменные эффектов/теней и служебные классы в [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css).
+- Добавлены переменные скругления границ в [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css).
+- Добавлены переменные отступов и размеров компонентов в [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css).
+- Сохранены совместимые алиасы `--a3-*` для существующих стилей фронтенда.
+- Заменены общие жестко закодированные цвета интерфейса семантическими CSS-переменными там, где это безопасно.
+- Добавлен `FIGMA_API_TOKEN` в `.env.example`.
 
-## Follow-Up
+## Дальнейшие шаги (Follow-Up)
 
-- Reissue or update the Figma token with `file_variables:read` scope to read canonical Figma Variables directly.
-- Map component variants and states to the accepted color, typography, effect, radius, spacing and size tokens.
+- Повторно запросить или обновить токен Figma с областью действия `file_variables:read`, чтобы напрямую считывать канонические переменные Figma (Figma Variables).
+- Сопоставить варианты и состояния компонентов с принятыми токенами цвета, типографики, эффектов, скруглений, отступов и размеров.

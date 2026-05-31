@@ -1,63 +1,66 @@
-# Figma Design System Audit
+# Технический аудит дизайн-системы Figma
 
-## Status
+## Статус
 
-`partial`
+`partial` (частично выполнен)
 
-## Inputs Used
+## Использованные исходные данные (Inputs Used)
 
-- `design/figma/a3-design-system/README.md`
-- `design/figma/a3-design-system/token-map.md`
-- `design/figma/a3-design-system/component-map.md`
+- [README.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/README.md)
+- [token-map.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/token-map.md)
+- [component-map.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/component-map.md)
+- [variants-and-states-policy.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/variants-and-states-policy.md)
+- [ds-baseline-policy.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/ds-baseline-policy.md)
 
-## Variables And Tokens
+## Переменные и токены (Variables And Tokens)
 
-- Color base tokens extracted and mapped.
-- Color palette tokens extracted and mapped.
-- Typography tokens extracted from user-provided Figma style export and mapped.
-- Effect/shadow tokens extracted from user-provided Figma style export and mapped.
-- Border radius tokens extracted from user-provided Figma token export and mapped.
-- Spacing tokens extracted from user-provided Figma token export and mapped.
-- Component size tokens extracted from user-provided Figma token export and mapped.
+- Базовые токены цвета извлечены и сопоставлены.
+- Токены палитры цветов извлечены и сопоставлены.
+- Токены типографики извлечены из предоставленного пользователем экспорта стилей Figma и сопоставлены.
+- Токены эффектов/теней извлечены из предоставленного пользователем экспорта стилей Figma и сопоставлены.
+- Токены скругления границ извлечены из предоставленного пользователем экспорта токенов Figma и сопоставлены.
+- Токены отступов извлечены из предоставленного пользователем экспорта токенов Figma и сопоставлены.
+- Токены размеров компонентов извлечены из предоставленного пользователем экспорта токенов Figma и сопоставлены.
 
-## Components
+## Компоненты (Components)
 
-Component audit is partial in `component-map.md`; button, icon button, function button, checkbox, radio, switch, segmented control, input, input card, select, textarea, dropdown, tooltip, toast, inline notification, breadcrumbs and chips are extracted and implemented, while tags, cards/panels, remaining navigation and other overlays are pending.
+Отраженный аудит компонентов является частичным в [component-map.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/component-map.md); кнопки (`button`), иконки-кнопки (`icon button`), функциональные кнопки (`function button`), чекбоксы (`checkbox`), радио-кнопки (`radio`), переключатели (`switch`), сегментированные элементы управления (`segmented control`), поля ввода (`input`), карточки ввода (`input card`), выпадающие списки (`select`), многострочные поля ввода (`textarea`), контекстные меню (`dropdown`), подсказки (`tooltip`), всплывающие уведомления (`toast`), встроенные уведомления (`inline notification`), хлебные крошки (`breadcrumbs`) и чипы (`chips`) извлечены и реализованы, в то время как теги, карточки/панели, оставшиеся элементы навигации и другие оверлеи находятся в ожидании реализации.
 
-## Frontend Mapping
+## Маппинг фронтенда (Frontend Mapping)
 
-Color base, color palette, typography, effect, border radius, spacing and size tokens are mapped to CSS custom properties in `apps/frontend/src/styles.css`.
+Базовые токены, палитра цветов, типографика, эффекты, скругления границ, отступы и токены размеров сопоставлены с пользовательскими свойствами CSS в [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css).
 
-Manual component preview is available in `apps/frontend/src/components-playground.tsx` through `/components` in the local frontend dev server.
+Ручной предпросмотр компонентов доступен в [apps/frontend/src/components-playground.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/components-playground.tsx) через роут `/components` на локальном сервере разработки фронтенда.
 
-Typography and effect Figma utility class names are also implemented in `apps/frontend/src/styles.css`:
+Имена служебных классов Figma для типографики и эффектов также реализованы в [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css):
 
-- `.text-style-*` for display, heading, body, description and mobile text styles.
-- `.effect-style-*` for bottom/top shadow styles and shadow reset.
-- `.a3-checkbox*` for the Figma Checkbox component set.
-- `.a3-radio*` for the Figma RadioButton component set.
-- `.a3-switch*` for the Figma Switch component set.
-- `.a3-segmented-control*` and `.a3-segment*` for the Figma SegmentedControl and Elements / Segment component sets.
-- `.a3-button*` for the Figma Button component set.
-- `.a3-icon-button*` for the Figma IconButton component set.
-- `.a3-function-button*` for the Figma FunctionButton component set.
-- `.a3-input*` for the Figma Input component set.
-- `.a3-input-card*` for the Figma InputCard component set.
-- `.a3-select*` for the Figma Select component set.
-- `.a3-textarea*` for the Figma TextArea component set.
-- `.a3-dropdown*` for the Figma DropdownMenu and Elements / Item component sets.
-- `.a3-tooltip*` for the Figma Tooltip, Elements / Layout Tooltip and Pointer container component sets.
-- `.a3-toast*` for the Figma Toast component set.
-- `.a3-inline-notification*` for the Figma InlineNotification component set.
-- `.a3-breadcrumb*` for the Figma Breadcrumbs, breadcrumb item and more button component sets.
-- `.a3-chip*` for the Figma Chips component set.
+- `.text-style-*` для стилей дисплеев, заголовков, тела документа, описаний и мобильных текстов.
+- `.effect-style-*` для стилей теней сверху/снизу и сброса теней.
+- `.a3-checkbox*` для набора компонентов Figma `Checkbox`.
+- `.a3-radio*` для набора компонентов Figma `RadioButton`.
+- `.a3-switch*` для набора компонентов Figma `Switch`.
+- `.a3-segmented-control*` и `.a3-segment*` для наборов компонентов Figma `SegmentedControl` и `Elements / Segment`.
+- `.a3-button*` для набора компонентов Figma `Button`.
+- `.a3-icon-button*` для набора компонентов Figma `IconButton`.
+- `.a3-function-button*` для набора компонентов Figma `FunctionButton`.
+- `.a3-input*` для набора компонентов Figma `Input`.
+- `.a3-input-card*` для набора компонентов Figma `InputCard`.
+- `.a3-select*` для набора компонентов Figma `Select`.
+- `.a3-textarea*` для набора компонентов Figma `TextArea`.
+- `.a3-dropdown*` для наборов компонентов Figma `DropdownMenu` и `Elements / Item`.
+- `.a3-tooltip*` для наборов компонентов Figma `Tooltip`, `Elements / Layout Tooltip` и `Pointer container`.
+- `.a3-toast*` для набора компонентов Figma `Toast`.
+- `.a3-inline-notification*` для набора компонентов Figma `InlineNotification`.
+- `.a3-breadcrumb*` для наборов компонентов Figma `Breadcrumbs`, элемента хлебных крошек и кнопки "еще".
+- `.a3-chip*` для набора компонентов Figma `Chips`.
 
-## Risks
+## Риски (Risks)
 
-- Current Figma API token lacks `file_variables:read`; token values were extracted from frame evidence rather than canonical Figma Variables API.
-- `Mont` is mapped as the primary design-system font, but the font file/import is not bundled yet; CSS falls back to Inter/system fonts.
+- В текущем API-токене Figma отсутствует `file_variables:read`; значения токенов извлекались на основе визуальной структуры фреймов, а не канонического Figma Variables API.
+- `Mont` сопоставлен как основной шрифт дизайн-системы, но файл/импорт шрифта еще не интегрирован в бандл; CSS откатывается к Inter/системным шрифтам.
 
-## Next Actions
+## Следующие шаги (Next Actions)
 
-- Extract the next component variants and states from Figma.
-- Map existing frontend components to accepted design-system tokens in a controlled migration pass.
+- Извлечь следующие варианты и состояния компонентов из Figma, используя [variants-and-states-policy.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/variants-and-states-policy.md).
+- Сопоставить существующие компоненты фронтенда с принятыми токенами дизайн-системы в рамках контролируемой миграции.
+- Использовать [ds-baseline-policy.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/ds-baseline-policy.md) при запуске новых проектов с нуля для обеспечения стандартных коллекций переменных.
