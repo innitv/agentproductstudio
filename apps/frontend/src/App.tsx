@@ -1725,7 +1725,7 @@ function ConsoleView({ onBack }: { onBack: () => void }) {
               onClick={() => setActiveTab("workflow")}
             >
               <Cpu className="nav-icon" />
-              <span>Оркестратор ECC</span>
+              <span>Оркестратор контекста</span>
             </button>
           </nav>
 
@@ -1972,7 +1972,7 @@ function ConsoleView({ onBack }: { onBack: () => void }) {
                         </div>
                       </div>
 
-                      <div className="chat-messages-box">
+                      <div className="chat-messages-box flex-1 overflow-y-auto p-4 space-y-3 min-h-[300px]">
                         {(chatHistory[selectedAgentId] || []).map((msg, idx) => (
                           <div key={idx} className={`chat-message ${msg.sender}`}>
                             <div className="message-bubble">
@@ -1980,13 +1980,335 @@ function ConsoleView({ onBack }: { onBack: () => void }) {
                             </div>
                           </div>
                         ))}
+                        {isBotTyping && (
+                          <div className="chat-message bot">
+                            <div className="message-bubble opacity-60">
+                              <p>Печатает...</p>
+                            </div>
+                          </div>
+                        )}
                       </div>
+
+                      <form onSubmit={handleSendMessage} className="chat-input-form flex gap-2 p-3 border-t border-slate-200 bg-slate-50">
+                        <input
+                          type="text"
+                          value={messageInput}
+                          onChange={(e) => setMessageInput(e.target.value)}
+                          placeholder="Спросите агента про тарифы, ошибки или регламент..."
+                          className="flex-1 px-3 py-2 text-xs border border-slate-300 rounded-lg outline-none focus:border-[#005FFC] bg-white text-slate-800"
+                        />
+                        <button
+                          type="submit"
+                          className="chat-submit-btn px-3 py-2 text-xs font-bold text-white bg-[#005FFC] hover:bg-[#005FFC]/90 rounded-lg transition-colors flex items-center justify-center"
+                        >
+                          <Send className="w-3.5 h-3.5" />
+                        </button>
+                      </form>
                     </div>
                   </div>
 
                 </div>
               </div>
             )}
+
+            {activeTab === "create" && (
+              <div className="tab-create animate-fade-in">
+                {/* Хлебные крошки */}
+                <div className="content-breadcrumbs">
+                  <Breadcrumbs
+                    items={[
+                      { href: "#", label: "Главная", onClick: () => setActiveTab("dashboard") },
+                      { href: "#", label: "Консоль" },
+                      { current: true, label: "Создание ИИ-агента" },
+                    ]}
+                  />
+                </div>
+
+                <div className="section-card form-card">
+                  <h2>No-code конструктор нового ИИ-агента</h2>
+                  <p className="subtitle">
+                    Задайте регламент и каналы дистрибуции для мгновенного развертывания интеллектуального помощника.
+                  </p>
+
+                  {/* InlineNotification - уведомление об интеграциях */}
+                  <div className="form-notification">
+                    <InlineNotification
+                      colorScheme="info"
+                      title="Публикация в реальном времени"
+                      subtitle="Все настройки ИИ-агента вступают в силу мгновенно. Вы можете сразу протестировать его в симуляторе."
+                    />
+                  </div>
+
+                  <form onSubmit={handleCreateAgent} className="create-agent-form">
+                    <div className="form-group-row">
+                      {/* Имя агента */}
+                      <Input
+                        label="Имя ИИ-агента"
+                        placeholder="Например, ИИ-Консультант или ИИ-Продавец"
+                        value={newAgentName}
+                        onChange={(e) => setNewAgentName(e.target.value)}
+                        required
+                        size="l"
+                        hint="Используется для идентификации агента в списке и чате"
+                      />
+
+                      {/* Роль агента */}
+                      <Select
+                        label="Роль ИИ-агента"
+                        defaultValue={newAgentRole}
+                        options={[
+                          { label: "Продавец (Автоматизация продаж)", value: "sales" },
+                          { label: "Поддержка (Круглосуточный саппорт)", value: "support" },
+                          { label: "Маркетолог (Лидогенерация)", value: "marketing" },
+                          { label: "Рекрутер (Автоматизация найма)", value: "hr" },
+                        ]}
+                        onValueChange={(val: string) => setNewAgentRole(val)}
+                      />
+                    </div>
+
+                    <div className="form-group-row">
+                      {/* Выбор LLM модели через Segmented Control */}
+                      <div className="form-control-block">
+                        <label className="form-field-label">Базовая LLM Модель</label>
+                        <SegmentedControl
+                          defaultValue={newAgentModel}
+                          options={[
+                            { label: "GPT-4o (Рекомендуется)", value: "GPT-4o" },
+                            { label: "Gemini 1.5 Pro", value: "Gemini 1.5 Pro" },
+                            { label: "Claude 3.5", value: "Claude 3.5 Sonnet" },
+                          ]}
+                          size="m"
+                          onValueChange={(val: string) => setNewAgentModel(val)}
+                        />
+                      </div>
+
+                      {/* Доступность агента через Radio кнопки */}
+                      <div className="form-control-block">
+                        <label className="form-field-label">Тип доступности</label>
+                        <div className="radio-group-row">
+                          <Radio
+                            label="Публичный (доступен по API)"
+                            name="agent-type"
+                            checked={newAgentType === "public"}
+                            onChange={() => setNewAgentType("public")}
+                          />
+                          <Radio
+                            label="Приватный (только для тестов)"
+                            name="agent-type"
+                            checked={newAgentType === "private"}
+                            onChange={() => setNewAgentType("private")}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Текстовая база знаний (Регламент) */}
+                    <Textarea
+                      label="Регламент ИИ-агента и база знаний"
+                      placeholder="Впишите правила общения агента. Например: 'Ты — ИИ-продавец. Будь вежлив. Предлагай тарифы: Старт за $49. Отвечай кратко.'"
+                      value={newAgentKnowledge}
+                      onChange={(e) => setNewAgentKnowledge(e.target.value)}
+                      size="m"
+                      counter={`${newAgentKnowledge.length}/1000`}
+                      hint="Задайте ключевые правила, ограничения и сценарии для ответов ИИ-агента"
+                    />
+
+                    {/* Каналы интеграции */}
+                    <div className="form-control-block">
+                      <label className="form-field-label">Каналы интеграции (дистрибуция)</label>
+                      <div className="checkbox-grid">
+                        <Checkbox
+                          label="Telegram-бот"
+                          checked={selectedChannels.telegram}
+                          onChange={(e) =>
+                            setSelectedChannels((prev) => ({ ...prev, telegram: e.target.checked }))
+                          }
+                        />
+                        <Checkbox
+                          label="WhatsApp Бизнес"
+                          checked={selectedChannels.whatsapp}
+                          onChange={(e) =>
+                            setSelectedChannels((prev) => ({ ...prev, whatsapp: e.target.checked }))
+                          }
+                        />
+                        <Checkbox
+                          label="amoCRM коннектор"
+                          checked={selectedChannels.amocrm}
+                          onChange={(e) =>
+                            setSelectedChannels((prev) => ({ ...prev, amocrm: e.target.checked }))
+                          }
+                        />
+                        <Checkbox
+                          label="Вебхуки и n8n"
+                          checked={selectedChannels.n8n}
+                          onChange={(e) =>
+                            setSelectedChannels((prev) => ({ ...prev, n8n: e.target.checked }))
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    {/* Кнопки формы */}
+                    <div className="form-actions-row">
+                      <Button
+                        type="submit"
+                        leadingIcon={<Plus aria-hidden="true" />}
+                        size="xl"
+                      >
+                        Создать и активировать
+                      </Button>
+                      
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="xl"
+                        onClick={() => setActiveTab("dashboard")}
+                      >
+                        Отменить
+                      </Button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "billing" && (
+              <div className="tab-billing animate-fade-in">
+                {/* Хлебные крошки */}
+                <div className="content-breadcrumbs">
+                  <Breadcrumbs
+                    items={[
+                      { href: "#", label: "Главная", onClick: () => setActiveTab("dashboard") },
+                      { href: "#", label: "Консоль" },
+                      { current: true, label: "Тарифы и биллинг" },
+                    ]}
+                  />
+                </div>
+
+                <div className="billing-heading text-center">
+                  <h2>Гибкие SaaS тарифы под любой масштаб</h2>
+                  <p className="subtitle">Платите только за то количество диалогов, которое реально потребляют ваши агенты</p>
+                </div>
+
+                <div className="tariffs-grid">
+                  <div className="tariff-card">
+                    <span className="tariff-badge">Старт</span>
+                    <h3 className="tariff-title">Для малого бизнеса</h3>
+                    <div className="tariff-price">
+                      <span className="currency">$</span>
+                      <span className="amount">49</span>
+                      <span className="period">/мес</span>
+                    </div>
+                    <ul className="tariff-features" aria-label="Возможности тарифа Старт">
+                      <li><Check className="feature-icon" /> 1 ИИ-агент</li>
+                      <li><Check className="feature-icon" /> 1,000 диалогов в месяц</li>
+                      <li><Check className="feature-icon" /> Интеграция с Telegram</li>
+                      <li className="disabled"><X className="feature-icon" /> amoCRM и вебхуки</li>
+                      <li className="disabled"><X className="feature-icon" /> Собственная база знаний</li>
+                    </ul>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => triggerToast("Тариф Старт", "Вы выбрали тариф 'Старт'. Для оплаты свяжитесь с поддержкой.", "success")}
+                    >
+                      Выбрать тариф
+                    </Button>
+                  </div>
+
+                  <div className="tariff-card popular">
+                    <span className="tariff-badge popular">Популярный</span>
+                    <h3 className="tariff-title">Для роста бизнеса</h3>
+                    <div className="tariff-price">
+                      <span className="currency">$</span>
+                      <span className="amount">149</span>
+                      <span className="period">/мес</span>
+                    </div>
+                    <ul className="tariff-features" aria-label="Возможности тарифа Рост">
+                      <li><Check className="feature-icon" /> До 5 ИИ-агентов</li>
+                      <li><Check className="feature-icon" /> 10,000 диалогов в месяц</li>
+                      <li><Check className="feature-icon" /> Telegram, WhatsApp и Web</li>
+                      <li><Check className="feature-icon" /> Интеграция с amoCRM</li>
+                      <li><Check className="feature-icon" /> Загрузка базы знаний (TXT, PDF)</li>
+                    </ul>
+                    <Button
+                      variant="primary"
+                      className="w-full"
+                      onClick={() => triggerToast("Тариф Рост", "Вы выбрали тариф 'Рост'. Подключаем платежный шлюз...", "success")}
+                    >
+                      Попробовать бесплатно
+                    </Button>
+                  </div>
+
+                  <div className="tariff-card">
+                    <span className="tariff-badge">Масштаб</span>
+                    <h3 className="tariff-title">Для корпораций</h3>
+                    <div className="tariff-price">
+                      <span className="currency">$</span>
+                      <span className="amount">499</span>
+                      <span className="period">/мес</span>
+                    </div>
+                    <ul className="tariff-features" aria-label="Возможности тарифа Масштаб">
+                      <li><Check className="feature-icon" /> Безлимитные ИИ-агенты</li>
+                      <li><Check className="feature-icon" /> 100,000 диалогов в месяц</li>
+                      <li><Check className="feature-icon" /> Все каналы интеграции и API</li>
+                      <li><Check className="feature-icon" /> Персональный менеджер 24/7</li>
+                      <li><Check className="feature-icon" /> SLA и кастомные LLM-модели</li>
+                    </ul>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => triggerToast("Тариф Масштаб", "Вы выбрали тариф 'Масштаб'. Заявка отправлена менеджеру.", "success")}
+                    >
+                      Связаться с отделом продаж
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "faq" && (
+              <div className="tab-faq animate-fade-in">
+                {/* Хлебные крошки */}
+                <div className="content-breadcrumbs">
+                  <Breadcrumbs
+                    items={[
+                      { href: "#", label: "Главная", onClick: () => setActiveTab("dashboard") },
+                      { href: "#", label: "Консоль" },
+                      { current: true, label: "Частые вопросы" },
+                    ]}
+                  />
+                </div>
+
+                <div className="faq-heading text-center">
+                  <h2>Часто задаваемые вопросы</h2>
+                  <p className="subtitle">Всё, что вы хотели знать о создании ИИ-агентов на платформе AgentFlow</p>
+                </div>
+
+                <div className="faq-list">
+                  <div className="faq-item">
+                    <h3>Как ИИ-агент отвечает на сложные вопросы клиентов?</h3>
+                    <p>
+                      Агент обучается по предоставленной базе знаний. Если клиент задает вопрос, на который нет ответа в регламенте, агент не галлюцинирует, а мягко переводит диалог на оператора-человека, отправляя уведомление в CRM.
+                    </p>
+                  </div>
+
+                  <div className="faq-item">
+                    <h3>Какую LLM модель лучше выбрать при создании?</h3>
+                    <p>
+                      Для большинства задач продаж и квалификации лидов рекомендуется **GPT-4o**, так как она показывает наилучшее понимание намерений на русском языке. Для простых сервисных сценариев отлично подойдет **Gemini 1.5 Pro**.
+                    </p>
+                  </div>
+
+                  <div className="faq-item">
+                    <h3>Как происходит интеграция с моими мессенджерами?</h3>
+                    <p>
+                      Достаточно указать API-токен Telegram-бота или подключить бизнес-номер WhatsApp. Платформа AgentFlow берет на себя всю логику маршрутизации диалогов и сохранение истории переписки.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
 
             {activeTab === "workflow" && (
               <div className="tab-workflow animate-fade-in" style={{ padding: "24px", color: "#F8F9FA" }}>
@@ -1995,14 +2317,14 @@ function ConsoleView({ onBack }: { onBack: () => void }) {
                     items={[
                       { href: "#", label: "Главная", onClick: () => setActiveTab("dashboard") },
                       { href: "#", label: "Консоль" },
-                      { current: true, label: "Оркестратор ECC" },
+                      { current: true, label: "Оркестратор контекста" },
                     ]}
                   />
                 </div>
 
                 <div className="dashboard-header-row" style={{ display: "flex", justifyContent: "between", alignItems: "center", marginBottom: "24px" }}>
                   <div>
-                    <h2 style={{ fontSize: "24px", fontWeight: "900", color: "#F8F9FA" }}>Управление Оркестрацией ECC</h2>
+                    <h2 style={{ fontSize: "24px", fontWeight: "900", color: "#F8F9FA" }}>Управление Оркестрацией контекста</h2>
                     <p className="subtitle" style={{ fontSize: "14px", color: "#94A3B8" }}>Интерактивный трекинг стадий воркфлоу, Gate Approvals и оптимизация контекста</p>
                   </div>
                   
@@ -2150,7 +2472,7 @@ function ConsoleView({ onBack }: { onBack: () => void }) {
                     {/* State Truncation Gate Preview */}
                     <div className="section-card" style={{ background: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(12px)", border: "1px solid rgba(255, 255, 255, 0.05)", borderRadius: "16px", padding: "20px" }}>
                       <h3 style={{ fontSize: "16px", fontWeight: "bold", marginBottom: "8px", color: "#F8F9FA" }}>
-                        Оптимизация контекста (ECC State Truncation Gate)
+                        Оптимизация контекста (State Truncation Gate)
                       </h3>
                       <p style={{ fontSize: "12px", color: "#94A3B8", marginBottom: "16px" }}>
                         Агент автоматически очищает историю переписки и передает специалистам строго сжатые YAML/JSON payloads, отсекая лишние логи.
