@@ -1467,7 +1467,19 @@ function LandingView({ onConsole }: { onConsole: () => void }) {
 
 // === ORIGINAL CONSOLE VIEW (AGENTFLOW CONSOLE) ===
 function ConsoleView({ onBack }: { onBack: () => void }) {
-  const [activeTab, setActiveTab] = React.useState<"dashboard" | "create" | "billing" | "faq">("dashboard");
+  const [activeTab, setActiveTab] = React.useState<"dashboard" | "create" | "billing" | "faq" | "workflow">("dashboard");
+
+  const [selectedStage, setSelectedStage] = React.useState<string>("02-prd");
+  const [stageApprovals, setStageApprovals] = React.useState<Record<string, boolean>>({
+    "00-intake": true,
+    "01-research": true,
+    "02-prd": false,
+    "03-ia": false,
+    "04-design": false,
+    "08-frontend": false,
+    "11-qa": false,
+    "12-release": false,
+  });
 
   const [agents, setAgents] = React.useState<AIAgent[]>([
     {
@@ -1706,6 +1718,14 @@ function ConsoleView({ onBack }: { onBack: () => void }) {
             >
               <HelpCircle className="nav-icon" />
               <span>Частые вопросы</span>
+            </button>
+
+            <button
+              className={`nav-item ${activeTab === "workflow" ? "active" : ""}`}
+              onClick={() => setActiveTab("workflow")}
+            >
+              <Cpu className="nav-icon" />
+              <span>Оркестратор ECC</span>
             </button>
           </nav>
 
@@ -1962,6 +1982,195 @@ function ConsoleView({ onBack }: { onBack: () => void }) {
                         ))}
                       </div>
                     </div>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+            {activeTab === "workflow" && (
+              <div className="tab-workflow animate-fade-in" style={{ padding: "24px", color: "#F8F9FA" }}>
+                <div className="content-breadcrumbs" style={{ marginBottom: "20px" }}>
+                  <Breadcrumbs
+                    items={[
+                      { href: "#", label: "Главная", onClick: () => setActiveTab("dashboard") },
+                      { href: "#", label: "Консоль" },
+                      { current: true, label: "Оркестратор ECC" },
+                    ]}
+                  />
+                </div>
+
+                <div className="dashboard-header-row" style={{ display: "flex", justifyContent: "between", alignItems: "center", marginBottom: "24px" }}>
+                  <div>
+                    <h2 style={{ fontSize: "24px", fontWeight: "900", color: "#F8F9FA" }}>Управление Оркестрацией ECC</h2>
+                    <p className="subtitle" style={{ fontSize: "14px", color: "#94A3B8" }}>Интерактивный трекинг стадий воркфлоу, Gate Approvals и оптимизация контекста</p>
+                  </div>
+                  
+                  <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                    <div style={{ background: "rgba(0, 95, 252, 0.1)", border: "1px solid rgba(0, 95, 252, 0.2)", borderRadius: "12px", padding: "8px 16px", fontSize: "12px", fontWeight: "bold", color: "#005FFC" }}>
+                      Сэкономлено токенов: <span style={{ color: "#10B981" }}>41,200 (38%)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "24px" }}>
+                  
+                  {/* Левая колонка - Граф Шагов */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                    <div className="section-card" style={{ background: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(12px)", border: "1px solid rgba(255, 255, 255, 0.05)", borderRadius: "16px", padding: "20px" }}>
+                      <h3 style={{ fontSize: "16px", fontWeight: "bold", marginBottom: "16px", color: "#F8F9FA" }}>Стадии воркфлоу</h3>
+                      
+                      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                        {[
+                          { id: "00-intake", title: "Intake & Briefing", desc: "Сбор требований и recursive brief" },
+                          { id: "01-research", title: "Deep Research", desc: "Анализ конкурентов, SWOT, персоны" },
+                          { id: "02-prd", title: "Product PRD", desc: "Спецификация требований и MoSCoW" },
+                          { id: "03-ia", title: "Information Architecture", desc: "Главный экран и Sitemap" },
+                          { id: "04-design", title: "Design Discovery", desc: "Visual spec и дизайн-бриф" },
+                          { id: "08-frontend", title: "Frontend Implementation", desc: "Bespoke UI кастомная верстка" },
+                          { id: "11-qa", title: "QA & Visual Review", desc: "Плейрайт и скриншот-сверка" },
+                          { id: "12-release", title: "Release & Publish", desc: "Notion экспорт и деплой" }
+                        ].map((stage) => {
+                          const isApproved = stageApprovals[stage.id];
+                          const isSelected = selectedStage === stage.id;
+                          return (
+                            <div
+                              key={stage.id}
+                              onClick={() => setSelectedStage(stage.id)}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "12px",
+                                padding: "12px",
+                                borderRadius: "12px",
+                                background: isSelected ? "rgba(0, 95, 252, 0.15)" : "transparent",
+                                border: isSelected ? "1px solid rgba(0, 95, 252, 0.3)" : "1px solid transparent",
+                                cursor: "pointer",
+                                transition: "all 0.2s"
+                              }}
+                            >
+                              <div style={{
+                                width: "24px",
+                                height: "24px",
+                                borderRadius: "50%",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                background: isApproved ? "#10B981" : "#F59E0B",
+                                color: "white",
+                                fontSize: "10px",
+                                fontWeight: "bold"
+                              }}>
+                                {isApproved ? "✓" : "!"}
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: "13px", fontWeight: "bold", color: isSelected ? "#005FFC" : "#F8F9FA" }}>{stage.title}</div>
+                                <div style={{ fontSize: "10px", color: "#64748B" }}>{stage.desc}</div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Правая колонка - Управление Approvals и Логи */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                    
+                    {/* Gate Approval Panel */}
+                    <div className="section-card" style={{ background: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(12px)", border: "1px solid rgba(255, 255, 255, 0.05)", borderRadius: "16px", padding: "20px" }}>
+                      <h3 style={{ fontSize: "18px", fontWeight: "bold", marginBottom: "8px", color: "#F8F9FA" }}>
+                        Панель Согласования (Quality Gate)
+                      </h3>
+                      <p style={{ fontSize: "12px", color: "#94A3B8", marginBottom: "20px" }}>
+                        Каждый этап требует ручного подтверждения (Human Approval Gate) перед переходом субагентов к следующему шагу воркфлоу.
+                      </p>
+
+                      <div style={{ background: "rgba(255, 255, 255, 0.02)", borderRadius: "12px", padding: "16px", border: "1px solid rgba(255, 255, 255, 0.05)", marginBottom: "20px" }}>
+                        <div style={{ display: "flex", justifyContent: "between", alignItems: "center", marginBottom: "12px" }}>
+                          <span style={{ fontSize: "14px", fontWeight: "bold" }}>Текущий шаг для согласования: </span>
+                          <span style={{ fontSize: "12px", color: "#F59E0B", fontWeight: "black", textTransform: "uppercase" }}>
+                            {selectedStage === "02-prd" ? "02-PRD (Product Requirements)" : selectedStage}
+                          </span>
+                        </div>
+                        
+                        <div style={{ fontSize: "12px", color: "#94A3B8", lineHeight: "1.6", marginBottom: "16px" }}>
+                          {selectedStage === "02-prd" && "Спецификация требований MVP составлена. Включены разделы MoSCoW приоритизации, критерии приемки и интеграции с аналитикой. Запуск разработки фронтенда заблокирован до утверждения требований."}
+                          {selectedStage === "03-ia" && "Информационная архитектура завершена. Описан Sitemap, главное пользовательское действие и сценарии перехода. Готово к утверждению."}
+                          {selectedStage === "04-design" && "Дизайн-концепцияBespoe UI готова. Выявлены HEX-цвета референса, шрифты и адаптивная сетка. Готово к утверждению."}
+                          {selectedStage !== "02-prd" && selectedStage !== "03-ia" && selectedStage !== "04-design" && "Стадия проверена автоматическими тестами. Требуется финальное подтверждение для синхронизации результатов."}
+                        </div>
+
+                        <div style={{ display: "flex", gap: "12px" }}>
+                          <button
+                            onClick={() => {
+                              setStageApprovals(prev => ({ ...prev, [selectedStage]: true }));
+                              triggerToast("Gate Approved", `Стадия ${selectedStage} успешно согласована!`, "success");
+                            }}
+                            disabled={stageApprovals[selectedStage]}
+                            style={{
+                              padding: "10px 20px",
+                              borderRadius: "8px",
+                              background: stageApprovals[selectedStage] ? "#10B981" : "#005FFC",
+                              color: "white",
+                              fontWeight: "bold",
+                              fontSize: "12px",
+                              cursor: stageApprovals[selectedStage] ? "not-allowed" : "pointer",
+                              border: "none",
+                              transition: "all 0.2s"
+                            }}
+                          >
+                            {stageApprovals[selectedStage] ? "✓ Согласовано" : "Утвердить и Разрешить следующий шаг"}
+                          </button>
+                          
+                          {!stageApprovals[selectedStage] && (
+                            <button
+                              onClick={() => {
+                                triggerToast("Gate Rejected", `Стадия ${selectedStage} отправлена на доработку субагенту`, "error");
+                              }}
+                              style={{
+                                padding: "10px 20px",
+                                borderRadius: "8px",
+                                background: "rgba(239, 68, 68, 0.15)",
+                                border: "1px solid #EF4444",
+                                color: "#EF4444",
+                                fontWeight: "bold",
+                                fontSize: "12px",
+                                cursor: "pointer",
+                                transition: "all 0.2s"
+                              }}
+                            >
+                              Отклонить (На доработку)
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* State Truncation Gate Preview */}
+                    <div className="section-card" style={{ background: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(12px)", border: "1px solid rgba(255, 255, 255, 0.05)", borderRadius: "16px", padding: "20px" }}>
+                      <h3 style={{ fontSize: "16px", fontWeight: "bold", marginBottom: "8px", color: "#F8F9FA" }}>
+                        Оптимизация контекста (ECC State Truncation Gate)
+                      </h3>
+                      <p style={{ fontSize: "12px", color: "#94A3B8", marginBottom: "16px" }}>
+                        Агент автоматически очищает историю переписки и передает специалистам строго сжатые YAML/JSON payloads, отсекая лишние логи.
+                      </p>
+
+                      <div style={{ background: "#0F172A", borderRadius: "12px", padding: "16px", border: "1px solid rgba(255, 255, 255, 0.05)", fontFamily: "monospace", fontSize: "11px", color: "#10B981" }}>
+                        <div style={{ color: "#64748B", marginBottom: "8px" }}># handoff-bundle-truncated.md (YAML Spec)</div>
+                        <div>---</div>
+                        <div>schema_payload:</div>
+                        <div>  status: ready</div>
+                        <div>  current_stage: "{selectedStage}"</div>
+                        <div>  goal: "Разработка облачного конфигуратора B2B"</div>
+                        <div>  moscow_must:</div>
+                        <div>    - "Hero с ясным CTA"</div>
+                        <div>    - "Адаптивная верстка (Tailwind)"</div>
+                        <div>    - "Форма обратной связи без PII"</div>
+                        <div>---</div>
+                      </div>
+                    </div>
+
                   </div>
 
                 </div>

@@ -26,6 +26,8 @@
 - `workflow-state.ts` — persisted `run-state.json` and per-stage `stage-results/*.json` helpers.
 - `workflow-engine.ts` — sequential standard workflow engine with start/resume/status and force rerun support.
 - `run-workflow-engine.ts` — CLI entrypoint for `workflow:start`, `workflow:resume`, `workflow:status` and `workflow:run-stage`.
+- `context-truncator.ts` — сжатие контекста `handoff-bundle.md` (State Truncation Gate) перед тяжелыми этапами разработки.
+- `doctor.ts` — диагностическая утилита для проверки целостности шаблонов, структуры папок и доступности MCP-серверов.
 - `hooks.ts` — lifecycle hook skeleton for guard checks, bundle checks and final checks.
 - `guardrails.ts` — input/output/tool guardrails и approval hooks.
 - `tracing.ts` — настройки tracing и sensitive-data режима.

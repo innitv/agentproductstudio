@@ -28,6 +28,7 @@
     "workflow:resume": "tsx runtime/typescript/run-workflow-engine.ts resume",
     "workflow:status": "tsx runtime/typescript/run-workflow-engine.ts status",
     "workflow:run-stage": "tsx runtime/typescript/run-workflow-engine.ts run-stage",
+    "workflow:doctor": "tsx runtime/typescript/doctor.ts",
     "reference:scan": "tsx runtime/typescript/reference-scan.ts",
     "reference:diff": "tsx runtime/typescript/visual-diff.ts",
     "reference:section-diff": "tsx runtime/typescript/visual-section-diff.ts",

@@ -286,8 +286,8 @@ yarn build
 yarn qa:playwright
 yarn qa:firecrawl
 yarn reference:scan <reference-url> [slug]
-yarn landing:run "<цель workflow>"
 yarn research:run outputs/<project-slug>/<YYYY-MM-DD> ["research query"]
+yarn landing:run "<цель workflow>"
 yarn workflow:run-local "<цель workflow>"
 yarn workflow:start "<цель workflow>"
 yarn workflow:resume outputs/<project-slug>/<YYYY-MM-DD>
@@ -296,6 +296,7 @@ yarn workflow:run-stage outputs/<project-slug>/<YYYY-MM-DD> 01-research --force
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through 01-research
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
+yarn workflow:doctor
 ```
 
 Schema-aware artifact validation:

@@ -6,6 +6,7 @@ import { runLandingWorkflow } from "./run-landing-workflow";
 import { buildLocalDownstreamArtifacts, writeLocalStageArtifact } from "./run-local-workflow";
 import { runResearchStage } from "./research-stage-runner";
 import { validateWorkflowRun } from "./validate-workflow-run";
+import { truncateContextForSpecialist } from "./context-truncator";
 import { artifactFiles, getWorkflowStagesForProfile, type WorkflowProfile } from "./workflow-stages";
 import {
   hasRunState,
@@ -106,6 +107,7 @@ export async function resumeWorkflowEngine(outputDir: string): Promise<WorkflowR
     await writeRunState(state);
 
     try {
+      await truncateContextForSpecialist(outputDir, stage.id);
       const result = await runStage(outputDir, state.goal, stage.id);
       await validateThroughStage(outputDir, stage.id, state.profile);
       state = await readRunState(outputDir);

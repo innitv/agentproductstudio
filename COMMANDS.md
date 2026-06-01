@@ -222,6 +222,20 @@ yarn notion:mcp
 
 Research publication для полного workflow остается обязательным gate: нужно опубликовать research-only child page или зафиксировать blocker/partial в artifacts.
 
+## Diagnostics & Repair
+
+Запустить утилиту диагностики окружения, ключей и целостности файлов:
+
+```bash
+yarn workflow:doctor
+```
+
+Запустить диагностику с автоматическим восстановлением (repair) поврежденных или удаленных шаблонов артефактов:
+
+```bash
+yarn workflow:doctor --repair
+```
+
 ## Typical Flows
 
 Standard flow без visual reference:

@@ -20,7 +20,10 @@
 4. Каждый агент обязан возвращать структурированный результат по контракту из `agent-pack/templates/agent-output-contract.schema.md`.
 5. Для продуктового pipeline не отдавай финальный результат напрямую от специалиста: финал собирает только `orchestrator`.
 6. Форматы файлов и нейминг смотри в `agent-pack/templates/file-format-conventions.md`.
-7. **Правило State Truncation Gate (Минимизация контекста):** При передаче управления специалистам на поздних стадиях (начиная с `08-frontend`), `orchestrator` обязан очищать накопившуюся историю переписки (conversation history) и передавать специалисту исключительно отфильтрованные данные `handoff-bundle.md` и конкретные файлы входов (inputs), требуемые для данного этапа согласно `workflow-stages.ts`. Это снижает потребление токенов на 30-40% и повышает точность работы моделей.
+7. **Правило State Truncation Gate (Минимизация контекста):** При передаче управления специалистам на поздних стадиях (начиная с `08-frontend`), оркестратор с помощью [context-truncator.ts](file:///c:/Project/product-agent-studio/runtime/typescript/context-truncator.ts) обязан очищать накопившуюся историю переписки и передавать специалисту исключительно отфильтрованные и структурированные данные `handoff-bundle.md` и конкретные файлы входов. Это снижает потребление токенов на 30-40% и повышает точность работы моделей.
+8. **Использование Навыков (Skills):** Для повторяющихся технических действий агенты используют библиотеку структурированных навыков в `agent-pack/skills/` (таких как [landing-builder/SKILL.md](file:///c:/Project/product-agent-studio/agent-pack/skills/landing-builder/SKILL.md) для фронтенда и [visual-diff-verifier/SKILL.md](file:///c:/Project/product-agent-studio/agent-pack/skills/visual-diff-verifier/SKILL.md) для QA).
+9. **Developer Control Panel (Web-GUI):** Все Gate Approvals и проверка текущего сжатого контекста осуществляются через локальный веб-интерфейс в `apps/frontend`.
+10. **Самодиагностика (Doctor):** Перед каждым запуском воркфлоу или проверкой среды запускается утилита [doctor.ts](file:///c:/Project/product-agent-studio/runtime/typescript/doctor.ts) с помощью команды `yarn workflow:doctor` для проверки секретов, MCP и целостности шаблонов.
 
 ## Artifact-driven принцип
 
