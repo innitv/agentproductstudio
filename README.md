@@ -180,8 +180,12 @@ apps/
     vite.config.ts
     src/
       App.tsx
+      types.ts
       main.tsx
       styles.css
+      views/
+        LandingView.tsx
+        ConsoleView.tsx
 design/
   figma/
     a3-design-system/
