@@ -3,6 +3,7 @@ agent_name: design-generator
 owner_stage_ids:
   - 06-screens
 required_inputs:
+  - prd
   - ia_brief
   - design_brief
   - copy_deck

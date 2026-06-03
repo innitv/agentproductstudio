@@ -3,9 +3,13 @@ agent_name: copywriting
 owner_stage_ids:
   - 05-copy
 required_inputs:
+  - recursive_brief
   - prd
   - design_brief
   - research_summary
+  - competitive_analysis
+  - proto_personas
+  - handoff_bundle
 required_outputs:
   - copy_deck
 approval_actions: []

@@ -5,10 +5,13 @@ owner_stage_ids:
 required_inputs:
   - prd
   - ia_brief
+  - reference_analysis
   - design_brief
   - screens
   - copy_deck
   - prototype_report
+  - visual_reference_review
+  - handoff_bundle
 required_outputs:
   - frontend_result
 approval_actions: []

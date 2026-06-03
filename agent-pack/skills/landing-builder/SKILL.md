@@ -1,7 +1,8 @@
 ---
 id: landing-builder
+name: landing-builder
 title: "Bespoke UI Landing Builder"
-description: "Сборка премиальных кастомных интерфейсов с нуля на чистом Tailwind CSS и React без использования готовых шаблонных UI-библиотек"
+description: "Use when implementing stage 08-frontend for a landing, console, or product UI from approved PRD/IA/design/copy/screens/prototype artifacts. Builds bespoke React/Vite/Tailwind UI, derives style from design artifacts or reference-analysis, preserves workflow gates, and writes frontend_result evidence."
 platforms:
   - codex
   - open-code
@@ -26,42 +27,51 @@ validation_commands:
 contract_schema: agent-pack/templates/skill.template.md
 ---
 
-# Навык: Bespoke UI Landing Builder
+# Skill: Bespoke UI Landing Builder
 
-## 1. Контекст (Context)
-Этот навык предназначен для создания уникальных, высококачественных и отзывчивых веб-интерфейсов и лендингов с использованием кастомных стилей Tailwind CSS. Шаблонный дизайн, использование готовых сеток или стандартных серых/синих кнопок категорически запрещено. Интерфейс должен выглядеть премиально, иметь плавные микро-анимации и идеально подходить под специфику продукта.
+## 1. Назначение
 
-## 2. Триггеры (Triggers)
-Агент применяет этот навык автоматически на этапе:
-- **Стадия воркфлоу**: `08-frontend` (реализация интерфейса).
-- **Событие**: Получение спецификации дизайна (`design-brief.md`, `screens.md`, `copy-deck.md`).
-- **Стек**: React + Vite + Tailwind CSS. Верстка целевого лендинга и калькуляторов осуществляется в presentation view внутри `apps/frontend/src/views/`. Для обновления текущего базового лендинга используется [LandingView.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/views/LandingView.tsx); для нового самостоятельного продукта допустим отдельный `<ProductName>View.tsx`. `ConsoleView.tsx` защищен от модификации кодом лендинга. `App.tsx` должен оставаться тонким роутером и может меняться только для подключения/выбора view. Общие типы данных выносятся в `types.ts`.
+Применяй skill только для `08-frontend`, когда уже есть `prd.md`, `ia-brief.md`, `design-brief.md`, `screens.md`, `copy-deck.md` и `prototype-report.md`. Frontend в полном workflow нельзя начинать раньше этих артефактов, кроме явно отмеченного `quick draft`.
 
-## 3. Пошаговый алгоритм выполнения (Action Step-by-Step)
+Стек по умолчанию: React + Vite + Tailwind CSS. Верстка целевого лендинга и калькуляторов живет в `apps/frontend/src/views/`. Для базового лендинга используй `apps/frontend/src/views/LandingView.tsx`; для отдельного продукта допустим новый `<ProductName>View.tsx`. `ConsoleView.tsx` не смешивай с кодом лендинга. `App.tsx` держи тонким роутером.
 
-### Шаг 1: Discovery-анализ визуальных токенов
-1. Прочитать `design-brief.md` и извлечь точную цветовую палитру (HEX/RGBA), карту шрифтов, размеры теней, скруглений (border-radius) и отступов.
-2. Прочитать `design/figma/a3-design-system/token-map.md` для интеграции общих токенов дизайн-системы.
+## 2. Обязательные inputs
 
-### Шаг 2: Инициализация базового стиля
-1. Обновить `apps/frontend/src/styles.css`, внедрив CSS-переменные для нашей уникальной цветовой схемы, чтобы обеспечить темный/светлый режимы (или единый премиальный темный режим, если требуется).
-2. Задать базовые стили для скроллбара, типографики и фоновых эффектов (например, mesh-градиенты или blur-эффекты).
+Перед изменением кода прочитай:
+- `prd.md`: цели, acceptance criteria, analytics.
+- `ia-brief.md`: sitemap, primary flow, главный экран и действие.
+- `design-brief.md`: визуальные токены, компоненты, responsive, accessibility.
+- `screens.md`: порядок экранов/секций и состояния.
+- `copy-deck.md`: финальные тексты, CTA, SEO, claims.
+- `prototype-report.md`: transition map и интерактивные сценарии.
+- `reference-analysis.md`, если задача reference-driven.
 
-### Шаг 3: Поблочная сборка интерфейса
-1. **Hero-секция (Первый экран)**:
-   - Сделать его визуально ошеломляющим: использовать градиентные тексты (`bg-clip-text bg-gradient-to-r`), интерактивные подложки с размытием (`backdrop-blur-md`).
-   - Кнопка призыва к действию (CTA) должна иметь микро-анимацию наведения (`hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(var(--primary-color),0.5)]`).
-2. **Секции ценности (Value / Features)**:
-   - Использовать карточки с эффектом стеклянного матового стекла (Glassmorphic cards): `bg-white/5 border border-white/10 backdrop-blur-md`.
-   - Структура сетки должна быть отзывчивой (`grid grid-cols-1 md:grid-cols-3 gap-8`).
-3. **Форма заявки (Lead Form)**:
-   - Чистая кастомная форма. Поля ввода должны иметь плавные focus-эффекты (`focus:ring-2 focus:ring-primary-500 border-white/20 bg-black/40 transition-all`).
+## 3. Процедура
 
-### Шаг 4: Интеграция микро-анимаций через Framer Motion
-- Добавить плавное появление секций при скролле (scroll-triggered animations) с помощью `framer-motion` (компоненты `motion.div`, `whileInView`, `viewport={{ once: true }}`).
+1. Извлеки implementation checklist из входных артефактов: секции, состояния, CTA, формы, analytics hooks, responsive breakpoints, accessibility notes.
+2. Собери UI bespoke-стилем: CSS Grid/Flexbox и Tailwind только как запись значений из design/reference artifacts. Не используй готовые шаблоны, дефолтные сетки и стандартный "component library look".
+3. В reference-driven задаче layout, gaps, column counts, aspect ratios и section order бери только из `reference-analysis.md`; не подставляй Bootstrap-like/12-column defaults.
+4. В обычной задаче стиль выводи из `design-brief.md`. Не навязывай glassmorphism, gradients, blur или темную тему, если они не заданы дизайном.
+5. Реализуй состояния: loading/empty/error/success для форм и ключевых интерактивных элементов, hover/focus/disabled для controls.
+6. Подключи analytics hooks из PRD без отправки PII в event payload.
+7. Обнови `frontend-result.md` в run directory: changed files, implemented screens/sections, analytics hooks, accessibility/responsive notes, validation commands.
 
-## 4. Контроль Качества и Проверки (Validation / Quality Gates)
-- [ ] Отсутствуют стандартные цвета Tailwind (например, чистый `bg-red-500` или `bg-blue-600`). Используются только кастомные гармоничные палитры.
-- [ ] Первый экран полностью влезает в стандартную область просмотра без ломаного скролла.
-- [ ] Все интерактивные элементы (кнопки, ссылки, карточки, инпуты) имеют hover/focus эффекты.
-- [ ] Проект успешно собирается по команде `yarn build` без TypeScript-ошибок.
+## 4. Evidence и failure modes
+
+`frontend-result.md` обязан содержать:
+- список измененных файлов;
+- какие inputs прочитаны;
+- какие acceptance criteria закрыты;
+- какие команды проверки запущены и их результат;
+- известные ограничения или blockers.
+
+Блокируй stage как `blocked`/`partial`, если нет обязательных upstream artifacts, задача reference-driven без `reference-analysis.md`, frontend просит Figma write/deploy без approval или build/typecheck не проходит.
+
+## 5. Validation gates
+
+- [ ] `yarn typecheck` проходит.
+- [ ] `yarn build` проходит.
+- [ ] Первый viewport не ломается на desktop/mobile.
+- [ ] Нет horizontal overflow, перекрытия текста, битых изображений.
+- [ ] Keyboard focus видим на интерактивных элементах.
+- [ ] Analytics hooks соответствуют PRD и не содержат PII.

@@ -6,6 +6,7 @@ required_inputs:
   - prd
   - research_summary
   - ia_brief
+  - copy_deck
 required_outputs:
   - design_brief
   - reference_analysis

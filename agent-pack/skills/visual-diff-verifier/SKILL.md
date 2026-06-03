@@ -1,7 +1,8 @@
 ---
 id: visual-diff-verifier
+name: visual-diff-verifier
 title: "Visual Reference Screenshot Verifier"
-description: "Поблочная и скриншот-сверка готового интерфейса с визуальным референсом (desktop и mobile) для выявления любых композиционных расхождений"
+description: "Use when a task is reference-driven or stage 09-visual-reference/11-qa must compare implementation against a screenshot or URL reference. Requires technical reference scan, paired reference/local section screenshots, visual diff artifacts, and visual_reference_review evidence before success."
 platforms:
   - codex
   - open-code
@@ -26,46 +27,47 @@ validation_commands:
 contract_schema: agent-pack/templates/skill.template.md
 ---
 
-# Навык: Visual Reference Screenshot Verifier
+# Skill: Visual Reference Screenshot Verifier
 
-## 1. Context (Контекст)
-Если пользователь предоставил скриншоты или URL визуального референса (просит сделать "как этот сайт"), финальная сдача проекта категорически заблокирована до проведения глубокой визуальной сверки. Этот навык описывает пошаговую процедуру проведения сравнения "пиксель-в-пиксель" для десктопной и мобильной версий, а также составление отчета `visual-reference-review.md`.
+## 1. Назначение
 
-## 2. Triggers (Триггеры)
-Агент применяет этот навык на этапе:
-- **Стадия воркфлоу**: `11-qa` (контроль качества).
-- **Событие**: Наличие в репозитории файла `reference-analysis.md` или флага `visual-reference` в воркфлоу.
-- **Инструмент**: Запущенный локальный сервер разработки `apps/frontend` и Playwright MCP.
+Применяй skill, если пользователь дал screenshot, URL референса или просит сделать "как этот сайт". Финальный `success` запрещен, пока нет технического скана референса, поблочных paired screenshots и `visual-reference-review.md`.
 
-## 3. Action Step-by-Step (Алгоритм выполнения)
+## 2. Обязательные inputs
 
-### Шаг 1: Подготовка скриншотов референса
-1. Запустить команду `yarn reference:scan <reference-url> [slug]` для захвата скриншотов референсного сайта (desktop и mobile) во всех viewport.
-2. Сохранить полученные скриншоты в папку `reports/visual-review/reference/`.
+- `reference-analysis.md`, созданный после `yarn reference:scan <url> [slug]`.
+- `design-brief.md` и `screens.md`, которые явно используют reference spec.
+- `frontend-result.md` с локальным URL или способом запуска.
 
-### Шаг 2: Снятие скриншотов текущей реализации
-1. Убедиться, что локальный dev-сервер запущен: `npm run dev` или `yarn build` + локальный хостинг.
-2. Сделать полные скриншоты страниц (full-page screenshots) нашей реализации с помощью Playwright для Desktop (1280x800) и Mobile (375x812).
-3. Сохранить их в `reports/visual-review/implementation/`.
+## 3. Процедура
 
-### Шаг 3: Проведение поблочного сравнения
-1. Для каждой видимой секции снять пары reference/local с одинаковыми именами:
-   - `reference-desktop-section-<name>.png` + `local-desktop-section-<name>.png`.
-   - `reference-mobile-section-<name>.png` + `local-mobile-section-<name>.png`.
-2. Для каждой пары запустить пиксельное сравнение:
-   - Использовать встроенные утилиты `yarn reference:diff` и `yarn reference:section-diff`.
-   - Сохранить `visual-diff-result.json` и `visual-diff-summary.md`.
-3. Зафиксировать расхождения в сетке, отступах (margin/padding), размерах шрифтов, контрастности кнопок и CTA-элементов.
+1. Перед созданием или обновлением `reference-analysis.md` запусти `yarn reference:scan <reference-url> [slug]`. Если `FIRECRAWL_API_KEY` не задан, используй локальный Playwright fallback, предусмотренный сканером.
+2. Проверь, что в `reports/visual-review/` физически сохранены desktop и mobile screenshots референса.
+3. Запусти локальную реализацию через проектный yarn-flow: `yarn build` плюс локальный preview/host, либо уже доступный dev server из `frontend-result.md`.
+4. Захвати reference и local секции в одном naming contract:
+   - `reference-desktop-section-<name>.png`
+   - `reference-mobile-section-<name>.png`
+   - `local-desktop-section-<name>.png`
+   - `local-mobile-section-<name>.png`
+5. Запусти `yarn reference:diff <reference-report-dir> <local-report-dir> [output-dir]` и, если доступны секционные пары, `yarn reference:section-diff`.
+6. Прочитай `visual-diff-result.json` перед вердиктом. Не заменяй diff фразой "похоже".
+7. Запиши `visual-reference-review.md` с таблицей: section, reference screenshot, local screenshot, diff result, status, corrections.
 
-### Шаг 4: Формирование отчета `visual-reference-review.md`
-Записать отчет в текущую run-папку, заполнив следующие разделы:
-- **Status**: `pass` (если расхождения < 5%), `partial` или `blocked` (если есть явные визуальные баги).
-- **Section-by-section comparison**: подробная таблица сравнения с указанием ссылок на скриншоты.
-- **Specific corrections needed**: список правок, которые необходимо внести во фронтенд-код, если проверка не пройдена.
+## 4. Evidence и failure modes
 
-## 4. Validation / Quality Gates (Критерии качества)
-- [ ] Скриншоты сняты как для desktop-версии, так и для mobile.
-- [ ] Для каждой видимой секции существуют пары reference/local desktop и mobile.
-- [ ] `visual-diff-result.json` создан через `yarn reference:diff` и прочитан перед вердиктом.
-- [ ] Ошибки верстки, такие как наложение текста, вылезание блоков за рамки экрана (horizontal overflow) или битые картинки, полностью отсутствуют.
-- [ ] Разница (pixel-diff percentage) на первом экране (Hero) составляет менее 3%.
+`visual-reference-review.md` обязан ссылаться на реальные screenshot files и `visual-diff-result.json`.
+
+Ставь `blocked`/`partial`, если:
+- нет `reference-analysis.md`;
+- reference scan не запускался в текущей задаче;
+- есть только local screenshots без reference pair;
+- есть нерешенные расхождения в layout, typography, spacing, media, CTA или mobile behavior;
+- скриншоты взяты из старого или несвязанного отчета.
+
+## 5. Validation gates
+
+- [ ] `yarn reference:scan` был запущен для текущего reference.
+- [ ] Desktop и mobile screenshots существуют для reference и local.
+- [ ] Для каждой видимой секции есть пары reference/local.
+- [ ] `visual-diff-result.json` создан и прочитан.
+- [ ] Нет horizontal overflow, перекрытия текста, битых изображений и missing media.

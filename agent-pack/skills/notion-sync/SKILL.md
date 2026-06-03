@@ -1,7 +1,8 @@
 ---
 id: notion-sync
+name: notion-sync
 title: "Notion Research & PRD Sync"
-description: "Автоматический экспорт и синхронизация локальных артефактов исследований (SWOT, персоны, конкуренты) и требований (PRD) в рабочее пространство Notion"
+description: "Use when 01-research or 12-release needs human-approved Notion publication/export of research-only or PRD artifacts. Prepares readable notion_research_export_ru, asks approval in chat, publishes only allowed content, and records blocked/partial states when approval, token, parent page, or permissions are missing."
 platforms:
   - codex
   - open-code
@@ -31,39 +32,53 @@ validation_commands:
 contract_schema: agent-pack/templates/skill.template.md
 ---
 
-# Навык: Notion Research & PRD Sync
+# Skill: Notion Research & PRD Sync
 
-## 1. Context (Контекст)
-На этапе выпуска релиза субагенты обязаны синхронизировать русскую версию пакета исследований (`research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `swot.md`) и требований в Notion. Этот навык регламентирует шаги для безопасного, структурированного экспорта с прохождением Quality Gates без утечки сырых пайлоадов или личной информации (PII).
+## 1. Назначение
 
-## 2. Triggers (Триггеры)
-Агент применяет этот навык на этапе:
-- **Стадия воркфлоу**: `12-release` (релиз и публикация).
-- **Событие**: Наличие в репозитории готового отчета QA (`qa-report.md`) со статусом `pass` или `pass_with_known_limitations`.
-- **Настройка**: Наличие `NOTION_TOKEN` в локальном файле `.env` и одобрение пользователя на внешнюю публикацию.
+Применяй skill только для Notion publication/export stages. Любая запись во внешний Notion требует human approval в текущем диалоге и доступных credentials. Нельзя молча пропускать approval request.
 
-## 3. Action Step-by-Step (Алгоритм выполнения)
+## 2. Обязательные inputs
 
-### Шаг 1: Верификация окружения и токенов
-1. Запустить проверку токена через команду `yarn notion:check`.
-2. Убедиться, что целевой Page ID указан в `.env` (переменная `NOTION_PAGE_ID` или `NOTION_TARGET`) либо в файле `workflow-scaffold.md`.
+Для research publication:
+- `research-summary.md`
+- `competitive-analysis.md`
+- `proto-personas.md`
+- `synthetic-interviews.md`
+- `swot.md`
+- `stage-gate-ledger.md`
 
-### Шаг 2: Проверка одобрения пользователя (Human Approval Gate)
-1. Проверить в `stage-gate-ledger.md` наличие явного текстового подтверждения пользователя на публикацию в Notion.
-2. Если подтверждение отсутствует, остановить выполнение шага со статусом `blocked`.
+Для PRD/export:
+- `prd.md`
+- approval record для соответствующего действия.
 
-### Шаг 3: Экспорт пакета исследований (Research Pack)
-1. Считать файлы исследований из run-папки.
-2. Запустить скрипт `yarn notion:mcp` (или воспользоваться Notion MCP).
-3. Создать дочернюю страницу (Child Page) внутри родительской страницы Notion с понятным русским названием (например, *«Пакет исследований: [Название Продукта] [Дата]»*).
-4. Импортировать таблицы анализа конкурентов, SWOT-квадранты и карточки персон, преобразуя Markdown в блоки Notion.
+## 3. Процедура research publication
 
-### Шаг 4: Экспорт требований (PRD Agile Board)
-1. Считать файл требований `prd.md`.
-2. Извлечь разделы MoSCoW-приоритизации и пользовательских историй.
-3. Запустить экспорт с помощью скрипта `node tooling/scripts/publish-notion-stories.mjs` для автоматического создания тасок на Agile Board.
+1. Подготовь `notion-research-export-ru.md` до запроса approval.
+2. Экспорт должен быть человекочитаемым: без workflow dump, schema/frontmatter, raw JSON, machine-readable payloads, code-block копий артефактов, frontend/release/log files.
+3. В конце `01-research` явно спроси в чате: `Разрешить публикацию пакета исследований в Notion?`
+4. Если пользователь разрешил, проверь `NOTION_TOKEN`, parent page и права. Затем публикуй только research pack в отдельную child page.
+5. Запиши publication URL/page id в `stage-gate-ledger.md`, `handoff-bundle.md` и, если workflow дошел до release, `release-notes.md`.
 
-## 4. Validation / Quality Gates (Критерии качества)
-- [ ] Опубликованный контент полностью переведен на русский язык.
-- [ ] В Notion не экспортируются сырые JSON/YAML payloads, системные frontmatter или технические machine-readable payloads.
-- [ ] Все ссылки на страницы исследований и Agile-доску Notion записаны в локальный `release-notes.md`.
+## 4. Процедура PRD/Agile export
+
+1. Отдельно запроси approval для PRD/export/agile board, если он не был явно дан.
+2. Экспортируй только согласованные PRD/user story sections.
+3. Не отправляй secrets, raw traces, private logs, machine payloads.
+
+## 5. Evidence и failure modes
+
+Если approval denied/missing, `NOTION_TOKEN` отсутствует, parent page не задан или прав нет, зафиксируй `blocked`/`partial` в:
+- `run-plan.md`;
+- `handoff-bundle.md`;
+- `stage-gate-ledger.md`;
+- `release-notes.md`, если он уже существует.
+
+Полный workflow нельзя завершать как `success`, если Notion research page пропущена без явного blocker/partial record.
+
+## 6. Validation gates
+
+- [ ] `notion-research-export-ru.md` создан до approval request.
+- [ ] Approval задан явно в чате.
+- [ ] Published content не содержит raw/schema/machine payloads.
+- [ ] Publication URL или blocker записан в workflow artifacts.

@@ -5,6 +5,11 @@ owner_stage_ids:
 required_inputs:
   - recursive_brief
   - research_summary
+  - competitive_analysis
+  - proto_personas
+  - synthetic_interviews
+  - swot
+  - handoff_bundle
 required_outputs:
   - prd
 approval_actions: []

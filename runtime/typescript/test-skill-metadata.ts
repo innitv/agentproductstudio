@@ -30,6 +30,7 @@ function assertMetadataError(errors: string[], pattern: RegExp): void {
 const parsed = parseSkillInstructionDocument([
   "---",
   "id: fixture-skill",
+  "name: fixture-skill",
   "title: Fixture",
   "description: Fixture skill",
   "platforms:",
@@ -72,6 +73,11 @@ withSkillFixture((root) => {
 withSkillFixture((root) => {
   overwriteSkill(root, "landing-builder", (content) => content.replace("  - frontend_result", "  - unknown_artifact"));
   assertMetadataError(validateSkillMetadata(root), /required_outputs contains unknown artifact\/output 'unknown_artifact'/);
+});
+
+withSkillFixture((root) => {
+  overwriteSkill(root, "landing-builder", (content) => content.replace("name: landing-builder", "name: wrong-name"));
+  assertMetadataError(validateSkillMetadata(root), /name 'wrong-name' must match id 'landing-builder'/);
 });
 
 console.log("skill metadata regression tests passed");

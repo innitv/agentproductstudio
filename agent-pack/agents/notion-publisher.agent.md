@@ -5,6 +5,9 @@ required_inputs:
   - prd
   - recursive_brief
   - research_summary
+  - proto_personas
+  - stage_gate_ledger
+  - release_notes
   - notion_target
   - approval_record
 required_outputs:

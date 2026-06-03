@@ -6,6 +6,7 @@ required_inputs:
   - recursive_brief
   - run_plan
   - handoff_bundle
+  - stage_gate_ledger
 required_outputs:
   - research_summary
   - competitive_analysis

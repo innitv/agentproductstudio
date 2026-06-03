@@ -1,7 +1,8 @@
 ---
 id: seo-copy-validator
+name: seo-copy-validator
 title: "SEO & Copywriting Validator"
-description: "Поблочная проверка текстов лендинга, валидация рекламных утверждений (claims), семантическая верстка заголовков (H1-H3) и оптимизация SEO-метаданных"
+description: "Use when stage 05-copy or 11-qa must validate landing copy, SEO metadata, semantic heading hierarchy, and marketing claims against source-backed research. Produces copy_deck/qa_report evidence and marks unsupported claims as needs_validation."
 platforms:
   - codex
   - open-code
@@ -25,37 +26,45 @@ validation_commands:
 contract_schema: agent-pack/templates/skill.template.md
 ---
 
-# Навык: SEO & Copywriting Validator
+# Skill: SEO & Copywriting Validator
 
-## 1. Context (Контекст)
-Копирайтинг — это ключевой элемент доверия к продукту. Тексты не должны содержать ложных или неподтвержденных обещаний, а структура документа должна быть оптимизирована для поисковых систем (SEO). Этот навык описывает пошаговые действия для написания, валидации и оптимизации текста `copy-deck.md`.
+## 1. Назначение
 
-## 2. Triggers (Триггеры)
-Агент применяет этот навык на этапе:
-- **Стадия воркфлоу**: `08-copywriting` / `05-copy` (копирайтинг).
-- **Событие**: Получение утвержденного PRD и информационной архитектуры.
-- **Вход**: Шаблон `copy-deck.template.md` и спецификации `prd.md`.
+Применяй skill при создании или QA `copy-deck.md`, чтобы тексты соответствовали PRD, IA, research evidence, SEO constraints и не содержали неподтвержденных claims.
 
-## 3. Action Step-by-Step (Алгоритм выполнения)
+## 2. Обязательные inputs
 
-### Шаг 1: Семантическая разметка и иерархия
-1. Разделить тексты строго по блокам информационной архитектуры (Hero, Value, FAQ, Form, Footer).
-2. Убедиться, что на странице присутствует **ровно один** заголовок первого уровня `# H1` (Hero Headline).
-3. Все остальные секции должны быть размечены заголовками второго уровня `## H2`, а их подразделы — `### H3`.
+- `prd.md`: позиционирование, goals, requirements, acceptance criteria.
+- `research-summary.md`: source-backed findings и claims-to-validate.
+- `copy-deck.md`: hero, CTA, sections, FAQ, SEO.
+- Дополнительные research files, если claim ссылается на competitors/personas/interviews/SWOT.
 
-### Шаг 2: Валидация рекламных и продуктовых утверждений (Claims)
-1. Выявить в тексте все численные или качественные утверждения (например, *«Увеличим продажи на 20%»*, *«Интеграция за 2 минуты»*).
-2. Для каждого утверждения:
-   - Проверить наличие реальных подтверждений (evidence) в `research-summary.md` или источниках.
-   - Если точного подтверждения нет, агент обязан пометить его как `[needs validation]` (требует валидации) или переформулировать в гипотезу.
-   - Записать все сомнительные утверждения в таблицу `## Claims To Validate` в `copy-deck.md`.
+## 3. Процедура
 
-### Шаг 3: Оптимизация SEO-метаданных
-1. Сформировать уникальный `<title>` (до 60 символов), содержащий главное ключевое слово и название продукта.
-2. Сформировать `<meta name="description">` (от 110 до 160 символов), кратко описывающий ценность для пользователя.
-3. Убедиться, что ключевые слова органично вписаны в тексты без переспама.
+1. Проверь структуру copy по IA/screens: каждая секция должна иметь назначение, CTA или следующий шаг.
+2. Проверь heading hierarchy: один H1, секционные H2, вложенные H3 без пропусков уровней.
+3. Составь claims matrix для всех численных, сравнительных, юридических, медицинских, финансовых, performance и "best/first/only" утверждений.
+4. Для каждого claim зафиксируй:
+   - exact claim;
+   - source artifact;
+   - evidence source или `none`;
+   - статус: `source_backed`, `synthetic_only`, `needs_validation`, `unsupported`;
+   - действие: keep, soften, remove, validate later.
+5. Tavily/source-backed evidence может подтверждать claims. DeepSeek/Gemini synthesis без внешних источников не считается source-backed evidence.
+6. Проверь SEO metadata: title до 60 символов, description 110-160 символов, без keyword stuffing и заглушек.
+7. Запиши `## Claims To Validate` в `copy-deck.md`; в QA stage добавь findings в `qa-report.md`.
 
-## 4. Validation / Quality Gates (Критерии качества)
-- [ ] В тексте нет выдуманных цитат пользователей (synthetic testimonials).
-- [ ] Мета-описание (meta description) полностью соответствует требованиям длины и не содержит заглушек.
-- [ ] Все спорные или неподтвержденные утверждения вынесены в таблицу валидации.
+## 4. External research gate
+
+Если для claim validation нужен внешний поиск, проверь approval action `external_research_provider_call` и правила research stage. Не выдумывай источники и не превращай hypothesis в fact.
+
+## 5. Evidence и failure modes
+
+Ставь `partial`, если copy usable, но часть claims требует валидации. Ставь `blocked`, если ключевой value proposition зависит от неподтвержденного high-risk claim.
+
+## 6. Validation gates
+
+- [ ] Один H1 и корректная иерархия H2/H3.
+- [ ] Нет fake testimonials, fake logos, fake numbers.
+- [ ] Все спорные claims есть в `## Claims To Validate`.
+- [ ] SEO title/description заполнены и соответствуют ограничениям.

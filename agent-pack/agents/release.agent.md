@@ -4,6 +4,9 @@ owner_stage_ids:
   - 12-release
 required_inputs:
   - qa_report
+  - frontend_result
+  - test_bench_result
+  - handoff_bundle
   - changed_files
   - validation
 required_outputs:

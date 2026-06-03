@@ -3,8 +3,12 @@ agent_name: ia
 owner_stage_ids:
   - 03-ia
 required_inputs:
+  - recursive_brief
   - prd
   - research_summary
+  - competitive_analysis
+  - proto_personas
+  - handoff_bundle
 required_outputs:
   - ia_brief
 approval_actions: []

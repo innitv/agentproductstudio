@@ -1,7 +1,8 @@
 ---
 id: funnel-analytics-verifier
+name: funnel-analytics-verifier
 title: "Funnel Analytics & PII Verifier"
-description: "Автоматизированное Playwright-тестирование отправки событий воронки конверсии (клик по CTA, отправка форм) и аудит на отсутствие рисков утечки персональных данных (PII)"
+description: "Use when stage 10-test-bench or 11-qa must verify PRD analytics events, CTA/form funnel behavior, and absence of PII in analytics payloads through Playwright interception or dataLayer checks. Writes test_bench_result and qa_report evidence."
 platforms:
   - codex
   - open-code
@@ -24,51 +25,49 @@ validation_commands:
 contract_schema: agent-pack/templates/skill.template.md
 ---
 
-# Навык: Funnel Analytics & PII Verifier
+# Skill: Funnel Analytics & PII Verifier
 
-## 1. Context (Контекст)
-Для каждого B2B/B2C прототипа критически важно собирать воронку лидогенерации (funnel analytics) и при этом гарантировать конфиденциальность пользователей (compliance c GDPR/ФЗ-152). Данный навык регламентирует написание и автоматический запуск Playwright-тестов для верификации отправки событий и исключения утечки персональных данных (PII - Personally Identifiable Information).
+## 1. Назначение
 
-## 2. Triggers (Триггеры)
-Агент применяет этот навык на этапе:
-- **Стадия воркфлоу**: `10-test-bench` (тестовый стенд) и `11-qa` (контроль качества).
-- **Событие**: Верификация работоспособности воронки конверсии после реализации UI.
-- **Вход**: PRD требования по аналитике (таблица `## Analytics`) и запущенный локально фронтенд.
+Применяй skill после frontend implementation, когда нужно проверить главный funnel path, события аналитики из PRD и отсутствие PII в event payloads.
 
-## 3. Action Step-by-Step (Алгоритм выполнения)
+## 2. Обязательные inputs
 
-### Шаг 1: Подготовка тестовой среды Playwright
-1. Убедиться, что в `tests/playwright/` или `apps/frontend/` настроено окружение для тестов.
-2. Прочитать аналитическую спецификацию из `prd.md` (список событий, свойств и триггеров).
+- `prd.md`: раздел Analytics, event names, triggers, allowed properties.
+- `prototype-report.md`: основной пользовательский сценарий.
+- `frontend-result.md`: локальный URL/команды запуска и реализованные analytics hooks.
 
-### Шаг 2: Написание автотестов для шагов воронки
-1. Написать Playwright-тест, имитирующий действия пользователя на странице:
-   - Шаг 1: Визит на Hero-экран (`hero_view`).
-   - Шаг 2: Клик по кнопке призыва к действию (`hero_cta_click`).
-   - Шаг 3: Заполнение формы и ее отправка (`lead_form_submit`).
-2. Внедрить в тест перехват сетевых запросов (Network Request Interception) или прослушивание `window.dataLayer`:
-   ```typescript
-   page.on('request', request => {
-     if (request.url().includes('analytics')) {
-       const payload = JSON.parse(request.postData() || '{}');
-       // Валидируем payload
-     }
-   });
-   ```
+## 3. Процедура
 
-### Шаг 3: Аудит на отсутствие PII (Security & Privacy Audit)
-1. На этапе отправки формы перехватить отправляемые свойства событий аналитики (`lead_form_submit`).
-2. Написать автоматическое утверждение (Assertion), проверяющее, что свойства события **не содержат**:
-   - Сырой Email (например, проверять на RegExp `\S+@\S+\.\S+`).
-   - Сырой номер телефона (проверять на RegExp поиска цифр телефона).
-   - Имена, фамилии или пароли.
-3. Если PII обнаружен в свойствах события, тест должен упасть с ошибкой `PII Leak detected`.
+1. Извлеки event contract из PRD: event name, trigger, required properties, allowed properties, prohibited properties, expected destination.
+2. Если PRD не задает allowlist, создай минимальную allowlist в `test-bench-result.md` как assumption и пометь проверку `needs_validation`.
+3. Покрой Playwright-тестом главный путь: landing view, primary CTA, form open/fill/submit, success/error state.
+4. Перехватывай analytics через network interception, mock endpoint или `window.dataLayer`, в зависимости от фактической реализации.
+5. Для каждого event проверь:
+   - name соответствует PRD;
+   - trigger произошел один раз или в ожидаемом количестве;
+   - required properties присутствуют;
+   - prohibited properties отсутствуют;
+   - payload не содержит raw email, phone, password, full name, free-text message или token-like strings.
+6. Запусти `yarn qa:playwright`.
+7. Запиши результаты в `test-bench-result.md` и, для QA stage, краткое резюме в `qa-report.md`.
 
-### Шаг 4: Запуск проверок и формирование отчета
-1. Запустить тесты командой `yarn qa:playwright`.
-2. Записать результаты прохождения проверок в `test-bench-result.md` в секцию `## Executable Checks`.
+## 4. Evidence и failure modes
 
-## 4. Validation / Quality Gates (Критерии качества)
-- [ ] Все шаги воронки (от первого экрана до отправки формы) покрыты автотестами.
-- [ ] В тестах явно прописаны проверки на отсутствие PII утечек.
-- [ ] Результаты тестов успешно записаны и не содержат падений.
+`test-bench-result.md` обязан содержать таблицу:
+- event;
+- trigger;
+- capture method;
+- expected payload;
+- actual payload summary without PII;
+- status;
+- failing assertion или screenshot/link на trace.
+
+Ставь `partial`, если analytics implementation отсутствует, но UI path работает. Ставь `blocked`, если нельзя запустить frontend или проверить основной сценарий.
+
+## 5. Validation gates
+
+- [ ] Все PRD events проверены или явно помечены `not_implemented`.
+- [ ] PII denylist применяется ко всем analytics payloads.
+- [ ] Основной funnel path покрыт Playwright.
+- [ ] `yarn qa:playwright` результат записан в артефакты.

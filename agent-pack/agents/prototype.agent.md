@@ -3,8 +3,12 @@ agent_name: prototype
 owner_stage_ids:
   - 07-prototype
 required_inputs:
+  - prd
   - ia_brief
+  - design_brief
   - screens
+  - copy_deck
+  - handoff_bundle
 required_outputs:
   - prototype_report
 approval_actions: []

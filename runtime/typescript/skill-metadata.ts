@@ -12,6 +12,7 @@ export interface SkillInstructionDocument {
 
 export interface SkillMetadata {
   id: string;
+  name: string;
   title: string;
   description: string;
   platforms: string[];
@@ -66,6 +67,10 @@ export function validateSkillMetadata(root = process.cwd()): string[] {
     const expectedId = file.split(/[\\/]/).at(-2);
     if (metadata.id !== expectedId) {
       errors.push(`${relativeFile}: id '${metadata.id}' must match skill directory '${expectedId}'.`);
+    }
+
+    if (metadata.name !== metadata.id) {
+      errors.push(`${relativeFile}: name '${metadata.name}' must match id '${metadata.id}'.`);
     }
 
     if (metadata.contract_schema !== "agent-pack/templates/skill.template.md") {
@@ -126,6 +131,7 @@ function isSkillMetadata(value: unknown): value is SkillMetadata {
 
   const record = value as Record<string, unknown>;
   return typeof record.id === "string"
+    && typeof record.name === "string"
     && typeof record.title === "string"
     && typeof record.description === "string"
     && Array.isArray(record.platforms)

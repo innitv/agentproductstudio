@@ -6,6 +6,10 @@ owner_stage_ids:
 required_inputs:
   - recursive_brief
   - research_summary
+  - competitive_analysis
+  - proto_personas
+  - synthetic_interviews
+  - swot
   - prd
   - ia_brief
   - design_brief
@@ -14,6 +18,8 @@ required_inputs:
   - prototype_report
   - frontend_result
   - test_bench_result
+  - stage_gate_ledger
+  - handoff_bundle
 required_outputs:
   - visual_reference_review
   - qa_report
