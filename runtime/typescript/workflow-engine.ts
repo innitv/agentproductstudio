@@ -1,12 +1,9 @@
-import { existsSync } from "node:fs";
-import { appendFile, readFile } from "node:fs/promises";
+import { appendFile } from "node:fs/promises";
 import { basename, join, relative } from "node:path";
-import { execSync } from "node:child_process";
 import { runLandingWorkflow } from "./run-landing-workflow";
-import { buildLocalDownstreamArtifacts, writeLocalStageArtifact } from "./run-local-workflow";
-import { runResearchStage } from "./research-stage-runner";
 import { validateWorkflowRun } from "./validate-workflow-run";
 import { truncateContextForSpecialist } from "./context-truncator";
+import { executeWorkflowStage } from "./workflow-stage-executors";
 import { artifactFiles, getWorkflowStagesForProfile, type WorkflowProfile } from "./workflow-stages";
 import {
   hasRunState,
@@ -14,14 +11,16 @@ import {
   readRunState,
   writeRunState,
   writeStageResult,
+  type WorkflowExecutionMode,
   type WorkflowRunState,
-  type WorkflowStageResult,
   type WorkflowStageStatus,
 } from "./workflow-state";
+import { summarizeRunStatus as resolveRunStatus } from "./status-resolver";
 
 export interface StartWorkflowOptions {
   goal: string;
   profile?: WorkflowProfile;
+  executionMode?: WorkflowExecutionMode;
 }
 
 export interface RerunWorkflowStageOptions {
@@ -30,13 +29,14 @@ export interface RerunWorkflowStageOptions {
 
 export async function startWorkflowEngine(options: StartWorkflowOptions): Promise<WorkflowRunState> {
   const profile = options.profile ?? "standard";
+  const executionMode = options.executionMode ?? "local";
   if (profile !== "standard") {
     throw new Error("Workflow engine first increment supports only the standard profile.");
   }
 
   const outputDir = await runLandingWorkflow({ goal: options.goal });
   const now = nowIso();
-  const state = createInitialState(outputDir, options.goal, profile, now);
+  const state = createInitialState(outputDir, options.goal, profile, executionMode, now);
   const intakeArtifacts = [
     artifactFiles.run_plan,
     artifactFiles.handoff_bundle,
@@ -108,7 +108,13 @@ export async function resumeWorkflowEngine(outputDir: string): Promise<WorkflowR
 
     try {
       await truncateContextForSpecialist(outputDir, stage.id);
-      const result = await runStage(outputDir, state.goal, stage.id);
+      const result = await executeWorkflowStage({
+        outputDir,
+        goal: state.goal,
+        stage,
+        profile: state.profile,
+        executionMode: state.execution_mode ?? "local",
+      });
       await validateThroughStage(outputDir, stage.id, state.profile);
       state = await readRunState(outputDir);
       state.stages[stage.id] = {
@@ -123,6 +129,9 @@ export async function resumeWorkflowEngine(outputDir: string): Promise<WorkflowR
       state.updated_at = result.completed_at;
       await writeRunState(state);
       await writeStageResult(outputDir, result);
+      if (result.status === "blocked") {
+        break;
+      }
     } catch (error) {
       const failedAt = nowIso();
       const message = error instanceof Error ? error.message : String(error);
@@ -169,6 +178,7 @@ export async function getWorkflowEngineStatus(outputDir: string): Promise<string
     `Run: ${state.run_id}`,
     `Goal: ${state.goal}`,
     `Profile: ${state.profile}`,
+    `Execution mode: ${state.execution_mode ?? "local"}`,
     `Status: ${state.status}`,
     "",
     "| Stage | Status | Attempts | Artifacts |",
@@ -243,7 +253,13 @@ export async function rerunWorkflowStage(
   return resumeWorkflowEngine(outputDir);
 }
 
-function createInitialState(outputDir: string, goal: string, profile: WorkflowProfile, now: string): WorkflowRunState {
+function createInitialState(
+  outputDir: string,
+  goal: string,
+  profile: WorkflowProfile,
+  executionMode: WorkflowExecutionMode,
+  now: string,
+): WorkflowRunState {
   const stages = Object.fromEntries(
     getWorkflowStagesForProfile(profile).map((stage) => [
       stage.id,
@@ -262,119 +278,13 @@ function createInitialState(outputDir: string, goal: string, profile: WorkflowPr
     run_id: `${basename(outputDir)}-${Date.now()}`,
     goal,
     profile,
+    execution_mode: executionMode,
     status: "pending",
     output_dir: outputDir,
     created_at: now,
     updated_at: now,
     stages,
   };
-}
-
-async function detectNotionConfig(outputDir: string): Promise<{ token?: string; pageId?: string }> {
-  let token = process.env.NOTION_TOKEN;
-  let pageId = process.env.NOTION_PAGE_ID || process.env.NOTION_PARENT_PAGE_ID || process.env.NOTION_TARGET;
-
-  // 1. Попробуем прочитать из .env
-  const envPath = join(process.cwd(), ".env");
-  if (existsSync(envPath)) {
-    try {
-      const envContent = await readFile(envPath, "utf8");
-      if (!token) {
-        const tokenMatch = envContent.match(/^NOTION_TOKEN=(.+)$/m);
-        if (tokenMatch?.[1]?.trim()) {
-          token = tokenMatch[1].trim();
-        }
-      }
-      if (!pageId) {
-        const pageIdMatch = envContent.match(/^(?:NOTION_PAGE_ID|NOTION_PARENT_PAGE_ID|NOTION_TARGET)=(.+)$/m);
-        if (pageIdMatch?.[1]?.trim()) {
-          pageId = pageIdMatch[1].trim();
-        }
-      }
-    } catch (e) {
-      // Игнорируем ошибки чтения .env
-    }
-  }
-
-  // 2. Попробуем найти в workflow-scaffold.md
-  if (!pageId) {
-    const scaffoldPath = join(outputDir, "workflow-scaffold.md");
-    if (existsSync(scaffoldPath)) {
-      try {
-        const scaffoldContent = await readFile(scaffoldPath, "utf8");
-        const match = scaffoldContent.match(/(?:notion_target|Notion Target|Page ID):\s*(.+)$/im);
-        if (match?.[1]?.trim()) {
-          pageId = match[1].trim();
-        }
-      } catch (e) {
-        // Игнорируем ошибки чтения scaffold
-      }
-    }
-  }
-
-  // 3. Попробуем найти в run-state.json
-  if (!pageId) {
-    const runStatePath = join(outputDir, "run-state.json");
-    if (existsSync(runStatePath)) {
-      try {
-        const runStateContent = await readFile(runStatePath, "utf8");
-        const parsed = JSON.parse(runStateContent);
-        if (parsed.notion_target) {
-          pageId = parsed.notion_target;
-        }
-      } catch (e) {
-        // Игнорируем ошибки чтения JSON
-      }
-    }
-  }
-
-  return { token, pageId };
-}
-
-async function runStage(
-  outputDir: string,
-  goal: string,
-  stageId: string,
-): Promise<WorkflowStageResult> {
-  if (stageId === "01-research") {
-    await runResearchStage({ outputDir });
-    const research = await readArtifact(outputDir, artifactFiles.research_summary);
-    const status = detectArtifactStatus(research, "completed");
-    return stageResult(stageId, "Deep Research", status, researchArtifacts(), ["recursive-brief.md"], status === "partial"
-      ? ["Research provider coverage is partial; downstream claims must remain marked needs validation."]
-      : []);
-  }
-
-  const downstreamArtifacts = await buildLocalDownstreamArtifacts(outputDir, goal);
-  const artifact = downstreamArtifacts.find((item) => item.stage === stageId);
-  if (!artifact) {
-    return stageResult(stageId, stageId, "skipped", [], [], [`No local executor is registered for ${stageId}.`]);
-  }
-
-  await writeLocalStageArtifact(outputDir, artifact);
-
-  const warnings: string[] = [];
-  if (stageId === "12-release") {
-    try {
-      const config = await detectNotionConfig(outputDir);
-      if (config.token && config.pageId) {
-        console.log(`[Notion Auto-Publish] Обнаружены NOTION_TOKEN и родительский Page ID (${config.pageId}).`);
-        console.log(`[Notion Auto-Publish] Запускаем автоматический экспорт Agile Board...`);
-        const scriptPath = join(process.cwd(), "tooling", "scripts", "publish-notion-stories.mjs");
-        execSync(`node "${scriptPath}" "${config.pageId}" "${outputDir}"`, { stdio: "inherit" });
-        console.log(`[Notion Auto-Publish] Экспорт завершен успешно!`);
-      } else {
-        warnings.push("Automatic Notion Agile Board export skipped: NOTION_TOKEN or parent page ID is not configured in .env or environment.");
-      }
-    } catch (publishError) {
-      const msg = publishError instanceof Error ? publishError.message : String(publishError);
-      warnings.push(`Automatic Notion Agile Board export failed: ${msg}`);
-      console.error(`[Notion Auto-Publish] Ошибка при автоматическом экспорте:`, publishError);
-    }
-  }
-
-  const status = detectArtifactStatus(artifact.content, "completed");
-  return stageResult(stageId, artifact.title, status, [artifact.file], inferInputsUsed(artifact.content), warnings);
 }
 
 async function validateThroughStage(outputDir: string, stageId: string, profile: WorkflowProfile): Promise<void> {
@@ -394,79 +304,6 @@ async function validateThroughStage(outputDir: string, stageId: string, profile:
   }
 }
 
-function stageResult(
-  stageId: string,
-  title: string,
-  status: WorkflowStageStatus,
-  artifacts: string[],
-  inputs: string[],
-  warnings: string[],
-): WorkflowStageResult {
-  return {
-    stage_id: stageId,
-    title,
-    status,
-    artifacts_created: artifacts,
-    inputs_used: inputs,
-    warnings,
-    errors: [],
-    next_stage: undefined,
-    completed_at: nowIso(),
-  };
-}
-
-function detectArtifactStatus(content: string, fallback: WorkflowStageStatus): WorkflowStageStatus {
-  if (/Status \| blocked \||## Status\s+blocked|status:\s*blocked/i.test(content)) {
-    return "blocked";
-  }
-
-  if (/Status \| partial \||## Status\s+partial|status:\s*partial/i.test(content)) {
-    return "partial";
-  }
-
-  return fallback;
-}
-
-function inferInputsUsed(content: string): string[] {
-  const match = content.match(/## Inputs Used\s+([\s\S]*?)(?:\n## |\n# |$)/);
-  if (!match) {
-    return [];
-  }
-
-  return [...match[1].matchAll(/`([^`]+)`|-\s+([^\n]+)/g)]
-    .map((item) => item[1] ?? item[2])
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
-async function readArtifact(outputDir: string, fileName: string): Promise<string> {
-  const path = join(outputDir, fileName);
-  return existsSync(path) ? readFile(path, "utf8") : "";
-}
-
-function researchArtifacts(): string[] {
-  return [
-    artifactFiles.research_summary,
-    artifactFiles.competitive_analysis,
-    artifactFiles.proto_personas,
-    artifactFiles.synthetic_interviews,
-    artifactFiles.swot,
-  ];
-}
-
 function summarizeRunStatus(state: WorkflowRunState): WorkflowStageStatus {
-  const statuses = Object.values(state.stages).map((stage) => stage.status);
-  if (statuses.includes("failed")) {
-    return "failed";
-  }
-
-  if (statuses.includes("blocked")) {
-    return "blocked";
-  }
-
-  if (statuses.includes("partial")) {
-    return "partial";
-  }
-
-  return "completed";
+  return resolveRunStatus(Object.values(state.stages).map((stage) => stage.status));
 }

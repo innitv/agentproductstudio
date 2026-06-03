@@ -11,6 +11,8 @@ export type WorkflowStageStatus =
   | "failed"
   | "skipped";
 
+export type WorkflowExecutionMode = "local" | "agentic";
+
 export interface WorkflowStageState {
   id: string;
   title: string;
@@ -26,6 +28,7 @@ export interface WorkflowRunState {
   run_id: string;
   goal: string;
   profile: "standard" | "reference";
+  execution_mode?: WorkflowExecutionMode;
   status: WorkflowStageStatus;
   output_dir: string;
   created_at: string;
@@ -71,4 +74,3 @@ export async function writeStageResult(outputDir: string, result: WorkflowStageR
 export function nowIso(): string {
   return new Date().toISOString();
 }
-
