@@ -54,6 +54,7 @@ Source of truth:
 
 - Реальные продуктовые workflow runtime: `outputs/<project-slug>/<YYYY-MM-DD>/`.
 - Тестовые, smoke и временные запуски: `outputs/temp/`.
+- Архивные запуски: `outputs/archive/<project-slug>/<YYYY-MM-DD>/`; поврежденные или неполные переносы помещаются в quarantine-зону через lifecycle-команды runtime.
 - `outputs/products/` является legacy/archive-зоной для старых или вручную перенесенных результатов и не является источником правил workflow.
 - Перед возвратом к проекту можно читать `outputs/registry.json` как навигационный индекс, если он доступен. `outputs/registry.json` и прошлые run artifacts не являются нормативным источником для изменения правил агента.
 
@@ -62,6 +63,9 @@ Source of truth:
 - `run-plan.md`
 - `handoff-bundle.md`
 - `stage-gate-ledger.md`
+- `run-state.json`
+- `run-meta.json`
+- `artifact-manifest.json`
 
 После каждого этапа обновляй:
 
@@ -70,7 +74,7 @@ Source of truth:
 
 Каждый этап обязан читать предыдущие артефакты и явно фиксировать `inputs_used`.
 
-После ручной правки артефактов в run directory запусти `yarn workflow:sync outputs/<project-slug>/<YYYY-MM-DD>`, если команда доступна, чтобы синхронизировать `run-state.json` и `stage-results/`. Нельзя использовать содержимое прошлых `outputs/*` как доказательство ошибки правил workflow без отдельной проверки нормативных файлов и runtime-команд.
+После ручной правки артефактов в run directory запусти `yarn workflow:sync outputs/<project-slug>/<YYYY-MM-DD>`, если команда доступна, чтобы синхронизировать `run-state.json`, `stage-results/`, `run-meta.json` и `artifact-manifest.json`. Для обзора runs используй `yarn workflow:list`, для детального просмотра одного run — `yarn workflow:inspect outputs/<project-slug>/<YYYY-MM-DD>`. Нельзя использовать содержимое прошлых `outputs/*` как доказательство ошибки правил workflow без отдельной проверки нормативных файлов и runtime-команд.
 
 ## 5. Обязательный продуктовый процесс
 

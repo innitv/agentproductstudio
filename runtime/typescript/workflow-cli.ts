@@ -12,7 +12,8 @@ import {
 } from "./approval-gate";
 import { loadLocalEnv } from "./env";
 import { parseUserIntent } from "./intent-parser";
-import { formatWorkflowRunList, listWorkflowRuns } from "./output-metadata";
+import { archiveWorkflowRun, cleanupTempOutputs, formatArchiveWorkflowRunResult, formatCleanupTempResult } from "./output-lifecycle";
+import { formatWorkflowRunInspection, formatWorkflowRunList, inspectWorkflowRun, listWorkflowRuns } from "./output-metadata";
 import { getWorkflowEngineStatus, rerunWorkflowStage, resumeWorkflowEngine, startWorkflowEngine } from "./workflow-engine";
 import { workflowStages } from "./workflow-stages";
 import type { WorkflowExecutionMode } from "./workflow-state";
@@ -63,6 +64,37 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
   if (command === "list") {
     const baseDir = readFlagValue(rest, "--base") ?? "outputs";
     console.log(formatWorkflowRunList(await listWorkflowRuns(resolve(process.cwd(), baseDir))));
+    return;
+  }
+
+  if (command === "inspect") {
+    const outputDir = rest[0];
+    if (!outputDir) {
+      throw new Error("Usage: yarn workflow:inspect outputs/<project-slug>/<YYYY-MM-DD>");
+    }
+
+    console.log(formatWorkflowRunInspection(await inspectWorkflowRun(resolve(process.cwd(), outputDir))));
+    return;
+  }
+
+  if (command === "cleanup-temp") {
+    const baseDir = readFlagValue(rest, "--base") ?? "outputs/temp";
+    console.log(formatCleanupTempResult(await cleanupTempOutputs({ baseDir, force: rest.includes("--force") })));
+    return;
+  }
+
+  if (command === "archive") {
+    const outputDir = rest.find((item) => !item.startsWith("--"));
+    if (!outputDir) {
+      throw new Error("Usage: yarn workflow:archive outputs/<project-slug>/<YYYY-MM-DD> [--force] [--quarantine] [--target-root outputs/archive]");
+    }
+
+    console.log(formatArchiveWorkflowRunResult(await archiveWorkflowRun({
+      outputDir,
+      force: rest.includes("--force"),
+      quarantine: rest.includes("--quarantine"),
+      targetRoot: readFlagValue(rest, "--target-root"),
+    })));
     return;
   }
 
@@ -182,7 +214,7 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
     return;
   }
 
-  throw new Error("Usage: workflow engine command must be one of: start, resume, status, list, run-stage, approve, deny, approvals, agentic-stages, agentic-readiness, agentic-approval-commands, agentic-preflight\nOr use a natural trigger phrase!");
+  throw new Error("Usage: workflow engine command must be one of: start, resume, status, list, inspect, cleanup-temp, archive, run-stage, approve, deny, approvals, agentic-stages, agentic-readiness, agentic-approval-commands, agentic-preflight\nOr use a natural trigger phrase!");
 }
 
 async function tryRunIntentCommand(command: string | undefined, rest: string[], rawArgs: string[]): Promise<boolean> {

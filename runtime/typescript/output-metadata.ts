@@ -58,6 +58,17 @@ export interface WorkflowRunListItem {
   goal: string;
 }
 
+export interface WorkflowRunInspection {
+  output_dir: string;
+  relative_output_dir: string;
+  meta?: RunMeta;
+  state?: WorkflowRunState;
+  manifest?: ArtifactManifest;
+  missing_metadata: string[];
+  missing_artifacts: ArtifactManifestEntry[];
+  blocking_stages: Array<{ stage_id: string; title: string; status: WorkflowStageStatus; error?: string }>;
+}
+
 export async function syncOutputMetadata(state: WorkflowRunState): Promise<void> {
   await writeFile(join(state.output_dir, runMetaFileName), `${JSON.stringify(createRunMeta(state), null, 2)}\n`, "utf8");
   await writeFile(join(state.output_dir, artifactManifestFileName), `${JSON.stringify(await createArtifactManifest(state), null, 2)}\n`, "utf8");
@@ -147,6 +158,107 @@ export function formatWorkflowRunList(items: WorkflowRunListItem[]): string {
   ].join("\n");
 }
 
+export async function inspectWorkflowRun(outputDirInput: string): Promise<WorkflowRunInspection> {
+  const outputDir = resolve(process.cwd(), outputDirInput);
+  if (!existsSync(outputDir)) {
+    throw new Error(`Output directory does not exist: ${outputDir}`);
+  }
+
+  const state = await readJson<WorkflowRunState>(join(outputDir, "run-state.json"));
+  const meta = await readJson<RunMeta>(join(outputDir, runMetaFileName));
+  const manifest = await readJson<ArtifactManifest>(join(outputDir, artifactManifestFileName));
+  const missingMetadata = [
+    ["run-state.json", state],
+    [runMetaFileName, meta],
+    [artifactManifestFileName, manifest],
+  ]
+    .filter(([, value]) => !value)
+    .map(([file]) => String(file));
+
+  const manifestArtifacts = manifest?.artifacts
+    ?? (state || meta ? await createArtifactManifestFromInspectionState(outputDir, state, meta) : []);
+  const blockingStages = state
+    ? Object.values(state.stages)
+      .filter((stage) => stage.status === "blocked" || stage.status === "failed" || stage.status === "partial")
+      .map((stage) => ({
+        stage_id: stage.id,
+        title: stage.title,
+        status: stage.status,
+        error: stage.error,
+      }))
+    : [];
+
+  return {
+    output_dir: outputDir,
+    relative_output_dir: relative(process.cwd(), outputDir),
+    meta,
+    state,
+    manifest,
+    missing_metadata: missingMetadata,
+    missing_artifacts: manifestArtifacts.filter((artifact) => !artifact.exists),
+    blocking_stages: blockingStages,
+  };
+}
+
+export function formatWorkflowRunInspection(inspection: WorkflowRunInspection): string {
+  const meta = inspection.meta;
+  const state = inspection.state;
+  const manifest = inspection.manifest;
+  const status = meta?.status ?? state?.status ?? "unknown";
+  const profile = meta?.workflow_profile ?? state?.profile ?? "unknown";
+  const mode = meta?.execution_mode ?? state?.execution_mode ?? "unknown";
+  const goal = meta?.source_request ?? state?.goal ?? "unknown";
+  const currentStage = meta?.current_stage ?? state?.current_stage ?? "";
+
+  return [
+    "# Workflow Run Inspect",
+    "",
+    `- Run: ${inspection.relative_output_dir}`,
+    `- Status: ${status}`,
+    `- Profile: ${profile}`,
+    `- Execution mode: ${mode}`,
+    `- Current stage: ${currentStage || "none"}`,
+    `- Updated: ${meta?.updated_at ?? state?.updated_at ?? "unknown"}`,
+    `- Goal: ${goal}`,
+    "",
+    "## Metadata",
+    "",
+    inspection.missing_metadata.length
+      ? `Missing: ${inspection.missing_metadata.map((file) => `\`${file}\``).join(", ")}`
+      : "All metadata files are present.",
+    "",
+    "## Blocking Stages",
+    "",
+    inspection.blocking_stages.length
+      ? [
+        "| Stage | Status | Error |",
+        "|---|---|---|",
+        ...inspection.blocking_stages.map((stage) => `| ${formatTableCell(`${stage.stage_id} ${stage.title}`)} | ${stage.status} | ${formatTableCell(stage.error ?? "")} |`),
+      ].join("\n")
+      : "No blocked, failed or partial stages.",
+    "",
+    "## Missing Artifacts",
+    "",
+    inspection.missing_artifacts.length
+      ? [
+        "| Stage | Artifact | File |",
+        "|---|---|---|",
+        ...inspection.missing_artifacts.map((artifact) => `| ${formatTableCell(`${artifact.stage_id} ${artifact.stage_title}`)} | ${artifact.artifact_name} | ${artifact.file} |`),
+      ].join("\n")
+      : "No missing required artifacts in manifest.",
+    "",
+    "## Artifact Summary",
+    "",
+    manifest
+      ? [
+        "| Stage | File | Status | Size |",
+        "|---|---|---|---:|",
+        ...manifest.artifacts.map((artifact) => `| ${formatTableCell(`${artifact.stage_id} ${artifact.stage_title}`)} | ${artifact.file} | ${artifact.status} | ${artifact.size_bytes ?? 0} |`),
+      ].join("\n")
+      : "Artifact manifest is missing. Run `yarn workflow:sync <run>` to regenerate metadata.",
+  ].join("\n");
+}
+
 async function findRunDirectories(dir: string): Promise<string[]> {
   if (existsSync(join(dir, "run-state.json")) || existsSync(join(dir, runMetaFileName))) {
     return [dir];
@@ -183,6 +295,29 @@ async function readRunListItem(outputDir: string): Promise<WorkflowRunListItem |
     current_stage: meta?.current_stage ?? state?.current_stage,
     goal: meta?.source_request ?? state?.goal ?? "Workflow run",
   };
+}
+
+async function createArtifactManifestFromInspectionState(
+  outputDir: string,
+  state?: WorkflowRunState,
+  meta?: RunMeta,
+): Promise<ArtifactManifestEntry[]> {
+  if (state) {
+    return (await createArtifactManifest({ ...state, output_dir: outputDir })).artifacts;
+  }
+
+  const profile = meta?.workflow_profile ?? "standard";
+  return getWorkflowStagesForProfile(profile).flatMap((stage) =>
+    getRequiredArtifactsForStage(stage, profile).map((artifactName) => ({
+      artifact_name: artifactName,
+      file: artifactFiles[artifactName],
+      stage_id: stage.id,
+      stage_title: stage.title,
+      status: "missing" as const,
+      exists: false,
+      schema: artifactSchemas[artifactName],
+    })),
+  );
 }
 
 async function readJson<T>(path: string): Promise<T | undefined> {

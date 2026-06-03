@@ -4,6 +4,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   artifactManifestFileName,
+  formatWorkflowRunInspection,
+  inspectWorkflowRun,
   listWorkflowRuns,
   runMetaFileName,
   type ArtifactManifest,
@@ -46,6 +48,13 @@ try {
   assert(runs.length === 1, "workflow list should find the temp run.");
   assert(runs[0].relative_output_dir.includes("sample-product"), "workflow list should include relative run path.");
   assert(runs[0].goal === state.goal, "workflow list should include run goal.");
+
+  const inspection = await inspectWorkflowRun(outputDir);
+  const report = formatWorkflowRunInspection(inspection);
+  assert(inspection.missing_metadata.length === 0, "workflow inspect should find all generated metadata.");
+  assert(inspection.missing_artifacts.some((artifact) => artifact.file === artifactFiles.prd), "workflow inspect should report missing downstream artifacts.");
+  assert(report.includes("# Workflow Run Inspect"), "workflow inspect report should include heading.");
+  assert(report.includes("## Missing Artifacts"), "workflow inspect report should include missing artifacts section.");
 
   console.log("output metadata regression tests passed");
 } finally {

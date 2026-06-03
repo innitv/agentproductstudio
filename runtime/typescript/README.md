@@ -32,6 +32,7 @@
 - Codex остаётся главным исполнителем и оркестратором в IDE.
 - Runtime помогает сохранять артефакты, проверять структуру, вести state и запускать локальные проверки.
 - Каждый persisted run синхронизирует `run-meta.json` и `artifact-manifest.json`; `outputs/registry.json` остаётся навигационным индексом, а не source of truth.
+- `workflow:validate` считает missing `run-meta.json`/`artifact-manifest.json` ошибкой для полного persisted run и warning для промежуточного `--through`.
 - Все внешние записи проходят через approval gate.
 - Agentic model-provider calls проходят через target-scoped approval gate и включаются только для staged rollout stages.
 - Отсутствующие optional provider keys считаются предупреждением, а не ошибкой проекта.
@@ -54,6 +55,11 @@ yarn workflow:start "<reference workflow goal>" --profile reference
 yarn workflow:resume outputs/<project-slug>/<YYYY-MM-DD>
 yarn workflow:status outputs/<project-slug>/<YYYY-MM-DD>
 yarn workflow:list
+yarn workflow:inspect outputs/<project-slug>/<YYYY-MM-DD>
+yarn workflow:cleanup-temp
+yarn workflow:cleanup-temp --force
+yarn workflow:archive outputs/<project-slug>/<YYYY-MM-DD>
+yarn workflow:archive outputs/<project-slug>/<YYYY-MM-DD> --force
 yarn workflow:run-stage outputs/<project-slug>/<YYYY-MM-DD> 01-research --force
 yarn workflow:agentic-stages
 yarn workflow:agentic-preflight outputs/<project-slug>/<YYYY-MM-DD> --strict

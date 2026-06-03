@@ -2,6 +2,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import YAML from "js-yaml";
+import { artifactManifestFileName, runMetaFileName } from "./output-metadata";
 import {
   artifactFiles,
   artifactSchemas,
@@ -187,6 +188,18 @@ function validateGateSemantics(options: {
   const runState = readJsonIfExists<RunStateLike>(join(options.outputDir, runStateFileName));
 
   if (runState) {
+    const missingMetadata = [
+      runMetaFileName,
+      artifactManifestFileName,
+    ].filter((fileName) => !existsSync(join(options.outputDir, fileName)));
+
+    for (const fileName of missingMetadata) {
+      findings.push({
+        level: options.throughStageId ? "warning" : "error",
+        message: `persisted workflow run is missing ${fileName}; run yarn workflow:sync ${options.outputDir}`,
+      });
+    }
+
     if (runState.profile && runState.profile !== options.profile) {
       findings.push({
         level: "warning",
