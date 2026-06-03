@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import YAML from "js-yaml";
 import {
@@ -9,6 +9,7 @@ import {
   getWorkflowStagesForProfile,
   type WorkflowProfile,
 } from "./workflow-stages";
+import { canReleaseFromQaStatus, isIncompleteArtifactStatus, isStageIncomplete } from "./status-resolver";
 
 interface Finding {
   level: "error" | "warning";
@@ -18,6 +19,20 @@ interface Finding {
 type JsonObject = Record<string, unknown>;
 
 const minimumArtifactBytes = 160;
+const runStateFileName = "run-state.json";
+const stageResultsDirName = "stage-results";
+
+type StageStateStatus = "pending" | "running" | "completed" | "partial" | "blocked" | "failed" | "skipped";
+
+interface RunStateLike {
+  status?: StageStateStatus;
+  profile?: WorkflowProfile;
+  stages?: Record<string, { status?: StageStateStatus; artifacts?: string[] }>;
+}
+
+interface StageResultLike {
+  status?: StageStateStatus;
+}
 
 export function validateWorkflowRun(
   outputDirInput: string,
@@ -46,6 +61,9 @@ export function validateWorkflowRun(
     return [{ level: "error", message: `Unknown stage id for '${profile}' profile: ${throughStageId}` }];
   }
 
+  const artifactPayloads = new Map<string, unknown>();
+  const artifactContents = new Map<string, string>();
+
   for (const stage of stages.slice(0, stageLimit + 1)) {
     const requiredArtifacts = getRequiredArtifactsForStage(stage, profile);
 
@@ -63,6 +81,7 @@ export function validateWorkflowRun(
 
       const size = statSync(filePath).size;
       const content = readFileSync(filePath, "utf8");
+      artifactContents.set(artifact, content);
 
       if (size < minimumArtifactBytes) {
         findings.push({
@@ -119,6 +138,7 @@ export function validateWorkflowRun(
               });
             }
           }
+          artifactPayloads.set(artifact, structured);
         }
       }
     }
@@ -140,7 +160,181 @@ export function validateWorkflowRun(
     }
   }
 
+  findings.push(...validateGateSemantics({
+    outputDir,
+    stages,
+    stageLimit,
+    profile,
+    throughStageId,
+    artifactPayloads,
+    artifactContents,
+  }));
+
   return findings;
+}
+
+function validateGateSemantics(options: {
+  outputDir: string;
+  stages: ReturnType<typeof getWorkflowStagesForProfile>;
+  stageLimit: number;
+  profile: WorkflowProfile;
+  throughStageId?: string;
+  artifactPayloads: Map<string, unknown>;
+  artifactContents: Map<string, string>;
+}): Finding[] {
+  const findings: Finding[] = [];
+  const checkedStages = options.stages.slice(0, options.stageLimit + 1);
+  const runState = readJsonIfExists<RunStateLike>(join(options.outputDir, runStateFileName));
+
+  if (runState) {
+    if (runState.profile && runState.profile !== options.profile) {
+      findings.push({
+        level: "warning",
+        message: `run-state.json profile is '${runState.profile}', but validation profile is '${options.profile}'`,
+      });
+    }
+
+    if (!options.throughStageId && runState.status && isStageIncomplete(runState.status)) {
+      findings.push({
+        level: "error",
+        message: `run-state.json status is '${runState.status}', so the full workflow gate is not complete`,
+      });
+    }
+
+    for (const stage of checkedStages) {
+      const stageStatus = runState.stages?.[stage.id]?.status;
+      if (!stageStatus) {
+        continue;
+      }
+
+      if (isStageIncomplete(stageStatus)) {
+        findings.push({
+          level: stageStatus === "pending" || stageStatus === "running" ? "warning" : "error",
+          message: `${stage.id} ${stage.title}: run-state stage status is '${stageStatus}', not completed`,
+        });
+      }
+
+      const stageResult = readJsonIfExists<StageResultLike>(join(options.outputDir, stageResultsDirName, `${stage.id}.json`));
+      if (stageResult?.status && stageResult.status !== stageStatus) {
+        findings.push({
+          level: "error",
+          message: `${stage.id} ${stage.title}: run-state status '${stageStatus}' conflicts with stage-results status '${stageResult.status}'`,
+        });
+      }
+    }
+  }
+
+  for (const stage of checkedStages) {
+    for (const artifact of getRequiredArtifactsForStage(stage, options.profile)) {
+      const payloadStatus = readPayloadStatus(options.artifactPayloads.get(artifact));
+      if (!payloadStatus) {
+        continue;
+      }
+
+      if (isIncompleteArtifactStatus(payloadStatus)) {
+        findings.push({
+          level: "error",
+          message: `${stage.id} ${stage.title}: artifact ${artifactFiles[artifact]} payload status is '${payloadStatus}', not release-ready`,
+        });
+      }
+    }
+  }
+
+  const qaStatus = readPayloadStatus(options.artifactPayloads.get("qa_report"));
+  const releaseStatus = readPayloadStatus(options.artifactPayloads.get("release_notes"));
+  if (
+    releaseStatus &&
+    ["ready", "released"].includes(releaseStatus) &&
+    qaStatus &&
+    !canReleaseFromQaStatus(qaStatus)
+  ) {
+    findings.push({
+      level: "error",
+      message: `release-notes.md status is '${releaseStatus}', but qa-report.md status is '${qaStatus}'`,
+    });
+  }
+
+  if (options.profile === "reference" && checkedStages.some((stage) => stage.id === "09-visual-reference")) {
+    const visualPayload = options.artifactPayloads.get("visual_reference_review");
+    const visualContent = options.artifactContents.get("visual_reference_review") ?? "";
+    if (!hasVisualDiffEvidence(options.outputDir, visualPayload, visualContent)) {
+      findings.push({
+        level: "error",
+        message: "09-visual-reference Visual Reference Review: missing required visual-diff-result.json evidence",
+      });
+    }
+  }
+
+  return findings;
+}
+
+function readJsonIfExists<T>(filePath: string): T | undefined {
+  if (!existsSync(filePath)) {
+    return undefined;
+  }
+
+  try {
+    return JSON.parse(readFileSync(filePath, "utf8")) as T;
+  } catch {
+    return undefined;
+  }
+}
+
+function readPayloadStatus(payload: unknown): string | undefined {
+  if (!isObject(payload) || typeof payload.status !== "string") {
+    return undefined;
+  }
+
+  return payload.status;
+}
+
+function hasVisualDiffEvidence(outputDir: string, payload: unknown, content: string): boolean {
+  if (/Visual diff was not found|Pixel-level image diff is not implemented yet|Run `yarn reference:diff/i.test(content)) {
+    return false;
+  }
+
+  const candidatePaths = new Set<string>();
+  candidatePaths.add(join(outputDir, "visual-diff-result.json"));
+
+  if (isObject(payload)) {
+    for (const key of ["visual_diff_result_path", "visual_diff_path"]) {
+      const value = payload[key];
+      if (typeof value === "string") {
+        candidatePaths.add(resolveCandidatePath(outputDir, value));
+      }
+    }
+
+    const screenshots = payload.screenshots;
+    if (Array.isArray(screenshots)) {
+      for (const item of screenshots) {
+        if (isObject(item) && typeof item.path === "string") {
+          candidatePaths.add(join(dirname(resolveCandidatePath(outputDir, item.path)), "visual-diff-result.json"));
+        }
+      }
+    }
+  }
+
+  for (const match of content.matchAll(/`([^`]*visual-diff-result\.json)`|([^\s`|]*visual-diff-result\.json)/g)) {
+    const value = match[1] ?? match[2];
+    if (value) {
+      candidatePaths.add(resolveCandidatePath(outputDir, value));
+    }
+  }
+
+  return [...candidatePaths].some((candidate) => existsSync(candidate));
+}
+
+function resolveCandidatePath(outputDir: string, candidate: string): string {
+  const normalized = candidate.replaceAll("\\", "/");
+  if (/^[A-Za-z]:\//.test(normalized) || normalized.startsWith("/")) {
+    return resolve(normalized);
+  }
+
+  if (normalized.startsWith("outputs/") || normalized.startsWith("reports/")) {
+    return resolve(process.cwd(), normalized);
+  }
+
+  return resolve(outputDir, normalized);
 }
 
 function detectWorkflowProfile(outputDir: string, handoff: string): WorkflowProfile {
