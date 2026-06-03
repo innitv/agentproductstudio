@@ -9,6 +9,7 @@ const requiredFiles = [
   "integrations/mcp/mcp-servers.example.json",
   "integrations/mcp/notion-local-token.mcp.example.json",
   "runtime/typescript/run-landing-workflow.ts",
+  "runtime/typescript/workflow.manifest.ts",
   "runtime/typescript/route.config.ts",
   "runtime/typescript/research.config.ts",
   "runtime/typescript/env.ts",
@@ -123,8 +124,12 @@ const researchEnforcementFiles = [
     requiredSnippets: ["standardRoutePlan", "referenceRoutePlan", "getRoutePlanForProfile", "referenceBundleArtifacts"],
   },
   {
+    file: "runtime/typescript/workflow.manifest.ts",
+    requiredSnippets: ["WorkflowProfile", "routeStepToStageId", "getWorkflowStagesForProfile", "getRequiredArtifactsForStage", "profile: \"reference\""],
+  },
+  {
     file: "runtime/typescript/workflow-stages.ts",
-    requiredSnippets: ["WorkflowProfile", "getWorkflowStagesForProfile", "getRequiredArtifactsForStage", "profile: \"reference\""],
+    requiredSnippets: ["WorkflowProfile", "getWorkflowStagesForProfile", "getRequiredArtifactsForStage", "workflow.manifest"],
   },
   {
     file: "runtime/typescript/validate-workflow-run.ts",

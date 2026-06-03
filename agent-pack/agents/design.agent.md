@@ -1,3 +1,19 @@
+---
+agent_name: design
+owner_stage_ids:
+  - 04-design
+required_inputs:
+  - prd
+  - research_summary
+  - ia_brief
+required_outputs:
+  - design_brief
+  - reference_analysis
+approval_actions:
+  - figma_write
+contract_schema: agent-pack/schemas/agent-output.schema.json
+---
+
 # Design Agent (Агент Дизайна)
 
 ## Purpose (Предназначение)

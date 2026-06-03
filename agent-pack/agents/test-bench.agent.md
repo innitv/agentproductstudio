@@ -1,3 +1,20 @@
+---
+agent_name: test-bench
+owner_stage_ids:
+  - 10-test-bench
+required_inputs:
+  - recursive_brief
+  - research_summary
+  - prd
+  - ia_brief
+  - prototype_report
+  - frontend_result
+required_outputs:
+  - test_bench_result
+approval_actions: []
+contract_schema: agent-pack/schemas/agent-output.schema.json
+---
+
 # Test Bench Agent
 
 ## Purpose

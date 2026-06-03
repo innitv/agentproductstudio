@@ -1,3 +1,16 @@
+---
+agent_name: prd
+owner_stage_ids:
+  - 02-prd
+required_inputs:
+  - recursive_brief
+  - research_summary
+required_outputs:
+  - prd
+approval_actions: []
+contract_schema: agent-pack/schemas/agent-output.schema.json
+---
+
 # PRD Agent
 
 ## Purpose

@@ -27,7 +27,7 @@ export async function runLandingWorkflow(input: LandingWorkflowInput): Promise<s
     throw new Error("Landing workflow requires a non-empty goal.");
   }
 
-  const profile = detectRouteProfile(input);
+  const profile = input.profile ?? detectRouteProfile(input);
   const routePlan = getRoutePlanForProfile(profile);
 
   if (!routePlan.length) {

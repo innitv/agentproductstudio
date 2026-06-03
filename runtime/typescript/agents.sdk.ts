@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { Agent, run } from "@openai/agents";
 import { agentInstructionFiles, agentNames } from "./agents.registry";
+import { parseAgentInstructionDocument } from "./agent-metadata";
 import { getRoutePlanForProfile, routeTools, type RouteProfile } from "./route.config";
 
 export type AgentRegistryKey = keyof typeof agentInstructionFiles;
@@ -35,7 +36,7 @@ const specialistDescriptions: Partial<Record<AgentRegistryKey, string>> = {
 export async function loadAgentInstructions(): Promise<Record<AgentRegistryKey, string>> {
   const entries = await Promise.all(
     Object.entries(agentInstructionFiles).map(async ([key, file]) => {
-      const content = await readFile(file, "utf8");
+      const content = parseAgentInstructionDocument(await readFile(file, "utf8")).body;
       return [key, content] as const;
     }),
   );

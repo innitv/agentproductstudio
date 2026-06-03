@@ -152,6 +152,35 @@ const testCases: TestCase[] = [
     },
   },
   {
+    name: "approved agentic stage validates structured output against schema",
+    run: async () => {
+      process.env.NODE_ENV = "test";
+      process.env.OPENAI_API_KEY = "test-key";
+      const mockOutputPath = join(tempDir, "mock-invalid-schema-agent-output.md");
+      process.env.AGENTIC_TEST_SPECIALIST_OUTPUT_PATH = mockOutputPath;
+      await writeFile(mockOutputPath, renderMockInvalidSchemaAgentOutput(), "utf8");
+      await recordApproval(tempDir, {
+        action: "model_provider_call",
+        approved: true,
+        approved_by: "test",
+        target: "openai_agents_sdk:prd:02-prd",
+        notes: "Тестовое подтверждение для invalid schema mock output.",
+      });
+
+      const stage = getStage("02-prd");
+      const result = await executeWorkflowStage({
+        outputDir: tempDir,
+        goal: "Тестовый продукт",
+        stage,
+        profile: "standard",
+        executionMode: "agentic",
+      });
+
+      assert(result.status === "partial", "02-prd should be partial when structured output violates schema");
+      assert(result.warnings.some((warning) => warning.includes("root.extra_field is not allowed")), "warnings should include schema validation error");
+    },
+  },
+  {
     name: "disabled rollout stage blocks before model provider path",
     run: async () => {
       delete process.env.OPENAI_API_KEY;
@@ -398,6 +427,27 @@ function renderMockMissingArtifactAgentOutput(): string {
     "risks: []",
     "open_questions: []",
     "recommended_next_step: Передать PRD на IA stage.",
+    "```",
+    "",
+  ].join("\n");
+}
+
+function renderMockInvalidSchemaAgentOutput(): string {
+  return [
+    "```agent-output-yaml",
+    "agent_name: prd",
+    "status: success",
+    "summary: Агент вернул лишнее поле, запрещённое JSON Schema.",
+    "inputs_used:",
+    "  - recursive-brief.md",
+    "  - research-summary.md",
+    "outputs:",
+    "  prd: '# Product Requirements'",
+    "assumptions: []",
+    "risks: []",
+    "open_questions: []",
+    "recommended_next_step: Передать PRD на IA stage.",
+    "extra_field: should-fail-schema",
     "```",
     "",
   ].join("\n");

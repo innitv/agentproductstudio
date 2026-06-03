@@ -10,6 +10,7 @@ import {
   optionalBundleArtifacts,
   referenceBundleArtifacts,
   routeTools,
+  routeStepToStageId,
   standardRoutePlan,
   referenceRoutePlan,
   type RouteStepName,
@@ -23,23 +24,7 @@ import {
   type WorkflowProfile,
 } from "./workflow-stages";
 import { approvalActions } from "./approval-gate";
-
-const routeStepToStageId: Readonly<Record<RouteStepName, string | undefined>> = {
-  intake: "00-intake",
-  research: "01-research",
-  prd: "02-prd",
-  notionPrdExport: undefined,
-  ia: "03-ia",
-  design: "04-design",
-  copywriting: "05-copy",
-  screens: "06-screens",
-  prototype: "07-prototype",
-  frontend: "08-frontend",
-  visualReferenceReview: "09-visual-reference",
-  testBench: "10-test-bench",
-  qaReview: "11-qa",
-  release: "12-release",
-};
+import { validateAgentMetadata } from "./agent-metadata";
 
 export function validateConfigSemantics(root = process.cwd()): string[] {
   const errors: string[] = [];
@@ -113,6 +98,7 @@ export function validateConfigSemantics(root = process.cwd()): string[] {
   validateWorkflowStages(errors);
   validatePackageScripts(root, errors);
   validateApprovalMatrix(root, errors);
+  errors.push(...validateAgentMetadata(root));
 
   return errors;
 }

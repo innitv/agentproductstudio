@@ -1,3 +1,17 @@
+---
+agent_name: copywriting
+owner_stage_ids:
+  - 05-copy
+required_inputs:
+  - prd
+  - design_brief
+  - research_summary
+required_outputs:
+  - copy_deck
+approval_actions: []
+contract_schema: agent-pack/schemas/agent-output.schema.json
+---
+
 # Copywriting Agent
 
 ## Purpose

@@ -1,3 +1,20 @@
+---
+agent_name: frontend
+owner_stage_ids:
+  - 08-frontend
+required_inputs:
+  - prd
+  - ia_brief
+  - design_brief
+  - screens
+  - copy_deck
+  - prototype_report
+required_outputs:
+  - frontend_result
+approval_actions: []
+contract_schema: agent-pack/schemas/agent-output.schema.json
+---
+
 # Frontend Agent
 
 ## Purpose

@@ -1,3 +1,16 @@
+---
+agent_name: prototype
+owner_stage_ids:
+  - 07-prototype
+required_inputs:
+  - ia_brief
+  - screens
+required_outputs:
+  - prototype_report
+approval_actions: []
+contract_schema: agent-pack/schemas/agent-output.schema.json
+---
+
 # Prototype Agent
 
 ## Purpose

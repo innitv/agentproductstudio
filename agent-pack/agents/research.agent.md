@@ -1,3 +1,22 @@
+---
+agent_name: research
+owner_stage_ids:
+  - 01-research
+required_inputs:
+  - recursive_brief
+  - run_plan
+  - handoff_bundle
+required_outputs:
+  - research_summary
+  - competitive_analysis
+  - proto_personas
+  - synthetic_interviews
+  - swot
+approval_actions:
+  - external_research_provider_call
+contract_schema: agent-pack/schemas/agent-output.schema.json
+---
+
 # Research Agent (Агент Исследований)
 
 ## Purpose (Предназначение)

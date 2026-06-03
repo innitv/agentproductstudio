@@ -28,13 +28,10 @@ export interface RerunWorkflowStageOptions {
 }
 
 export async function startWorkflowEngine(options: StartWorkflowOptions): Promise<WorkflowRunState> {
-  const profile = options.profile ?? "standard";
+  const profile = options.profile ?? detectWorkflowProfileFromGoal(options.goal);
   const executionMode = options.executionMode ?? "local";
-  if (profile !== "standard") {
-    throw new Error("Workflow engine first increment supports only the standard profile.");
-  }
 
-  const outputDir = await runLandingWorkflow({ goal: options.goal });
+  const outputDir = await runLandingWorkflow({ goal: options.goal, profile });
   const now = nowIso();
   const state = createInitialState(outputDir, options.goal, profile, executionMode, now);
   const intakeArtifacts = [
@@ -76,9 +73,6 @@ export async function resumeWorkflowEngine(outputDir: string): Promise<WorkflowR
   }
 
   let state = await readRunState(outputDir);
-  if (state.profile !== "standard") {
-    throw new Error("Workflow engine first increment supports only the standard profile.");
-  }
 
   const stages = getWorkflowStagesForProfile(state.profile);
   for (const stage of stages) {
@@ -115,7 +109,6 @@ export async function resumeWorkflowEngine(outputDir: string): Promise<WorkflowR
         profile: state.profile,
         executionMode: state.execution_mode ?? "local",
       });
-      await validateThroughStage(outputDir, stage.id, state.profile);
       state = await readRunState(outputDir);
       state.stages[stage.id] = {
         ...state.stages[stage.id],
@@ -132,6 +125,8 @@ export async function resumeWorkflowEngine(outputDir: string): Promise<WorkflowR
       if (result.status === "blocked") {
         break;
       }
+
+      await validateThroughStage(outputDir, stage.id, state.profile);
     } catch (error) {
       const failedAt = nowIso();
       const message = error instanceof Error ? error.message : String(error);
@@ -210,9 +205,6 @@ export async function rerunWorkflowStage(
   }
 
   const state = await readRunState(outputDir);
-  if (state.profile !== "standard") {
-    throw new Error("Workflow engine rerun first increment supports only the standard profile.");
-  }
 
   const stages = getWorkflowStagesForProfile(state.profile);
   const targetIndex = stages.findIndex((stage) => stage.id === stageId);
@@ -306,4 +298,10 @@ async function validateThroughStage(outputDir: string, stageId: string, profile:
 
 function summarizeRunStatus(state: WorkflowRunState): WorkflowStageStatus {
   return resolveRunStatus(Object.values(state.stages).map((stage) => stage.status));
+}
+
+function detectWorkflowProfileFromGoal(goal: string): WorkflowProfile {
+  return /https?:\/\/|visual reference|reference url|как этот сайт|референс/i.test(goal)
+    ? "reference"
+    : "standard";
 }

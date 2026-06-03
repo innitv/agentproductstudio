@@ -6,7 +6,7 @@ import { formatModelProviderApprovalTarget } from "./agentic-approval-targets";
 import { recordApproval } from "./approval-gate";
 import { formatAgenticPreflight } from "./run-workflow-engine";
 import { resumeWorkflowEngine } from "./workflow-engine";
-import { workflowStages } from "./workflow-stages";
+import { getWorkflowStagesForProfile, workflowStages } from "./workflow-stages";
 import { nowIso, writeRunState, type WorkflowRunState, type WorkflowStageStatus } from "./workflow-state";
 
 interface TestCase {
@@ -68,6 +68,26 @@ const testCases: TestCase[] = [
       assert(preflight.includes("Ready: yes"), "preflight should be ready after default rollout stages completed");
       assert(preflight.includes("not required (completed)"), "preflight should mark completed rollout approvals as not required");
       assert(preflight.includes("workflow:resume outputs/test-agentic-engine"), "ready preflight should suggest resume");
+    },
+  },
+  {
+    name: "reference profile resumes to visual reference gate and blocks without visual evidence",
+    run: async () => {
+      delete process.env.OPENAI_API_KEY;
+      await writeBaseArtifacts(tempDir, "reference");
+      await writeReferenceRunStateAtVisualGate(tempDir);
+
+      const state = await resumeWorkflowEngine(tempDir);
+
+      assert(state.profile === "reference", "run should keep reference profile");
+      assert(state.status === "blocked", "reference run should block at visual gate instead of failing");
+      assert(state.stages["09-visual-reference"]?.status === "blocked", "09-visual-reference should be blocked");
+      assert(state.stages["10-test-bench"]?.status === "pending", "test bench should not run after blocked visual gate");
+      assert(existsSync(join(tempDir, "visual-reference-review.md")), "visual-reference-review.md should be created");
+
+      const review = await readFile(join(tempDir, "visual-reference-review.md"), "utf8");
+      assert(review.includes("## Gate Result"), "visual review should include gate result section");
+      assert(review.includes("visual-diff-result.json"), "visual review should explain missing visual diff evidence");
     },
   },
 ];
@@ -135,7 +155,36 @@ async function writeAgenticRunState(outputDir: string): Promise<void> {
   await writeRunState(state);
 }
 
-async function writeBaseArtifacts(outputDir: string): Promise<void> {
+async function writeReferenceRunStateAtVisualGate(outputDir: string): Promise<void> {
+  const now = nowIso();
+  const completedStages = new Set(["00-intake", "01-research", "02-prd", "03-ia", "04-design", "05-copy", "06-screens", "07-prototype", "08-frontend"]);
+  const stages = Object.fromEntries(getWorkflowStagesForProfile("reference")
+    .map((stage) => [stage.id, {
+      id: stage.id,
+      title: stage.title,
+      status: (completedStages.has(stage.id) ? "completed" : "pending") as WorkflowStageStatus,
+      attempts: completedStages.has(stage.id) ? 1 : 0,
+      artifacts: [],
+      updated_at: now,
+    }])) as WorkflowRunState["stages"];
+
+  const state: WorkflowRunState = {
+    run_id: `test-reference-${Date.now()}`,
+    goal: "Тестовый reference profile run https://example.com",
+    profile: "reference",
+    execution_mode: "local",
+    status: "running",
+    output_dir: outputDir,
+    created_at: now,
+    updated_at: now,
+    current_stage: "09-visual-reference",
+    stages,
+  };
+
+  await writeRunState(state);
+}
+
+async function writeBaseArtifacts(outputDir: string, profile: "standard" | "reference" = "standard"): Promise<void> {
   const artifacts: Record<string, string> = {
     "run-plan.md": [
       "# Run Plan",
@@ -150,6 +199,10 @@ async function writeBaseArtifacts(outputDir: string): Promise<void> {
       "- Research",
       "- PRD",
       "- IA",
+      "",
+      "## Workflow Profile",
+      "",
+      profile,
       "",
       "## Ограничения",
       "",

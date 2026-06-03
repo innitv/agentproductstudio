@@ -1,3 +1,18 @@
+---
+agent_name: design-generator
+owner_stage_ids:
+  - 06-screens
+required_inputs:
+  - ia_brief
+  - design_brief
+  - copy_deck
+required_outputs:
+  - screens
+approval_actions:
+  - figma_write
+contract_schema: agent-pack/schemas/agent-output.schema.json
+---
+
 # Design Generator Agent (Агент Генерации Дизайна)
 
 ## Purpose (Предназначение)

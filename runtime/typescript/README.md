@@ -6,11 +6,15 @@
 
 ## Основные файлы
 
-- `workflow-stages.ts` — stage ids, владельцы, обязательные артефакты и секции.
+- `workflow.manifest.ts` — единый source of truth для stage ids, route steps, владельцев, артефактов, профилей и route→stage mapping.
+- `workflow-stages.ts`, `route.config.ts` — compatibility facades для существующих imports.
 - `workflow-state.ts` — persisted `run-state.json` и `stage-results/*.json`.
 - `workflow-engine.ts` — start/resume/status/run-stage для persisted workflow.
-- `workflow-stage-executors.ts` — выбор research, local или approval-gated agentic executor.
-- `run-workflow-engine.ts` — CLI entrypoint для `workflow:start`, `workflow:resume`, `workflow:status`, `workflow:run-stage`, approvals и agentic preflight/readiness commands.
+- `workflow-stage-executors.ts` — тонкий dispatcher между research, local и approval-gated agentic executor.
+- `executors/` — реализации stage execution: `research-executor.ts`, `local-executor.ts`, `agentic-executor.ts`, Notion export helper и общие executor utilities.
+- `agent-output/` — parser/normalizer structured specialist output, JSON Schema validation по `agent-pack/schemas/agent-output.schema.json` и Markdown artifact fallback.
+- `workflow-cli.ts` — command dispatch, intent parsing, approval commands и agentic preflight/readiness formatting.
+- `run-workflow-engine.ts` — тонкий CLI entrypoint и compatibility exports для тестов/скриптов.
 - `agentic-rollout.ts`, `agentic-approval-targets.ts` — staged rollout agentic stages и стабильные approval targets для model provider calls.
 - `run-local-workflow.ts` — deterministic local artifact generator.
 - `run-landing-workflow.ts` — scaffold workflow-папки.
@@ -19,6 +23,7 @@
 - `approval-gate.ts` — локальный helper approval records для внешних записей.
 - `doctor.ts` — диагностика структуры проекта, шаблонов и optional provider keys.
 - `context-truncator.ts` — State Truncation Gate для поздних стадий.
+- `agent-metadata.ts` — парсинг и semantic validation YAML frontmatter в `agent-pack/agents/*.agent.md`.
 - `agents.registry.ts`, `agents.sdk.ts`, `route.config.ts` — регистрация агентов и маршрутов для инспекции/совместимости.
 
 ## Runtime Contract
@@ -30,6 +35,7 @@
 - Отсутствующие optional provider keys считаются предупреждением, а не ошибкой проекта.
 - Outputs валидируются по JSON Schema или required Markdown sections перед передачей следующему этапу.
 - Agentic specialist output должен содержать structured envelope и Markdown для обязательного artifact в `outputs.<artifact_name>` или `outputs.<file_name>`; иначе stage понижается до `partial`.
+- Agent instruction frontmatter валидируется как machine-readable contract; перед передачей в Agents SDK frontmatter удаляется из prompt body.
 - Sensitive inputs/outputs не сохраняются в traces для production-like запусков.
 
 ## Команды
@@ -42,6 +48,7 @@ yarn landing:run "<landing workflow goal>"
 yarn workflow:run-local "<landing workflow goal>"
 yarn workflow:start "<landing workflow goal>"
 yarn workflow:start "<workflow goal>" --mode agentic
+yarn workflow:start "<reference workflow goal>" --profile reference
 yarn workflow:resume outputs/<project-slug>/<YYYY-MM-DD>
 yarn workflow:status outputs/<project-slug>/<YYYY-MM-DD>
 yarn workflow:run-stage outputs/<project-slug>/<YYYY-MM-DD> 01-research --force

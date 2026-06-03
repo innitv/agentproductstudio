@@ -25,6 +25,7 @@ export interface LandingWorkflowInput {
   research_mode?: string;
   source_policy?: unknown;
   notion_target?: string;
+  profile?: "standard" | "reference";
 }
 
 export interface HandoffBundle {

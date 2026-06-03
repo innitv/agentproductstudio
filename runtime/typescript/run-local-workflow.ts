@@ -67,11 +67,13 @@ async function buildContext(outputDir: string, goal: string) {
   const isResearchPartial = /Status \| partial|status:\s*partial/i.test(research);
   const status = isResearchPartial ? "partial" : "ready";
   const productName = createProductName(goal);
+  const profile = await inferProfileFromRunPlan(outputDir);
 
   return {
     outputDir,
     goal,
     productName,
+    profile,
     status,
     validationNote: isResearchPartial
       ? "Research coverage is partial; product claims must remain marked needs validation."
@@ -90,7 +92,7 @@ export async function writeLocalStageArtifact(outputDir: string, artifact: Artif
 }
 
 function buildDownstreamArtifacts(context: Awaited<ReturnType<typeof buildContext>>): ArtifactSpec[] {
-  return [
+  const artifacts: ArtifactSpec[] = [
     {
       file: artifactFiles.prd,
       stage: "02-prd",
@@ -152,6 +154,55 @@ function buildDownstreamArtifacts(context: Awaited<ReturnType<typeof buildContex
       content: renderRelease(context),
     },
   ];
+
+  if (context.profile === "reference") {
+    artifacts.splice(2, 0, {
+      file: artifactFiles.reference_analysis,
+      stage: "04-design",
+      title: "Reference Analysis",
+      content: renderReferenceAnalysis(context),
+    });
+    artifacts.splice(8, 0, {
+      file: artifactFiles.visual_reference_review,
+      stage: "09-visual-reference",
+      title: "Visual Reference Review",
+      content: renderVisualReferenceReview(context),
+    });
+  }
+
+  return artifacts;
+}
+
+function renderReferenceAnalysis(context: Awaited<ReturnType<typeof buildContext>>): string {
+  return [
+    "# Reference Analysis",
+    "",
+    "## Inputs Used",
+    "",
+    "- `recursive-brief.md`",
+    "- `research-summary.md`",
+    "- Reference URL or screenshot request from intake, if present",
+    "",
+    "## References",
+    "",
+    "- Reference profile was selected; technical scan evidence must be produced with `yarn reference:scan` before final design sign-off.",
+    "",
+    "## Allowed Patterns",
+    "",
+    "- Section order, spacing rhythm, CTA hierarchy and responsive behavior may be adapted from scanned evidence.",
+    "- Use only structural observations captured from the reference scan; do not copy protected brand assets or proprietary content.",
+    "",
+    "## Disallowed Copying",
+    "",
+    "- Do not copy logos, exact illustrations, proprietary text, unique brand compositions or unlicensed media.",
+    "- Do not replace the mandatory scan with a generic style interpretation.",
+    "",
+    "## Design Implications",
+    "",
+    `- Current local reference analysis is ${context.status}; downstream design must remain blocked/partial until reference screenshots and section-level notes are attached.`,
+    "- `design-brief.md` and `screens.md` must explicitly consume this reference analysis before frontend work is accepted.",
+    "",
+  ].join("\n");
 }
 
 function renderPrd(context: Awaited<ReturnType<typeof buildContext>>): string {
@@ -472,6 +523,48 @@ function renderFrontend(context: Awaited<ReturnType<typeof buildContext>>): stri
   ]);
 }
 
+function renderVisualReferenceReview(context: Awaited<ReturnType<typeof buildContext>>): string {
+  return [
+    "# Visual Reference Review",
+    "",
+    "## Status",
+    "",
+    "blocked",
+    "",
+    "## Inputs Used",
+    "",
+    "- `reference-analysis.md`",
+    "- `design-brief.md`",
+    "- `screens.md`",
+    "- `frontend-result.md`",
+    "",
+    "## Screenshot Set",
+    "",
+    "- Missing required paired screenshots: `reference-desktop-*`, `reference-mobile-*`, `local-desktop-*`, `local-mobile-*`.",
+    "",
+    "## Full-Site Comparison",
+    "",
+    "| Area | Reference pattern | Local result | Status |",
+    "|---|---|---|---|",
+    "| visual-evidence | Reference scan and visual diff are required. | Local implementation evidence is missing. | blocked |",
+    "",
+    "## Gaps Found",
+    "",
+    "- Missing `visual-diff-result.json`; run `yarn reference:diff <reference-report-dir> <local-report-dir>` after paired screenshots exist.",
+    "- Missing section-level reference/local screenshot pairs.",
+    "- Missing `visual-section-diff-result.json` for section-level QA.",
+    "",
+    "## Corrections Made",
+    "",
+    "- Local workflow runner created a blocking review artifact instead of pretending visual parity passed.",
+    "",
+    "## Gate Result",
+    "",
+    `blocked — ${context.validationNote} Visual reference evidence must be captured before QA/release can continue.`,
+    "",
+  ].join("\n");
+}
+
 function renderTestBench(context: Awaited<ReturnType<typeof buildContext>>): string {
   const payload = {
     status: context.status,
@@ -663,6 +756,12 @@ async function inferGoalFromRunPlan(outputDir: string): Promise<string> {
   const runPlan = await readIfExists(join(outputDir, artifactFiles.run_plan));
   const match = runPlan.match(/## Запрос\s+([\s\S]*?)(?:\n## |\n# |$)/);
   return match?.[1]?.trim() || "Продуктовый лендинг";
+}
+
+async function inferProfileFromRunPlan(outputDir: string): Promise<"standard" | "reference"> {
+  const runPlan = await readIfExists(join(outputDir, artifactFiles.run_plan));
+  const match = runPlan.match(/## Workflow Profile\s+([\s\S]*?)(?:\n## |\n# |$)/);
+  return match?.[1]?.trim() === "reference" ? "reference" : "standard";
 }
 
 async function writeResearchFallback(outputDir: string, goal: string): Promise<void> {

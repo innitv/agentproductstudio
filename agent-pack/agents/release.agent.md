@@ -1,3 +1,20 @@
+---
+agent_name: release
+owner_stage_ids:
+  - 12-release
+required_inputs:
+  - qa_report
+  - changed_files
+  - validation
+required_outputs:
+  - release_notes
+approval_actions:
+  - notion_agile_export
+  - git_write
+  - deploy
+contract_schema: agent-pack/schemas/agent-output.schema.json
+---
+
 # Release Agent
 
 ## Purpose

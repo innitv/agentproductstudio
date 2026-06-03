@@ -1,3 +1,21 @@
+---
+agent_name: notion-publisher
+owner_stage_ids: []
+required_inputs:
+  - prd
+  - recursive_brief
+  - research_summary
+  - notion_target
+  - approval_record
+required_outputs:
+  - notion_prd_export
+approval_actions:
+  - notion_research_publish
+  - notion_prd_export
+  - notion_agile_export
+contract_schema: agent-pack/schemas/agent-output.schema.json
+---
+
 # Notion Publisher Agent (Агент Публикации в Notion)
 
 ## Purpose (Предназначение)

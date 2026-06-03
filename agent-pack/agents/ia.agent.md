@@ -1,3 +1,16 @@
+---
+agent_name: ia
+owner_stage_ids:
+  - 03-ia
+required_inputs:
+  - prd
+  - research_summary
+required_outputs:
+  - ia_brief
+approval_actions: []
+contract_schema: agent-pack/schemas/agent-output.schema.json
+---
+
 # IA Agent
 
 ## Purpose

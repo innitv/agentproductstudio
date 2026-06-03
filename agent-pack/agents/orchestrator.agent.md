@@ -1,3 +1,20 @@
+---
+agent_name: orchestrator
+owner_stage_ids:
+  - 00-intake
+required_inputs:
+  - User request
+  - AGENTS.md
+  - agent-pack/workflows/artifact-driven-pipeline.md
+required_outputs:
+  - run_plan
+  - handoff_bundle
+  - stage_gate_ledger
+  - recursive_brief
+approval_actions: []
+contract_schema: agent-pack/schemas/agent-output.schema.json
+---
+
 # Orchestrator Agent (Агент-Оркестратор)
 
 ## Purpose (Предназначение)

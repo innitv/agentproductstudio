@@ -1,3 +1,26 @@
+---
+agent_name: qa-review
+owner_stage_ids:
+  - 09-visual-reference
+  - 11-qa
+required_inputs:
+  - recursive_brief
+  - research_summary
+  - prd
+  - ia_brief
+  - design_brief
+  - screens
+  - copy_deck
+  - prototype_report
+  - frontend_result
+  - test_bench_result
+required_outputs:
+  - visual_reference_review
+  - qa_report
+approval_actions: []
+contract_schema: agent-pack/schemas/agent-output.schema.json
+---
+
 # QA Review Agent (Агент Контроля Качества)
 
 ## Purpose (Предназначение)
