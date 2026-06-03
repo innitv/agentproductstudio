@@ -9,6 +9,7 @@
 - `workflow.manifest.ts` — единый source of truth для stage ids, route steps, владельцев, артефактов, профилей и route→stage mapping.
 - `workflow-stages.ts`, `route.config.ts` — compatibility facades для существующих imports.
 - `workflow-state.ts` — persisted `run-state.json` и `stage-results/*.json`.
+- `output-metadata.ts` — `run-meta.json`, `artifact-manifest.json` и listing индекса запусков в `outputs`.
 - `workflow-engine.ts` — start/resume/status/run-stage для persisted workflow.
 - `workflow-stage-executors.ts` — тонкий dispatcher между research, local и approval-gated agentic executor.
 - `executors/` — реализации stage execution: `research-executor.ts`, `local-executor.ts`, `agentic-executor.ts`, Notion export helper и общие executor utilities.
@@ -30,6 +31,7 @@
 
 - Codex остаётся главным исполнителем и оркестратором в IDE.
 - Runtime помогает сохранять артефакты, проверять структуру, вести state и запускать локальные проверки.
+- Каждый persisted run синхронизирует `run-meta.json` и `artifact-manifest.json`; `outputs/registry.json` остаётся навигационным индексом, а не source of truth.
 - Все внешние записи проходят через approval gate.
 - Agentic model-provider calls проходят через target-scoped approval gate и включаются только для staged rollout stages.
 - Отсутствующие optional provider keys считаются предупреждением, а не ошибкой проекта.
@@ -51,6 +53,7 @@ yarn workflow:start "<workflow goal>" --mode agentic
 yarn workflow:start "<reference workflow goal>" --profile reference
 yarn workflow:resume outputs/<project-slug>/<YYYY-MM-DD>
 yarn workflow:status outputs/<project-slug>/<YYYY-MM-DD>
+yarn workflow:list
 yarn workflow:run-stage outputs/<project-slug>/<YYYY-MM-DD> 01-research --force
 yarn workflow:agentic-stages
 yarn workflow:agentic-preflight outputs/<project-slug>/<YYYY-MM-DD> --strict

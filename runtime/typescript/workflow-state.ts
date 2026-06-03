@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { syncOutputMetadata } from "./output-metadata";
 
 export type WorkflowStageStatus =
   | "pending"
@@ -59,6 +60,7 @@ export async function readRunState(outputDir: string): Promise<WorkflowRunState>
 
 export async function writeRunState(state: WorkflowRunState): Promise<void> {
   await writeFile(join(state.output_dir, runStateFileName), `${JSON.stringify(state, null, 2)}\n`, "utf8");
+  await syncOutputMetadata(state);
 }
 
 export function hasRunState(outputDir: string): boolean {
@@ -69,6 +71,9 @@ export async function writeStageResult(outputDir: string, result: WorkflowStageR
   const resultsDir = join(outputDir, stageResultsDirName);
   await mkdir(resultsDir, { recursive: true });
   await writeFile(join(resultsDir, `${result.stage_id}.json`), `${JSON.stringify(result, null, 2)}\n`, "utf8");
+  if (hasRunState(outputDir)) {
+    await syncOutputMetadata(await readRunState(outputDir));
+  }
 }
 
 export function nowIso(): string {

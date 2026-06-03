@@ -12,6 +12,7 @@ import {
 } from "./approval-gate";
 import { loadLocalEnv } from "./env";
 import { parseUserIntent } from "./intent-parser";
+import { formatWorkflowRunList, listWorkflowRuns } from "./output-metadata";
 import { getWorkflowEngineStatus, rerunWorkflowStage, resumeWorkflowEngine, startWorkflowEngine } from "./workflow-engine";
 import { workflowStages } from "./workflow-stages";
 import type { WorkflowExecutionMode } from "./workflow-state";
@@ -56,6 +57,12 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
     }
 
     console.log(await getWorkflowEngineStatus(resolve(process.cwd(), outputDir)));
+    return;
+  }
+
+  if (command === "list") {
+    const baseDir = readFlagValue(rest, "--base") ?? "outputs";
+    console.log(formatWorkflowRunList(await listWorkflowRuns(resolve(process.cwd(), baseDir))));
     return;
   }
 
@@ -175,7 +182,7 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
     return;
   }
 
-  throw new Error("Usage: workflow engine command must be one of: start, resume, status, run-stage, approve, deny, approvals, agentic-stages, agentic-readiness, agentic-approval-commands, agentic-preflight\nOr use a natural trigger phrase!");
+  throw new Error("Usage: workflow engine command must be one of: start, resume, status, list, run-stage, approve, deny, approvals, agentic-stages, agentic-readiness, agentic-approval-commands, agentic-preflight\nOr use a natural trigger phrase!");
 }
 
 async function tryRunIntentCommand(command: string | undefined, rest: string[], rawArgs: string[]): Promise<boolean> {

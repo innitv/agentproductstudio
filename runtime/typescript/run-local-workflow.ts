@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import { basename, join, relative } from "node:path";
 import { pathToFileURL } from "node:url";
 import { runLandingWorkflow } from "./run-landing-workflow";
+import { syncWorkflowRunState } from "./sync-run-state";
 import { runResearchStage } from "./research-stage-runner";
 import { validateWorkflowRun } from "./validate-workflow-run";
 import { artifactFiles } from "./workflow-stages";
@@ -37,7 +38,8 @@ export async function runLocalWorkflow(options: LocalWorkflowOptions): Promise<s
     await appendStageProgress(outputDir, artifact);
   }
 
-  const findings = validateWorkflowRun(outputDir, undefined, "standard");
+  const profile = await inferProfileFromRunPlan(outputDir);
+  const findings = validateWorkflowRun(outputDir, undefined, profile);
   const errors = findings.filter((finding) => finding.level === "error");
 
   for (const finding of findings) {
@@ -58,6 +60,7 @@ export async function runLocalWorkflow(options: LocalWorkflowOptions): Promise<s
     throw new Error(`Local workflow validation failed with ${errors.length} error(s).`);
   }
 
+  await syncWorkflowRunState({ outputDir, profile, executionMode: "local", preview: false });
   console.log(`Local workflow completed: ${relative(process.cwd(), outputDir)}`);
   return outputDir;
 }

@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { basename, join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import YAML from "js-yaml";
+import { syncOutputMetadata } from "./output-metadata";
 import { artifactFiles, getRequiredArtifactsForStage, getWorkflowStagesForProfile, type WorkflowProfile } from "./workflow-stages";
 import { artifactStatusToStageStatus, readMarkdownStatus, summarizeRunStatus } from "./status-resolver";
 import {
@@ -212,6 +213,7 @@ async function writeSyncedState(outputDir: string, state: WorkflowRunState, stag
   await Promise.all(
     stageResults.map((result) => writeFile(join(resultsDir, `${result.stage_id}.json`), `${JSON.stringify(result, null, 2)}\n`, "utf8")),
   );
+  await syncOutputMetadata(state);
 }
 
 async function readExistingRunState(outputDir: string): Promise<WorkflowRunState | undefined> {
