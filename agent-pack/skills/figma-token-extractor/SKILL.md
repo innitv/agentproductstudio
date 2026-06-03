@@ -8,6 +8,20 @@ platforms:
 mcp_servers:
   - figma
 strictness_profile: strict
+owner_stage_ids:
+  - 04-design
+  - 08-frontend
+required_inputs:
+  - recursive_brief
+  - run_plan
+  - design_brief
+required_outputs:
+  - design_brief
+approval_actions:
+  - figma_write
+validation_commands:
+  - yarn validate:config
+contract_schema: agent-pack/templates/skill.template.md
 ---
 
 # Навык: Figma Design Token Extractor

@@ -3,9 +3,9 @@ agent_name: orchestrator
 owner_stage_ids:
   - 00-intake
 required_inputs:
-  - User request
-  - AGENTS.md
-  - agent-pack/workflows/artifact-driven-pipeline.md
+  - user_request
+  - project_instructions
+  - artifact_driven_pipeline
 required_outputs:
   - run_plan
   - handoff_bundle

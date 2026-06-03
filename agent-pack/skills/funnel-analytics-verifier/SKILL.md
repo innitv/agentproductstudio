@@ -8,6 +8,20 @@ platforms:
 mcp_servers:
   - playwright
 strictness_profile: strict
+owner_stage_ids:
+  - 10-test-bench
+  - 11-qa
+required_inputs:
+  - prd
+  - prototype_report
+  - frontend_result
+required_outputs:
+  - test_bench_result
+  - qa_report
+approval_actions: []
+validation_commands:
+  - yarn qa:playwright
+contract_schema: agent-pack/templates/skill.template.md
 ---
 
 # Навык: Funnel Analytics & PII Verifier

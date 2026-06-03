@@ -8,6 +8,22 @@ platforms:
 mcp_servers:
   - playwright
 strictness_profile: strict
+owner_stage_ids:
+  - 08-frontend
+required_inputs:
+  - prd
+  - ia_brief
+  - design_brief
+  - screens
+  - copy_deck
+  - prototype_report
+required_outputs:
+  - frontend_result
+approval_actions: []
+validation_commands:
+  - yarn typecheck
+  - yarn build
+contract_schema: agent-pack/templates/skill.template.md
 ---
 
 # Навык: Bespoke UI Landing Builder

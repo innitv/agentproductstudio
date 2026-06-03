@@ -8,6 +8,22 @@ platforms:
 mcp_servers:
   - playwright
 strictness_profile: strict
+owner_stage_ids:
+  - 09-visual-reference
+  - 11-qa
+required_inputs:
+  - reference_analysis
+  - design_brief
+  - screens
+  - frontend_result
+required_outputs:
+  - visual_reference_review
+approval_actions: []
+validation_commands:
+  - yarn reference:scan
+  - yarn reference:diff
+  - yarn reference:section-diff
+contract_schema: agent-pack/templates/skill.template.md
 ---
 
 # Навык: Visual Reference Screenshot Verifier

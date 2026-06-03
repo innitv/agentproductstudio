@@ -8,6 +8,21 @@ platforms:
 mcp_servers:
   - web_search
 strictness_profile: strict
+owner_stage_ids:
+  - 05-copy
+  - 11-qa
+required_inputs:
+  - prd
+  - research_summary
+  - copy_deck
+required_outputs:
+  - copy_deck
+  - qa_report
+approval_actions:
+  - external_research_provider_call
+validation_commands:
+  - yarn validate:config
+contract_schema: agent-pack/templates/skill.template.md
 ---
 
 # Навык: SEO & Copywriting Validator

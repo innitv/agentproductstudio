@@ -8,6 +8,27 @@ platforms:
 mcp_servers:
   - notion
 strictness_profile: strict
+owner_stage_ids:
+  - 01-research
+  - 12-release
+required_inputs:
+  - research_summary
+  - competitive_analysis
+  - proto_personas
+  - synthetic_interviews
+  - swot
+  - prd
+  - approval_record
+required_outputs:
+  - notion_research_export_ru
+  - notion_prd_export
+approval_actions:
+  - notion_research_publish
+  - notion_prd_export
+  - notion_agile_export
+validation_commands:
+  - yarn notion:check
+contract_schema: agent-pack/templates/skill.template.md
 ---
 
 # Навык: Notion Research & PRD Sync
