@@ -15,6 +15,9 @@ required_inputs:
 required_outputs:
   - frontend_result
 approval_actions: []
+skills:
+  - landing-builder
+  - figma-token-extractor
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 

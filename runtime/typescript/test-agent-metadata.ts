@@ -35,6 +35,7 @@ const parsed = parseAgentInstructionDocument([
   "required_inputs: []",
   "required_outputs: []",
   "approval_actions: []",
+  "skills: []",
   "contract_schema: agent-pack/schemas/agent-output.schema.json",
   "---",
   "",
@@ -61,6 +62,11 @@ withAgentDocFixture((root) => {
   const errors = validateAgentMetadata(root);
   assertMetadataError(errors, /required_outputs contains unknown artifact 'unknown_artifact'/);
   assertMetadataError(errors, /metadata required_outputs is missing stage artifact 'prd'/);
+});
+
+withAgentDocFixture((root) => {
+  overwriteAgent(root, "frontend.agent.md", (content) => content.replace("  - landing-builder", "  - unknown-skill"));
+  assertMetadataError(validateAgentMetadata(root), /skills contains unknown skill 'unknown-skill'/);
 });
 
 const instructions = await loadAgentInstructions();

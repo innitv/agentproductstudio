@@ -24,6 +24,10 @@ required_outputs:
   - visual_reference_review
   - qa_report
 approval_actions: []
+skills:
+  - visual-diff-verifier
+  - funnel-analytics-verifier
+  - seo-copy-validator
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 

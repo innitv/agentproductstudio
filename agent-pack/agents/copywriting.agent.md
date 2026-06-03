@@ -13,6 +13,8 @@ required_inputs:
 required_outputs:
   - copy_deck
 approval_actions: []
+skills:
+  - seo-copy-validator
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 

@@ -15,6 +15,8 @@ required_outputs:
   - swot
 approval_actions:
   - external_research_provider_call
+skills:
+  - notion-sync
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 

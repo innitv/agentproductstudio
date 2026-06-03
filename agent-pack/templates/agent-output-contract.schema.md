@@ -12,6 +12,8 @@ status: success|partial|blocked
 summary: <краткое_описание_выполненной_работы>
 inputs_used:
   - <использованные_входные_артефакты>
+skills_used:
+  - <skill-id из agent metadata, если применялся>
 outputs:
   <имя_артефакта>: <содержимое_или_метаданные>
 assumptions:
@@ -26,6 +28,7 @@ recommended_next_step: <рекомендуемый_следующий_шаг>
 Правила:
 
 - `inputs_used` обязан ссылаться на файлы из каталога `outputs/<project-slug>/<YYYY-MM-DD>/`.
+- `skills_used` опционален, но если stage применял skill из agent frontmatter, укажи его id из `agent-pack/skills/*/SKILL.md`.
 - `outputs` обязан содержать созданный артефакт текущего этапа (stage) по artifact name из `runtime/typescript/route.config.ts` или по file name из `runtime/typescript/workflow-stages.ts`.
 - Если stage создаёт Markdown-файл, значение `outputs.<artifact>` должно быть полным Markdown-содержимым целевого файла, включая обязательные секции из `workflow-stages.ts`.
 - `status: success` запрещён, если отсутствует хотя бы один обязательный artifact key текущего stage. В таком случае возвращай `partial` с warning/risk или `blocked`, если без артефакта нельзя продолжать.
@@ -43,6 +46,7 @@ summary: PRD сформирован по исследованию и брифу.
 inputs_used:
   - recursive-brief.md
   - research-summary.md
+skills_used: []
 outputs:
   prd: |
     # Product Requirements

@@ -14,6 +14,7 @@ import { loadLocalEnv } from "./env";
 import { parseUserIntent } from "./intent-parser";
 import { archiveWorkflowRun, cleanupTempOutputs, formatArchiveWorkflowRunResult, formatCleanupTempResult } from "./output-lifecycle";
 import { formatWorkflowRunInspection, formatWorkflowRunList, inspectWorkflowRun, listWorkflowRuns } from "./output-metadata";
+import { formatSkillUsageInspection, inspectSkillUsage } from "./skill-usage";
 import { getWorkflowEngineStatus, rerunWorkflowStage, resumeWorkflowEngine, startWorkflowEngine } from "./workflow-engine";
 import { workflowStages } from "./workflow-stages";
 import type { WorkflowExecutionMode } from "./workflow-state";
@@ -74,6 +75,11 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
     }
 
     console.log(formatWorkflowRunInspection(await inspectWorkflowRun(resolve(process.cwd(), outputDir))));
+    return;
+  }
+
+  if (command === "skills") {
+    console.log(formatSkillUsageInspection(inspectSkillUsage(resolve(process.cwd()))));
     return;
   }
 
@@ -214,7 +220,7 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
     return;
   }
 
-  throw new Error("Usage: workflow engine command must be one of: start, resume, status, list, inspect, cleanup-temp, archive, run-stage, approve, deny, approvals, agentic-stages, agentic-readiness, agentic-approval-commands, agentic-preflight\nOr use a natural trigger phrase!");
+  throw new Error("Usage: workflow engine command must be one of: start, resume, status, list, inspect, skills, cleanup-temp, archive, run-stage, approve, deny, approvals, agentic-stages, agentic-readiness, agentic-approval-commands, agentic-preflight\nOr use a natural trigger phrase!");
 }
 
 async function tryRunIntentCommand(command: string | undefined, rest: string[], rawArgs: string[]): Promise<boolean> {

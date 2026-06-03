@@ -9,6 +9,7 @@
     "status": { "enum": ["success", "partial", "blocked"] },
     "summary": { "type": "string" },
     "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "skills_used": { "type": "array", "items": { "type": "string" } },
     "outputs": { "type": "object" },
     "assumptions": { "type": "array", "items": { "type": "string" } },
     "risks": { "type": "array", "items": { "type": "string" } },

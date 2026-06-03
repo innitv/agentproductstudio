@@ -200,6 +200,7 @@ function validatePackageScripts(root: string, errors: string[]): void {
   const expectedScripts: Record<string, string> = {
     "workflow:validate": "runtime/typescript/validate-workflow-run.ts",
     "workflow:sync": "runtime/typescript/sync-run-state.ts",
+    "workflow:skills": "runtime/typescript/run-workflow-engine.ts",
     "reference:scan": "runtime/typescript/reference-scan.ts",
     "reference:diff": "runtime/typescript/visual-diff.ts",
     "reference:section-diff": "runtime/typescript/visual-section-diff.ts",

@@ -12,6 +12,8 @@ required_outputs:
   - reference_analysis
 approval_actions:
   - figma_write
+skills:
+  - figma-token-extractor
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 

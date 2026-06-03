@@ -13,6 +13,7 @@ required_inputs:
 required_outputs:
   - prd
 approval_actions: []
+skills: []
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 

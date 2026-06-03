@@ -16,6 +16,8 @@ approval_actions:
   - notion_research_publish
   - notion_prd_export
   - notion_agile_export
+skills:
+  - notion-sync
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 

@@ -15,6 +15,8 @@ approval_actions:
   - notion_agile_export
   - git_write
   - deploy
+skills:
+  - notion-sync
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 

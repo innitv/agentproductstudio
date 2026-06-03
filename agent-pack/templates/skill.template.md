@@ -1,44 +1,51 @@
 ---
 id: skill-id-placeholder
+name: skill-id-placeholder
 title: "Название Навыка"
-description: "Краткое описание того, какую задачу решает навык"
+description: "Use when <stage/task trigger> needs <capability>. State required context, expected evidence/output, and any blocker/approval behavior in one trigger-oriented sentence."
 platforms:
   - codex
   - open-code
-  - claude-code
 mcp_servers:
   - optional-mcp-server-name
-strictness_profile: standard | strict | minimal
+strictness_profile: standard
+owner_stage_ids:
+  - 00-intake
+required_inputs:
+  - recursive_brief
+required_outputs:
+  - run_plan
+approval_actions: []
+validation_commands:
+  - yarn validate:config
+contract_schema: agent-pack/templates/skill.template.md
 ---
 
-# Навык: {{title}}
+# Skill: {{title}}
 
-## 1. Контекст (Context)
-Подробное объяснение того, зачем нужен этот навык, какие проблемы он решает и в каких сценариях он является оптимальным выбором по сравнению с базовым поведением модели.
+## 1. Назначение
 
-## 2. Триггеры (Triggers)
-Четкие условия, при которых субагент обязан применить данный навык.
-- **Пользовательский запрос**: Ключевые слова, фразы или типы задач.
-- **Стадия воркфлоу**: Конкретные этапы воркфлоу (например, `08-frontend` или `11-qa`).
-- **Состояние репозитория**: Наличие определенных файлов (например, `reference-analysis.md` или `App.tsx`).
+Кратко опиши, когда agent обязан применить skill, какие workflow gates он защищает и какой результат должен оставить. Не дублируй `AGENTS.md`; skill должен быть компактной процедурой для повторяемой capability.
 
-## 3. Пошаговый алгоритм выполнения (Action Step-by-Step)
-Детализированный алгоритм действий с разметкой "как думать" и "как делать". 
+## 2. Обязательные inputs
 
-> [!IMPORTANT]
-> На каждом шаге агент должен фиксировать свои допущения (assumptions) и потенциальные риски в `handoff-bundle.md`.
+Перечисли файлы, runtime state, URL, approval records или env capability, которые нужно прочитать перед действием. Имена должны соответствовать `required_inputs` в frontmatter.
 
-1. **Шаг 1: Подготовка и сбор входов**
-   - Проверить наличие необходимых файлов...
-   - Считать структуру...
-2. **Шаг 2: Выполнение ключевой логики**
-   - Описание действий...
-3. **Шаг 3: Формирование результатов**
-   - Записать артефакт в директорию...
+## 3. Процедура
 
-## 4. Контроль Качества и Проверки (Validation / Quality Gates)
-Четкий чеклист, по которому субагент сам должен проверить свою работу перед завершением шага.
-- [ ] Все сгенерированные файлы валидируются по соответствующим JSON Schema.
-- [ ] Отсутствуют заглушки (placeholders).
-- [ ] Разметка полностью адаптивна и поддерживает мобильные устройства.
-- [ ] Ошибок компиляции или сборки в консоли нет.
+1. Опиши минимальный порядок действий.
+2. Укажи, какие decisions, assumptions и risks нужно записать в run artifacts.
+3. Укажи, какие файлы или внешние системы можно менять, а какие нельзя.
+
+## 4. Evidence и failure modes
+
+Опиши обязательный evidence/output contract: какие артефакты, таблицы, ссылки на отчеты, команды или records должны появиться.
+
+Опиши, когда stage получает `partial` или `blocked`, особенно если отсутствуют inputs, approval, credentials, screenshots, validation или source-backed evidence.
+
+## 5. Validation gates
+
+- [ ] `required_inputs` прочитаны и перечислены в `inputs_used`.
+- [ ] `required_outputs` созданы или blocker/partial зафиксирован.
+- [ ] Approval actions не выполнялись без human approval.
+- [ ] Команды из `validation_commands` запущены или причина пропуска записана.

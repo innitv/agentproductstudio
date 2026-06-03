@@ -12,6 +12,8 @@ required_inputs:
 required_outputs:
   - test_bench_result
 approval_actions: []
+skills:
+  - funnel-analytics-verifier
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 

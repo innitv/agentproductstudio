@@ -11,6 +11,7 @@ required_outputs:
   - screens
 approval_actions:
   - figma_write
+skills: []
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 

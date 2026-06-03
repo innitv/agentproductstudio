@@ -56,6 +56,7 @@ yarn workflow:resume outputs/<project-slug>/<YYYY-MM-DD>
 yarn workflow:status outputs/<project-slug>/<YYYY-MM-DD>
 yarn workflow:list
 yarn workflow:inspect outputs/<project-slug>/<YYYY-MM-DD>
+yarn workflow:skills
 yarn workflow:cleanup-temp
 yarn workflow:cleanup-temp --force
 yarn workflow:archive outputs/<project-slug>/<YYYY-MM-DD>

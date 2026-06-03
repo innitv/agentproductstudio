@@ -12,6 +12,7 @@ required_inputs:
 required_outputs:
   - ia_brief
 approval_actions: []
+skills: []
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 

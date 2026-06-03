@@ -4,6 +4,7 @@ import YAML from "js-yaml";
 import { approvalActions } from "./approval-gate";
 import { agentInstructionFiles, agentNames } from "./agents.registry";
 import { artifactNames, routeTools } from "./route.config";
+import { loadSkillMetadataRecords } from "./skill-metadata";
 import { getRequiredArtifactsForStage, workflowStages } from "./workflow-stages";
 
 type AgentRegistryKey = keyof typeof agentInstructionFiles;
@@ -19,6 +20,7 @@ export interface AgentMetadata {
   required_inputs: string[];
   required_outputs: string[];
   approval_actions: string[];
+  skills: string[];
   contract_schema: string;
 }
 
@@ -44,6 +46,8 @@ export function validateAgentMetadata(root = process.cwd()): string[] {
   const knownArtifacts = new Set<string>(Object.values(artifactNames));
   const knownStages = new Set(workflowStages.map((stage) => stage.id));
   const knownApprovals = new Set<string>(approvalActions);
+  const skillRecords = loadSkillMetadataRecords(root);
+  const skillsById = new Map(skillRecords.map((record) => [record.metadata.id, record.metadata]));
 
   for (const [key, file] of Object.entries(agentInstructionFiles) as Array<[AgentRegistryKey, string]>) {
     const metadata = loadAgentMetadata(join(root, file));
@@ -70,6 +74,21 @@ export function validateAgentMetadata(root = process.cwd()): string[] {
     for (const action of metadata.approval_actions) {
       if (!knownApprovals.has(action)) {
         errors.push(`${file}: approval_actions contains unknown action '${action}'.`);
+      }
+    }
+
+    for (const skillId of metadata.skills) {
+      const skill = skillsById.get(skillId);
+      if (!skill) {
+        errors.push(`${file}: skills contains unknown skill '${skillId}'.`);
+        continue;
+      }
+
+      if (metadata.owner_stage_ids.length > 0) {
+        const hasStageOverlap = metadata.owner_stage_ids.some((stageId) => skill.owner_stage_ids.includes(stageId));
+        if (!hasStageOverlap) {
+          errors.push(`${file}: skill '${skillId}' has no owner_stage_ids overlap with agent stages '${metadata.owner_stage_ids.join(", ")}'.`);
+        }
       }
     }
 
@@ -116,5 +135,7 @@ function isAgentMetadata(value: unknown): value is AgentMetadata {
     && record.required_outputs.every((item) => typeof item === "string")
     && Array.isArray(record.approval_actions)
     && record.approval_actions.every((item) => typeof item === "string")
+    && Array.isArray(record.skills)
+    && record.skills.every((item) => typeof item === "string")
     && typeof record.contract_schema === "string";
 }

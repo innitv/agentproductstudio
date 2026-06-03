@@ -26,6 +26,11 @@ export interface SkillMetadata {
   contract_schema: string;
 }
 
+export interface SkillMetadataRecord {
+  file: string;
+  metadata: SkillMetadata;
+}
+
 export function parseSkillInstructionDocument(content: string): SkillInstructionDocument {
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
   if (!match) {
@@ -109,6 +114,21 @@ export function validateSkillMetadata(root = process.cwd()): string[] {
   }
 
   return errors;
+}
+
+export function loadSkillMetadataRecords(root = process.cwd()): SkillMetadataRecord[] {
+  return listSkillFiles(root).flatMap((file) => {
+    const content = readFileSync(file, "utf8");
+    const metadata = parseSkillInstructionDocument(content).metadata;
+    if (!metadata) {
+      return [];
+    }
+
+    return [{
+      file: relative(root, file).replaceAll("\\", "/"),
+      metadata,
+    }];
+  });
 }
 
 function listSkillFiles(root: string): string[] {
