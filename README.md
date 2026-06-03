@@ -1,4 +1,4 @@
-# Пак оркестра субагентов для Codex и OpenAI Agents SDK
+# Пак оркестра субагентов для Codex
 
 Назначение: собрать рабочую архитектуру, где один запрос продуктового дизайнера запускает управляемую цепочку исследования, PRD, IA, UX/UI, screen specification, прототипа, копирайтинга, разработки, тестового стенда, ревью и подготовки результата к передаче.
 
@@ -9,6 +9,8 @@
 - Guardrails и human review для рискованных решений.
 - MCP/инструменты для поиска, файлов, браузера, дизайна, задач и деплоя.
 - Трассировка, результаты запусков и quality gates как часть процесса.
+
+Правило языка документации: человекочитаемые описания ведутся на русском языке. Английский допустим для имён файлов, команд, переменных, API-терминов и обязательных contract section keys вроде `## Inputs Used`, если они нужны валидатору или схемам.
 
 ## Целевая продуктовая схема
 
@@ -53,7 +55,7 @@ ia_brief + screens -> prototype_report
 prd + ia_brief + prototype_report + frontend_result -> test_bench_result
 ```
 
-## Handoff bundle
+## Пакет handoff
 
 Между этапами передаётся единый пакет контекста, чтобы frontend, QA и release не восстанавливали смысл из разрозненных сообщений:
 
@@ -224,25 +226,25 @@ agent-pack/templates/
 README.md
 ```
 
-## Route Tools, Hooks And Rules
+## Route tools, hooks и правила
 
-Route tools and artifact dependencies live in `runtime/typescript/route.config.ts` and `runtime/typescript/tools.ts`.
+Route tools и зависимости артефактов описаны в `runtime/typescript/route.config.ts` и `runtime/typescript/tools.ts`.
 
-Optional external publication tools, such as `publish_prd_to_notion`, are route tools with approval requirements. They do not replace local artifacts and should have a local Markdown fallback.
+Опциональные инструменты внешней публикации, например `publish_prd_to_notion`, являются route tools с обязательным подтверждением. Они не заменяют локальные артефакты и должны иметь локальный Markdown fallback.
 
-Adaptive research configuration lives in `runtime/typescript/research.config.ts` and `integrations/mcp/research-providers.md`. Research providers are interchangeable; the prompt and source policy decide whether to use local files, user sources, web search, browser scan, official docs or deep research MCP.
+Адаптивная конфигурация исследований хранится в `runtime/typescript/research.config.ts` и `integrations/mcp/research-providers.md`. Research providers взаимозаменяемы; prompt и source policy решают, использовать ли локальные файлы, пользовательские источники, web search, browser scan, официальную документацию или deep research MCP.
 
-Lifecycle hooks live in:
+Lifecycle hooks находятся в:
 
 - `runtime/typescript/hooks.ts`;
 - `.codex/hooks/README.md`.
 
-Command and action rules live in:
+Правила команд и действий находятся в:
 
 - `.codex/rules/safe-commands.example.toml`;
 - `.codex/rules/README.md`.
 
-`.codex/config.example.toml` connects these layers through `[route_tools]`, `[hooks]`, `[rules]`, `[approval]` and `[profiles.*]`.
+`.codex/config.example.toml` связывает эти слои через `[route_tools]`, `[hooks]`, `[rules]`, `[approval]` и `[profiles.*]`.
 
 ## Форматы файлов
 
@@ -269,17 +271,30 @@ Command and action rules live in:
    Для Firecrawl scrape/reference scan используй локальный `.env` с `FIRECRAWL_API_KEY` и команду `yarn reference:scan`.
 5. Для каждой задачи используй маршрут из `agent-pack/workflows/artifact-driven-pipeline.md` и контракт `agent-pack/templates/agent-output-contract.schema.md`.
 6. Для ревью используй правила из `AGENTS.md`, `agent-pack/quality/quality-gates.md` и `/review` в Codex.
-7. Для вопросов по OpenAI API, Codex, Agents SDK, Apps SDK и MCP используй OpenAI Docs MCP: `https://developers.openai.com/mcp`.
+7. Для вопросов по Codex, MCP и связанным интеграциям используй официальные источники и проектные MCP-инструкции.
 8. Для будущей исполняемой реализации используй каркас `runtime/typescript/`.
 9. Для проверки качества workflow используй `agent-pack/quality/quality-gates.md` и `yarn workflow:validate`.
 
 Краткий справочник команд: `COMMANDS.md`.
 
+## Основной режим работы
+
+Сценарий проекта один: **работа через Codex внутри IDE/чата**.
+
+```text
+пользовательский запрос
+  -> Codex читает AGENTS.md, agent-pack/agents, workflows и templates
+  -> Codex выполняет этапы через локальные инструменты и команды
+  -> проект сохраняет артефакты, ledger, handoff и результаты проверок
+```
+
+LLM уже присутствует в текущей Codex-сессии, а репозиторий задаёт правила, роли специалистов, порядок этапов, guardrails и проверяемые артефакты.
+
 ## Локальный runtime scaffold
 
-Основной режим проекта — использовать эту папку как Codex agent pack: `AGENTS.md`, `agent-pack/agents/`, `agent-pack/templates/`, `agent-pack/workflows/`, `agent-pack/schemas/`, `agent-pack/guardrails/` и `agent-pack/quality/` задают правила работы. В этом режиме отдельный `OPENAI_API_KEY` не нужен.
+Основной режим проекта — использовать эту папку как Codex agent pack: `AGENTS.md`, `agent-pack/agents/`, `agent-pack/templates/`, `agent-pack/workflows/`, `agent-pack/schemas/`, `agent-pack/guardrails/` и `agent-pack/quality/` задают правила работы.
 
-В проект также добавлен Node/TypeScript runtime layer: Agents SDK scaffold, локальные research/reference adapters, workflow validation и persisted workflow engine:
+В проект также добавлен Node/TypeScript runtime layer для локального scaffold, research/reference adapters, workflow validation и persisted workflow engine:
 
 ```bash
 yarn install
@@ -294,6 +309,15 @@ yarn research:run outputs/<project-slug>/<YYYY-MM-DD> ["research query"]
 yarn landing:run "<цель workflow>"
 yarn workflow:run-local "<цель workflow>"
 yarn workflow:start "<цель workflow>"
+yarn workflow:start "<цель workflow>" --mode agentic
+yarn workflow:agentic-stages
+yarn workflow:agentic-preflight outputs/<project-slug>/<YYYY-MM-DD> --strict
+yarn workflow:agentic-approval-commands outputs/<project-slug>/<YYYY-MM-DD> --by human --missing-only
+yarn workflow:agentic-readiness outputs/<project-slug>/<YYYY-MM-DD> --strict
+yarn workflow:approve outputs/<project-slug>/<YYYY-MM-DD> notion_research_publish --target <notion-parent-page-id> --by human
+yarn workflow:approvals outputs/<project-slug>/<YYYY-MM-DD>
+yarn workflow:deny outputs/<project-slug>/<YYYY-MM-DD> notion_research_publish --target <notion-parent-page-id> --by human
+yarn workflow:test-agentic
 yarn workflow:resume outputs/<project-slug>/<YYYY-MM-DD>
 yarn workflow:status outputs/<project-slug>/<YYYY-MM-DD>
 yarn workflow:run-stage outputs/<project-slug>/<YYYY-MM-DD> 01-research --force
@@ -303,12 +327,20 @@ yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
 yarn workflow:doctor
 ```
 
-Schema-aware artifact validation:
+Валидация артефактов с учётом схем:
 
-- Markdown artifacts can include YAML frontmatter with `schema_payload`.
-- Alternatively, include a fenced code block labeled `artifact-json`.
+- Markdown-артефакты могут включать YAML frontmatter с `schema_payload`.
+- Альтернативный вариант — fenced code block с меткой `artifact-json`.
 - `workflow:validate` checks required Markdown sections and validates structured payloads against `agent-pack/schemas/*.schema.json` when a schema is mapped in `runtime/typescript/workflow-stages.ts`.
 - `workflow:validate` supports `--profile standard|reference|auto`; `reference` requires `visual-reference-review.md`, while `standard` does not.
+
+Режим исполнения:
+
+- `local` — режим по умолчанию для `workflow:start`. Он сохраняет текущий детерминированный каркас: исполняемая research stage плюс локальная генерация downstream-артефактов.
+- `agentic` — approval-gated staged rollout для отдельных specialist stages. Перед `workflow:resume` проверяй `workflow:agentic-preflight ... --strict`; model provider calls требуют `model_provider_call` approval с target вида `openai_agents_sdk:<owner>:<stage-id>`.
+- Внешние записи вроде Notion, Figma или деплоя должны проходить через `yarn workflow:approve`; runtime сохраняет записи в `approval-state.json`, а отсутствующее подтверждение фиксируется как partial/blocked вместо тихой публикации.
+- Approval matching строгий по `target`: targetless approval не покрывает targeted request, а targeted approval не покрывает targetless request.
+- `AGENTIC_ENABLED_STAGES` валидируется по известным stage id; несуществующие значения игнорируются и показываются в CLI output.
 
 Example:
 
@@ -321,16 +353,19 @@ schema_payload:
 ---
 ```
 
-Ключи для опциональных внешних providers хранятся только в локальном `.env`, созданном по `.env.example`. Не сохраняй реальные значения `OPENAI_API_KEY`, `TAVILY_API_KEY`, `DEEPSEEK_API_KEY`, `FIRECRAWL_API_KEY`, `NOTION_TOKEN` или repository tokens в конфиги, outputs, traces или документацию.
+Ключи для опциональных внешних providers хранятся только в локальном `.env`, созданном по `.env.example`. Не сохраняй реальные значения `TAVILY_API_KEY`, `DEEPSEEK_API_KEY`, `FIRECRAWL_API_KEY`, `NOTION_TOKEN` или repository tokens в конфиги, outputs, traces или документацию.
 
 Текущий статус:
 
-- `runtime/typescript/` содержит Agents SDK integration scaffold, executable research adapters, visual-reference tooling and local workflow engine.
-- `runtime/typescript/agents.sdk.ts` создаёт Agents SDK слой: orchestrator, specialists и specialists-as-tools.
+- `runtime/typescript/` содержит executable research adapters, visual-reference tooling and local workflow engine.
+- `runtime/typescript/agents.sdk.ts` хранит технический слой регистрации orchestrator/specialists для runtime-инспекции.
 - `runtime/typescript/workflow-stages.ts` описывает обязательные stage gates и артефакты каждого шага.
 - `runtime/typescript/validate-workflow-run.ts` проверяет, что run-папка содержит все обязательные артефакты и ключевые секции.
+- `runtime/typescript/doctor.ts` разделяет ошибки целостности проекта и предупреждения по optional provider keys; local workflow не считается сломанным из-за отсутствия provider env keys.
 - `runtime/typescript/route.config.ts` использует standard route без visual reference review; reference route добавляет `visualReferenceReview` только для задач с референсом.
 - `runtime/typescript/workflow-engine.ts` и `workflow-state.ts` дают persisted standard workflow: `run-state.json`, `stage-results/`, `start/resume/status/run-stage`.
+- `runtime/typescript/workflow-stage-executors.ts` выбирает research/local/agentic executor для stage и блокирует agentic execution без ключа, rollout enablement, exact approval target или обязательного artifact output.
+- `runtime/typescript/approval-gate.ts` проверяет локальные approval records перед внешними write-действиями и agentic model-provider calls.
 - `runtime/typescript/firecrawl.ts` подключает Firecrawl SDK как opt-in scrape/interact provider.
 - `runtime/typescript/reference-scan.ts` собирает reference pack: Firecrawl markdown/json и Playwright desktop/mobile full-page screenshots в `reports/visual-review/<slug>/`.
 - `runtime/typescript/visual-diff.ts`, `visual-section-diff.ts` и `visual-reference-review.ts` создают pixel/section evidence и `visual-reference-review.md` для reference-driven QA.
@@ -343,7 +378,6 @@ schema_payload:
 - Firecrawl QA подключён через `@mendable/firecrawl-js`; `yarn qa:firecrawl` проверяет Firecrawl scrape вместе с Playwright, а `yarn reference:scan <url> [slug]` создает пакет для visual reference review.
 - Notion MCP установлен как opt-in provider через `@notionhq/notion-mcp-server`; запуск: `yarn notion:mcp` при наличии локального `NOTION_TOKEN`.
 - Локальная token-инструкция для Notion: `integrations/mcp/notion-local-token.md`.
-- `OPENAI_API_KEY` нужен только для standalone runtime, который сам вызывает OpenAI API вне Codex-интерфейса.
 - OpenAI Docs MCP, Playwright/browser MCP, Tavily, DeepSeek, Firecrawl, Notion, GitHub/GitLab и Figma подключаются через пользовательский Codex/MCP config или локальный `.env`, а не через committed secrets.
 
 ## Базовый принцип маршрутизации

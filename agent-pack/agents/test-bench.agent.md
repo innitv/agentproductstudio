@@ -41,18 +41,28 @@
 
 ## Output Contract
 
+Возвращай structured envelope по `agent-pack/templates/agent-output-contract.schema.md`. Если используется fenced block, допустимы `agent-output-yaml` или `agent-output-json`. В `outputs.test_bench_result` положи полное Markdown-содержимое `test-bench-result.md` с обязательными секциями из `runtime/typescript/workflow-stages.ts`. Если входы неполные или требуется approval/provider, возвращай `partial`/`blocked`, а не `success`.
+
 ```yaml
 agent_name: test-bench
 status: success|partial|blocked
 outputs:
-  test_bench_result:
-    status: draft|partial|blocked|ready
-    inputs_used:
-    main_funnel:
-    analytics_spec:
-    pii_risk: none|low|medium|high
-    executable_checks:
-    result: pass|fail|blocked
+  test_bench_result: |
+    # Test Bench Result
+
+    ## Main Funnel
+
+    ...
+
+    ## Analytics Spec
+
+    ...
+
+    ## Executable Checks
+
+    ...
+
+    ## Result
+
+    pass|fail|blocked
 ```
-
-

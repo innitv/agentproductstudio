@@ -41,18 +41,32 @@
 
 ## Output Contract
 
+Возвращай structured envelope по `agent-pack/templates/agent-output-contract.schema.md`. Если используется fenced block, допустимы `agent-output-yaml` или `agent-output-json`. В `outputs.release_notes` положи полное Markdown-содержимое `release-notes.md` с обязательными секциями из `runtime/typescript/workflow-stages.ts`. Если Notion/Figma/deploy/Git write требует approval или blocked, возвращай `partial`/`blocked`, а не `success`.
+
 ```yaml
 agent_name: release
 status: success|partial|blocked
 outputs:
-  release_notes:
-    status: ready|blocked|released
-    inputs_used:
-    changed_files:
-    what_changed:
-    validation:
-    deployment_notes:
-    rollback_notes:
+  release_notes: |
+    # Release Notes
+
+    ## Status
+
+    ready|blocked|released
+
+    ## Changed Files
+
+    ...
+
+    ## What Changed
+
+    ...
+
+    ## Validation
+
+    ...
+
+    ## Rollback Notes
+
+    ...
 ```
-
-

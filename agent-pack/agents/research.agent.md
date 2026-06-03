@@ -2,7 +2,7 @@
 
 ## Purpose (Предназначение)
 
-Создает базу глубоких исследований (deep research base) для принятия решений по продукту (product), информационной архитектуре (IA), дизайну (design), копирайту (copy), интерактивному прототипу (prototype) и тест-бенчу (test bench). Агент не должен выдавать поверхностные заметки: он отвечает за выявление подтвержденных фактов на основе источников, определение Jobs To Be Done (JTBD), профайлы протоперсон (proto-personas), симулированные интервью (synthetic interviews), конкурентный анализ (competitive analysis), SWOT, план валидации и определение неизвестных (unknowns).
+Создает базу глубоких исследований (deep research base) для принятия решений по продукту (product), информационной архитектуре (IA), дизайну (design), копирайту (copy), интерактивному прототипу (prototype) и тест-бенчу (test bench). Агент не должен выдавать поверхностные заметки: он отвечает за выявление подтвержденных фактов на основе источников, определение Jobs To Be Done (JTBD), профайлы протоперсон (proto-personas), симулированные интервью (simulated_interviews, synthetic interviews), конкурентный анализ (competitive analysis), SWOT, план валидации и определение неизвестных (unknowns).
 
 ## Inputs (Входные данные)
 
@@ -100,6 +100,10 @@
 
 ## Output Contract (Контракт вывода)
 
+Агент возвращает результат по контракту `agent-pack/templates/agent-output-contract.schema.md`. Если используется fenced-блок, допустимы `agent-output-yaml` или `agent-output-json`. Полные Markdown-тексты артефактов передаются в `outputs.research_summary`, `outputs.competitive_analysis`, `outputs.proto_personas`, `outputs.synthetic_interviews` и `outputs.swot`. Для `status: success` все пять ключей обязательны и каждый должен содержать полный Markdown соответствующего файла, а не краткие метаданные.
+
+Если для `tavily`, `deepseek`, `gemini` или другого внешнего provider отсутствует ключ, разрешение источников или human approval, агент не ставит `success`: он возвращает `partial` или `blocked`, фиксирует провайдера и причину в `risks`, `open_questions` и соответствующем Markdown-артефакте.
+
 ```yaml
 agent_name: research
 status: success|partial|blocked
@@ -108,7 +112,7 @@ outputs:
   research_summary:
   competitive_analysis:
   proto_personas:
-  simulated_interviews:
+  synthetic_interviews:
   swot:
 assumptions:
 risks:

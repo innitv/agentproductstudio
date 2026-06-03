@@ -68,16 +68,32 @@ QA-агент обязан проверить:
 
 ## Output Contract (Контракт вывода)
 
+Возвращай structured envelope по `agent-pack/templates/agent-output-contract.schema.md`. Если используется fenced block, допустимы `agent-output-yaml` или `agent-output-json`. В `outputs.qa_report` положи полное Markdown-содержимое `qa-report.md` с обязательными секциями из `runtime/typescript/workflow-stages.ts`. Если есть missing artifacts, active blockers или нерешённый visual reference gate, возвращай `partial`/`blocked`, а не `success`.
+
 ```yaml
 agent_name: qa-review
 status: success|partial|blocked
 outputs:
-  qa_report:
-    verdict: pass|pass_with_known_limitations|fail
-    research_integrity:
-    prd_fit:
-    ux_accessibility:
-    responsive:
-    validation:
-    blockers:
+  qa_report: |
+    # QA Report
+
+    ## Status
+
+    pass|pass_with_known_limitations|fail|blocked
+
+    ## PRD Fit
+
+    ...
+
+    ## Accessibility
+
+    ...
+
+    ## Responsive
+
+    ...
+
+    ## Validation
+
+    ...
 ```

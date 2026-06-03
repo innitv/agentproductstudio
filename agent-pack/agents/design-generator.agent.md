@@ -40,3 +40,11 @@
 ## Required Outputs (Обязательные результаты)
 
 - `screens.md`
+
+## Structured Output Contract (Структурированный контракт вывода)
+
+Агент возвращает результат по контракту `agent-pack/templates/agent-output-contract.schema.md`. Если используется fenced-блок, допустимы `agent-output-yaml` или `agent-output-json`.
+
+- `outputs.screens` содержит полный Markdown для `screens.md`.
+- Если проект требует Figma canvas write, агент сначала возвращает подготовленный JSON-запрос и статус `partial`/`blocked` до явного human approval; запись в Figma без approval запрещена.
+- Если обязательные входы `ia-brief.md`, `design-brief.md`, `copy-deck.md` или `prd.md` отсутствуют, статус не может быть `success`.

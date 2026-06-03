@@ -39,7 +39,7 @@ Before handoff, verify hero/nav/color/typography/spacing/card/CTA/form/footer pa
 - **Кастомная верстка с нуля (Bespoke UI by Default):** Использование любых шаблонных библиотек компонентов и заготовок полностью исключено из процессов верстки. Запрещено верстать целевые страницы по стандартным шаблонам. Вся верстка производится строго с нуля как Bespoke UI с применением чистого кастомного Tailwind CSS / HTML и независимых React-компонентов, детально воспроизводящих дизайн-бриф и утвержденные макеты Figma на основе [landing-builder/SKILL.md](file:///c:/Project/product-agent-studio/agent-pack/skills/landing-builder/SKILL.md).
 - **Минимизация зависимостей**: Не добавлять сторонние Yarn-зависимости без крайней необходимости. Максимально использовать существующие токены дизайн-системы.
 - **Целостность состояний**: Строго следовать карте переходов прототипа. Не создавать компоненты, у которых не описаны состояния загрузки, ошибок и пустых экранов.
-- **Изоляция представлений (Modular Views Architecture):** Любая целевая верстка презентационных страниц, промо-лендингов и калькуляторов (таких как Dodo, VK Cloud, Valorant и др.) по требованиям заказчика должна осуществляться **строго внутри [LandingView.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/views/LandingView.tsx)**. Файл [ConsoleView.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/views/ConsoleView.tsx) является защищенной внутренней B2B-консолью управления оркестрацией и не должен модифицироваться кодом лендингов. Файл [App.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/App.tsx) должен оставаться легким Hash-роутером и не должен содержать логику представлений. Все общие типы выносятся в [types.ts](file:///c:/Project/product-agent-studio/apps/frontend/src/types.ts).
+- **Изоляция представлений (Modular Views Architecture):** Целевая верстка презентационных страниц, промо-лендингов и калькуляторов должна жить в отдельном presentation view внутри `apps/frontend/src/views/`. Для обновления существующего лендинга используй [LandingView.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/views/LandingView.tsx); для нового самостоятельного продукта допустим отдельный `<ProductName>View.tsx`. Файл [ConsoleView.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/views/ConsoleView.tsx) является защищенной внутренней B2B-консолью управления оркестрацией и не должен модифицироваться кодом лендингов. Файл [App.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/App.tsx) должен оставаться легким роутером и может меняться только для подключения/выбора view. Все общие типы выносятся в [types.ts](file:///c:/Project/product-agent-studio/apps/frontend/src/types.ts).
 - **Сохранение кода пользователя**: Не перезаписывать и не портить файлы кода пользователя без явного согласования.
 
 ## Required Output
@@ -54,15 +54,28 @@ Before handoff, verify hero/nav/color/typography/spacing/card/CTA/form/footer pa
 
 ## Output Contract
 
+Возвращай structured envelope по `agent-pack/templates/agent-output-contract.schema.md`. Если используется fenced block, допустимы `agent-output-yaml` или `agent-output-json`. В `outputs.frontend_result` положи полное Markdown-содержимое `frontend-result.md` с обязательными секциями из `runtime/typescript/workflow-stages.ts`. Если входы неполные, State Truncation Gate не выполнен или требуется approval/provider, возвращай `partial`/`blocked`, а не `success`.
+
 ```yaml
 agent_name: frontend
 status: success|partial|blocked
 outputs:
-  frontend_result:
-    status: success|partial|blocked
-    inputs_used:
-    changed_files:
-    implementation_notes:
-    commands_run:
-    known_limitations:
+  frontend_result: |
+    # Frontend Result
+
+    ## Changed Files
+
+    ...
+
+    ## Implementation Notes
+
+    ...
+
+    ## Commands Run
+
+    ...
+
+    ## Known Limitations
+
+    ...
 ```

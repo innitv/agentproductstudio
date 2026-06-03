@@ -48,6 +48,15 @@
 - `reference-analysis.md`
 - `design-brief.md`
 
+## Structured Output Contract (Структурированный контракт вывода)
+
+Агент возвращает результат по контракту `agent-pack/templates/agent-output-contract.schema.md`. Если используется fenced-блок, допустимы `agent-output-yaml` или `agent-output-json`.
+
+- `outputs.design_brief` содержит полный Markdown для `design-brief.md`.
+- `outputs.reference_analysis` содержит полный Markdown для `reference-analysis.md`, если проект reference-driven; если референса нет, поле можно опустить или вернуть артефакт со статусом `skipped_with_reason`.
+- Для standard profile `success` требует `outputs.design_brief`; для reference profile `success` требует одновременно `outputs.reference_analysis` и `outputs.design_brief`.
+- Если требуется запись в Figma или получение внешних reference screenshots, но нет human approval, токена или разрешения `write_allowed=true`, агент возвращает `partial`/`blocked` и явно фиксирует blocker вместо имитации выполненного действия.
+
 ## Trigger Phrases / Триггерные фразы
 
 Этот агент активируется и готовит дизайн-направление по следующим фразам:

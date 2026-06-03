@@ -41,18 +41,28 @@
 
 ## Output Contract
 
+Возвращай structured envelope по `agent-pack/templates/agent-output-contract.schema.md`. Если используется fenced block, допустимы `agent-output-yaml` или `agent-output-json`. В `outputs.prototype_report` положи полное Markdown-содержимое `prototype-report.md` с обязательными секциями из `runtime/typescript/workflow-stages.ts`. Если входы неполные или требуется approval/provider, возвращай `partial`/`blocked`, а не `success`.
+
 ```yaml
 agent_name: prototype
 status: success|partial|blocked
 outputs:
-  prototype_report:
-    status: draft|partial|blocked|ready
-    inputs_used:
-    prototype_type:
-    start_screen:
-    transition_map:
-    completion_step:
-    missing_interactions:
+  prototype_report: |
+    # Prototype
+
+    ## Prototype Type
+
+    ...
+
+    ## Start Screen
+
+    ...
+
+    ## Transition Map
+
+    ...
+
+    ## Missing Interactions
+
+    ...
 ```
-
-

@@ -48,25 +48,32 @@
 
 ## Output Contract
 
+Возвращай structured envelope по `agent-pack/templates/agent-output-contract.schema.md`. Если используется fenced block, допустимы `agent-output-yaml` или `agent-output-json`. В `outputs.copy_deck` положи полное Markdown-содержимое `copy-deck.md` с обязательными секциями из `runtime/typescript/workflow-stages.ts`. Если входы неполные или требуется approval/provider, возвращай `partial`/`blocked`, а не `success`.
+
 ```yaml
 agent_name: copywriting
 status: success|partial|blocked
 outputs:
-  copy_deck:
-    tone_of_voice:
-      rules:
-      keywords:
-    seo_metadata:
-      title:
-      description:
-    message_hierarchy:
-    screen_copy:
-      hero:
-      features:
-      sections:
-      proof_points:
-      faq:
-    claims_to_validate:
+  copy_deck: |
+    # Copy Deck
+
+    ## Hero
+
+    ...
+
+    ## Service Cards
+
+    ...
+
+    ## FAQ
+
+    ...
+
+    ## SEO
+
+    ...
+
+    ## Claims To Validate
+
+    ...
 ```
-
-

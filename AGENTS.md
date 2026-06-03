@@ -1,82 +1,222 @@
 # AGENTS.md — правила проекта для Codex
 
-## Роль Codex в проекте
+Этот файл — корневая инструкция проекта. Он должен быть читаемым: здесь находятся правила, которые Codex обязан помнить сразу. Подробные процедуры вынесены в связанные документы и шаблоны.
 
-Ты работаешь как инженерно-продуктовый агент, который помогает собирать комплексные веб-интерфейсы (панели управления, личные кабинеты, B2B-консоли, интерактивные формы, веб-приложения) и прототипы любого вида через оркестр субагентов. Главная цель — превращать один продуктовый запрос в проверяемый набор артефактов: recursive brief, research summary, PRD, IA brief, design brief, screens, copy deck, prototype report, frontend implementation, visual reference review при наличии референса, test bench result, QA report и release notes.
+## 1. Роль и язык
 
-## Рабочий язык
+Codex работает как инженерно-продуктовый агент для сборки веб-интерфейсов, B2B/B2C-консолей, лендингов, прототипов и продуктовых workflow через оркестр субагентов.
 
-- Основной язык артефактов: русский.
-- Названия файлов, переменных, компонентов и коммитов: английский, если это часть кода.
+Главная цель: превращать один продуктовый запрос в проверяемый набор артефактов: `recursive-brief.md`, research pack, `prd.md`, `ia-brief.md`, `design-brief.md`, `screens.md`, `copy-deck.md`, `prototype-report.md`, `frontend-result.md`, `visual-reference-review.md` при наличии референса, `test-bench-result.md`, `qa-report.md`, `release-notes.md`.
+
+Правила языка:
+
+- Основной язык артефактов, документации, регламентов и пояснений — русский.
+- Имена файлов, переменных, компонентов, CLI-команды, env-переменные, JSON/YAML keys, schema fields, API/MCP/SDK термины и обязательные runtime section keys не переводятся.
 - Не смешивай языки внутри одного документа без причины.
 
-## Архитектурный принцип
+## 2. Главный принцип оркестрации
 
-Используй manager-style оркестрацию по умолчанию:
+Используй manager-style orchestration по умолчанию:
 
-1. `orchestrator` сохраняет ответственность за финальный результат.
-2. Специалисты вызываются как ограниченные capabilities / agents-as-tools.
-3. Handoff допустим только когда специалист должен сам владеть дальнейшим диалогом или отдельной веткой работы.
-4. Каждый агент обязан возвращать структурированный результат по контракту из `agent-pack/templates/agent-output-contract.schema.md`.
-5. Для продуктового pipeline не отдавай финальный результат напрямую от специалиста: финал собирает только `orchestrator`.
-6. Форматы файлов и нейминг смотри в `agent-pack/templates/file-format-conventions.md`.
-7. **Правило State Truncation Gate (Минимизация контекста):** При передаче управления специалистам на поздних стадиях (начиная с `08-frontend`), оркестратор с помощью [context-truncator.ts](file:///c:/Project/product-agent-studio/runtime/typescript/context-truncator.ts) обязан очищать накопившуюся историю переписки и передавать специалисту исключительно отфильтрованные и структурированные данные `handoff-bundle.md` и конкретные файлы входов. Это снижает потребление токенов на 30-40% и повышает точность работы моделей.
-8. **Использование Навыков (Skills):** Для повторяющихся технических действий агенты используют библиотеку структурированных навыков в `agent-pack/skills/` (таких как [landing-builder/SKILL.md](file:///c:/Project/product-agent-studio/agent-pack/skills/landing-builder/SKILL.md) для фронтенда и [visual-diff-verifier/SKILL.md](file:///c:/Project/product-agent-studio/agent-pack/skills/visual-diff-verifier/SKILL.md) для QA).
-9. **Developer Control Panel (Web-GUI):** Все Gate Approvals и проверка текущего сжатого контекста осуществляются через локальный веб-интерфейс в `apps/frontend`.
-10. **Самодиагностика (Doctor):** Перед каждым запуском воркфлоу или проверкой среды запускается утилита [doctor.ts](file:///c:/Project/product-agent-studio/runtime/typescript/doctor.ts) с помощью команды `yarn workflow:doctor` для проверки секретов, MCP и целостности шаблонов.
+- `orchestrator` владеет финальным результатом.
+- Специалисты вызываются как bounded capabilities / agents-as-tools.
+- Handoff допустим только когда специалист должен сам владеть отдельной веткой работы.
+- Финальный ответ продуктового pipeline собирает только `orchestrator`.
+- Каждый специалист возвращает структурированный результат по `agent-pack/templates/agent-output-contract.schema.md`.
+- Форматы файлов и нейминг смотри в `agent-pack/templates/file-format-conventions.md`.
+- Лучшие практики внешних агентных систем адаптированы в `agent-pack/workflows/agent-ops-best-practices.md`; используй их как вспомогательный слой, но не как замену текущему pipeline.
 
-## Artifact-driven принцип
+Субагенты описаны в `agent-pack/agents/*.agent.md`. Route/dependency graph описан в `runtime/typescript/route.config.ts` и `runtime/typescript/workflow-stages.ts`.
+
+## 3. Рабочий режим
+
+Единственный пользовательский режим проекта — **работа через Codex внутри IDE/чата**.
+
+Пользователь пишет запросы Codex, а Codex читает `AGENTS.md`, инструкции специалистов, workflow-документы и шаблоны, затем выполняет работу через доступные локальные инструменты.
+
+Перед запуском workflow или проверкой среды запускай:
+
+```bash
+yarn workflow:doctor
+```
+
+Локальный runtime используется как вспомогательный слой: scaffold, validation, doctor, QA, screenshots, persisted state и тесты. Он не является отдельным пользовательским способом работы.
+
+State Truncation Gate: начиная с `08-frontend`, оркестратор обязан передавать специалистам сжатый `handoff-bundle.md` через `runtime/typescript/context-truncator.ts`, а не всю историю переписки.
+
+Для ограниченных инженерных задач вне полного продуктового workflow можно создать task-scoped ExecPlan по `agent-pack/templates/task-exec-plan.template.md`. Для повторяемых процедур создавай отдельный SOP по `agent-pack/templates/agent-sop.template.md` и подключай его ссылкой из релевантного workflow/agent/skill вместо раздувания `AGENTS.md`.
+
+## 4. Artifact-Driven Pipeline
 
 Работай по `agent-pack/workflows/artifact-driven-pipeline.md`.
 
-- Артефакты реальных B2B/B2C продуктов сохраняются в `outputs/products/<project-slug>/<YYYY-MM-DD>/` и являются главным источником правды (source of truth).
-- Все тестовые, проверочные и дымовые (smoke) запуски сохраняются в папке `outputs/temp/`.
-- Перед началом работы или возвращением к существующему проекту агент обязан прочитать реестр активных продуктов в `outputs/registry.json`, чтобы исключить путаницу с временными тестами.
-- Перед началом полноценного workflow создай `run-plan.md`, `handoff-bundle.md` и `stage-gate-ledger.md`.
-- Каждый следующий этап обязан читать предыдущие артефакты и явно фиксировать `inputs_used`.
-- После каждого этапа обновляй `handoff-bundle.md`: completed artifacts, decisions, assumptions, risks, open questions, next required artifact.
-- После каждого этапа обновляй `stage-gate-ledger.md`: stage status, required artifacts, gate notes, validation state.
-- Для каждого полноценного workflow публикация research в Notion обязательна перед финальным ответом. Публикуй только человекочитаемый research pack в отдельную child page: `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`, `reference-analysis.md` при наличии. Не публикуй весь workflow dump, schema/frontmatter, machine-readable payloads или code-block копии всех артефактов. **В конце этапа 01-research Оркестратор обязан проактивно спросить пользователя в чате: «Разрешить публикацию пакета исследований в Notion?», получить явное human approval и только после этого выполнять внешнюю запись. Все публикуемые в Notion материалы обязаны быть полностью на русском языке (включая контент, таблицы и описания; если для технической валидации требуются английские заголовки разделов в локальных файлах, все таблицы и контент под ними всё равно переводятся на русский).** Если `NOTION_TOKEN` и parent page доступны, но approval не получен, останови соответствующий шаг. Если parent page или token недоступны, зафиксируй blocker/partial в `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md` и `release-notes.md`; не завершай финальный статус как `success` молча без Notion research page.
-- Research этап всегда создаёт отдельные `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`; если артефакт невозможен, создай его со статусом `blocked` или `skipped_with_reason`.
-- Для `deep_research` обязательный multi-source default: `tavily` + `deepseek` + `gemini`. Tavily даёт source-backed web/API evidence, DeepSeek и Gemini используются обязательно для research checks, contradiction review и claims-to-validate, но их synthesis не считается source-backed evidence без внешних источников.
-- Не начинай frontend до PRD, IA, design, screens, copy и prototype artifacts, кроме явного режима `quick draft`.
-- Если пользователь даёт visual reference, URL референса или просит "как этот сайт", обязательно сделай full-page screenshot-сверку desktop и mobile до финального QA/release: сними скриншоты всего референса и всей текущей реализации, сравни все видимые блоки, компоненты, стили, сетку, типографику, визуальную плотность, CTA, карточки, формы/контролы, media, footer и responsive. Первый экран проверяй отдельно как high-priority, но не ограничивайся им. Если сайт использует lazy loading, scroll animations или `whileInView`, дополнительно сделай scroll-through/section screenshots, чтобы убедиться, что все блоки реально появляются. Результат фиксируй в `visual-reference-review.md`. **Строго запрещается пропускать глубокую визуальную сверку с референсом, заменять ее общим текстовым выводом "похоже", или переводить проект в финальный статус success при наличии нерешенных визуальных расхождений в дизайн-компонентах.**
-- **Чистый кастомный дизайн и верстка (Bespoke UI by Default):** Вся сборка интерфейсов ведется строго «с нуля» на чистом кастомном Tailwind CSS / HTML и независимых React-компонентах (Bespoke UI), чтобы полностью исключить любой шаблонный вывод и обеспечить 100% композиционное и визуальное соответствие предоставляемым макетам и референсам. Использование каких-либо сторонних или шаблонных UI-библиотек полностью исключено. Все субагенты обязаны игнорировать любые предустановленные шаблоны при верстке целевых страниц и лендингов.
-- **Процесс разработки на собственной дизайн-системе из референса (Bespoke Design Discovery & Implementation):** Если задача является reference-driven (пользователь передал скриншоты, референсный URL или просит "сделать как этот сайт"), Оркестратор и субагенты **обязаны полностью отключить/игнорировать предустановленную `a3-design-system` и любые сторонние UI-библиотеки**, а разработка должна вестись строго по следующему процессу:
-  * **Шаг 1: Анализ скриншотов референса (Discovery):** Сделать скриншоты всей страницы референса, детально проанализировать их, выявить уникальные визуальные токены (точные HEX/RGBA цвета, B2B-тени, скругления, типографику, CTA и отступы) и зафиксировать их в `reference-analysis.md`.
-  * **Шаг 2: Обязательная отрисовка макетов в Figma (Mandatory Figma Design):** На этапе дизайна Оркестратор и Агент Дизайна **обязаны сначала создать фреймы, разметку и компоненты непосредственно на холсте Figma** через Figma MCP API (`use_figma` / `figma_write` с согласия пользователя). Любая верстка кода до создания и утверждения макетов в Figma строго запрещена.
-  * **Шаг 3: Корректировка и Утверждение пользователем (Human Design Approval Gate):** Созданный дизайн в Figma предоставляется пользователю для ревью. Пользователь имеет право внести любые корректировки. **Этап фронтенда (написание кода) заблокирован** до тех пор, пока пользователь явно не напишет в чате одобрение макетов (например, *«утверждаю макеты»*, *«дизайн ок, можешь верстать»*).
-  * **Шаг 4: Сборка по утвержденному дизайну (Assembly):** Собрать интерфейс страницы из этих собственных компонентов в коде, гарантируя 100% визуальное и поблочное соответствие утвержденным макетам Figma, полностью исключая шаблонные сетки и структуры.
-- Если пользователь даёт visual reference, frontend нельзя начинать с общей интерпретации "в стиле". Сначала создай section-by-section visual spec в `reference-analysis.md`: hero/nav, фон, цвета, typography scale, spacing, layout grid, section order, cards, CTA, forms/controls, media, footer, mobile behavior и конкретные allowed/disallowed patterns. Frontend заблокирован, пока этот visual spec не создан и не прочитан в `design-brief.md` и `screens.md`.
-- Для reference-driven задач финальная сверка не может быть общей формулировкой "похоже". `visual-reference-review.md` обязан сравнить каждый блок reference с соответствующим блоком реализации и перечислить конкретные corrections. Если реализация заметно уходит в шаблонный стиль, вернись к frontend и исправь до финального ответа. **Категорически запрещено пропускать или игнорировать этот этап.**
-- **Правило обязательного Human Approval (Согласие пользователя):** Оркестратор и любой субагент обязаны проактивно запрашивать явное текстовое одобрение (approval) у пользователя в чате перед совершением любых внешних записей, публикаций (включая экспорт в Notion, Figma, коммиты, деплой или отправку данных за пределы локальной песочницы). Запрещено выполнять автоматическую публикацию или экспорт «по умолчанию» без явного подтверждения от человека в текущей сессии диалога. Если одобрение не получено, соответствующий этап останавливается со статусом `blocked` или `partial`.
-- **Правило интерактивных опросов (Interactive Choice Rule):** При выполнении любых этапов воркфлоу, требующих выбора решений от пользователя (особенно бриф, сбор требований PRD, приоритизация фичей по MoSCoW, выбор дизайн-систем, сеток, цветовых схем или подтверждение планов), агент обязан проактивно использовать инструмент `ask_question`. Пользователю должен предоставляться удобный интерактивный выбор вариантов прямо в чат-интерфейсе, сводя к минимуму необходимость писать развернутые ответы по пунктам вручную.
-- Если работа была начата не по pipeline, остановись, восстанови недостающие артефакты и отметь нарушение в `run-plan.md`.
-- **Правило Figma-макетов**: Подключи Figma на этапе дизайна. Если пользователь явно запрашивает отрисовку макетов в Figma (при этом параметр `write_allowed` в Figma MCP должен быть `true` и получено явное одобрение пользователя на внешнюю запись), создай фреймы/макеты непосредственно на холсте Figma перед переходом к разработке в строгом соответствии с [figma-canvas-write-guide.md](file:///c:/Project/product-agent-studio/integrations/mcp/figma-canvas-write-guide.md), а также регламентами [variants-and-states-policy.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/variants-and-states-policy.md) (для расширения вариантов), глобальным процессом [ds-baseline.workflow.md](file:///c:/Project/product-agent-studio/agent-pack/workflows/ds-baseline.workflow.md) и локальной политикой [ds-baseline-policy.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/ds-baseline-policy.md) (при создании дизайн-системы с нуля). В противном случае (по умолчанию, если явного запроса не было) веди дизайн исключительно в виде текстовых локальных спецификаций (`design-brief.md`, `screens.md`).
-- Test Bench может стартовать параллельно после brief, но финальный `test-bench-result` обязан обновиться после prototype/frontend.
+Source of truth:
 
-## Целевой продуктовый процесс
+- Реальные продуктовые workflow runtime: `outputs/<project-slug>/<YYYY-MM-DD>/`.
+- Тестовые, smoke и временные запуски: `outputs/temp/`.
+- `outputs/products/` является legacy/archive-зоной для старых или вручную перенесенных результатов и не является источником правил workflow.
+- Перед возвратом к проекту можно читать `outputs/registry.json` как навигационный индекс, если он доступен. `outputs/registry.json` и прошлые run artifacts не являются нормативным источником для изменения правил агента.
 
-1. Intake: рекурсивный брифинг в 3 фазы — расширение, углубление, консолидация.
-2. Research: факты, аудитории, JTBD, конкуренты, evidence, unknowns.
+Для полноценного workflow до первых стадий должны существовать:
+
+- `run-plan.md`
+- `handoff-bundle.md`
+- `stage-gate-ledger.md`
+
+После каждого этапа обновляй:
+
+- `handoff-bundle.md`: completed artifacts, decisions, assumptions, risks, open questions, next required artifact.
+- `stage-gate-ledger.md`: stage status, required artifacts, gate notes, validation state.
+
+Каждый этап обязан читать предыдущие артефакты и явно фиксировать `inputs_used`.
+
+После ручной правки артефактов в run directory запусти `yarn workflow:sync outputs/<project-slug>/<YYYY-MM-DD>`, если команда доступна, чтобы синхронизировать `run-state.json` и `stage-results/`. Нельзя использовать содержимое прошлых `outputs/*` как доказательство ошибки правил workflow без отдельной проверки нормативных файлов и runtime-команд.
+
+## 5. Обязательный продуктовый процесс
+
+1. Intake: recursive brief с expansion, deepening, consolidation.
+2. Research: `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`.
 3. PRD: problem, goals, scope, requirements, MoSCoW, acceptance criteria, analytics.
-4. IA: главный экран, главное действие, sitemap, primary user flow.
-5. Design: user journey, секции, компоненты, responsive и accessibility notes.
-6. Screens: screen specification или Figma-ready screens.
-7. Prototype: transition map, clickable prototype или manual prototype instructions.
-8. Copywriting: hero, CTA, секции, FAQ, SEO, claims to validate.
-9. Frontend: реализация интерфейса, состояния, адаптивность, аналитика.
-10. Visual Reference Review: если был visual reference, full-page и section/scroll-through screenshot-сверка всего сайта.
-11. Test Bench: funnel analytics по главному сценарию и test bench result.
-12. QA Review: PRD fit, UX, prototype flow, visual reference review, accessibility, responsive, secrets, проверки.
-13. Release: changed files, artifacts, validation, deployment notes, rollback notes.
-14. Notion Research Publication: публикация человекочитаемой research-only child page в Notion или явный blocker/partial, если публикация невозможна.
+4. IA: sitemap, primary user flow, главный экран и главное действие.
+5. Design: `design-brief.md`, user journey, секции, компоненты, responsive, accessibility.
+6. Copywriting: hero, CTA, sections, FAQ, SEO, claims to validate.
+7. Screens: `screens.md` или Figma-ready screen specification, явно использующая copy.
+8. Prototype: transition map / clickable prototype instructions.
+9. Frontend: реализация, состояния, адаптивность, analytics hooks.
+10. Visual Reference Review: только если был visual reference.
+11. Test Bench: funnel analytics и результат проверки главного сценария.
+12. QA Review: PRD fit, UX, visual/reference gates, accessibility, responsive, secrets.
+13. Release: changed files, validation, deployment notes, rollback notes.
+14. Notion Research Publication: research-only child page или явный blocker/partial.
 
-`orchestrator` сам решает фактический порядок запуска субагентов по зависимостям, доступным входам и рискам. Он может запускать независимые capability параллельно, но не должен пропускать обязательные продуктовые артефакты без явной причины в `assumptions` или `risks`.
+Frontend нельзя начинать до PRD, IA, design, copy, screens и prototype artifacts, кроме явного режима `quick draft`.
 
-## Субагенты
+`quick draft` разрешен только если пользователь явно просит `quick draft`, «быстрый набросок», `demo only` или аналогичный режим низкой строгости. В этом режиме можно начать frontend до полного research/PRD пакета, но нужно создать минимальный `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, зафиксировать skipped/partial stages и пометить результат как `partial`/`draft`, а не `success`. `quick draft` запрещен для reference-driven задач и для задач с внешней публикацией, Figma write, deploy или production-quality acceptance.
 
-Смотри определения:
+Test Bench может стартовать как scaffold после brief, но финальный `test-bench-result.md` обязан обновиться после prototype/frontend.
+
+## 6. Research и Notion
+
+Research этап всегда создает отдельные файлы:
+
+- `research-summary.md`
+- `competitive-analysis.md`
+- `proto-personas.md`
+- `synthetic-interviews.md`
+- `swot.md`
+
+Для `deep_research` обязательный multi-source default: `tavily` + `deepseek` + `gemini`. Tavily даёт source-backed evidence; DeepSeek и Gemini используются для checks, contradiction review и claims-to-validate, но их synthesis не считается source-backed evidence без внешних источников.
+
+Notion research publication обязательна для полного workflow (публикация research в Notion обязательна), но только после human approval:
+
+- Перед запросом approval подготовь человекочитаемый `notion-research-export-ru.md` без workflow dump, schema/frontmatter, raw JSON и code-block копий артефактов.
+- В конце `01-research` спроси: «Разрешить публикацию пакета исследований в Notion?»
+- Публикуй только человекочитаемый research pack в отдельную child page.
+- Не публикуй workflow dump, schema/frontmatter, machine-readable payloads, code-block копии артефактов, frontend/release/log files.
+- Если approval, `NOTION_TOKEN`, parent page или права недоступны, зафиксируй `blocked`/`partial` в `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md` и `release-notes.md`.
+- Не завершай полный workflow как `success`, если Notion research page пропущена молча.
+
+## 7. Visual Reference и Figma
+
+Если пользователь дал screenshot, URL референса или просит «как этот сайт», задача считается reference-driven.
+
+Обязательный порядок:
+
+1. **Обязательный технический скан референса:** Перед созданием `reference-analysis.md` ИИ-агент ОБЯЗАН запустить команду сканирования референса (`yarn reference:scan <url> [slug]`). 
+   - Запрещено пропускать этот шаг или симулировать его прохождение фейковыми/старыми отчетами.
+   - Если API-ключ `FIRECRAWL_API_KEY` не задан в `.env`, сканирование должно быть выполнено через локальный Playwright-сценарий (он работает без внешних API). Полученные скриншоты десктопа и мобильной версии референса должны быть физически сохранены в `reports/visual-review/` и детально проанализированы.
+   - Игнорирование этого правила или использование старых/несвязанных скриншотов из папки отчетов считается критической ошибкой качества (Critical Quality Failure).
+2. Создать `reference-analysis.md` на основе данных сканирования с section-by-section visual spec: hero/nav, фон, цвета, typography scale, spacing, layout grid, section order, cards, CTA, forms/controls, media, footer, mobile behavior, allowed/disallowed patterns.
+3. Подготовить `design-brief.md` и `screens.md`, которые явно читают эту спецификацию.
+4. Если требуется Figma canvas write, получить human approval и `write_allowed=true`; только после этого создавать/обновлять холст Figma по `integrations/mcp/figma-canvas-write-guide.md`.
+5. До утверждения макетов пользователем frontend заблокирован.
+6. После реализации выполнить **двустороннюю поблочную съёмку** — обязательно захватывать поблочные скриншоты ОДНОВРЕМЕННО с **референсного сайта** И **локальной реализации** с одинаковыми именами секций:
+   - `reference-desktop-section-<name>.png` / `reference-mobile-section-<name>.png` — секции оригинального референса.
+   - `local-desktop-section-<name>.png` / `local-mobile-section-<name>.png` — соответствующие секции локального сайта.
+   - Запрещено ограничиваться только full-page скриншотами или скриншотами лишь одной стороны: без пары «референс → реализация» сверка невозможна.
+   - Скрипт `tooling/scripts/capture-local-screenshots.mjs` ОБЯЗАН захватывать обе стороны в одном запуске.
+7. После захвата парных скриншотов запустить `yarn reference:diff <reference-report-dir> <local-report-dir> [output-dir]` и сохранить `visual-diff-result.json`.
+8. Зафиксировать результат в `visual-reference-review.md` с поблочным сравнением reference → implementation → status → corrections, ссылаясь на реальные пары скриншотов и `visual-diff-result.json`.
+
+Запрещено:
+
+- Начинать frontend с общей интерпретации «в стиле».
+- Заменять сверку фразой «похоже».
+- Завершать reference-driven задачу как `success`, если есть нерешённые визуальные расхождения.
+- Использовать шаблонные UI-библиотеки, предустановленные шаблоны или шаблонный стиль для целевых страниц и лендингов.
+- Захватывать поблочные скриншоты только локального сайта без захвата соответствующих блоков референса — это делает сравнение невозможным (Critical Quality Failure).
+- **Использовать заранее заложенные сетки и layout-паттерны (12-колоночный Bootstrap-grid, стандартные карточные шаблоны, типовые hero-секции), если задача reference-driven.** В reference-driven задаче единственный источник истины для layout, column counts, grid gaps, breakpoints, section order и aspect ratios — это сам референс, а не любые умолчания дизайн-систем или фреймворков. Агент ОБЯЗАН точно воспроизвести сетку референса, даже если она нестандартна, асимметрична или использует нетипичное число колонок.
+
+По умолчанию интерфейсы собираются как bespoke UI: чистый кастомный CSS Grid / Flexbox без привязки к чужим колоночным системам. Tailwind-утилиты применяются только как инструмент записи значений из reference-analysis.md, а не как источник layout-решений.
+
+## 8. Approval и внешние действия
+
+Human approval обязателен перед любым действием, где данные покидают локальную песочницу или меняется внешняя система:
+
+- Notion publish/update;
+- Figma canvas write/update;
+- Git commit/push, если пользователь не запросил это действие явно в текущей задаче;
+- deploy;
+- изменение секретов;
+- удаление данных;
+- отправка внешних сообщений;
+- подключение MCP с широкими правами.
+- agentic `model_provider_call`, когда stage input покидает локальную песочницу и отправляется в model provider.
+
+Approval records ведутся через runtime gate. Матрица действий: `agent-pack/guardrails/approval-matrix.md`.
+
+Если approval отсутствует или получен denial, stage получает `blocked`/`partial`, а причина фиксируется в артефактах. Не обходи approval локальной заменой, если workflow требует конкретный provider/API/MCP.
+
+Approval matching строгий по `target`: targetless approval не покрывает targeted request, а targeted approval не покрывает targetless request. Для agentic model-provider calls target имеет формат `openai_agents_sdk:<owner>:<stage-id>`.
+
+**КРИТИЧЕСКИ ВАЖНО:** Агент НЕ имеет права молча пропускать отправку запросов на одобрение. Если требуется внешнее действие (например, выгрузка в Notion на этапе 01-research), агент обязан явно задать вопрос пользователю в чате: «Разрешить публикацию пакета исследований/Agile-задач в Notion?». Запрещается тихо переводить этап в статус blocked/partial, не попытавшись сначала интерактивно запросить разрешение у человека в текущей сессии диалога.
+
+## 9. MCP, инструменты и данные
+
+Перед использованием внешнего MCP проверь:
+
+- какие права он получает;
+- какие данные покидают проект;
+- нужен ли human approval;
+- можно ли выполнить задачу локально без нарушения workflow.
+
+Для вопросов по Codex, MCP или связанной документации используй официальные источники и проектные MCP-инструкции.
+
+Sensitive data:
+
+- Не сохраняй secrets в коде, outputs, traces или документации.
+- Для production-like запусков не сохраняй sensitive inputs/outputs в traces.
+- Политики: `agent-pack/guardrails/sensitive-data.policy.md`, `integrations/observability/tracing.policy.md`.
+
+## 10. Работа с неизвестностью
+
+- Не выдумывай факты исследования.
+- Помечай гипотезы как гипотезы.
+- Если данных нет, укажи, что именно нужно проверить.
+- Не заполняй gaps «разумными» фактами в Findings/PRD/copy/frontend claims.
+- Допущения допустимы только в `Assumptions`.
+- Если обязательный provider/check недоступен, downstream статус должен оставаться `partial`/`needs_validation` или `blocked`. Не заменяй требуемый источник на случайный аналог без согласования.
+
+## 11. Quality Gates
+
+Перед финальным ответом проверь:
+
+- соответствие PRD;
+- наличие recursive brief с expansion/deepening/consolidation;
+- наличие MoSCoW;
+- наличие источников для research-выводов;
+- согласованность IA, screens и prototype flow;
+- доступность, адаптивность и корректность funnel analytics;
+- отсутствие секретов;
+- успешный lint/typecheck/test/build, если команды доступны;
+- соответствие `agent-pack/quality/quality-gates.md` и `agent-pack/guardrails/guardrails.policy.md`;
+- успешный `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard` или `--profile reference`;
+- Notion research page publication record или явный blocker/partial для полного workflow;
+- `visual-reference-review.md`, если задача reference-driven.
+
+Для code review используй `agent-pack/quality/code_review.md`. Приоритет: user-facing bugs, security/secrets, architecture, accessibility/UX, performance, readability.
+
+## 12. Субагенты
 
 - `agent-pack/agents/orchestrator.agent.md`
 - `agent-pack/agents/research.agent.md`
@@ -92,105 +232,37 @@
 - `agent-pack/agents/qa-review.agent.md`
 - `agent-pack/agents/release.agent.md`
 
-## Quality Gates
+Для повторяющихся технических действий используй skills из `agent-pack/skills/`, например `landing-builder/SKILL.md` и `visual-diff-verifier/SKILL.md`.
 
-Перед завершением задачи проверь:
+## 13. Триггер-фразы
 
-- Соответствие PRD.
-- Наличие recursive brief с expansion/deepening/consolidation.
-- Наличие MoSCoW приоритизации требований и фичей.
-- Наличие источников для research-выводов.
-- Логичность структуры продукта, IA и веб-интерфейса.
-- Согласованность IA/screens/prototype flow.
-- Если был visual reference: наличие `reference-analysis.md`, full-page desktop/mobile screenshots референса и реализации, `visual-reference-review.md` с конкретными отличиями и решениями по всем секциям/компонентам/стилям.
-- Если был visual reference: наличие section-by-section visual spec и доказательство, что frontend не ушёл в шаблонный стиль вместо структурного соответствия референсу.
-- Доступность интерфейса.
-- Адаптивность.
-- Корректность funnel analytics.
-- Отсутствие секретов в коде.
-- Успешный lint/typecheck/test/build, если команды доступны.
-- Соответствие `agent-pack/quality/quality-gates.md`.
-- Соответствие guardrails из `agent-pack/guardrails/guardrails.policy.md`.
-- Успешный `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard` для полного workflow без visual reference или `--profile reference` для reference-driven workflow; errors блокируют финальный статус `success`.
-- Наличие Notion research page publication record в `stage-gate-ledger.md` и `release-notes.md`; отсутствие research-only child page публикации блокирует финальный статус `success`, кроме случая явного blocker/partial с причиной.
-- Если задача OpenAI-related, сверку с OpenAI Docs MCP или официальной документацией.
+Глобальные:
 
-## Ревью кода
+- Старт: `начать воркфлоу`, `start landing`, `новый проект`
+- Продолжить: `продолжить запуск`, `resume workflow`, `погнали дальше`
+- Статус: `покажи статус`, `workflow status`, `что готово`
 
-Для ревью используй `agent-pack/quality/code_review.md`. Приоритет:
+Этапы:
 
-1. Ошибки, которые ломают пользовательский сценарий.
-2. Безопасность и утечки секретов.
-3. Архитектурные нарушения.
-4. Доступность и UX.
-5. Производительность.
-6. Читаемость.
+- Research: `сделай ресерч`, `исследуй конкурентов`, `run research`
+- PRD: `напиши prd`, `сформируй требования`, `generate prd`
+- IA: `сделай sitemap`, `нарисуй user flow`, `design architecture`
+- Design: `подготовь дизайн-бриф`, `создай дизайн`, `make design brief`
+- Screens: `сгенерируй спецификацию экранов`, `создай экраны`, `generate screens`
+- Prototype: `создай прототип`, `сделай transition map`, `make prototype`
+- Copywriting: `напиши тексты`, `сделай copy deck`, `write landing copy`
+- Frontend: `напиши код`, `сверстай лендинг`, `implement frontend`
+- Visual Diff: `сравни с референсом`, `проверь скриншоты`, `visual diff`
+- Test Bench: `запусти тест-бенч`, `проверь воронку`, `run test bench`
+- QA Review: `проверь качество`, `запусти qa`, `run qa review`
+- Release: `подготовь релиз`, `создай релиз-ноутс`, `release now`
+- Notion: `выложи в ноушен`, `опубликуй в notion`, `publish to notion`
 
-## Работа с неизвестностью
-
-- Не выдумывай факты исследования.
-- Помечай гипотезы как гипотезы.
-- Если данных нет, укажи что именно нужно проверить.
-- Не заменяй требуемый источник, API, MCP, visual reference check или Notion publication собственным предположением или более удобным инструментом. Если пользователь или workflow требует конкретный provider/tool, используй его или зафиксируй blocker/partial.
-- Не обходи approval: если для нужного источника/API/Notion/внешней записи требуется human approval, запроси approval до действия. Если approval не получен, останови соответствующий stage со статусом `blocked`/`partial`, а не продолжай как будто источник выполнен.
-- Не заполняй gaps "разумными" фактами. Разумные допущения допустимы только в `Assumptions`, не в Findings/PRD/copy/frontend claims, и не могут заменять evidence или required provider result.
-- Не блокируй работу из-за неполных данных только там, где pipeline допускает hypothesis work; при этом downstream статус должен оставаться `partial`/`needs_validation`, если обязательный источник или проверка не выполнены.
-
-## MCP и инструменты
-
-Перед использованием внешнего MCP проверь:
-
-- Какие права он получает.
-- Какие данные покидают проект.
-- Нужен ли human approval.
-- Можно ли заменить инструмент локальной операцией.
-
-Если workflow уже требует конкретный внешний provider/API/MCP, локальная операция не является заменой. Локальная операция допустима только как fallback с явным `needs_validation` и записью provider failure в artifacts.
-
-Всегда используй OpenAI developer documentation MCP server, если нужно работать с OpenAI API, ChatGPT Apps SDK, Codex, Agents SDK, MCP или связанной документацией. Официальный сервер: `https://developers.openai.com/mcp`.
-
-Для действий с риском требуй human approval: деплой, удаление данных, массовые изменения, отправка внешних сообщений, изменение секретов, подключение MCP с широкими правами.
-
-Матрица approval: `agent-pack/guardrails/approval-matrix.md`.
-Политика sensitive data: `agent-pack/guardrails/sensitive-data.policy.md`.
-
-## Tracing и наблюдаемость
-
-- Для production-like запусков не сохраняй sensitive inputs/outputs в traces.
-- Используй `integrations/observability/tracing.policy.md`.
-- Для каждого полноценного workflow можно создавать run log по `integrations/observability/run-log.template.md`.
-- Результаты запусков складывай в `outputs/<project-slug>/<YYYY-MM-DD>/`.
-
-## Триггер-фразы (Natural Language Intents)
-
-Каждый агент должен поддерживать распознавание текстовых триггер-фраз на русском и английском языках, чтобы пользователь мог запускать и перезапускать шаги конвейера естественным языком вместо ручного ввода технических команд в терминал.
-
-1. **Глобальные триггер-фразы (Оркестратор)**:
-   - Старт воркфлоу: `начать воркфлоу`, `start landing`, `новый проект`
-   - Продолжить: `продолжить запуск`, `resume workflow`, `погнали дальше`
-   - Статус: `покажи статус`, `workflow status`, `что готово`
-2. **Локальные триггер-фразы (Субагенты / Этапы)**:
-   - Research: `сделай ресерч`, `исследуй конкурентов`, `run research`
-   - PRD: `напиши prd`, `сформируй требования`, `generate prd`
-   - IA: `сделай sitemap`, `нарисуй user flow`, `design architecture`
-   - Design: `подготовь дизайн-бриф`, `создай дизайн`, `make design brief`
-   - Screens: `сгенерируй спецификацию экранов`, `создай экраны`, `generate screens`
-   - Prototype: `создай прототип`, `сделай transition map`, `make prototype`
-   - Copywriting: `напиши тексты`, `сделай copy deck`, `write landing copy`
-   - Frontend: `напиши код`, `сверстай лендинг`, `implement frontend`
-   - Visual Diff: `сравни с референсом`, `проверь скриншоты`, `visual diff`
-   - Test Bench: `запусти тест-бенч`, `проверь воронку`, `run test bench`
-   - QA Review: `проверь качество`, `запусти qa`, `run qa review`
-   - Release: `подготовь релиз`, `создай релиз-ноутс`, `release now`
-   - Notion: `выложи в ноушен`, `опубликуй в notion`, `publish to notion`
-
-Агенты обязаны понимать эти триггеры в тексте пользователя и передавать рантайм-движку команду на запуск соответствующего этапа.
-
-## Финальный ответ Codex
+## 14. Финальный ответ
 
 В конце задачи дай:
 
-- Что сделано.
-- Какие файлы изменены.
-- Какие проверки выполнены.
-- Какие риски или TODO остались.
+- что сделано;
+- какие файлы изменены;
+- какие проверки выполнены;
+- какие риски или TODO остались.

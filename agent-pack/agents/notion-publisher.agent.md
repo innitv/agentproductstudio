@@ -17,7 +17,7 @@
 
 1. Проверить наличие артефактов исследований и их читаемость для человека.
 2. Создать русскоязычный экспорт только для результатов исследований без схем, YAML frontmatter, необработанного JSON или полных дампов кодовых блоков.
-3. Если целевая страница или одобрение отсутствуют, создать резервный файл Markdown и установить статус `blocked` или `ready_for_approval` (готов к одобрению). Не позволять Оркестратору завершать воркфлоу со статусом `success` без публикации.
+3. Если целевая страница или одобрение отсутствуют, создать резервный файл Markdown и установить статус `partial` или `blocked` с `recommended_next_step` для получения approval. Не позволять Оркестратору завершать воркфлоу со статусом `success` без публикации.
 4. Если целевая страница и одобрение получены, создать отдельную дочернюю страницу в Notion (separate Notion child page) и опубликовать только исследовательский контент и анализ референсов.
 5. При наличии `prd.md` и `proto-personas.md` создать две связанные базы данных в Notion (Персоны и User Stories), связать их через Relation и наполнить User Stories интерактивными чек-листами Acceptance Criteria.
 6. Записать URL/ID созданной страницы или зафиксировать блокирующую проблему.
@@ -47,3 +47,11 @@
 
 - `notion-research-export-ru.md` (или аналогичный человекочитаемый файл экспорта исследований)
 - Запись о публикации дочерней страницы исследований Notion в `stage-gate-ledger.md` and `release-notes.md` для полного воркфлоу
+
+## Structured Output Contract (Структурированный контракт вывода)
+
+Агент возвращает результат по контракту `agent-pack/templates/agent-output-contract.schema.md`. Если используется fenced-блок, допустимы `agent-output-yaml` или `agent-output-json`.
+
+- `outputs.notion_research_export_ru` содержит полный Markdown для локального research-only экспорта.
+- `outputs.notion_publication_record` содержит человекочитаемую запись для `stage-gate-ledger.md` и `release-notes.md`: статус публикации, Notion page id/url или blocker.
+- Для внешней записи в Notion требуется точное human approval действие: `notion_research_publish`, `notion_prd_export` или `notion_agile_export` с целевым page/database target. Если approval, `NOTION_TOKEN`, parent page или права интеграции отсутствуют, агент возвращает `partial` или `blocked`; финальный `success` запрещен.

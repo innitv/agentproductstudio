@@ -51,19 +51,47 @@
 - **Создание PRD**: `напиши prd`, `сформируй требования`, `подготовь тз`, `generate prd`, `create prd`.
 - **Обновление PRD**: `обнови prd`, `перепиши требования`, `update prd`.
 
+## Agentic Runtime Contract
+
+- Возвращай structured envelope в fenced block `agent-output-yaml` или `agent-output-json`, если используется структурированный runtime/parser.
+- Поля envelope должны соответствовать `agent-pack/templates/agent-output-contract.schema.md`.
+- В `outputs.prd` положи полное Markdown-содержимое `prd.md` с обязательными секциями из `runtime/typescript/workflow-stages.ts`.
+- Если не хватает входов, provider недоступен или требуется approval, возвращай `status: partial` или `status: blocked`, а не `success`.
+
 ## Output Contract
 
 ```yaml
 agent_name: prd
 status: success|partial|blocked
 outputs:
-  prd:
-    problem:
-    goals:
-    non_goals:
-    requirements:
-    moscow:
-    acceptance_criteria:
-    analytics:
-```
+  prd: |
+    # Product Requirements
 
+    ## Problem
+
+    ...
+
+    ## Goals
+
+    ...
+
+    ## Non-Goals
+
+    ...
+
+    ## Requirements
+
+    ...
+
+    ## MoSCoW
+
+    ...
+
+    ## Acceptance Criteria
+
+    ...
+
+    ## Analytics
+
+    ...
+```

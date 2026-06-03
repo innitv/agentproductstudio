@@ -41,18 +41,28 @@
 
 ## Output Contract
 
+Возвращай structured envelope по `agent-pack/templates/agent-output-contract.schema.md`. Если используется fenced block, допустимы `agent-output-yaml` или `agent-output-json`. В `outputs.ia_brief` положи полное Markdown-содержимое `ia-brief.md` с обязательными секциями из `runtime/typescript/workflow-stages.ts`. Если входы неполные или требуется approval/provider, возвращай `partial`/`blocked`, а не `success`.
+
 ```yaml
 agent_name: ia
 status: success|partial|blocked
 outputs:
-  ia_brief:
-    status: draft|partial|blocked|ready
-    inputs_used:
-    primary_screen:
-    primary_action:
-    completion_step:
-    sitemap:
-    primary_user_flow:
+  ia_brief: |
+    # Information Architecture
+
+    ## Primary Screen
+
+    ...
+
+    ## Primary Action
+
+    ...
+
+    ## Sitemap
+
+    ...
+
+    ## Primary User Flow
+
+    ...
 ```
-
-
