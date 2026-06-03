@@ -5,6 +5,7 @@ import { join } from "node:path";
 interface DiagnosticResult {
   check: string;
   passed: boolean;
+  level: "pass" | "warning" | "error";
   message: string;
   canRepair: boolean;
 }
@@ -34,6 +35,7 @@ async function runDiagnostics(): Promise<DiagnosticResult[]> {
     results.push({
       check: `Директория: ${dir}`,
       passed: exists,
+      level: exists ? "pass" : "error",
       message: exists ? "Присутствует на диске." : "Директория отсутствует!",
       canRepair: false
     });
@@ -47,6 +49,7 @@ async function runDiagnostics(): Promise<DiagnosticResult[]> {
     results.push({
       check: "Файл конфигурации окружения (.env)",
       passed: false,
+      level: "error",
       message: ".env файл не найден в корне проекта!",
       canRepair: true
     });
@@ -65,17 +68,19 @@ async function runDiagnostics(): Promise<DiagnosticResult[]> {
       }
 
       results.push({
-        check: "Ключи в .env",
-        passed: missingKeys.length === 0,
+        check: "Optional provider keys в .env",
+        passed: true,
+        level: missingKeys.length === 0 ? "pass" : "warning",
         message: missingKeys.length === 0 
-          ? "Все необходимые переменные окружения присутствуют." 
-          : `В .env отсутствуют ключи из примера: ${missingKeys.join(", ")}`,
+          ? "Все optional provider keys из примера присутствуют." 
+          : `В .env отсутствуют optional keys из примера: ${missingKeys.join(", ")}. Это блокирует только соответствующие optional provider actions, но не работу через Codex/IDE и не local workflow.`,
         canRepair: false
       });
     } catch (e) {
       results.push({
         check: "Ключи в .env",
         passed: false,
+        level: "error",
         message: "Ошибка при чтении или парсинге файлов .env.",
         canRepair: false
       });
@@ -89,6 +94,7 @@ async function runDiagnostics(): Promise<DiagnosticResult[]> {
     results.push({
       check: `Шаблон: ${template}`,
       passed: exists,
+      level: exists ? "pass" : "error",
       message: exists ? "Шаблон присутствует." : "Файл шаблона не найден!",
       canRepair: true
     });
@@ -100,6 +106,7 @@ async function runDiagnostics(): Promise<DiagnosticResult[]> {
   results.push({
     check: "MCP примеры конфигурации",
     passed: mcpExists,
+    level: mcpExists ? "pass" : "error",
     message: mcpExists ? "Файл mcp-servers.example.json присутствует." : "Файл примера MCP-конфига не найден!",
     canRepair: false
   });
@@ -142,10 +149,10 @@ async function main() {
   let allPassed = true;
 
   for (const result of results) {
-    const symbol = result.passed ? "✔" : "✖";
-    const statusText = result.passed ? "ПРОЙДЕНО" : "ОШИБКА";
+    const symbol = result.level === "pass" ? "✔" : result.level === "warning" ? "!" : "✖";
+    const statusText = result.level === "pass" ? "ПРОЙДЕНО" : result.level === "warning" ? "ПРЕДУПРЕЖДЕНИЕ" : "ОШИБКА";
     console.log(`[${statusText}] ${symbol} ${result.check}: ${result.message}`);
-    if (!result.passed) {
+    if (result.level === "error") {
       allPassed = false;
     }
   }

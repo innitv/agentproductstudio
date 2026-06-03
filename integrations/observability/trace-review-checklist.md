@@ -1,4 +1,4 @@
-# Trace Review Checklist
+# Чек-лист ревью трассировки
 
 ## Route
 
@@ -26,7 +26,7 @@
 - QA verdict согласован с найденными проблемами.
 - Release notes содержат validation и rollback notes.
 
-## Sensitive Data
+## Чувствительные данные
 
 - Secrets не попали в artifacts.
 - Secrets не попали в logs.

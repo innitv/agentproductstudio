@@ -19,7 +19,7 @@ strictness_profile: strict
 Агент применяет этот навык автоматически на этапе:
 - **Стадия воркфлоу**: `08-frontend` (реализация интерфейса).
 - **Событие**: Получение спецификации дизайна (`design-brief.md`, `screens.md`, `copy-deck.md`).
-- **Стек**: React + Vite + Tailwind CSS. Вся верстка целевого лендинга и калькуляторов (таких как Dodo, VK Cloud, Valorant и др.) осуществляется **строго внутри [LandingView.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/views/LandingView.tsx)**. Файлы `ConsoleView.tsx` и `App.tsx` защищены от модификации кодом лендинга. Общие типы данных выносятся в `types.ts`.
+- **Стек**: React + Vite + Tailwind CSS. Верстка целевого лендинга и калькуляторов осуществляется в presentation view внутри `apps/frontend/src/views/`. Для обновления текущего базового лендинга используется [LandingView.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/views/LandingView.tsx); для нового самостоятельного продукта допустим отдельный `<ProductName>View.tsx`. `ConsoleView.tsx` защищен от модификации кодом лендинга. `App.tsx` должен оставаться тонким роутером и может меняться только для подключения/выбора view. Общие типы данных выносятся в `types.ts`.
 
 ## 3. Пошаговый алгоритм выполнения (Action Step-by-Step)
 

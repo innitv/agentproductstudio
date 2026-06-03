@@ -14,6 +14,8 @@
 - каждый артефакт содержит раздел `## Inputs Used`, кроме `run-plan.md` и `handoff-bundle.md`;
 - `handoff-bundle.md` обновлен после завершения этапа;
 - неизвестные аспекты (unknowns), предположения (assumptions), риски (risks) и следующий требуемый артефакт (next required artifact) явно перенесены дальше;
+- фактические локальные команды, решения и ручные approvals фиксируются в заметках этапа;
+- external writes имеют явную approval-запись в `approval-state.json`; если последняя matching-запись является denial, действие считается заблокированным;
 - `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard` не возвращает ошибок для пакета стандартного профиля (standard profile) без визуального референса;
 - `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference` не возвращает ошибок для пакета профиля референса (reference profile) с визуальным референсом;
 - в случае настройки интеграции с Notion на стадии релиза выполнен автоматический экспорт Agile-доски (базы Персон и связанных с ними через Relation Пользовательских историй с чек-листами критериев приемки Acceptance Criteria).
@@ -31,11 +33,17 @@
 | 06-screens | design-generator | `screens.md` | pending |  |
 | 07-prototype | prototype | `prototype-report.md` | pending |  |
 | 08-frontend | frontend | `frontend-result.md` | pending |  |
-| 09-test-bench | test-bench | `test-bench-result.md` | pending |  |
-| 10-qa | qa-review | `qa-report.md` | pending |  |
-| 11-release | release | `release-notes.md` | pending |  |
+| 09-visual-reference | qa-review | `visual-reference-review.md` | skipped | Только для reference profile |
+| 10-test-bench | test-bench | `test-bench-result.md` | pending |  |
+| 11-qa | qa-review | `qa-report.md` | pending |  |
+| 12-release | release | `release-notes.md` | pending |  |
 
 ## Запуски валидации (Validation Runs)
 
 | Время | Команда | Результат | Заметки |
 |---|---|---|---|
+
+## Agentic Preflight
+
+| Время | Команда | Ready | Strict gate | Blocking stages | Заметки |
+|---|---|---|---|---|---|

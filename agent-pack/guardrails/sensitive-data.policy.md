@@ -1,4 +1,4 @@
-# Sensitive Data Policy
+# Политика чувствительных данных
 
 ## Правило
 
@@ -12,12 +12,12 @@
 - `NOTION_TOKEN`
 - `TAVILY_API_KEY`
 - `DEEPSEEK_API_KEY`
-- GitHub/GitLab tokens
-- private keys, OAuth secrets, session cookies
+- токены GitHub/GitLab
+- private keys, OAuth secrets и session cookies
 
 Используй только `.env.example` с пустыми placeholders. Реальный `.env` должен оставаться локальным и игнорироваться git.
 
-## Research And Notion
+## Исследования и Notion
 
 Перед публикацией в Notion или внешние APIs проверь:
 
@@ -26,11 +26,11 @@
 - нет ли raw personal data, secrets, private source dumps или machine-readable workflow payloads;
 - research pack содержит только human-readable summary и источники, разрешенные для публикации.
 
-## Tracing And Reports
+## Трассировка и отчёты
 
 Для production-like запусков не сохраняй sensitive inputs/outputs в traces. Локальные reports, screenshots и Playwright traces не должны попадать в commit без явного решения release owner.
 
-## Incident Handling
+## Обработка инцидентов
 
 Если секрет попал в файл или внешний сервис:
 

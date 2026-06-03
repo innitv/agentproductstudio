@@ -1,4 +1,4 @@
-# Run Log Template
+# Шаблон журнала запуска
 
 ## Run
 

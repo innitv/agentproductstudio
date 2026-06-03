@@ -1,10 +1,10 @@
-# Workflow: Deep Research
+# Workflow: глубокое исследование
 
-## Goal
+## Цель
 
-Create a research base that is strong enough for PRD, IA, design, copy, prototype and test bench decisions without pretending that hypotheses are facts.
+Создать исследовательскую базу, достаточную для решений по PRD, IA, дизайну, copy, прототипу и test bench, не выдавая гипотезы за факты.
 
-## Source Policy
+## Политика источников
 
 ```yaml
 mode: deep_research
@@ -34,7 +34,7 @@ fallback: needs_validation
 Для полного `deep_research` используются все default providers: `tavily`, `deepseek` и `gemini`.
 Одиночный provider не считается успешным research gate: если один из них недоступен, упал или не вернул источники, stage получает статус `partial`, а причина фиксируется в `research-summary.md`, `handoff-bundle.md` и `stage-gate-ledger.md`.
 `deepseek` и `gemini` используются обязательно как API cross-check/strategy providers для поиска противоречий, рисков и claims-to-validate. Их выводы не заменяют source-backed evidence из Tavily/источников, но отсутствие DeepSeek/Gemini блокирует полный статус `success`.
-## Required Outputs
+## Обязательные выходы
 
 - `research-summary.md`
 - `competitive-analysis.md`
@@ -44,42 +44,42 @@ fallback: needs_validation
 
 ## Pipeline
 
-1. Read `recursive-brief.md`.
-2. Define research questions and assumptions.
-3. Run multi-source research according to policy: Tavily + DeepSeek + Gemini by default.
-4. Cross-check findings across providers and mark contradictions as `claims_to_validate`.
-5. Gather sources according to policy with provider name, retrieved_at and confidence.
-6. Build audience and JTBD.
-7. Create `proto_personas` with Evidence status.
-8. Create `simulated_interviews` with Evidence status: `synthetic`.
-9. Create competitor set and alternatives.
-10. Create SWOT with evidence/status.
-11. Create validation plan and claims-to-validate.
-12. Update handoff and ledger.
+1. Прочитать `recursive-brief.md`.
+2. Определить research questions и assumptions.
+3. Запустить multi-source research по policy: Tavily + DeepSeek + Gemini по умолчанию.
+4. Сверить findings между providers и пометить противоречия как `claims_to_validate`.
+5. Собрать sources по policy с provider name, `retrieved_at` и confidence.
+6. Сформировать audience и JTBD.
+7. Создать `proto_personas` со статусом evidence.
+8. Создать `synthetic_interviews` со статусом evidence: `synthetic`.
+9. Создать список конкурентов и альтернатив.
+10. Создать SWOT с evidence/status.
+11. Создать validation plan и claims-to-validate.
+12. Обновить handoff и ledger.
 
-## Mandatory Validation
+## Обязательная валидация
 
-Research is COMPLETE only when:
+Research считается COMPLETE только когда:
 
-- all required artifacts exist;
-- evidence log exists;
-- providers requested/used/unavailable/failures are recorded;
-- Tavily, DeepSeek and Gemini all returned usable results for `success`; otherwise status is `partial`;
-- validation plan exists;
-- unknowns are documented;
+- все обязательные artifacts существуют;
+- evidence log существует;
+- requested/used/unavailable/failures по providers записаны;
+- Tavily, DeepSeek и Gemini вернули usable results для `success`; иначе статус остается `partial`;
+- validation plan существует;
+- unknowns задокументированы;
 - `skipped_with_reason` is present for any missing research unit;
-- ledger is updated;
-- handoff is updated.
+- ledger обновлён;
+- handoff обновлён.
 
 ## Guardrails
 
-- Synthetic interviews are hypothesis-generation artifacts only.
-- Synthetic participants must not replace real user research.
-- Pricing, market size, competitor claims and user behavior require source-backed evidence or `needs validation`.
+- Synthetic interviews являются только артефактами для генерации гипотез.
+- Synthetic participants не должны заменять real user research.
+- Pricing, market size, competitor claims и user behavior требуют source-backed evidence или `needs validation`.
 
-## Evidence References
+## Источники по evidence
 
-- Intercom JTBD: https://www.intercom.com/books/jobs-to-be-done
-- Atlassian Product Discovery: https://www.atlassian.com/agile/product-management/discovery
-- UXAtlas on synthetic users and evidence risk: https://www.uxatlas.io/articles/synthetic-users-evidence
-- UXArmy on synthetic participants limitations: https://uxarmy.com/blog/synthetic-participants-ux-research/
+- Intercom про JTBD: https://www.intercom.com/books/jobs-to-be-done
+- Atlassian про product discovery: https://www.atlassian.com/agile/product-management/discovery
+- UXAtlas о synthetic users и evidence risk: https://www.uxatlas.io/articles/synthetic-users-evidence
+- UXArmy об ограничениях synthetic participants: https://uxarmy.com/blog/synthetic-participants-ux-research/

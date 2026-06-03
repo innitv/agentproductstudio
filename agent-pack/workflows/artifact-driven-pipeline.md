@@ -2,7 +2,11 @@
 
 ## Источник истины (Source Of Truth)
 
-Источником истины являются файлы, расположенные в каталоге: `outputs/products/<project-slug>/<YYYY-MM-DD>/`. Для временных проверочных запусков и тестов используется каталог `outputs/temp/`.
+Источником истины для runtime workflow являются файлы, расположенные в каталоге: `outputs/<project-slug>/<YYYY-MM-DD>/`. Для временных проверочных запусков и тестов используется каталог `outputs/temp/`.
+
+`outputs/products/` является legacy/archive-зоной для старых или вручную перенесенных результатов. Она не является нормативным источником для правил агента и не должна использоваться как путь по умолчанию в командах `workflow:*`.
+
+`outputs/registry.json` может использоваться как навигационный индекс активных продуктов, но не как gate и не как доказательство корректности или некорректности правил workflow. Состояние конкретного `run-state.json` в прошлых `outputs/*` считается диагностикой отдельного запуска, а не дефектом инструкций.
 
 ## Обязательная последовательность этапов
 
@@ -39,6 +43,14 @@
 6. Успешно пройти валидацию (validation).
 
 Невыполнение любого из пунктов переводит этап в статус `blocked` (заблокирован); следующий этап не может быть начат.
+
+## Рабочий режим
+
+Проект работает через Codex внутри IDE/чата: Codex читает инструкции агентов, workflow-документы и шаблоны, затем выполняет этапы через локальные инструменты и фиксирует артефакты.
+
+Локальный runtime используется как вспомогательный слой для scaffold, validation, persisted state и QA-команд.
+
+Перед запуском workflow или проверкой среды Оркестратор выполняет `yarn workflow:doctor`. Перед финальным статусом запускается `workflow:validate` по нужному profile.
 
 ## Конечно-разностный автомат состояний этапа (Stage State Machine)
 
@@ -78,7 +90,7 @@ NOT_STARTED -> IN_PROGRESS -> GENERATED -> VALIDATED -> HANDED_OFF -> COMPLETE
 - сегменты целевой аудитории (audience segments);
 - Jobs To Be Done (JTBD);
 - `proto_personas`: от 2 до 4 прото-персон (или `skipped_with_reason`);
-- `simulated_interviews`: от 3 до 5 синтетических интервью (или `skipped_with_reason`);
+- `synthetic_interviews`: от 3 до 5 синтетических интервью (или `skipped_with_reason`);
 - у каждой персоны должен быть указан `Evidence status`;
 - у каждого синтетического интервью должен быть статус `evidence_status: synthetic`;
 - конкурентный анализ;
@@ -104,6 +116,8 @@ NOT_STARTED -> IN_PROGRESS -> GENERATED -> VALIDATED -> HANDED_OFF -> COMPLETE
 - нерешенные вопросы (unresolved questions);
 - следующий требуемый артефакт (next required artifact).
 
+После ручной правки артефактов в run directory оркестратор запускает `yarn workflow:sync outputs/<project-slug>/<YYYY-MM-DD>`, если команда доступна. Если синхронизация невозможна, причина фиксируется в `handoff-bundle.md` и `stage-gate-ledger.md`.
+
 ## Ведение реестра ворот качества (Ledger Enforcement)
 
 Каждый этап обязан обновлять реестр в файле `stage-gate-ledger.md`, фиксируя:
@@ -125,6 +139,8 @@ NOT_STARTED -> IN_PROGRESS -> GENERATED -> VALIDATED -> HANDED_OFF -> COMPLETE
 ## Блокировка фронтенда (Frontend Lock)
 
 Разработка фронтенда не может быть начата до завершения этапов PRD, информационной архитектуры (IA), дизайна, копирайтинга, спецификации экранов и прототипа, за исключением специального демонстрационного режима быстрого наброска (`quick draft`).
+
+`quick draft` разрешен только при явном запросе пользователя: `quick draft`, «быстрый набросок», `demo only` или эквивалентная формулировка. В этом режиме frontend может стартовать раньше полного upstream пакета, но workflow обязан создать минимальные `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, записать пропущенные стадии как `partial`/`skipped_with_reason` и не возвращать финальный `success`. `quick draft` запрещен для reference-driven задач, внешних публикаций, Figma write, deploy и production-quality acceptance.
 
 Если пользователь передает визуальные референсы или требует соответствия определенному сайту, создание `reference-analysis.md` является строго обязательным до начала работы над `design-brief.md`.
 Анализ референса должен четко разделять разрешенные паттерны (allowed patterns), запрещенное копирование (disallowed copying), фирменный стиль и риски нарушения интеллектуальной собственности (IP risks).
@@ -156,7 +172,8 @@ NOT_STARTED -> IN_PROGRESS -> GENERATED -> VALIDATED -> HANDED_OFF -> COMPLETE
 - использованные входные данные (`inputs_used`);
 - ссылки или пути к полноразмерным скриншотам (full-page desktop & mobile screenshots) референса;
 - ссылки или пути к полноразмерным скриншотам текущей реализации;
-- ссылки или пути к скриншотам отдельных секций или экранов прокрутки, если эффекты ленивой загрузки (lazy loading) или scroll-анимации могут скрывать элементы при общем захвате страницы;
+- ссылки или пути к парным скриншотам отдельных секций с одинаковыми именами: `reference-desktop-section-<name>.png` + `local-desktop-section-<name>.png`, `reference-mobile-section-<name>.png` + `local-mobile-section-<name>.png`;
+- результат `yarn reference:diff <reference-report-dir> <local-report-dir> [output-dir]` в `visual-diff-result.json` и краткую интерпретацию pixel diff;
 - детальное сравнение первого экрана как критически важной зоны;
 - сравнение всех видимых блоков, компонентов, стилей, сетки, шрифтов, плотности контента, CTA, карточек, форм, подвала и мобильного отображения;
 - список выявленных расхождений (gaps);
@@ -164,6 +181,8 @@ NOT_STARTED -> IN_PROGRESS -> GENERATED -> VALIDATED -> HANDED_OFF -> COMPLETE
 - поблочную таблицу соответствия: блок референса -> локальный блок -> статус соответствия -> исправление;
 - явное подтверждение того, что реализация не скатилась в дефолтный или шаблонный стиль;
 - финальный вердикт ворот качества (gate result): `passed` (пройдено), `passed_with_notes` или `blocked`.
+
+Если хотя бы для одной видимой секции отсутствует пара reference/local desktop или mobile, либо не создан `visual-diff-result.json`, visual reference gate получает статус `blocked`.
 
 Этапы QA и релиза не могут получить статус успешного завершения (`success`), если визуальный референс был задан, но скриншот-сверка не была проведена или не зафиксирована в реестре `stage-gate-ledger.md`.
 
@@ -177,6 +196,7 @@ NOT_STARTED -> IN_PROGRESS -> GENERATED -> VALIDATED -> HANDED_OFF -> COMPLETE
 
 Требования к публикации:
 - публикуется исключительно пакет результатов исследования (research-only human-readable pack): `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`, а также `reference-analysis.md` (при наличии);
+- перед запросом approval создается `notion-research-export-ru.md` как человекочитаемый research pack без workflow dump, schema/frontmatter, raw JSON и code-block копий артефактов;
 - публикация осуществляется в виде отдельной дочерней страницы (child page) внутри родительской страницы Notion, а не путем вставки всего воркфлоу на одну страницу;
 - категорически запрещено публиковать машиночитаемые схемы, frontmatter, сырые JSON-данные, полный системный дамп воркфлоу, файлы фронтенда, логов или релизов, а также копии файлов в виде блоков кода;
 - если `NOTION_TOKEN` и родительская страница доступны, оркестратор запрашивает подтверждение пользователя (human approval) на внешнюю запись и запускает скрипт `tooling/scripts/publish-notion-research-page.mjs <parent-page> <research-export-md> "<page-title>"`;
@@ -199,9 +219,9 @@ NOT_STARTED -> IN_PROGRESS -> GENERATED -> VALIDATED -> HANDED_OFF -> COMPLETE
 ## Валидация во время выполнения (Runtime Validation)
 
 ```bash
-yarn workflow:validate outputs/products/<project-slug>/<YYYY-MM-DD> --through <stage-id>
-yarn workflow:validate outputs/products/<project-slug>/<YYYY-MM-DD> --profile standard
-yarn workflow:validate outputs/products/<project-slug>/<YYYY-MM-DD> --profile reference
+yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through <stage-id>
+yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
+yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
 ```
 
 Любая ошибка валидации блокирует финальный статус `success`.

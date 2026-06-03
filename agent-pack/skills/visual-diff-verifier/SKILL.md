@@ -33,9 +33,13 @@ strictness_profile: strict
 3. Сохранить их в `reports/visual-review/implementation/`.
 
 ### Шаг 3: Проведение поблочного сравнения
-1. Для каждой секции (Hero, Value/Services, FAQ, Form, Footer) запустить пиксельное сравнение:
+1. Для каждой видимой секции снять пары reference/local с одинаковыми именами:
+   - `reference-desktop-section-<name>.png` + `local-desktop-section-<name>.png`.
+   - `reference-mobile-section-<name>.png` + `local-mobile-section-<name>.png`.
+2. Для каждой пары запустить пиксельное сравнение:
    - Использовать встроенные утилиты `yarn reference:diff` и `yarn reference:section-diff`.
-2. Зафиксировать расхождения в сетке, отступах (margin/padding), размерах шрифтов, контрастности кнопок и CTA-элементов.
+   - Сохранить `visual-diff-result.json` и `visual-diff-summary.md`.
+3. Зафиксировать расхождения в сетке, отступах (margin/padding), размерах шрифтов, контрастности кнопок и CTA-элементов.
 
 ### Шаг 4: Формирование отчета `visual-reference-review.md`
 Записать отчет в текущую run-папку, заполнив следующие разделы:
@@ -45,5 +49,7 @@ strictness_profile: strict
 
 ## 4. Validation / Quality Gates (Критерии качества)
 - [ ] Скриншоты сняты как для desktop-версии, так и для mobile.
+- [ ] Для каждой видимой секции существуют пары reference/local desktop и mobile.
+- [ ] `visual-diff-result.json` создан через `yarn reference:diff` и прочитан перед вердиктом.
 - [ ] Ошибки верстки, такие как наложение текста, вылезание блоков за рамки экрана (horizontal overflow) или битые картинки, полностью отсутствуют.
 - [ ] Разница (pixel-diff percentage) на первом экране (Hero) составляет менее 3%.

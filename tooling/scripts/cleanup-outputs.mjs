@@ -39,7 +39,7 @@ console.log(`Список активных продуктов: ${activeProducts.
 // Создаем папки-контейнеры, если их нет
 if (!fs.existsSync(productsDir)) {
   fs.mkdirSync(productsDir, { recursive: true });
-  console.log(`Создана папка для продуктов: ${productsDir}`);
+  console.log(`Создана legacy/archive-папка: ${productsDir}`);
 }
 if (!fs.existsSync(tempDir)) {
   fs.mkdirSync(tempDir, { recursive: true });
@@ -64,7 +64,7 @@ try {
   process.exit(1);
 }
 
-let movedToProductsCount = 0;
+let keptActiveCount = 0;
 let movedToTempCount = 0;
 
 for (const item of items) {
@@ -96,15 +96,10 @@ for (const item of items) {
 
   // Если это директория
   if (activeProducts.includes(item)) {
-    // Это активный продукт, переносим в outputs/products/
-    const destPath = path.join(productsDir, item);
-    try {
-      fs.renameSync(fullPath, destPath);
-      console.log(`[Продукт] Успешно перемещен: ${item} -> outputs/products/${item}`);
-      movedToProductsCount++;
-    } catch (err) {
-      console.error(`Ошибка при переносе продукта ${item}:`, err.message);
-    }
+    // Это активный runtime-продукт. Не переносим его: workflow:* команды
+    // используют outputs/<project-slug>/<YYYY-MM-DD>/ как source of truth.
+    console.log(`[Продукт] Оставлен в runtime-пути: outputs/${item}`);
+    keptActiveCount++;
   } else {
     // Это временная папка/тест, переносим в outputs/temp/
     const destPath = path.join(tempDir, item);
@@ -120,6 +115,6 @@ for (const item of items) {
 
 console.log("\n=================================================");
 console.log("  РЕОРГАНИЗАЦИЯ УСПЕШНО ЗАВЕРШЕНА");
-console.log(`  Перенесено активных продуктов: ${movedToProductsCount}`);
+console.log(`  Активных продуктов оставлено: ${keptActiveCount}`);
 console.log(`  Перенесено в архив temp:        ${movedToTempCount}`);
 console.log("=================================================");

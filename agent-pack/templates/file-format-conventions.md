@@ -14,6 +14,15 @@ outputs/<project-slug>/<YYYY-MM-DD>/
 - `handoff-bundle.md`
 - `stage-gate-ledger.md`
 
+## Task-Scoped Files
+
+Для ограниченных инженерных задач вне полного продуктового workflow можно использовать:
+
+- `agent-pack/templates/task-exec-plan.template.md` -> `.agents/plans/<task-slug>/PLAN.md` или текущий run directory.
+- `agent-pack/templates/agent-sop.template.md` -> отдельный SOP-документ для повторяемой процедуры.
+
+Task ExecPlan не заменяет `run-plan.md` полного workflow. SOP не должен дублировать весь `AGENTS.md`; он фиксирует только одну повторяемую процедуру и подключается ссылкой из workflow/agent/skill.
+
 ## Required Research Files
 
 - `research-summary.md`
