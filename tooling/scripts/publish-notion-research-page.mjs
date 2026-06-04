@@ -1,10 +1,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-const [, , parentArg, exportPathArg = "outputs/valorant-points-store/2026-05-24/notion-research-export-ru.md", titleArg] = process.argv;
+const [, , parentArg, exportPathArg, titleArg] = process.argv;
 
-if (!parentArg) {
-  console.error("Usage: node tooling/scripts/publish-notion-research-page.mjs <parent-page-url-or-id> [research-export-md] [page-title]");
+if (!parentArg || !exportPathArg) {
+  console.error("Usage: node tooling/scripts/publish-notion-research-page.mjs <parent-page-url-or-id> <research-export-md> [page-title]");
   process.exit(1);
 }
 
