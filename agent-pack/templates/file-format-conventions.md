@@ -13,6 +13,23 @@ outputs/<project-slug>/<YYYY-MM-DD>/
 - `run-plan.md`
 - `handoff-bundle.md`
 - `stage-gate-ledger.md`
+- `run-state.json`
+- `run-meta.json`
+- `artifact-manifest.json`
+- `run-index.md`
+
+## Output Artifact Types
+
+`outputs/<project-slug>/<YYYY-MM-DD>/` является ledger конкретного запуска. `artifact-manifest.json` должен помогать понять назначение каждого файла:
+
+- `state`: JSON state/checkpoint files for resume and status.
+- `manifest`: navigation and ledger files such as `artifact-manifest.json` and `run-index.md`.
+- `product_artifact`: stage outputs consumed by downstream agents, such as `prd.md`, `design-brief.md`, `copy-deck.md`.
+- `evidence`: validation, QA, screenshots, visual diff, test-bench and audit proof.
+- `external_record`: approval, publication, release, deploy and rollback records.
+- `export`: human-readable packages prepared for external publication, such as `notion-research-export-ru.md`.
+
+Человек начинает чтение с `run-index.md`. Агент или runtime начинает диагностику с `run-state.json`, `run-meta.json` и `artifact-manifest.json`.
 
 ## Task-Scoped Files
 

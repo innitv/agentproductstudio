@@ -137,6 +137,7 @@ withRun((runDir) => {
   assertError(findings, /run-state\.json status is 'blocked'/);
   assertError(findings, /persisted workflow run is missing run-meta\.json/);
   assertError(findings, /persisted workflow run is missing artifact-manifest\.json/);
+  assertError(findings, /persisted workflow run is missing run-index\.md/);
 });
 
 withRun((runDir) => {

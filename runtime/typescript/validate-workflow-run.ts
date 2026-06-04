@@ -2,7 +2,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import YAML from "js-yaml";
-import { artifactManifestFileName, runMetaFileName } from "./output-metadata";
+import { artifactManifestFileName, runIndexFileName, runMetaFileName } from "./output-metadata";
 import {
   artifactFiles,
   artifactSchemas,
@@ -191,6 +191,7 @@ function validateGateSemantics(options: {
     const missingMetadata = [
       runMetaFileName,
       artifactManifestFileName,
+      runIndexFileName,
     ].filter((fileName) => !existsSync(join(options.outputDir, fileName)));
 
     for (const fileName of missingMetadata) {

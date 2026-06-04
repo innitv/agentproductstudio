@@ -1,12 +1,19 @@
 import { existsSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join, relative, resolve } from "node:path";
+import { approvalStateFileName } from "./approval-gate";
+import { artifactNames, routeTools } from "./route.config";
 import { artifactFiles, artifactSchemas, getRequiredArtifactsForStage, getWorkflowStagesForProfile } from "./workflow-stages";
 import { artifactStatusToStageStatus, readMarkdownStatus } from "./status-resolver";
-import type { WorkflowRunState, WorkflowStageStatus } from "./workflow-state";
+import { runStateFileName, type WorkflowRunState, type WorkflowStageStatus } from "./workflow-state";
 
 export const runMetaFileName = "run-meta.json";
 export const artifactManifestFileName = "artifact-manifest.json";
+export const runIndexFileName = "run-index.md";
+
+export type ArtifactType = "state" | "manifest" | "product_artifact" | "evidence" | "external_record" | "export";
+export type ArtifactLifecycle = "active" | "draft" | "blocked" | "partial" | "archived" | "temporary";
 
 export interface RunMeta {
   project_slug: string;
@@ -28,13 +35,21 @@ export interface RunMeta {
 export interface ArtifactManifestEntry {
   artifact_name: string;
   file: string;
+  artifact_type: ArtifactType;
   stage_id: string;
   stage_title: string;
+  producer_stage: string;
+  producer_agent: string;
+  consumers: string[];
   status: WorkflowStageStatus | "missing";
   exists: boolean;
+  human_readable: boolean;
+  safe_to_publish: boolean;
+  lifecycle: ArtifactLifecycle;
   schema?: string;
   size_bytes?: number;
   updated_at?: string;
+  checksum_sha256?: string;
 }
 
 export interface ArtifactManifest {
@@ -71,7 +86,9 @@ export interface WorkflowRunInspection {
 
 export async function syncOutputMetadata(state: WorkflowRunState): Promise<void> {
   await writeFile(join(state.output_dir, runMetaFileName), `${JSON.stringify(createRunMeta(state), null, 2)}\n`, "utf8");
-  await writeFile(join(state.output_dir, artifactManifestFileName), `${JSON.stringify(await createArtifactManifest(state), null, 2)}\n`, "utf8");
+  const manifest = await createArtifactManifest(state);
+  await writeFile(join(state.output_dir, artifactManifestFileName), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+  await writeFile(join(state.output_dir, runIndexFileName), renderRunIndex(state, manifest), "utf8");
 }
 
 export function createRunMeta(state: WorkflowRunState): RunMeta {
@@ -96,6 +113,7 @@ export function createRunMeta(state: WorkflowRunState): RunMeta {
 
 export async function createArtifactManifest(state: WorkflowRunState): Promise<ArtifactManifest> {
   const entries: ArtifactManifestEntry[] = [];
+  const seenFiles = new Set<string>();
 
   for (const stage of getWorkflowStagesForProfile(state.profile)) {
     for (const artifactName of getRequiredArtifactsForStage(stage, state.profile)) {
@@ -107,16 +125,27 @@ export async function createArtifactManifest(state: WorkflowRunState): Promise<A
       entries.push({
         artifact_name: artifactName,
         file,
+        artifact_type: classifyArtifact(artifactName),
         stage_id: stage.id,
         stage_title: stage.title,
+        producer_stage: stage.id,
+        producer_agent: stage.owner,
+        consumers: findArtifactConsumers(artifactName),
         status: fileStat ? artifactStatusToStageStatus(readMarkdownStatus(content) ?? "", state.stages[stage.id]?.status ?? "completed") : "missing",
         exists: Boolean(fileStat),
+        human_readable: isHumanReadableArtifact(artifactName, file),
+        safe_to_publish: isSafeToPublishArtifact(artifactName),
+        lifecycle: inferArtifactLifecycle(fileStat ? artifactStatusToStageStatus(readMarkdownStatus(content) ?? "", state.stages[stage.id]?.status ?? "completed") : "missing"),
         schema: artifactSchemas[artifactName],
         size_bytes: fileStat?.size,
         updated_at: fileStat?.mtime.toISOString(),
+        checksum_sha256: fileStat ? sha256(content) : undefined,
       });
+      seenFiles.add(file);
     }
   }
+
+  entries.push(...await createDiscoveredArtifactEntries(state, seenFiles));
 
   return {
     generated_at: new Date().toISOString(),
@@ -175,8 +204,9 @@ export async function inspectWorkflowRun(outputDirInput: string): Promise<Workfl
     .filter(([, value]) => !value)
     .map(([file]) => String(file));
 
-  const manifestArtifacts = manifest?.artifacts
-    ?? (state || meta ? await createArtifactManifestFromInspectionState(outputDir, state, meta) : []);
+  const manifestArtifacts = manifest
+    ? await normalizeManifestArtifacts(outputDir, manifest.artifacts, state, meta)
+    : (state || meta ? await createArtifactManifestFromInspectionState(outputDir, state, meta) : []);
   const blockingStages = state
     ? Object.values(state.stages)
       .filter((stage) => stage.status === "blocked" || stage.status === "failed" || stage.status === "partial")
@@ -193,7 +223,9 @@ export async function inspectWorkflowRun(outputDirInput: string): Promise<Workfl
     relative_output_dir: relative(process.cwd(), outputDir),
     meta,
     state,
-    manifest,
+    manifest: manifest
+      ? { ...manifest, artifacts: manifestArtifacts }
+      : (state || meta ? createSyntheticManifest(state, meta, manifestArtifacts) : undefined),
     missing_metadata: missingMetadata,
     missing_artifacts: manifestArtifacts.filter((artifact) => !artifact.exists),
     blocking_stages: blockingStages,
@@ -259,6 +291,43 @@ export function formatWorkflowRunInspection(inspection: WorkflowRunInspection): 
   ].join("\n");
 }
 
+export function formatWorkflowOutputsGuide(inspection: WorkflowRunInspection): string {
+  const manifestArtifacts = [
+    ...createLedgerMetadataArtifacts(inspection),
+    ...(inspection.manifest?.artifacts ?? []),
+  ];
+  const groups = groupArtifactsByType(manifestArtifacts);
+
+  return [
+    "# Workflow Outputs Guide",
+    "",
+    `- Run: ${inspection.relative_output_dir}`,
+    `- Status: ${inspection.meta?.status ?? inspection.state?.status ?? "unknown"}`,
+    `- Current stage: ${inspection.meta?.current_stage ?? inspection.state?.current_stage ?? "none"}`,
+    "",
+    "## What To Read First",
+    "",
+    firstReadableFiles(manifestArtifacts).length
+      ? firstReadableFiles(manifestArtifacts).map((artifact) => `- \`${artifact.file}\` (${artifact.artifact_name}, ${artifact.status})`).join("\n")
+      : "- No readable artifacts are available yet.",
+    "",
+    "## Blocking Work",
+    "",
+    inspection.blocking_stages.length
+      ? inspection.blocking_stages.map((stage) => `- ${stage.stage_id} ${stage.title}: ${stage.status}${stage.error ? ` - ${stage.error}` : ""}`).join("\n")
+      : "- No blocked, failed or partial stages.",
+    "",
+    "## Artifact Groups",
+    "",
+    ...(["product_artifact", "evidence", "export", "external_record", "manifest", "state"] as ArtifactType[])
+      .flatMap((type) => renderArtifactGroup(type, groups.get(type) ?? [])),
+    "",
+    "## Next Action",
+    "",
+    inferNextAction(inspection),
+  ].join("\n");
+}
+
 async function findRunDirectories(dir: string): Promise<string[]> {
   if (existsSync(join(dir, "run-state.json")) || existsSync(join(dir, runMetaFileName))) {
     return [dir];
@@ -311,13 +380,212 @@ async function createArtifactManifestFromInspectionState(
     getRequiredArtifactsForStage(stage, profile).map((artifactName) => ({
       artifact_name: artifactName,
       file: artifactFiles[artifactName],
+      artifact_type: classifyArtifact(artifactName),
       stage_id: stage.id,
       stage_title: stage.title,
+      producer_stage: stage.id,
+      producer_agent: stage.owner,
+      consumers: findArtifactConsumers(artifactName),
       status: "missing" as const,
       exists: false,
+      human_readable: isHumanReadableArtifact(artifactName, artifactFiles[artifactName]),
+      safe_to_publish: isSafeToPublishArtifact(artifactName),
+      lifecycle: "draft" as const,
       schema: artifactSchemas[artifactName],
     })),
   );
+}
+
+async function normalizeManifestArtifacts(
+  outputDir: string,
+  artifacts: ArtifactManifestEntry[],
+  state?: WorkflowRunState,
+  meta?: RunMeta,
+): Promise<ArtifactManifestEntry[]> {
+  const profile = state?.profile ?? meta?.workflow_profile ?? "standard";
+  const stageById = new Map(getWorkflowStagesForProfile(profile).map((stage) => [stage.id, stage]));
+
+  return Promise.all(artifacts.map(async (artifact) => {
+    const file = artifact.file;
+    const artifactName = artifact.artifact_name;
+    const stage = stageById.get(artifact.stage_id);
+    const path = join(outputDir, file);
+    const fileStat = existsSync(path) ? await stat(path) : undefined;
+    const content = fileStat ? await readFile(path, "utf8").catch(() => "") : "";
+    const fallbackStatus = artifact.status === "missing" ? "completed" : artifact.status;
+    const status = fileStat
+      ? artifactStatusToStageStatus(readMarkdownStatus(content) ?? "", state?.stages[artifact.stage_id]?.status ?? fallbackStatus)
+      : "missing";
+
+    return {
+      ...artifact,
+      artifact_type: artifact.artifact_type ?? classifyArtifact(artifactName),
+      producer_stage: artifact.producer_stage ?? artifact.stage_id,
+      producer_agent: artifact.producer_agent ?? stage?.owner ?? "unknown",
+      consumers: artifact.consumers ?? findArtifactConsumers(artifactName),
+      status,
+      exists: Boolean(fileStat),
+      human_readable: artifact.human_readable ?? isHumanReadableArtifact(artifactName, file),
+      safe_to_publish: artifact.safe_to_publish ?? isSafeToPublishArtifact(artifactName),
+      lifecycle: artifact.lifecycle ?? inferArtifactLifecycle(status),
+      schema: artifact.schema ?? artifactSchemas[artifactName],
+      size_bytes: fileStat?.size ?? artifact.size_bytes,
+      updated_at: fileStat?.mtime.toISOString() ?? artifact.updated_at,
+      checksum_sha256: fileStat ? sha256(content) : artifact.checksum_sha256,
+    };
+  }));
+}
+
+function createSyntheticManifest(
+  state: WorkflowRunState | undefined,
+  meta: RunMeta | undefined,
+  artifacts: ArtifactManifestEntry[],
+): ArtifactManifest {
+  return {
+    generated_at: new Date().toISOString(),
+    run_id: state?.run_id ?? meta?.run_id ?? "unknown",
+    workflow_profile: state?.profile ?? meta?.workflow_profile ?? "standard",
+    artifacts,
+  };
+}
+
+function createLedgerMetadataArtifacts(inspection: WorkflowRunInspection): ArtifactManifestEntry[] {
+  return [
+    createLedgerMetadataArtifact(inspection, runStateFileName, "state", "run_state", Boolean(inspection.state), false),
+    createLedgerMetadataArtifact(inspection, runMetaFileName, "state", "run_meta", Boolean(inspection.meta), false),
+    createLedgerMetadataArtifact(inspection, artifactManifestFileName, "manifest", "artifact_manifest", Boolean(inspection.manifest), false),
+    createLedgerMetadataArtifact(inspection, runIndexFileName, "manifest", "run_index", existsSync(join(inspection.output_dir, runIndexFileName)), true),
+  ];
+}
+
+function createLedgerMetadataArtifact(
+  inspection: WorkflowRunInspection,
+  file: string,
+  artifactType: ArtifactType,
+  artifactName: string,
+  exists: boolean,
+  humanReadable: boolean,
+): ArtifactManifestEntry {
+  return {
+    artifact_name: artifactName,
+    file,
+    artifact_type: artifactType,
+    stage_id: "run-ledger",
+    stage_title: "Run Ledger",
+    producer_stage: "runtime",
+    producer_agent: "workflow-runtime",
+    consumers: ["orchestrator", "workflow:inspect", "workflow:outputs", "workflow:validate"],
+    status: exists ? "completed" : "missing",
+    exists,
+    human_readable: humanReadable,
+    safe_to_publish: false,
+    lifecycle: exists ? "active" : "draft",
+  };
+}
+
+async function createDiscoveredArtifactEntries(
+  state: WorkflowRunState,
+  seenFiles: Set<string>,
+): Promise<ArtifactManifestEntry[]> {
+  const discovered = [
+    {
+      artifactName: artifactNames.notionPrdExport,
+      file: artifactFiles[artifactNames.notionPrdExport],
+      artifactType: "export" as const,
+      producerStage: "optional-notion-prd-export",
+      producerAgent: routeTools.notionPrdExport.agent,
+      stageTitle: "Notion PRD Export",
+      humanReadable: true,
+      safeToPublish: true,
+    },
+    {
+      artifactName: "notion_research_export_ru",
+      file: "notion-research-export-ru.md",
+      artifactType: "export" as const,
+      producerStage: "01-research",
+      producerAgent: "notion-publisher",
+      stageTitle: "Notion Research Export",
+      humanReadable: true,
+      safeToPublish: true,
+    },
+    {
+      artifactName: "approval_state",
+      file: approvalStateFileName,
+      artifactType: "external_record" as const,
+      producerStage: "runtime",
+      producerAgent: "approval-gate",
+      stageTitle: "Approval Records",
+      humanReadable: false,
+      safeToPublish: false,
+    },
+    {
+      artifactName: "visual_diff_result",
+      file: "visual-diff-result.json",
+      artifactType: "evidence" as const,
+      producerStage: "09-visual-reference",
+      producerAgent: "visual-diff-verifier",
+      stageTitle: "Visual Diff Evidence",
+      humanReadable: false,
+      safeToPublish: false,
+    },
+    {
+      artifactName: "visual_section_diff_result",
+      file: "visual-section-diff-result.json",
+      artifactType: "evidence" as const,
+      producerStage: "09-visual-reference",
+      producerAgent: "visual-diff-verifier",
+      stageTitle: "Visual Section Diff Evidence",
+      humanReadable: false,
+      safeToPublish: false,
+    },
+    {
+      artifactName: "visual_section_diff_summary",
+      file: "visual-section-diff-summary.md",
+      artifactType: "evidence" as const,
+      producerStage: "09-visual-reference",
+      producerAgent: "visual-diff-verifier",
+      stageTitle: "Visual Section Diff Evidence",
+      humanReadable: true,
+      safeToPublish: false,
+    },
+  ];
+
+  const entries: ArtifactManifestEntry[] = [];
+  for (const item of discovered) {
+    if (seenFiles.has(item.file)) {
+      continue;
+    }
+
+    const path = join(state.output_dir, item.file);
+    if (!existsSync(path)) {
+      continue;
+    }
+
+    const fileStat = await stat(path);
+    const content = await readFile(path, "utf8").catch(() => "");
+    entries.push({
+      artifact_name: item.artifactName,
+      file: item.file,
+      artifact_type: item.artifactType,
+      stage_id: item.producerStage,
+      stage_title: item.stageTitle,
+      producer_stage: item.producerStage,
+      producer_agent: item.producerAgent,
+      consumers: findArtifactConsumers(item.artifactName),
+      status: artifactStatusToStageStatus(readMarkdownStatus(content) ?? "", "completed"),
+      exists: true,
+      human_readable: item.humanReadable,
+      safe_to_publish: item.safeToPublish,
+      lifecycle: "active",
+      schema: artifactSchemas[item.artifactName],
+      size_bytes: fileStat.size,
+      updated_at: fileStat.mtime.toISOString(),
+      checksum_sha256: sha256(content),
+    });
+    seenFiles.add(item.file);
+  }
+
+  return entries;
 }
 
 async function readJson<T>(path: string): Promise<T | undefined> {
@@ -347,6 +615,215 @@ function inferLastValidatedAt(state: WorkflowRunState): string | undefined {
     .map((stage) => stage.updated_at)
     .sort()
     .at(-1);
+}
+
+function renderRunIndex(state: WorkflowRunState, manifest: ArtifactManifest): string {
+  const completed = manifest.artifacts.filter((artifact) => artifact.exists && artifact.status === "completed");
+  const blocked = Object.values(state.stages).filter((stage) => ["blocked", "failed", "partial"].includes(stage.status));
+  const readable = firstReadableFiles(manifest.artifacts);
+
+  return [
+    "# Run Index",
+    "",
+    `- Run ID: ${state.run_id}`,
+    `- Goal: ${state.goal}`,
+    `- Status: ${state.status}`,
+    `- Profile: ${state.profile}`,
+    `- Execution mode: ${state.execution_mode ?? "local"}`,
+    `- Current stage: ${state.current_stage ?? "none"}`,
+    `- Updated: ${state.updated_at}`,
+    "",
+    "## What To Read First",
+    "",
+    readable.length
+      ? readable.map((artifact) => `- \`${artifact.file}\` (${artifact.artifact_name}, ${artifact.status})`).join("\n")
+      : "- No readable artifacts are available yet.",
+    "",
+    "## Progress",
+    "",
+    `- Completed artifacts: ${completed.length}/${manifest.artifacts.length}`,
+    `- Blocking stages: ${blocked.length}`,
+    "",
+    "## Blocking Stages",
+    "",
+    blocked.length
+      ? blocked.map((stage) => `- ${stage.id} ${stage.title}: ${stage.status}${stage.error ? ` - ${stage.error}` : ""}`).join("\n")
+      : "- No blocked, failed or partial stages.",
+    "",
+    "## Artifact Groups",
+    "",
+    ...(["product_artifact", "evidence", "export", "external_record"] as ArtifactType[])
+      .flatMap((type) => renderArtifactGroup(type, groupArtifactsByType(manifest.artifacts).get(type) ?? [])),
+    "",
+    "## Next Action",
+    "",
+    inferNextActionFromState(state, manifest),
+  ].join("\n") + "\n";
+}
+
+function classifyArtifact(artifactName: string): ArtifactType {
+  if (artifactName === "notion_research_export_ru" || artifactName === artifactNames.notionPrdExport) {
+    return "export";
+  }
+
+  if (artifactName === artifactNames.visualReferenceReview || artifactName === artifactNames.testBenchResult || artifactName === artifactNames.qaReport) {
+    return "evidence";
+  }
+
+  if (artifactName === artifactNames.releaseNotes) {
+    return "external_record";
+  }
+
+  return "product_artifact";
+}
+
+function findArtifactConsumers(artifactName: string): string[] {
+  return [...new Set(
+    Object.values(routeTools)
+      .filter((route) => [
+        ...route.inputs,
+        ...readOptionalStringArray(route, "referenceInputs"),
+        ...route.dependsOn,
+        ...readOptionalStringArray(route, "referenceDependsOn"),
+      ].includes(artifactName))
+      .map((route) => route.stageId ?? route.agent)
+      .filter(Boolean),
+  )];
+}
+
+function isHumanReadableArtifact(artifactName: string, file: string): boolean {
+  return file.endsWith(".md") && !["run_state", "artifact_manifest"].includes(artifactName);
+}
+
+function isSafeToPublishArtifact(artifactName: string): boolean {
+  const safeArtifacts: readonly string[] = [
+    artifactNames.researchSummary,
+    artifactNames.competitiveAnalysis,
+    artifactNames.protoPersonas,
+    artifactNames.syntheticInterviews,
+    artifactNames.swot,
+    artifactNames.prd,
+    artifactNames.iaBrief,
+    artifactNames.designBrief,
+    artifactNames.screens,
+    artifactNames.copyDeck,
+    artifactNames.prototypeReport,
+    artifactNames.notionPrdExport,
+  ];
+  return safeArtifacts.includes(artifactName);
+}
+
+function inferArtifactLifecycle(status: WorkflowStageStatus | "missing"): ArtifactLifecycle {
+  if (status === "completed") {
+    return "active";
+  }
+
+  if (status === "blocked" || status === "failed") {
+    return "blocked";
+  }
+
+  if (status === "partial") {
+    return "partial";
+  }
+
+  return "draft";
+}
+
+function sha256(content: string): string {
+  return createHash("sha256").update(content).digest("hex");
+}
+
+function groupArtifactsByType(artifacts: ArtifactManifestEntry[]): Map<ArtifactType, ArtifactManifestEntry[]> {
+  const groups = new Map<ArtifactType, ArtifactManifestEntry[]>();
+  for (const artifact of artifacts) {
+    groups.set(artifact.artifact_type, [...(groups.get(artifact.artifact_type) ?? []), artifact]);
+  }
+
+  return groups;
+}
+
+function firstReadableFiles(artifacts: ArtifactManifestEntry[]): ArtifactManifestEntry[] {
+  const preferred = [
+    "run_index",
+    artifactNames.recursiveBrief,
+    artifactNames.researchSummary,
+    artifactNames.prd,
+    artifactNames.iaBrief,
+    artifactNames.designBrief,
+    artifactNames.screens,
+    artifactNames.copyDeck,
+    artifactNames.prototypeReport,
+    artifactNames.frontendResult,
+    artifactNames.qaReport,
+    artifactNames.releaseNotes,
+  ];
+
+  const preferredOrder = new Map<string, number>(preferred.map((artifactName, index) => [artifactName, index]));
+
+  return artifacts
+    .filter((artifact) => artifact.exists && artifact.human_readable)
+    .sort((a, b) => (preferredOrder.get(a.artifact_name) ?? 999) - (preferredOrder.get(b.artifact_name) ?? 999))
+    .slice(0, 8);
+}
+
+function readOptionalStringArray(value: unknown, key: string): readonly string[] {
+  if (!value || typeof value !== "object" || !(key in value)) {
+    return [];
+  }
+
+  const record = value as Record<string, unknown>;
+  const maybeArray = record[key];
+  return Array.isArray(maybeArray) && maybeArray.every((item) => typeof item === "string")
+    ? maybeArray
+    : [];
+}
+
+function renderArtifactGroup(type: ArtifactType, artifacts: ArtifactManifestEntry[]): string[] {
+  const title = type.replaceAll("_", " ");
+  if (!artifacts.length) {
+    return [`### ${title}`, "", "- none", ""];
+  }
+
+  return [
+    `### ${title}`,
+    "",
+    "| File | Status | Producer | Safe to publish |",
+    "|---|---|---|---|",
+    ...artifacts.map((artifact) => `| ${artifact.file} | ${artifact.status} | ${artifact.producer_stage} ${artifact.producer_agent} | ${artifact.safe_to_publish ? "yes" : "no"} |`),
+    "",
+  ];
+}
+
+function inferNextAction(inspection: WorkflowRunInspection): string {
+  if (inspection.missing_metadata.length) {
+    return `Run \`yarn workflow:sync ${inspection.relative_output_dir}\` to regenerate missing metadata.`;
+  }
+
+  if (inspection.blocking_stages.length) {
+    const first = inspection.blocking_stages[0];
+    return `Resolve ${first.stage_id} ${first.title} (${first.status}) before continuing.`;
+  }
+
+  if (inspection.missing_artifacts.length) {
+    const first = inspection.missing_artifacts[0];
+    return `Create or rerun required artifact \`${first.file}\` for ${first.stage_id}.`;
+  }
+
+  return "Run validation or continue with the next workflow stage.";
+}
+
+function inferNextActionFromState(state: WorkflowRunState, manifest: ArtifactManifest): string {
+  const blocking = Object.values(state.stages).find((stage) => ["blocked", "failed", "partial"].includes(stage.status));
+  if (blocking) {
+    return `Resolve ${blocking.id} ${blocking.title} (${blocking.status}) before continuing.`;
+  }
+
+  const missing = manifest.artifacts.find((artifact) => !artifact.exists);
+  if (missing) {
+    return `Create or rerun required artifact \`${missing.file}\` for ${missing.stage_id}.`;
+  }
+
+  return "Run final validation or prepare release handoff.";
 }
 
 function formatTableCell(value: string): string {

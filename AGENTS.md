@@ -66,6 +66,16 @@ Source of truth:
 - `run-state.json`
 - `run-meta.json`
 - `artifact-manifest.json`
+- `run-index.md`
+
+`outputs/<project-slug>/<YYYY-MM-DD>/` трактуется как run ledger:
+
+- `state`: `run-state.json`, `run-meta.json`;
+- `manifest`: `artifact-manifest.json`, `run-index.md`;
+- `product_artifact`: stage Markdown artifacts (`prd.md`, `design-brief.md`, `frontend-result.md` и т.д.);
+- `evidence`: QA, screenshots, visual diff, test-bench and validation evidence;
+- `external_record`: approval/publication/deploy/release records;
+- `export`: человекочитаемые пакеты для внешней публикации, например `notion-research-export-ru.md`.
 
 После каждого этапа обновляй:
 
@@ -74,7 +84,7 @@ Source of truth:
 
 Каждый этап обязан читать предыдущие артефакты и явно фиксировать `inputs_used`.
 
-После ручной правки артефактов в run directory запусти `yarn workflow:sync outputs/<project-slug>/<YYYY-MM-DD>`, если команда доступна, чтобы синхронизировать `run-state.json`, `stage-results/`, `run-meta.json` и `artifact-manifest.json`. Для обзора runs используй `yarn workflow:list`, для детального просмотра одного run — `yarn workflow:inspect outputs/<project-slug>/<YYYY-MM-DD>`. Нельзя использовать содержимое прошлых `outputs/*` как доказательство ошибки правил workflow без отдельной проверки нормативных файлов и runtime-команд.
+После ручной правки артефактов в run directory запусти `yarn workflow:sync outputs/<project-slug>/<YYYY-MM-DD>`, если команда доступна, чтобы синхронизировать `run-state.json`, `stage-results/`, `run-meta.json`, `artifact-manifest.json` и `run-index.md`. Для обзора runs используй `yarn workflow:list`, для детального просмотра одного run — `yarn workflow:inspect outputs/<project-slug>/<YYYY-MM-DD>`, для человекочитаемого объяснения outputs — `yarn workflow:outputs outputs/<project-slug>/<YYYY-MM-DD>`. Нельзя использовать содержимое прошлых `outputs/*` как доказательство ошибки правил workflow без отдельной проверки нормативных файлов и runtime-команд.
 
 ## 5. Обязательный продуктовый процесс
 

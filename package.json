@@ -29,6 +29,7 @@
     "workflow:status": "tsx runtime/typescript/run-workflow-engine.ts status",
     "workflow:list": "tsx runtime/typescript/run-workflow-engine.ts list",
     "workflow:inspect": "tsx runtime/typescript/run-workflow-engine.ts inspect",
+    "workflow:outputs": "tsx runtime/typescript/run-workflow-engine.ts outputs",
     "workflow:skills": "tsx runtime/typescript/run-workflow-engine.ts skills",
     "workflow:cleanup-temp": "tsx runtime/typescript/run-workflow-engine.ts cleanup-temp",
     "workflow:archive": "tsx runtime/typescript/run-workflow-engine.ts archive",
