@@ -509,6 +509,56 @@ async function createDiscoveredArtifactEntries(
       safeToPublish: true,
     },
     {
+      artifactName: artifactNames.styleGuide,
+      file: artifactFiles[artifactNames.styleGuide],
+      artifactType: "product_artifact" as const,
+      producerStage: "04-design",
+      producerAgent: routeTools.design.agent,
+      stageTitle: "Style Decomposition",
+      humanReadable: true,
+      safeToPublish: false,
+    },
+    {
+      artifactName: artifactNames.designGeneratorPrompt,
+      file: artifactFiles[artifactNames.designGeneratorPrompt],
+      artifactType: "product_artifact" as const,
+      producerStage: "06-screens",
+      producerAgent: routeTools.screens.agent,
+      stageTitle: "Design Generator Prompt",
+      humanReadable: true,
+      safeToPublish: false,
+    },
+    {
+      artifactName: artifactNames.designLoopReport,
+      file: artifactFiles[artifactNames.designLoopReport],
+      artifactType: "evidence" as const,
+      producerStage: "06-screens",
+      producerAgent: routeTools.screens.agent,
+      stageTitle: "Design Loop Evidence",
+      humanReadable: true,
+      safeToPublish: false,
+    },
+    {
+      artifactName: artifactNames.figmaHandoffBundle,
+      file: artifactFiles[artifactNames.figmaHandoffBundle],
+      artifactType: "export" as const,
+      producerStage: "optional-figma-handoff",
+      producerAgent: routeTools.design.agent,
+      stageTitle: "Figma Handoff Bundle",
+      humanReadable: true,
+      safeToPublish: false,
+    },
+    {
+      artifactName: artifactNames.storybookResult,
+      file: artifactFiles[artifactNames.storybookResult],
+      artifactType: "evidence" as const,
+      producerStage: "optional-storybook-export",
+      producerAgent: routeTools.frontend.agent,
+      stageTitle: "Storybook Export Evidence",
+      humanReadable: true,
+      safeToPublish: false,
+    },
+    {
       artifactName: "approval_state",
       file: approvalStateFileName,
       artifactType: "external_record" as const,
@@ -666,7 +716,17 @@ function classifyArtifact(artifactName: string): ArtifactType {
     return "export";
   }
 
-  if (artifactName === artifactNames.visualReferenceReview || artifactName === artifactNames.testBenchResult || artifactName === artifactNames.qaReport) {
+  if (artifactName === artifactNames.figmaHandoffBundle) {
+    return "export";
+  }
+
+  if (
+    artifactName === artifactNames.visualReferenceReview ||
+    artifactName === artifactNames.testBenchResult ||
+    artifactName === artifactNames.qaReport ||
+    artifactName === artifactNames.designLoopReport ||
+    artifactName === artifactNames.storybookResult
+  ) {
     return "evidence";
   }
 
@@ -704,6 +764,7 @@ function isSafeToPublishArtifact(artifactName: string): boolean {
     artifactNames.swot,
     artifactNames.prd,
     artifactNames.iaBrief,
+    artifactNames.styleGuide,
     artifactNames.designBrief,
     artifactNames.screens,
     artifactNames.copyDeck,
@@ -749,11 +810,14 @@ function firstReadableFiles(artifacts: ArtifactManifestEntry[]): ArtifactManifes
     artifactNames.researchSummary,
     artifactNames.prd,
     artifactNames.iaBrief,
+    artifactNames.styleGuide,
     artifactNames.designBrief,
+    artifactNames.designLoopReport,
     artifactNames.screens,
     artifactNames.copyDeck,
     artifactNames.prototypeReport,
     artifactNames.frontendResult,
+    artifactNames.storybookResult,
     artifactNames.qaReport,
     artifactNames.releaseNotes,
   ];

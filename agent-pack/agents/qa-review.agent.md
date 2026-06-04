@@ -28,6 +28,7 @@ skills:
   - visual-diff-verifier
   - funnel-analytics-verifier
   - seo-copy-validator
+  - design-engineering
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 
@@ -67,9 +68,11 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 6. Проверить рекламные и продуктовые утверждения в текстах на наличие доказательств или меток `[needs validation]` (требует валидации).
 7. **Визуальная скриншот-сверка:** При наличии визуального референса применить навык [visual-diff-verifier/SKILL.md](file:///c:/Project/product-agent-studio/agent-pack/skills/visual-diff-verifier/SKILL.md) для поблочного Playwright-сравнения desktop/mobile версий с референсным сайтом.
 8. Проверить доступность (accessibility), адаптивное поведение (responsiveness) и прохождение основного сценария.
-9. Проверить спецификацию аналитики и отсутствие рисков утечки персональных данных (PII).
-10. Проверить результаты выполнения тестовых команд и известные ограничения.
-11. Вынести итоговый вердикт: `pass` (пройдено), `pass_with_known_limitations` (пройдено с известными ограничениями) или `fail` (не пройдено).
+9. Если есть `figma-handoff-bundle.md`, проверить Figma handoff fidelity: variables/components/states/Auto Layout rules имеют соответствие во frontend или явно описанные deviations.
+10. Проверить design-engineering слой: motion duration/easing, отсутствие `transition: all`, `prefers-reduced-motion`, focus/active states, hover только для fine pointer, отсутствие лишних анимаций на частых keyboard actions.
+11. Проверить спецификацию аналитики и отсутствие рисков утечки персональных данных (PII).
+12. Проверить результаты выполнения тестовых команд и известные ограничения.
+13. Вынести итоговый вердикт: `pass` (пройдено), `pass_with_known_limitations` (пройдено с известными ограничениями) или `fail` (не пройдено).
 
 ## Research Integrity (Целостность исследований)
 
@@ -91,6 +94,8 @@ QA-агент обязан проверить:
 - **Аудит кастомного интерфейса (Bespoke UI Audit):** QA-агент обязан отклонить релиз (выставить `fail`), если в коде используются шаблонные компоненты или готовые UI-заготовки сторонних библиотек вместо уникальной верстки с нуля (Bespoke UI Components) на чистом кастомном Tailwind CSS / HTML и независимых React-компонентах, соответствующих утвержденным макетам Figma.
 - Запрещено выносить положительный вердикт, если синтетические интервью выдаются за реальные исследования пользователей.
 - Запрещено выпускать релиз, если основной пользовательский сценарий (primary flow) не работает или падает.
+- Motion/interactions не могут считаться passed, если в пользовательском UI есть `transition: all`, отсутствует reduced-motion fallback для transform-based motion, hover-анимации срабатывают на touch или интерактивные элементы не имеют видимого focus/active состояния.
+- Figma handoff не может считаться passed, если canvas write заявлен как выполненный, но нет target/node evidence, screenshot verification или список созданных frames/components. Если handoff содержит Auto Layout/variables/component sets, QA проверяет их наличие или зафиксированные deviations.
 - Статус внешних публикаций/записей должен строго соответствовать матрице одобрений (Approval Matrix).
 
 ## Trigger Phrases / Триггерные фразы

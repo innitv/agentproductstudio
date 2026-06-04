@@ -1,6 +1,7 @@
 export {
   artifactNames,
   coreBundleArtifacts,
+  designEnhancementArtifacts,
   fullBundleArtifacts,
   getCoreBundleArtifactsForProfile,
   getRoutePlanForProfile,

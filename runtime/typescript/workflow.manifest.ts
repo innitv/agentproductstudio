@@ -18,11 +18,16 @@ export const artifactNames = {
   notionPrdExport: "notion_prd_export",
   iaBrief: "ia_brief",
   referenceAnalysis: "reference_analysis",
+  styleGuide: "style_guide",
   designBrief: "design_brief",
+  designGeneratorPrompt: "design_generator_prompt",
+  designLoopReport: "design_loop_report",
+  figmaHandoffBundle: "figma_handoff_bundle",
   screens: "screens",
   copyDeck: "copy_deck",
   prototypeReport: "prototype_report",
   frontendResult: "frontend_result",
+  storybookResult: "storybook_result",
   visualReferenceReview: "visual_reference_review",
   testBenchResult: "test_bench_result",
   qaReport: "qa_report",
@@ -71,11 +76,16 @@ export const artifactFiles: Readonly<Record<string, string>> = {
   [artifactNames.notionPrdExport]: "notion-prd-export.md",
   [artifactNames.iaBrief]: "ia-brief.md",
   [artifactNames.referenceAnalysis]: "reference-analysis.md",
+  [artifactNames.styleGuide]: "STYLE_GUIDE.md",
   [artifactNames.designBrief]: "design-brief.md",
+  [artifactNames.designGeneratorPrompt]: "design-generator-prompt.md",
+  [artifactNames.designLoopReport]: "design-loop-report.md",
+  [artifactNames.figmaHandoffBundle]: "figma-handoff-bundle.md",
   [artifactNames.screens]: "screens.md",
   [artifactNames.copyDeck]: "copy-deck.md",
   [artifactNames.prototypeReport]: "prototype-report.md",
   [artifactNames.frontendResult]: "frontend-result.md",
+  [artifactNames.storybookResult]: "storybook-result.md",
   [artifactNames.visualReferenceReview]: "visual-reference-review.md",
   [artifactNames.testBenchResult]: "test-bench-result.md",
   [artifactNames.qaReport]: "qa-report.md",
@@ -534,7 +544,15 @@ export const coreBundleArtifacts = [
 
 export const referenceBundleArtifacts = [artifactNames.referenceAnalysis, artifactNames.visualReferenceReview] as const;
 
-export const optionalBundleArtifacts = [artifactNames.notionPrdExport, ...referenceBundleArtifacts] as const;
+export const designEnhancementArtifacts = [
+  artifactNames.styleGuide,
+  artifactNames.designGeneratorPrompt,
+  artifactNames.designLoopReport,
+  artifactNames.figmaHandoffBundle,
+  artifactNames.storybookResult,
+] as const;
+
+export const optionalBundleArtifacts = [artifactNames.notionPrdExport, ...referenceBundleArtifacts, ...designEnhancementArtifacts] as const;
 
 export const fullBundleArtifacts = [...coreBundleArtifacts, ...optionalBundleArtifacts] as const;
 

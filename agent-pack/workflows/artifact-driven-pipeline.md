@@ -17,10 +17,14 @@
   -> research-summary.md + competitive-analysis.md + proto-personas.md + synthetic-interviews.md + swot.md
   -> prd.md
   -> ia-brief.md
-  -> design-brief.md
   -> reference-analysis.md (если был задан визуальный референс)
+  -> STYLE_GUIDE.md (опционально, если есть визуальный риск или референс)
+  -> design-brief.md
   -> copy-deck.md
+  -> design-generator-prompt.md (опционально, перед генерацией экранов)
   -> screens.md
+  -> design-loop-report.md (опционально, после первичной спецификации/макета экранов)
+  -> figma-handoff-bundle.md / Figma canvas write (опционально, approval-gated)
   -> prototype-report.md
   -> frontend-result.md
   -> visual-reference-review.md (если был задан визуальный референс)
@@ -29,6 +33,7 @@
   -> release-notes.md
   -> Запись о публикации исследования в Notion (обязательно для полного воркфлоу)
   -> notion-prd-export.md (если требуется отдельный плоский экспорт PRD)
+  -> storybook-result.md (опциональный export/evidence artifact)
 ```
 
 ## Жесткий контроль этапов (Hard Stage Enforcement)
@@ -162,6 +167,33 @@ NOT_STARTED -> IN_PROGRESS -> GENERATED -> VALIDATED -> HANDED_OFF -> COMPLETE
 - явный список разрешенных и запрещенных паттернов.
 
 `design-brief.md` и `screens.md` обязаны считывать эту спецификацию и транслировать её в конкретные проектные решения. Использование референса исключительно как «источника абстрактного вдохновения» без структурного маппинга строго запрещено.
+
+## Опциональный слой декомпозиции стиля и дизайн-итераций (Design Enhancement Layer)
+
+Для задач с высоким визуальным риском, референсами, Figma handoff или запросом на дизайн-систему Оркестратор может включить дополнительный слой артефактов. Эти файлы не являются обязательными для каждого standard workflow, но если они созданы, downstream stages обязаны читать их как inputs:
+
+- `STYLE_GUIDE.md`: системная декомпозиция стиля. Разделяет слой подачи/рендера (свет, глубина, материал, фон, грейд) и слой структуры UI (сетка, компоненты, типографика, цвет, иерархия). Должен содержать явные токены, композиционные метрики, allowed/disallowed patterns и anti-patterns.
+- `design-generator-prompt.md`: prompt package для генерации или ручного проектирования 2-3 экранов, основанный на `STYLE_GUIDE.md`, PRD, IA и copy. Запрещено подменять продукт третьей придуманной идеей.
+- `design-loop-report.md`: evidence итераций "скрин -> критика -> revision block". Критика фиксирует не общие пожелания, а конкретные причины визуальной дешевизны, style drift и required corrections.
+- `figma-handoff-bundle.md`: approval-gated пакет foundation/components/screens перед любой записью в Figma.
+- `storybook-result.md`: optional evidence для компонентной библиотеки, Storybook states и motion/a11y checks.
+
+Для reference-driven задач `STYLE_GUIDE.md` рекомендуется создавать сразу после `reference-analysis.md`, чтобы `design-brief.md`, `screens.md` и frontend не скатывались в generic/default landing style. Если этот слой пропущен, причина фиксируется в `handoff-bundle.md` как `skipped_with_reason`.
+
+Figma write и Storybook export не выполняются молча: Figma требует human approval и `write_allowed=true`, Storybook требует явного запроса пользователя или release/export scope.
+
+### Порядок Skills В Design Enhancement Layer
+
+Design skills применяются в таком порядке:
+
+1. `style-decompose` на `04-design`: после `reference-analysis.md`, до финального `design-brief.md`.
+2. `design-loop` на `06-screens`: сначала `design-generator-prompt.md`, затем `screens.md`, затем `design-loop-report.md`.
+3. `figma-handoff` после `screens.md` и `design-loop-report.md`: готовит `figma-handoff-bundle.md`, approval gate и canvas strategy.
+4. Figma `use_figma` write выполняется только после human approval, `write_allowed=true`, проверки target и `search_design_system`.
+5. `design-engineering` на `08-frontend` и `11-qa`: проверяет motion, focus, hover, active, disabled/loading/error/empty states и reduced motion.
+6. `ds-to-storybook` после frontend: только если нужен component library / Storybook export.
+
+Figma canvas strategy выбирается по задаче: если пользователь дал anchor frame, он может использоваться как точка привязки, но полноценная дизайн-доска должна создаваться отдельными frames на canvas, если это улучшает читаемость handoff.
 
 ## Ворота скриншот-сверки с референсом (Visual Reference Screenshot Gate)
 

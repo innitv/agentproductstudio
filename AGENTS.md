@@ -13,6 +13,7 @@ Codex работает как инженерно-продуктовый аген
 - Основной язык артефактов, документации, регламентов и пояснений — русский.
 - Имена файлов, переменных, компонентов, CLI-команды, env-переменные, JSON/YAML keys, schema fields, API/MCP/SDK термины и обязательные runtime section keys не переводятся.
 - Не смешивай языки внутри одного документа без причины.
+- При создании новых templates, skills, plans, workflow docs и agent docs человекочитаемые заголовки, подсказки, checklist items и пояснения пиши на русском. Английский допустим только для технических имен, статусов, команд, code blocks, frontmatter keys и устоявшихся терминов без удачного русского аналога.
 
 ## 2. Главный принцип оркестрации
 
@@ -102,6 +103,20 @@ Source of truth:
 12. QA Review: PRD fit, UX, visual/reference gates, accessibility, responsive, secrets.
 13. Release: changed files, validation, deployment notes, rollback notes.
 14. Notion Research Publication: research-only child page или явный blocker/partial.
+
+Опциональный design enhancement layer для задач с визуальным риском, reference-driven задач, Figma handoff или Storybook export:
+
+- `STYLE_GUIDE.md` после `reference-analysis.md`: декомпозиция стиля на слой подачи/рендера и слой UI-структуры, явные токены, метрики композиции, allowed/disallowed patterns и anti-patterns.
+- `design-generator-prompt.md` перед генерацией экранов: продуктовый контекст + правила стиля + constraints для 2-3 экранов.
+- `design-loop-report.md` после визуальной итерации: таблица Before/After/Why, style drift и revision block.
+- `figma-handoff-bundle.md` перед Figma MCP write: foundation, variables/styles/components/screens, Auto Layout rules, canvas strategy, approval state и screenshot evidence после записи.
+- `storybook-result.md` после frontend, если нужен component library export.
+
+Если optional layer применим, но пропущен, фиксируй `skipped_with_reason` в `handoff-bundle.md`.
+
+Все человекочитаемые секции этих optional artifacts пишутся на русском; технические имена файлов, runtime statuses, table keys и code snippets остаются на английском.
+
+Порядок design skills фиксированный: `style-decompose` после `reference-analysis.md`; `design-loop` на этапе `06-screens`; `figma-handoff` после `screens.md` и `design-loop-report.md`; Figma write через remote `use_figma` только после approval; `design-engineering` на frontend/QA; `ds-to-storybook` после frontend при запросе component library export.
 
 Frontend нельзя начинать до PRD, IA, design, copy, screens и prototype artifacts, кроме явного режима `quick draft`.
 

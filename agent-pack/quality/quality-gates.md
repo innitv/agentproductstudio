@@ -39,6 +39,11 @@
 - IA содержит primary screen, primary action и primary user flow.
 - Design содержит responsive и accessibility notes.
 - Если есть visual reference, `reference-analysis.md` содержит section-by-section visual spec, а `design-brief.md` и `screens.md` явно используют этот spec.
+- Для reference-driven или high-visual-risk задач рекомендуется `STYLE_GUIDE.md`; если он пропущен, `handoff-bundle.md` содержит `skipped_with_reason`.
+- Если создан `STYLE_GUIDE.md`, он содержит два слоя: presentation/render и UI structure, а также явные tokens, composition metrics, allowed/disallowed patterns и anti-patterns.
+- Если создан `design-loop-report.md`, он содержит таблицу `Before | After | Why`, style drift и revision block.
+- Если запрошен Figma handoff, `figma-handoff-bundle.md` создан после `screens.md` и содержит canvas strategy, variables/styles/components/screens, Auto Layout rules, approval state и target.
+- Если Figma write выполнен, bundle содержит node/frame evidence, screenshot verification и известные visual gaps.
 - Copy содержит hero, CTA, sections, FAQ, SEO и claims to validate.
 - Copy не использует synthetic interviews как testimonials.
 
@@ -54,6 +59,9 @@
 - Если frontend сделан в режиме `quick draft`, gate не может быть `passed`: допустим только `passed_with_notes`/`partial` с явным списком skipped upstream artifacts.
 - Secrets не добавлены.
 - Базовые responsive и accessibility требования реализованы.
+- Motion/interaction gate: нет `transition: all`, UI-анимации имеют явную цель и обычно короче 300ms, hover-анимации gated через fine pointer media query, transform-based motion имеет `prefers-reduced-motion`, интерактивные элементы имеют focus/active/disabled/loading/error states.
+- Если есть `figma-handoff-bundle.md`, frontend либо реализует эквиваленты variables/component states/Auto Layout rules, либо фиксирует deviations в `frontend-result.md`.
+- Если есть `storybook-result.md`, он содержит связь Figma component -> frontend component -> Story и проверку states.
 - Доступные build/typecheck/test commands выполнены или blockers задокументированы.
 - Если был visual reference: сняты full-page desktop/mobile screenshots референса и реализации.
 - Если был visual reference: для каждой видимой секции сняты пары скриншотов с одинаковыми именами секций: `reference-desktop-section-<name>.png` + `local-desktop-section-<name>.png`, `reference-mobile-section-<name>.png` + `local-mobile-section-<name>.png`. Без полных пар gate = `blocked`.
