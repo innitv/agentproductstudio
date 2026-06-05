@@ -44,28 +44,30 @@ fallback: needs_validation
 
 ## Pipeline
 
-1. Прочитать `recursive-brief.md`.
-2. Создать research plan: questions, assumptions, decision needs, source classes, search dimensions и expected handoff для PRD/IA/design.
-3. Сформировать targeted search queries по market/category, competitors/alternatives, user scenarios/JTBD, trust/compliance, pricing/business model и design implications.
+1. Выполнить artifact context inventory: прочитать текущий run ledger, включая `run-plan.md`, `recursive-brief.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, прошлые research/export/CJM artifacts, `stage-results/*.json` и пользовательские local artifacts, если они уже лежат в run directory.
+2. На основе всего artifact context создать research plan: questions, assumptions, decision needs, source classes, search dimensions и expected handoff для PRD/IA/design.
+3. Сформировать targeted search queries по market/category, competitors/alternatives, user scenarios/JTBD, trust/compliance, pricing/business model и design implications. Query не должен терять ограничения и выводы, уже зафиксированные в run artifacts.
 4. Запустить multi-source research по policy: Tavily + DeepSeek + Gemini по умолчанию.
 5. Выполнить source quality pass: authority, freshness, directness, independence, specificity и relevance to decision. Noisy scrape не использовать как самостоятельный finding.
 6. Запустить gap loop: если не хватает источников по конкурентам, primary facts, user evidence или design implications, выполнить дополнительный поиск или пометить `needs_validation`.
 7. Сверить findings между providers и пометить противоречия как `claims_to_validate`.
 8. Собрать sources по policy с provider name, `retrieved_at`, confidence, source type и `used_for`.
-9. Сформировать audience и JTBD.
+9. Сформировать artifact-driven synthesis: audience, JTBD, CJM/user paths, opportunity scoring, roadmap и research-to-design handoff на основе artifact context + provider output.
 10. Создать `proto_personas` со статусом evidence.
 11. Создать `synthetic_interviews` со статусом evidence: `synthetic`.
 12. Создать список конкурентов и альтернатив.
 13. Создать SWOT с evidence/status.
 14. Создать validation plan и claims-to-validate.
-15. Создать research-to-design handoff: primary user paths, trust requirements, decision moments, content risks, visual evidence needs, validation priority.
-16. Обновить handoff и ledger.
+15. Перед записью выполнить candidate quality/write gate: обязательные секции, доменная конкретика, русскоязычность публикационных секций, provider coverage, source-backed facts, claims-to-validate и отсутствие generic placeholders. Слабый candidate не должен молча затирать более полный artifact.
+16. Обновить handoff и ledger, включая список реально использованных входных файлов и результат write gate.
 
 ## Обязательная валидация
 
 Research считается COMPLETE только когда:
 
 - все обязательные artifacts существуют;
+- artifact context inventory выполнен по текущей run directory;
+- `inputs_used` отражает реальные run artifacts, которые были прочитаны, а не только `recursive-brief.md`;
 - evidence log существует;
 - research plan существует;
 - source quality pass существует;
@@ -74,6 +76,7 @@ Research считается COMPLETE только когда:
 - contradiction review существует, а unresolved conflicts записаны в claims-to-validate;
 - validation plan существует;
 - research-to-design handoff существует или содержит `skipped_with_reason`;
+- candidate quality/write gate записан в handoff или ledger;
 - unknowns задокументированы;
 - `skipped_with_reason` is present for any missing research unit;
 - ledger обновлён;

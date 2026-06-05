@@ -33,12 +33,13 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - `recursive-brief.md`
 - `run-plan.md`
 - `handoff-bundle.md`
+- `stage-gate-ledger.md`
 - Политика источников (source policy) от Оркестратора
 
 ### Optional (Необязательные)
 
 - Источники, предоставленные пользователем
-- Существующие выходные артефакты от предыдущих запусков
+- Существующие выходные артефакты текущего run directory: прошлые research/export/CJM files, `stage-results/*.json`, `artifact-manifest.json`, `run-index.md`, Notion/Figma handoff records и другие `.md/.json/.yaml/.yml/.txt` файлы
 - Названия конкурентов или целевая география проекта
 
 ## Input Validation (Валидация входных данных)
@@ -51,23 +52,25 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Internal Pipeline (Внутренний процесс)
 
-1. Превратить бриф в `research-plan`: 3-7 исследовательских вопросов, целевые сегменты, географию, временные рамки, expected decisions для PRD/IA/design и список источников, которые нельзя подменять синтезом.
-2. Разложить тему на измерения поиска: рынок/категория, конкуренты/альтернативы, пользовательские сценарии, trust/compliance, UX/patterns, pricing/business model, риски и дизайн-последствия.
-3. Сформировать targeted search queries по каждому измерению. Если запрос слишком широкий, разбить его на подзапросы и не начинать synthesis до получения минимального evidence coverage.
-4. Определить политику источников и классы доказательств: официальные/подтвержденные (official/source-backed), конкуренты (competitor), сообщества/отзывы (community/review), внутренние (internal), гипотезы (hypothesis), синтетические (synthetic).
-5. Запустить исследование по нескольким источникам: `tavily` + `deepseek` + `gemini` по умолчанию, затем использовать разрешенные резервные провайдеры (`user_sources`, `openai_docs`, `web_search`, `browser`) по мере необходимости.
-6. Оценить качество источников до synthesis: authority, freshness, directness, independence, specificity и contradiction risk. Низкокачественные сниппеты, scraped noise, неполные таблицы и маркетинговые claims без первичного источника не повышают confidence.
-7. Запустить gap loop: если не хватает конкурентов, primary sources, user evidence, pricing facts или дизайн-паттернов, выполнить дополнительный поиск или зафиксировать `needs_validation`; запрещено закрывать gap синтетическим выводом.
-8. Сверить результаты между провайдерами: совпадающие утверждения получают более высокий уровень доверия (confidence). Провести фазу **Contradiction Review (Анализ противоречий)**: сопоставить выводы Tavily, DeepSeek и Gemini, явно зафиксировав любые конфликтующие факты, цифры или конкурентные различия в специальном обязательном подразделе `## Contradiction Review` внутри файла `research-summary.md`. Все такие противоречия должны быть перенесены в раздел `claims_to_validate` со статусом `needs validation`.
-9. Собрать источники и зафиксировать URL-адреса источников или локальные пути к файлам, имя провайдера, дату получения (`retrieved_at`), тип источника, уровень доверия и применимость к продуктовым решениям.
-10. Синтезировать сегменты аудитории и сценарии Jobs To Be Done (JTBD), не смешивая реальные evidence, model synthesis и assumptions.
-11. Создать профайлы протоперсон (`proto-personas`) на основе JTBD, болей, желаемых результатов и контекста принятия решений.
-12. Создать симулированные интервью (`synthetic-interviews`) исключительно как материал для генерации гипотез.
-13. Сформировать пул конкурентов, альтернатив и матрицу сравнения; если прямые конкуренты не найдены, явно описать substitute/alternative workflows.
-14. Создать SWOT-анализ с указанием доказательств и статуса по каждому пункту.
-15. Сформировать список утверждений для валидации (`claims-to-validate`) и план валидации.
-16. Подготовить research-to-design handoff: какие выводы влияют на IA, CJM, visual hierarchy, trust patterns, accessibility, proof blocks, forms/controls и copy claims.
-17. Обновить `handoff-bundle.md` и `stage-gate-ledger.md`.
+1. Выполнить **Artifact Context Inventory**: прочитать весь доступный контекст текущего run directory, включая `run-plan.md`, `recursive-brief.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, прошлые research/export/CJM artifacts, `stage-results/*.json` и пользовательские local artifacts. Не ограничиваться одним `recursive-brief.md`, если рядом уже есть более точные output-файлы.
+2. Превратить artifact context в `research-plan`: 3-7 исследовательских вопросов, целевые сегменты, географию, временные рамки, expected decisions для PRD/IA/design и список источников, которые нельзя подменять синтезом.
+3. Разложить тему на измерения поиска: рынок/категория, конкуренты/альтернативы, пользовательские сценарии, trust/compliance, UX/patterns, pricing/business model, риски и дизайн-последствия.
+4. Сформировать targeted search queries по каждому измерению. Если запрос слишком широкий, разбить его на подзапросы и не начинать synthesis до получения минимального evidence coverage. Query должен учитывать ограничения и решения, уже зафиксированные в run artifacts.
+5. Определить политику источников и классы доказательств: официальные/подтвержденные (official/source-backed), конкуренты (competitor), сообщества/отзывы (community/review), внутренние (internal), гипотезы (hypothesis), синтетические (synthetic).
+6. Запустить исследование по нескольким источникам: `tavily` + `deepseek` + `gemini` по умолчанию, затем использовать разрешенные резервные провайдеры (`user_sources`, `openai_docs`, `web_search`, `browser`) по мере необходимости.
+7. Оценить качество источников до synthesis: authority, freshness, directness, independence, specificity и contradiction risk. Низкокачественные сниппеты, scraped noise, неполные таблицы и маркетинговые claims без первичного источника не повышают confidence.
+8. Запустить gap loop: если не хватает конкурентов, primary sources, user evidence, pricing facts или дизайн-паттернов, выполнить дополнительный поиск или зафиксировать `needs_validation`; запрещено закрывать gap синтетическим выводом.
+9. Сверить результаты между провайдерами: совпадающие утверждения получают более высокий уровень доверия (confidence). Провести фазу **Contradiction Review (Анализ противоречий)**: сопоставить выводы Tavily, DeepSeek и Gemini, явно зафиксировав любые конфликтующие факты, цифры или конкурентные различия в специальном обязательном подразделе `## Contradiction Review` внутри файла `research-summary.md`. Все такие противоречия должны быть перенесены в раздел `claims_to_validate` со статусом `needs validation`.
+10. Собрать источники и зафиксировать URL-адреса источников или локальные пути к файлам, имя провайдера, дату получения (`retrieved_at`), тип источника, уровень доверия и применимость к продуктовым решениям.
+11. Синтезировать сегменты аудитории, CJM/user paths и сценарии Jobs To Be Done (JTBD), не смешивая реальные evidence, model synthesis и assumptions.
+12. Создать профайлы протоперсон (`proto-personas`) на основе JTBD, болей, желаемых результатов и контекста принятия решений.
+13. Создать симулированные интервью (`synthetic-interviews`) исключительно как материал для генерации гипотез.
+14. Сформировать пул конкурентов, альтернатив и матрицу сравнения; если прямые конкуренты не найдены, явно описать substitute/alternative workflows.
+15. Создать SWOT-анализ с указанием доказательств и статуса по каждому пункту.
+16. Сформировать список утверждений для валидации (`claims-to-validate`) и план валидации.
+17. Подготовить research-to-design handoff: какие выводы влияют на IA, CJM, visual hierarchy, trust patterns, accessibility, proof blocks, forms/controls и copy claims.
+18. Перед финальной записью выполнить candidate quality/write gate: проверка обязательных секций, доменной конкретики, русскоязычности публикационных секций, provider coverage, source-backed facts и отсутствия generic placeholders.
+19. Обновить `handoff-bundle.md` и `stage-gate-ledger.md`.
 
 ## Evidence Quality Model (Модель качества доказательств)
 

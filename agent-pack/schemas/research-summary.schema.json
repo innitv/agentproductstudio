@@ -9,7 +9,9 @@
     "inputs_used": { "$ref": "#/$defs/string_list" },
     "provider_coverage": { "type": "array", "items": { "$ref": "#/$defs/provider_coverage_item" } },
     "provider_failures": { "type": "array", "items": { "$ref": "#/$defs/provider_failure" } },
+    "artifact_context_inventory": { "type": "array", "items": { "$ref": "#/$defs/artifact_context_item" } },
     "research_questions": { "$ref": "#/$defs/non_empty_string_list" },
+    "domain_synthesis": { "$ref": "#/$defs/domain_synthesis" },
     "audience": { "type": "array", "items": { "$ref": "#/$defs/audience_segment" } },
     "jobs_to_be_done": { "type": "array", "items": { "$ref": "#/$defs/jtbd" } },
     "proto_personas": { "type": "array", "items": { "$ref": "#/$defs/proto_persona" } },
@@ -45,6 +47,94 @@
         "error": { "type": "string" },
         "impact": { "type": "string" },
         "follow_up": { "type": "string" }
+      }
+    },
+    "artifact_context_item": {
+      "type": "object",
+      "required": ["artifact", "used_for"],
+      "properties": {
+        "artifact": { "type": "string" },
+        "type": { "type": "string" },
+        "used_for": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    },
+    "domain_synthesis": {
+      "type": "object",
+      "required": ["theme", "positioning", "primary_paths", "scenarios", "opportunities", "roadmap", "design_handoff"],
+      "properties": {
+        "theme": { "type": "string" },
+        "positioning": { "type": "string" },
+        "primary_paths": { "$ref": "#/$defs/string_list" },
+        "scenarios": { "type": "array", "items": { "$ref": "#/$defs/domain_scenario" } },
+        "opportunities": { "type": "array", "items": { "$ref": "#/$defs/domain_opportunity" } },
+        "roadmap": { "type": "array", "items": { "$ref": "#/$defs/roadmap_item" } },
+        "design_handoff": { "$ref": "#/$defs/design_handoff" },
+        "source_backed_facts": { "type": "array", "items": { "$ref": "#/$defs/source_backed_fact" } },
+        "contradiction_review": { "type": "array", "items": { "$ref": "#/$defs/contradiction_item" } }
+      }
+    },
+    "domain_scenario": {
+      "type": "object",
+      "required": ["name", "user_goal", "friction", "product_role", "priority", "evidence_status"],
+      "properties": {
+        "name": { "type": "string" },
+        "user_goal": { "type": "string" },
+        "friction": { "type": "string" },
+        "product_role": { "type": "string" },
+        "priority": { "enum": ["P0", "P1", "P2"] },
+        "evidence_status": { "$ref": "#/$defs/evidence_status" }
+      }
+    },
+    "domain_opportunity": {
+      "type": "object",
+      "required": ["initiative", "scenario", "reach", "impact", "confidence", "effort", "priority"],
+      "properties": {
+        "initiative": { "type": "string" },
+        "scenario": { "type": "string" },
+        "reach": { "type": "number" },
+        "impact": { "type": "number" },
+        "confidence": { "type": "number" },
+        "effort": { "type": "number" },
+        "priority": { "enum": ["P0", "P1", "P2"] }
+      }
+    },
+    "source_backed_fact": {
+      "type": "object",
+      "required": ["fact", "source", "confidence"],
+      "properties": {
+        "fact": { "type": "string" },
+        "source": { "type": "string" },
+        "confidence": { "enum": ["high", "medium", "low"] }
+      }
+    },
+    "roadmap_item": {
+      "type": "object",
+      "required": ["horizon", "focus", "outcome"],
+      "properties": {
+        "horizon": { "type": "string" },
+        "focus": { "type": "string" },
+        "outcome": { "type": "string" }
+      }
+    },
+    "design_handoff": {
+      "type": "object",
+      "required": ["trust_requirements", "decision_moments", "content_risks", "visual_evidence_needs"],
+      "properties": {
+        "trust_requirements": { "$ref": "#/$defs/string_list" },
+        "decision_moments": { "$ref": "#/$defs/string_list" },
+        "content_risks": { "$ref": "#/$defs/string_list" },
+        "visual_evidence_needs": { "$ref": "#/$defs/string_list" }
+      }
+    },
+    "contradiction_item": {
+      "type": "object",
+      "required": ["topic", "agreement", "disagreement", "decision"],
+      "properties": {
+        "topic": { "type": "string" },
+        "agreement": { "type": "string" },
+        "disagreement": { "type": "string" },
+        "decision": { "type": "string" }
       }
     },
     "evidence_status": { "enum": ["source-backed", "proto", "synthetic", "hypothesis", "needs validation"] },

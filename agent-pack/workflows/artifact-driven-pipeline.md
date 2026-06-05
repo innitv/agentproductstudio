@@ -90,10 +90,14 @@ NOT_STARTED -> IN_PROGRESS -> GENERATED -> VALIDATED -> HANDED_OFF -> COMPLETE
 
 Исследование должно содержать:
 
+- artifact context inventory: список run artifacts, которые были реально прочитаны перед synthesis;
+- `inputs_used`, отражающий `run-plan.md`, `recursive-brief.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, прошлые research/export/CJM artifacts, `stage-results/*.json` и provider outputs, если они использовались;
 - исследовательские вопросы (research questions);
 - журнал источников и доказательств (sources/evidence log);
 - сегменты целевой аудитории (audience segments);
 - Jobs To Be Done (JTBD);
+- CJM/user paths или `skipped_with_reason`, если CJM неприменим к задаче;
+- opportunity scoring или приоритеты возможностей, если research должен кормить PRD/IA/design;
 - `proto_personas`: от 2 до 4 прото-персон (или `skipped_with_reason`);
 - `synthetic_interviews`: от 3 до 5 синтетических интервью (или `skipped_with_reason`);
 - у каждой персоны должен быть указан `Evidence status`;
@@ -101,7 +105,9 @@ NOT_STARTED -> IN_PROGRESS -> GENERATED -> VALIDATED -> HANDED_OFF -> COMPLETE
 - конкурентный анализ;
 - SWOT-анализ;
 - план валидации;
-- неизвестные аспекты (unknowns) и гипотезы для проверки (claims to validate).
+- research-to-design handoff;
+- unknowns и гипотезы для проверки (claims to validate);
+- candidate quality/write gate: решение о записи или сохранении существующего artifact, если новый candidate слабее, слишком generic или теряет контекст.
 
 Исследование получает статус `fail` (ошибка), если:
 
@@ -109,6 +115,8 @@ NOT_STARTED -> IN_PROGRESS -> GENERATED -> VALIDATED -> HANDED_OFF -> COMPLETE
 - симулированные интервью отсутствуют без указания причины `skipped_with_reason`;
 - синтетические интервью используются как реальные доказательства;
 - утверждения из симулированных интервью переносятся в PRD или копирайт без пометки `needs validation` (требует валидации).
+- research runner игнорирует уже существующие run artifacts и строит synthesis только из query/provider output;
+- provider validation `pass` используется как единственное основание для `ready`, хотя rendered artifacts остаются generic, неполными или не отражают текущий run ledger.
 
 ## Контроль передачи данных (Handoff Enforcement)
 

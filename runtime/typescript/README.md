@@ -19,7 +19,7 @@
 - `agentic-rollout.ts`, `agentic-approval-targets.ts` — staged rollout agentic stages и стабильные approval targets для model provider calls.
 - `run-local-workflow.ts` — deterministic local artifact generator.
 - `run-landing-workflow.ts` — scaffold workflow-папки.
-- `research-stage-runner.ts` — research stage runner для `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`.
+- `research-stage-runner.ts` — artifact-driven research stage runner для `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`; перед provider calls собирает контекст из всех доступных файлов run directory (`.md`, `.json`, `.yaml`, `.yml`, `.txt`), использует его для synthesis/rendering и фиксирует реальные `inputs_used`.
 - `reference-scan.ts`, `visual-diff.ts`, `visual-section-diff.ts`, `visual-reference-review.ts` — visual reference и screenshot QA.
 - `approval-gate.ts` — локальный helper approval records для внешних записей.
 - `doctor.ts` — диагностика структуры проекта, шаблонов и optional provider keys.
@@ -37,6 +37,8 @@
 - Agentic model-provider calls проходят через target-scoped approval gate и включаются только для staged rollout stages.
 - Отсутствующие optional provider keys считаются предупреждением, а не ошибкой проекта.
 - Outputs валидируются по JSON Schema или required Markdown sections перед передачей следующему этапу.
+- Research runner обязан использовать весь текущий run ledger как вход: `run-plan.md`, `recursive-brief.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, прошлые research/export/CJM artifacts и `stage-results/*.json`, если они есть. Provider output дополняет этот контекст, но не заменяет его.
+- Research rendering проходит candidate quality/write gate: слабый или generic candidate не должен молча затирать более полный artifact; решение о записи фиксируется в handoff и ledger.
 - Agentic specialist output должен содержать structured envelope и Markdown для обязательного artifact в `outputs.<artifact_name>` или `outputs.<file_name>`; иначе stage понижается до `partial`.
 - Agent instruction frontmatter валидируется как machine-readable contract; перед передачей в Agents SDK frontmatter удаляется из prompt body.
 - Sensitive inputs/outputs не сохраняются в traces для production-like запусков.

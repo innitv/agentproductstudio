@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { appendFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -18,6 +18,15 @@ interface ResearchArtifactWriteDecision {
   existing_score: number;
   candidate_score: number;
   reason: string;
+}
+
+interface RunArtifactContext {
+  files: Array<{
+    file: string;
+    content: string;
+  }>;
+  combined_text: string;
+  inputs_used: string[];
 }
 
 interface DomainScenario {
@@ -148,6 +157,10 @@ const requiredIntakeFiles = [
   artifactFiles.recursive_brief,
 ] as const;
 
+const artifactContextExtensions = new Set([".md", ".json", ".yaml", ".yml", ".txt"]);
+const maxArtifactContextFileChars = 12_000;
+const maxArtifactContextTotalChars = 80_000;
+
 export async function runResearchStage(options: ResearchStageRunOptions): Promise<void> {
   const outputDir = resolve(process.cwd(), options.outputDir);
 
@@ -160,14 +173,15 @@ export async function runResearchStage(options: ResearchStageRunOptions): Promis
     throw new Error(`Research stage requires intake artifacts first. Missing: ${missing.join(", ")}`);
   }
 
-  const query = options.query?.trim() || inferQuery(outputDir);
+  const artifactContext = collectRunArtifactContext(outputDir);
+  const query = options.query?.trim() || inferQuery(outputDir, artifactContext);
   const multiSource = await runMultiSourceResearch({
     query,
-    productContext: readArtifactIfExists(outputDir, artifactFiles.recursive_brief).slice(0, 4_000),
+    productContext: artifactContext.combined_text.slice(0, 16_000),
     language: "ru",
     maxResultsPerProvider: 8,
   });
-  const payload = buildResearchSummaryPayload(multiSource);
+  const payload = buildResearchSummaryPayload(multiSource, artifactContext);
 
   const writeDecisions: ResearchArtifactWriteDecision[] = [];
   writeDecisions.push(await writeResearchArtifact(outputDir, artifactFiles.research_summary, renderResearchSummary(multiSource, payload), query));
@@ -197,12 +211,13 @@ export async function runResearchStage(options: ResearchStageRunOptions): Promis
   console.log(`Artifact writes: ${writeDecisions.map((item) => `${item.file}=${item.action}`).join(", ")}`);
 }
 
-function inferQuery(outputDir: string): string {
+function inferQuery(outputDir: string, artifactContext: RunArtifactContext): string {
   const runPlan = readArtifactIfExists(outputDir, artifactFiles.run_plan);
   const recursiveBrief = readArtifactIfExists(outputDir, artifactFiles.recursive_brief);
   const requestMatch = runPlan.match(/## Запрос\s+([\s\S]*?)(?:\n## |\n# |$)/);
   const expansionMatch = recursiveBrief.match(/## Expansion\s+([\s\S]*?)(?:\n## |\n# |$)/);
-  const candidate = [requestMatch?.[1], expansionMatch?.[1]]
+  const goalMatch = artifactContext.combined_text.match(/## Цель\s+([\s\S]*?)(?:\n## |\n# |$)/);
+  const candidate = [requestMatch?.[1], expansionMatch?.[1], goalMatch?.[1]]
     .filter(Boolean)
     .join("\n")
     .replace(/`partial`/g, "")
@@ -215,12 +230,88 @@ function inferQuery(outputDir: string): string {
   return candidate;
 }
 
-function buildResearchSummaryPayload(result: MultiSourceResearchResult): ResearchSummaryPayload {
+function collectRunArtifactContext(outputDir: string): RunArtifactContext {
+  const files: RunArtifactContext["files"] = [];
+  const visited = new Set<string>();
+  let totalChars = 0;
+
+  walkArtifactFiles(outputDir, "", (absolutePath, relativePath) => {
+    if (visited.has(relativePath) || totalChars >= maxArtifactContextTotalChars) {
+      return;
+    }
+
+    visited.add(relativePath);
+    const content = readFileSync(absolutePath, "utf8")
+      .replace(/\r\n/g, "\n")
+      .slice(0, maxArtifactContextFileChars);
+    const remaining = maxArtifactContextTotalChars - totalChars;
+    const sliced = content.slice(0, Math.max(0, remaining));
+
+    if (!sliced.trim()) {
+      return;
+    }
+
+    files.push({ file: relativePath, content: sliced });
+    totalChars += sliced.length;
+  });
+
+  const combinedText = files
+    .map((item) => `# Artifact: ${item.file}\n${item.content}`)
+    .join("\n\n---\n\n");
+
+  return {
+    files,
+    combined_text: combinedText,
+    inputs_used: files.map((item) => item.file),
+  };
+}
+
+function walkArtifactFiles(rootDir: string, relativeDir: string, onFile: (absolutePath: string, relativePath: string) => void): void {
+  const absoluteDir = join(rootDir, relativeDir);
+  const entries = readdirSync(absoluteDir, { withFileTypes: true })
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  for (const entry of entries) {
+    if (entry.name.startsWith(".")) {
+      continue;
+    }
+
+    const relativePath = relativeDir ? `${relativeDir}/${entry.name}` : entry.name;
+    const absolutePath = join(rootDir, relativePath);
+
+    if (entry.isDirectory()) {
+      if (entry.name === "node_modules" || entry.name === "screenshots" || entry.name === "assets") {
+        continue;
+      }
+
+      walkArtifactFiles(rootDir, relativePath, onFile);
+      continue;
+    }
+
+    if (!entry.isFile()) {
+      continue;
+    }
+
+    const extension = entry.name.includes(".") ? entry.name.slice(entry.name.lastIndexOf(".")).toLowerCase() : "";
+    if (!artifactContextExtensions.has(extension)) {
+      continue;
+    }
+
+    const stat = statSync(absolutePath);
+    if (stat.size > 2_000_000) {
+      continue;
+    }
+
+    onFile(absolutePath, relativePath);
+  }
+}
+
+function buildResearchSummaryPayload(result: MultiSourceResearchResult, artifactContext: RunArtifactContext): ResearchSummaryPayload {
   const status = result.validation.status === "pass" ? "ready" : "partial";
   const retrievedAt = new Date().toISOString();
   const used = new Set(result.providersUsed);
   const sourcesByProvider = new Map<ResearchProvider, number>();
-  const synthesis = buildDomainSynthesis(result);
+  const synthesis = buildDomainSynthesis(result, artifactContext);
 
   for (const source of result.sources) {
     sourcesByProvider.set(source.provider, (sourcesByProvider.get(source.provider) ?? 0) + 1);
@@ -274,36 +365,19 @@ function buildResearchSummaryPayload(result: MultiSourceResearchResult): Researc
 
   return {
     status,
-    inputs_used: ["recursive-brief.md", "handoff-bundle.md", "stage-gate-ledger.md", "Tavily provider output when configured", "DeepSeek provider output when configured"],
+    inputs_used: [
+      ...artifactContext.inputs_used,
+      "Tavily provider output when configured",
+      "DeepSeek provider output when configured",
+      "Gemini provider output when configured",
+    ],
     provider_coverage: providerCoverage,
     provider_failures: providerFailures,
     research_questions: buildResearchQuestions(result, synthesis),
     audience: buildAudience(synthesis, result.sources.length > 0),
     jobs_to_be_done: buildJobsToBeDone(synthesis, result.sources.length > 0),
     proto_personas: buildProtoPersonas(synthesis),
-    simulated_interviews: [
-      {
-        persona: "Рациональный покупатель",
-        scenario: "Сравнивает лендинг с альтернативами.",
-        summary: "Ожидает увидеть цену, ограничения, доказательства доверия и простой CTA.",
-        evidence_status: "synthetic",
-        needs_validation: true,
-      },
-      {
-        persona: "Операционный координатор",
-        scenario: "Проверяет пригодность решения для команды.",
-        summary: "Ищет процесс, документы, поддержку и ответственность после заявки.",
-        evidence_status: "synthetic",
-        needs_validation: true,
-      },
-      {
-        persona: "Сомневающийся посетитель",
-        scenario: "Уходит, если claims звучат неподтвержденно.",
-        summary: "Нужны конкретные источники, ограничения и безопасный способ связаться.",
-        evidence_status: "synthetic",
-        needs_validation: true,
-      },
-    ],
+    simulated_interviews: buildSimulatedInterviews(synthesis),
     findings: [
       ...tavilyFindings.map((finding) => ({
         finding: finding.finding.slice(0, 500),
@@ -353,9 +427,10 @@ function buildResearchSummaryPayload(result: MultiSourceResearchResult): Researc
   };
 }
 
-function buildDomainSynthesis(result: MultiSourceResearchResult): DomainSynthesis {
+function buildDomainSynthesis(result: MultiSourceResearchResult, artifactContext: RunArtifactContext): DomainSynthesis {
   const evidenceText = [
     result.query,
+    artifactContext.combined_text,
     ...result.sources.map((source) => `${source.title ?? ""} ${"content" in source ? "" : ""}`),
     ...result.results.flatMap((item) => item.findings.map((finding) => finding.finding)),
     ...result.results.map((item) => "summary" in item ? item.summary : ""),
@@ -373,14 +448,14 @@ function buildDomainSynthesis(result: MultiSourceResearchResult): DomainSynthesi
     }));
 
   return {
-    theme: paymentDomain ? "Платежная оркестрация по номеру телефона" : "Продуктовый discovery и проверка спроса",
+    theme: inferTheme(paymentDomain, artifactContext),
     positioning: paymentDomain
       ? "A3 Pay как слой оркестрации платежных обязательств, статусов и способов оплаты, а не отдельный кошелек"
-      : "Продукт как управляемый путь от боли пользователя к проверяемому действию",
+      : inferGenericPositioning(artifactContext),
     primary_paths: scenarios.slice(0, 4).map((scenario) => `${scenario.name}: ${scenario.user_goal}`),
     scenarios,
     opportunities,
-    roadmap: buildRoadmap(paymentDomain),
+    roadmap: buildRoadmap(paymentDomain, artifactContext),
     design_handoff: paymentDomain ? {
       trust_requirements: [
         "Проверенный получатель и понятное назначение платежа.",
@@ -408,7 +483,7 @@ function buildDomainSynthesis(result: MultiSourceResearchResult): DomainSynthesi
       trust_requirements: ["Проверяемые доказательства ценности.", "Прозрачные ограничения и следующий шаг."],
       decision_moments: ["Понимание проблемы.", "Сравнение альтернатив.", "Выбор действия."],
       content_risks: ["Не утверждать неподтвержденные метрики.", "Не смешивать гипотезы и факты."],
-      visual_evidence_needs: ["Референсы конкурентов.", "Скриншоты ключевых user flows."],
+      visual_evidence_needs: ["Референсы конкурентов.", "Скриншоты ключевых пользовательских сценариев.", ...inferVisualEvidenceNeeds(artifactContext)],
     },
     source_backed_facts: sourceBackedFacts,
     contradiction_review: buildContradictionReview(result, paymentDomain),
@@ -473,7 +548,20 @@ function buildPaymentScenarios(evidenceText: string, hasSources: boolean): Domai
 
 function buildGenericScenarios(result: MultiSourceResearchResult, evidenceText: string): DomainScenario[] {
   const hasSources = result.sources.length > 0;
+  const requestedArtifacts = extractNamedArtifacts(evidenceText).slice(0, 3);
+  const artifactDrivenScenario = requestedArtifacts[0]
+    ? {
+        name: `Артефакт: ${requestedArtifacts[0]}`,
+        user_goal: "Получить проверяемый результат, который можно передать следующему этапу workflow.",
+        friction: "Контекст часто размазан между брифом, handoff, ledger и предыдущими output-файлами.",
+        product_role: "Собрать входные данные из всех артефактов run directory и сохранить traceability.",
+        priority: "P0" as const,
+        evidence_status: hasSources ? "source-backed" as const : "needs validation" as const,
+      }
+    : undefined;
+
   return [
+    ...(artifactDrivenScenario ? [artifactDrivenScenario] : []),
     {
       name: "Первичная оценка ценности",
       user_goal: "Понять, решает ли продукт мою задачу.",
@@ -526,7 +614,12 @@ function initiativeForScenario(scenario: DomainScenario): string {
   return `Улучшить сценарий: ${scenario.name}`;
 }
 
-function buildRoadmap(paymentDomain: boolean): DomainSynthesis["roadmap"] {
+function buildRoadmap(paymentDomain: boolean, artifactContext: RunArtifactContext): DomainSynthesis["roadmap"] {
+  const explicitRoadmap = extractRoadmapFromArtifacts(artifactContext);
+  if (explicitRoadmap.length) {
+    return explicitRoadmap;
+  }
+
   if (!paymentDomain) {
     return [
       { horizon: "0-3 месяца", focus: "Интервью, конкурентные экраны и проблемные гипотезы", outcome: "Подтвержденная problem framing." },
@@ -542,6 +635,122 @@ function buildRoadmap(paymentDomain: boolean): DomainSynthesis["roadmap"] {
     { horizon: "12-18 месяцев", focus: "Путешествия, авто-этапы, BNPL-брокер", outcome: "Выход в высокотревожные многосторонние сценарии." },
     { horizon: "18-24 месяца", focus: "Недвижимость и регулируемые партнерские сценарии", outcome: "Партнерский вход в крупные чеки без подмены банковских ролей." },
   ];
+}
+
+function inferTheme(paymentDomain: boolean, artifactContext: RunArtifactContext): string {
+  if (paymentDomain) {
+    return "Платежная оркестрация по номеру телефона";
+  }
+
+  const title = extractFirstHeading(artifactContext.combined_text);
+  if (title) {
+    return title.replace(/^Recursive brief:\s*/i, "").trim();
+  }
+
+  const requestedArtifacts = extractNamedArtifacts(artifactContext.combined_text);
+  if (requestedArtifacts.length) {
+    return `Artifact-driven research для ${requestedArtifacts.slice(0, 3).join(", ")}`;
+  }
+
+  return "Продуктовый discovery и проверка спроса";
+}
+
+function inferGenericPositioning(artifactContext: RunArtifactContext): string {
+  const consolidation = extractSection(artifactContext.combined_text, "Consolidation")
+    || extractSection(artifactContext.combined_text, "Цель")
+    || extractSection(artifactContext.combined_text, "Goal");
+
+  if (consolidation) {
+    return firstSentence(consolidation, "Продукт как управляемый путь от боли пользователя к проверяемому действию");
+  }
+
+  return "Продукт как управляемый путь от боли пользователя к проверяемому действию";
+}
+
+function inferVisualEvidenceNeeds(artifactContext: RunArtifactContext): string[] {
+  const text = artifactContext.combined_text.toLowerCase();
+  const needs: string[] = [];
+
+  if (/figma|фигм|макет|design|screens/.test(text)) {
+    needs.push("Макеты, screen spec и Figma handoff из текущего run.");
+  }
+
+  if (/reference|референс|dribbble|visual/.test(text)) {
+    needs.push("Скриншоты и reference-analysis для визуального сравнения.");
+  }
+
+  if (/notion|ноушен|publication/.test(text)) {
+    needs.push("Публикационный export без raw workflow dump и без смешения языков.");
+  }
+
+  return needs;
+}
+
+function extractRoadmapFromArtifacts(artifactContext: RunArtifactContext): DomainSynthesis["roadmap"] {
+  const roadmapSection = extractSection(artifactContext.combined_text, "12-24 month roadmap")
+    || extractSection(artifactContext.combined_text, "Дорожная карта")
+    || extractSection(artifactContext.combined_text, "Roadmap");
+
+  if (!roadmapSection) {
+    return [];
+  }
+
+  const rows = roadmapSection
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("|") && !/---/.test(line))
+    .slice(1, 6)
+    .map((line) => line.split("|").map((cell) => cell.trim()).filter(Boolean));
+
+  return rows
+    .filter((cells) => cells.length >= 3)
+    .map((cells) => ({
+      horizon: cells[0],
+      focus: cells[1],
+      outcome: cells[2],
+    }));
+}
+
+function buildSimulatedInterviews(synthesis: DomainSynthesis): ResearchSummaryPayload["simulated_interviews"] {
+  return synthesis.scenarios.slice(0, 3).map((scenario) => ({
+    persona: personaNameForScenario(scenario.name),
+    scenario: scenario.name,
+    summary: `Проверить, понимает ли пользователь цель "${scenario.user_goal}", доверяет ли роли продукта и где возникают возражения: ${scenario.friction}`,
+    evidence_status: "synthetic" as const,
+    needs_validation: true,
+  }));
+}
+
+function extractNamedArtifacts(text: string): string[] {
+  const matches = text.match(/`?([a-z0-9-]+(?:\.[a-z0-9]+)+)`?/gi) ?? [];
+  return Array.from(new Set(matches
+    .map((item) => item.replace(/`/g, ""))
+    .filter((item) => /\.(md|json|yaml|yml|txt)$/i.test(item))))
+    .slice(0, 12);
+}
+
+function extractFirstHeading(text: string): string | undefined {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .find((line) => /^#\s+/.test(line))
+    ?.replace(/^#\s+/, "")
+    .trim();
+}
+
+function extractSection(text: string, heading: string): string | undefined {
+  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = text.match(new RegExp(`##\\s+${escaped}\\s+([\\s\\S]*?)(?:\\n##\\s+|\\n#\\s+|$)`, "i"));
+  return match?.[1]?.trim();
+}
+
+function firstSentence(text: string, fallback: string): string {
+  const normalized = text
+    .replace(/\|/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const sentence = normalized.split(/(?<=[.!?。])\s+/)[0]?.trim();
+  return sentence && sentence.length >= 24 ? sentence.slice(0, 240) : fallback;
 }
 
 function buildContradictionReview(result: MultiSourceResearchResult, paymentDomain: boolean): DomainSynthesis["contradiction_review"] {
@@ -657,7 +866,8 @@ function renderResearchSummary(result: MultiSourceResearchResult, payload: Resea
     "",
     "## Inputs Used",
     "",
-    ...payload.inputs_used.map((item) => `- ${item}`),
+    ...payload.inputs_used.slice(0, 30).map((item) => `- ${item}`),
+    ...(payload.inputs_used.length > 30 ? [`- ...и еще ${payload.inputs_used.length - 30} входных файлов из run directory`] : []),
     "",
     "## Source Policy",
     "",

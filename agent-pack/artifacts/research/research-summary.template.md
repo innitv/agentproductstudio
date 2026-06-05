@@ -12,8 +12,23 @@
 ## Inputs Used
 
 - `recursive-brief.md`
+- `run-plan.md`
 - `handoff-bundle.md`
+- `stage-gate-ledger.md`
+- Previous run artifacts:
 - Sources:
+
+## Artifact Context Inventory
+
+Research stage must read the current run ledger before provider synthesis. Include local artifacts actually used from `outputs/<project-slug>/<YYYY-MM-DD>/`.
+
+| Artifact | Type | Used for | Notes |
+|---|---|---|---|
+| `run-plan.md` | run ledger | scope and constraints |  |
+| `recursive-brief.md` | intake | expansion/deepening/consolidation |  |
+| `handoff-bundle.md` | handoff | decisions, risks, next artifact |  |
+| `stage-gate-ledger.md` | gate ledger | validation and approval state |  |
+| `stage-results/*.json` | runtime state | previous structured outputs |  |
 
 ## Source Policy
 
@@ -57,6 +72,29 @@ If either default provider is unavailable, failed or empty, set Status to `parti
 
 | Question | Why it matters | Evidence needed | Status |
 |---|---|---|---|
+
+## Продуктовый синтез
+
+| Field | Value |
+|---|---|
+| Theme |  |
+| Positioning |  |
+| Primary paths |  |
+
+## CJM-синтез сценариев
+
+| Сценарий | Цель пользователя | Трение | Роль продукта | Приоритет | Статус доказательств |
+|---|---|---|---|---|---|
+
+## Оценка возможностей
+
+| Инициатива | Сценарий | Reach | Impact | Confidence | Effort | RICE | Приоритет |
+|---|---|---:|---:|---:|---:|---:|---|
+
+## Дорожная карта
+
+| Горизонт | Фокус | Результат |
+|---|---|---|
 
 ## Audience
 
@@ -125,6 +163,11 @@ Guardrail: synthetic interviews are used only for hypothesis generation, intervi
 | `visual_evidence_needs` |  |
 | `validation_priority` |  |
 
+## Candidate Quality / Write Gate
+
+| File | Action | Candidate score | Existing score | Gate result | Reason |
+|---|---|---:|---:|---|---|
+
 ## Unknowns
 
 - 
@@ -132,6 +175,8 @@ Guardrail: synthetic interviews are used only for hypothesis generation, intervi
 ## Readiness Checklist
 
 - [ ] Research questions are answered or marked `needs validation`.
+- [ ] Artifact Context Inventory lists real run artifacts, not only `recursive-brief.md`.
+- [ ] `inputs_used` reflects all meaningful local artifacts and provider outputs used for synthesis.
 - [ ] Provider Coverage records requested, used, unavailable/failed providers.
 - [ ] Research Plan covers market/category, competitors, user scenarios, trust/compliance and design implications.
 - [ ] Source Quality Pass separates primary/source-backed facts from noisy snippets and model synthesis.
@@ -143,8 +188,11 @@ Guardrail: synthetic interviews are used only for hypothesis generation, intervi
 - [ ] Contradiction Review exists and unresolved conflicts are marked `needs_validation`.
 - [ ] Audience segments are defined.
 - [ ] JTBD is complete.
+- [ ] CJM/user paths are present or `skipped_with_reason`.
+- [ ] Opportunity scoring or prioritized opportunity list is present when research feeds PRD/IA/design.
 - [ ] Proto Personas are present or `skipped_with_reason`.
 - [ ] Synthetic Interviews are present or `skipped_with_reason`.
 - [ ] Research Validation Plan is actionable.
 - [ ] Findings separate evidence from hypotheses.
 - [ ] Research-To-Design Handoff exists or has `skipped_with_reason`.
+- [ ] Candidate Quality / Write Gate is recorded before overwriting existing research artifacts.

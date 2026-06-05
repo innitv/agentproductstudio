@@ -13,6 +13,8 @@
 
 ## Gate 1: целостность исследования
 
+- Artifact Context Inventory выполнен: research stage прочитал текущий run ledger, включая `run-plan.md`, `recursive-brief.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, прошлые research/export/CJM artifacts, `stage-results/*.json` и другие релевантные local artifacts из run directory.
+- `inputs_used` в research artifacts отражает реальные входные файлы и provider outputs, а не только `recursive-brief.md`.
 - Research questions существуют.
 - Research Plan покрывает market/category, competitors/alternatives, user scenarios/JTBD, trust/compliance и design implications.
 - Для `deep_research` есть Provider Coverage по `tavily`, `deepseek` и `gemini`.
@@ -34,6 +36,8 @@
 - `validation plan` достаточно конкретен: понятно, кого интервьюировать, что наблюдать и какой minimum evidence нужен.
 - Facts, hypotheses и unknowns разделены.
 - Research-To-Design Handoff содержит primary user paths, trust requirements, decision moments, content risks, visual evidence needs и validation priority.
+- Candidate quality/write gate выполнен до записи или перезаписи research artifacts: обязательные секции, доменная конкретика, русскоязычность публикационных секций, provider coverage, source-backed facts, claims-to-validate и отсутствие generic placeholders проверены; результат gate записан в handoff или ledger.
+- Provider validation `pass` сам по себе не равен research quality `ready`: если rendered artifacts generic, не используют run context или теряют важные existing artifacts, stage должен быть `partial`/`needs_validation` или сохранить более полный artifact.
 
 ## Gate 2: полнота PRD
 
