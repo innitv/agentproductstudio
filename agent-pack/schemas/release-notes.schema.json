@@ -2,14 +2,182 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Release Notes",
   "type": "object",
-  "required": ["status", "inputs_used", "changed_files", "what_changed", "validation", "rollback_notes"],
+  "required": [
+    "status",
+    "inputs_used",
+    "release_scope",
+    "run_ledger_audit",
+    "changed_files",
+    "changed_artifacts",
+    "what_changed",
+    "dependency_sensitive_delta",
+    "validation",
+    "release_decision_matrix",
+    "deployment_notes",
+    "rollback_notes",
+    "approval_external_records",
+    "remaining_risks"
+  ],
   "properties": {
     "status": { "enum": ["ready", "blocked", "released"] },
     "inputs_used": { "type": "array", "items": { "type": "string" } },
-    "changed_files": { "type": "array", "items": { "type": "string" } },
+    "release_scope": {
+      "type": "object",
+      "required": ["release_type", "exact_target", "approval_required", "release_owner"],
+      "properties": {
+        "release_type": {
+          "enum": ["artifact_only", "code", "external_publication", "deploy", "git_handoff", "mixed"]
+        },
+        "exact_target": { "type": "string" },
+        "approval_required": { "type": "boolean" },
+        "release_owner": { "type": "string" }
+      }
+    },
+    "run_ledger_audit": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["item", "status", "evidence"],
+        "properties": {
+          "item": { "type": "string" },
+          "status": { "enum": ["pass", "fail", "blocked", "not_applicable"] },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
+    "changed_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["file", "change_type", "in_release_scope"],
+        "properties": {
+          "file": { "type": "string" },
+          "change_type": {
+            "enum": ["product_artifact", "code", "config", "test", "docs", "external_record", "generated_report", "unrelated_dirty_tree"]
+          },
+          "change": { "type": "string" },
+          "in_release_scope": { "type": "boolean" }
+        }
+      }
+    },
+    "changed_artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["artifact", "producer_stage", "status"],
+        "properties": {
+          "artifact": { "type": "string" },
+          "producer_stage": { "type": "string" },
+          "status": { "type": "string" },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
     "what_changed": { "type": "array", "items": { "type": "string" } },
-    "validation": { "type": "array", "items": { "type": "object" } },
-    "deployment_notes": { "type": "array", "items": { "type": "string" } },
-    "rollback_notes": { "type": "array", "items": { "type": "string" } }
+    "dependency_sensitive_delta": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["area", "result"],
+        "properties": {
+          "area": { "type": "string" },
+          "result": { "enum": ["pass", "risk", "blocked", "not_applicable"] },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
+    "validation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["check", "command_or_evidence", "result", "release_impact"],
+        "properties": {
+          "check": { "type": "string" },
+          "command_or_evidence": { "type": "string" },
+          "result": { "enum": ["pass", "fail", "blocked", "skipped", "not_applicable"] },
+          "release_impact": { "type": "string" }
+        }
+      }
+    },
+    "release_decision_matrix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["gate", "required_state", "actual_state", "decision"],
+        "properties": {
+          "gate": { "type": "string" },
+          "required_state": { "type": "string" },
+          "actual_state": { "type": "string" },
+          "decision": { "enum": ["pass", "fail", "blocked", "accepted_with_limitations"] }
+        }
+      }
+    },
+    "deployment_notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["step", "action", "expected_result", "stop_condition"],
+        "properties": {
+          "step": { "type": "string" },
+          "action": { "type": "string" },
+          "expected_result": { "type": "string" },
+          "stop_condition": { "type": "string" }
+        }
+      }
+    },
+    "post_release_smoke_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["check", "target", "expected_result", "owner"],
+        "properties": {
+          "check": { "type": "string" },
+          "target": { "type": "string" },
+          "expected_result": { "type": "string" },
+          "owner": { "type": "string" }
+        }
+      }
+    },
+    "rollback_notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["surface", "rollback_action", "validation_after_rollback", "data_loss_risk", "approval_needed"],
+        "properties": {
+          "surface": { "type": "string" },
+          "rollback_action": { "type": "string" },
+          "validation_after_rollback": { "type": "string" },
+          "data_loss_risk": { "enum": ["none", "low", "medium", "high"] },
+          "approval_needed": { "type": "boolean" }
+        }
+      }
+    },
+    "approval_external_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action", "target", "status"],
+        "properties": {
+          "action": { "type": "string" },
+          "target": { "type": "string" },
+          "approval_or_record": { "type": "string" },
+          "status": { "enum": ["approved", "not_required", "blocked", "completed", "not_requested"] },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
+    "remaining_risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["risk", "severity", "owner"],
+        "properties": {
+          "risk": { "type": "string" },
+          "severity": { "enum": ["blocker", "critical", "high", "medium", "low", "info"] },
+          "owner": { "type": "string" },
+          "follow_up": { "type": "string" }
+        }
+      }
+    }
   }
 }

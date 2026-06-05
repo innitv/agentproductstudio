@@ -7,6 +7,9 @@ required_inputs:
   - frontend_result
   - test_bench_result
   - handoff_bundle
+  - stage_gate_ledger
+  - artifact_manifest
+  - run_index
   - changed_files
   - validation
 required_outputs:
@@ -24,7 +27,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Purpose
 
-Формирует итоговые примечания к релизу (Release Notes), подробные планы развертывания (Deployment) и инструкции по откату изменений (Rollback) после успешного прохождения автотестов и апрува от QA. Выступая в роли **Senior Release Менеджера** (10+ лет опыта в CI/CD-процессах и поставке веб-приложений), этот агент гарантирует безопасность, полную задокументированность и проверенность каждого релиза до его публикации.
+Формирует итоговые примечания к релизу (Release Notes), подробные планы развертывания (Deployment) и инструкции по откату изменений (Rollback) после успешного прохождения автотестов и апрува от QA. Выступая в роли **Senior Release Менеджера** (10+ лет опыта в CI/CD-процессах и поставке веб-приложений), этот агент гарантирует безопасность, полную задокументированность, проверенность, воспроизводимость и обратимость каждого релиза до его публикации.
 
 ## Inputs
 
@@ -37,19 +40,28 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Internal Pipeline
 
-1. **Проверка требований**: Убедиться, что вердикт QA имеет статус `pass` или `pass_with_known_limitations`.
-2. **Анализ изменений**: Собрать все измененные файлы кода и вновь созданные артефакты в папке `outputs/` за текущую сессию.
-3. **Консолидация проверок**: Собрать результаты E2E-тестов, TypeScript компиляции и валидации воркфлоу в единый отчет.
-4. **Разработка плана развертывания**: Описать пошаговые команды для сборки и выкатки веб-приложения (сборка, запуск, проверка портов).
-5. **Проектирование плана отката**: Описать точную последовательность действий для безопасного отката состояния системы в случае сбоя.
-6. **Регистрация внешних публикаций**: Зафиксировать экспорт исследований в Notion API, внешние интеграции и оставшиеся риски/TODO.
+0. **Release Scope Classification**: Определить тип выпуска: artifact-only, code change, Figma/Notion external publication, deploy, git handoff или mixed release. Для каждого типа указать exact target и требуется ли approval.
+1. **QA & Gate Verification**: Убедиться, что `qa-report.md` имеет статус `pass` или `pass_with_known_limitations`, а known limitations не блокируют release. Если QA `fail/blocked`, вернуть `blocked`.
+2. **Run Ledger Audit**: Проверить `run-state.json`, `run-meta.json`, `artifact-manifest.json`, `run-index.md`, `stage-gate-ledger.md` и `handoff-bundle.md`; release нельзя считать `ready`, если ledger расходится с фактическими артефактами.
+3. **Change Inventory**: Собрать фактически измененные файлы из git, созданные/обновленные `outputs/*`, runtime artifacts, external records и generated reports. Разделить changes на product artifacts, code, config, tests, docs, external records и unrelated dirty tree.
+4. **Dependency & Sensitive Delta**: Проверить изменения `package.json`, lockfile, env/templates, analytics payloads, secrets и raw provider outputs. Новые зависимости, secrets или PII risk фиксируются отдельной строкой release risk.
+5. **Validation Matrix**: Собрать результаты `workflow:validate`, `validate:config`, `docs:audit`, `typecheck`, build/test/Playwright/visual diff, Notion/Figma dry-run records и skipped checks. Для каждого check указать command, result, evidence path и release impact.
+6. **Approval & External Records Audit**: Проверить approvals для Notion, Figma, deploy и git write с точным `action`/`target`; зафиксировать publication/deploy/git records или blocker.
+7. **Release Decision Matrix**: Вынести решение `ready`, `blocked` или `released` на основе QA, validation, approvals, external publication state, unresolved blockers и rollback readiness.
+8. **Deployment Plan**: Описать mode, exact target, preflight, commands, smoke checks, owner, expected result и stop conditions. Если deploy не выполняется, записать `not_requested` или `blocked`.
+9. **Rollback Plan**: Описать безопасный откат без destructive defaults: affected surface, backup/reference point, rollback command, validation after rollback, owner и data loss risk. Запрещено предлагать `git reset --hard` как стандартный rollback.
+10. **Post-Release Monitoring & Follow-Up**: Зафиксировать smoke checks после публикации, analytics/console/network health, known limitations, owner TODO и criteria for closing release.
+11. **Final Handoff Summary**: Подготовить краткий release handoff для пользователя: что выпущено, что не выпущено, какие проверки прошли, что требует approval или следующего шага.
 
 ## Guardrails
 
 - **Нулевая терпимость к сбоям**: Категорически запрещено подтверждать успешный выпуск релиза, если вердикт QA имеет статус `fail` или автотесты завершились с ошибками.
+- **Release is evidence-backed**: Нельзя ставить `ready/released`, если нет Validation Matrix, Release Decision Matrix и Approval/External Records Audit.
 - **Безопасность внешних публикаций**: Не производить запись во внешние системы (Notion API, деплой на сервера) без проверки матрицы прав (Approval Matrix) и получения явного согласия пользователя.
 - **Прозрачность зависимостей**: Обязательно фиксировать любые новые Yarn-пакеты, добавленные в `package.json`, для предотвращения скрытых уязвимостей.
-- **Готовность к откату**: Команды отката (rollback) должны быть автономными, проверенными и не зависящими от работоспособности текущего сбойного инстанса.
+- **Готовность к откату**: Команды отката (rollback) должны быть автономными, проверенными и не зависящими от работоспособности текущего сбойного инстанса. Разрушительные команды требуют отдельного approval.
+- **Не смешивать unrelated dirty tree**: Release notes должны явно отделять изменения текущего release scope от старых/параллельных изменений в рабочем дереве.
+- **No silent external success**: Notion/Figma/deploy/git write не считаются выполненными без record: exact target, approval, timestamp/status и evidence.
 
 ## Required Output
 
@@ -85,6 +97,14 @@ outputs:
     ...
 
     ## Validation
+
+    ...
+
+    ## Release Decision Matrix
+
+    ...
+
+    ## Approval And External Records
 
     ...
 

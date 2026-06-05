@@ -33,8 +33,27 @@ const baseSections: Record<string, readonly string[]> = {
   [artifactNames.referenceAnalysis]: ["## Inputs Used", "## References", "## Allowed Patterns", "## Disallowed Copying", "## Design Implications"],
   [artifactNames.designBrief]: ["## Visual Direction", "## Sections", "## Components", "## Responsive Notes", "## Accessibility Notes"],
   [artifactNames.copyDeck]: ["## Hero", "## Service Cards", "## FAQ", "## SEO", "## Claims To Validate"],
-  [artifactNames.screens]: ["## Inputs Used", "## Screen", "## Mobile"],
-  [artifactNames.prototypeReport]: ["## Prototype Type", "## Start Screen", "## Transition Map", "## Missing Interactions"],
+  [artifactNames.screens]: [
+    "## Inputs Used",
+    "## Input Readiness Pass",
+    "## Design-System Grounding",
+    "## Screen List",
+    "## Screen Traceability",
+    "## Component Inventory",
+    "## State Inventory",
+    "## Figma Readiness",
+  ],
+  [artifactNames.prototypeReport]: [
+    "## Input Readiness Pass",
+    "## Prototype Type",
+    "## Flow Goal",
+    "## Start Screen",
+    "## Transition Map",
+    "## State Inventory",
+    "## Manual Test Script",
+    "## Frontend Handoff Contract",
+    "## Missing Interactions",
+  ],
   [artifactNames.frontendResult]: ["## Changed Files", "## Implementation Notes", "## Commands Run", "## Known Limitations"],
   [artifactNames.visualReferenceReview]: [
     "## Inputs Used",
@@ -45,8 +64,30 @@ const baseSections: Record<string, readonly string[]> = {
     "## Gate Result",
   ],
   [artifactNames.testBenchResult]: ["## Main Funnel", "## Analytics Spec", "## Executable Checks", "## Result"],
-  [artifactNames.qaReport]: ["## Status", "## PRD Fit", "## Accessibility", "## Responsive", "## Validation"],
-  [artifactNames.releaseNotes]: ["## Status", "## Changed Files", "## What Changed", "## Validation", "## Rollback Notes"],
+  [artifactNames.qaReport]: [
+    "## Status",
+    "## QA Scope & Evidence Plan",
+    "## Research Integrity",
+    "## Traceability Audit",
+    "## PRD Fit",
+    "## Accessibility",
+    "## Responsive",
+    "## Negative & Edge Path Pass",
+    "## Validation",
+    "## Evidence Matrix",
+    "## Severity Matrix",
+  ],
+  [artifactNames.releaseNotes]: [
+    "## Status",
+    "## Release Scope",
+    "## Run Ledger Audit",
+    "## Changed Files",
+    "## What Changed",
+    "## Validation",
+    "## Release Decision Matrix",
+    "## Rollback Notes",
+    "## Approval And External Records",
+  ],
 };
 
 function withRun(assertion: (runDir: string) => void): void {
@@ -153,20 +194,96 @@ withRun((runDir) => {
     [artifactNames.qaReport]: {
       status: "blocked",
       inputs_used: ["fixture"],
+      qa_scope: ["product_pipeline", "frontend", "release"],
+      evidence_plan: [
+        { audit_area: "QA status", planned_check: "Confirm blocker fixture", evidence_source: "fixture", status: "blocked" },
+      ],
       research_integrity: {},
+      traceability_audit: [
+        {
+          signal: "fixture",
+          prd_requirement: "REQ-FIXTURE",
+          ia_node: "fixture",
+          screen_or_component: "fixture",
+          test_signal: "fixture",
+          status: "blocked",
+        },
+      ],
       prd_fit: "blocked",
+      ia_screens_prototype_consistency: "blocked",
       accessibility: "blocked",
       responsive: "blocked",
+      negative_edge_path_pass: [
+        { scenario: "fixture", result: "blocked", evidence: "fixture" },
+      ],
+      funnel_analytics: "blocked",
+      secrets_sensitive_data: "blocked",
       validation: [],
+      evidence_matrix: [
+        { finding_id: "QA-FIXTURE", evidence_type: "artifact", reference: "fixture" },
+      ],
+      severity_matrix: [
+        {
+          finding_id: "QA-FIXTURE",
+          severity: "blocker",
+          owner_stage: "11-qa",
+          affected_surface: "fixture",
+          evidence: "fixture",
+          recommendation: "resolve fixture",
+          release_impact: "blocked",
+        },
+      ],
+      skipped_unavailable_checks: [
+        { check: "fixture", reason: "fixture", impact: "blocked" },
+      ],
       blockers: ["fixture blocker"],
     },
     [artifactNames.releaseNotes]: {
       status: "ready",
       inputs_used: ["fixture"],
-      changed_files: ["apps/frontend/src/App.tsx"],
+      release_scope: {
+        release_type: "code",
+        exact_target: "fixture",
+        approval_required: false,
+        release_owner: "release",
+      },
+      run_ledger_audit: [
+        { item: "fixture", status: "pass", evidence: "fixture" },
+      ],
+      changed_files: [
+        { file: "apps/frontend/src/App.tsx", change_type: "code", change: "fixture", in_release_scope: true },
+      ],
+      changed_artifacts: [
+        { artifact: "release-notes.md", producer_stage: "12-release", status: "ready" },
+      ],
       what_changed: ["fixture"],
-      validation: [{ command: "yarn workflow:validate", status: "failed" }],
-      rollback_notes: ["revert fixture"],
+      dependency_sensitive_delta: [
+        { area: "fixture", result: "pass", evidence: "fixture" },
+      ],
+      validation: [
+        { check: "workflow", command_or_evidence: "yarn workflow:validate", result: "fail", release_impact: "blocked" },
+      ],
+      release_decision_matrix: [
+        { gate: "QA status", required_state: "pass", actual_state: "blocked", decision: "blocked" },
+      ],
+      deployment_notes: [
+        { step: "fixture", action: "fixture", expected_result: "fixture", stop_condition: "fixture" },
+      ],
+      rollback_notes: [
+        {
+          surface: "fixture",
+          rollback_action: "revert fixture",
+          validation_after_rollback: "fixture",
+          data_loss_risk: "low",
+          approval_needed: false,
+        },
+      ],
+      approval_external_records: [
+        { action: "fixture", target: "fixture", status: "not_required" },
+      ],
+      remaining_risks: [
+        { risk: "fixture", severity: "blocker", owner: "release" },
+      ],
     },
   });
 

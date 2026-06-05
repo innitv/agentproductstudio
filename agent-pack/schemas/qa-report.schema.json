@@ -2,15 +2,138 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "QA Report",
   "type": "object",
-  "required": ["status", "inputs_used", "research_integrity", "prd_fit", "accessibility", "responsive", "validation"],
+  "required": [
+    "status",
+    "inputs_used",
+    "qa_scope",
+    "evidence_plan",
+    "research_integrity",
+    "traceability_audit",
+    "prd_fit",
+    "ia_screens_prototype_consistency",
+    "accessibility",
+    "responsive",
+    "negative_edge_path_pass",
+    "funnel_analytics",
+    "secrets_sensitive_data",
+    "validation",
+    "evidence_matrix",
+    "severity_matrix",
+    "skipped_unavailable_checks"
+  ],
   "properties": {
     "status": { "enum": ["pass", "pass_with_known_limitations", "fail", "blocked"] },
     "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "qa_scope": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "product_pipeline",
+          "reference_driven",
+          "frontend",
+          "figma_handoff",
+          "notion_publication",
+          "release"
+        ]
+      }
+    },
+    "evidence_plan": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["audit_area", "planned_check", "evidence_source", "status"],
+        "properties": {
+          "audit_area": { "type": "string" },
+          "planned_check": { "type": "string" },
+          "evidence_source": { "type": "string" },
+          "status": { "enum": ["not_applicable", "pending", "pass", "fail", "blocked"] }
+        }
+      }
+    },
     "research_integrity": { "type": "object" },
+    "traceability_audit": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["signal", "prd_requirement", "ia_node", "screen_or_component", "test_signal", "status"],
+        "properties": {
+          "signal": { "type": "string" },
+          "prd_requirement": { "type": "string" },
+          "ia_node": { "type": "string" },
+          "screen_or_component": { "type": "string" },
+          "copy_or_prototype": { "type": "string" },
+          "test_signal": { "type": "string" },
+          "status": { "enum": ["pass", "gap", "blocked", "not_applicable"] }
+        }
+      }
+    },
     "prd_fit": { "type": "string" },
+    "ia_screens_prototype_consistency": { "type": "string" },
+    "copy_claims": { "type": "string" },
     "accessibility": { "type": "string" },
     "responsive": { "type": "string" },
+    "negative_edge_path_pass": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["scenario", "result", "evidence"],
+        "properties": {
+          "scenario": { "type": "string" },
+          "result": { "enum": ["pass", "fail", "blocked", "not_applicable"] },
+          "evidence": { "type": "string" },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "funnel_analytics": { "type": "string" },
+    "secrets_sensitive_data": { "type": "string" },
+    "visual_reference_figma_handoff": { "type": "string" },
     "validation": { "type": "array", "items": { "type": "object" } },
+    "evidence_matrix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["finding_id", "evidence_type", "reference"],
+        "properties": {
+          "finding_id": { "type": "string" },
+          "evidence_type": {
+            "enum": ["artifact", "command", "screenshot", "trace", "schema", "reproduction", "source", "experience_based"]
+          },
+          "reference": { "type": "string" },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "severity_matrix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["finding_id", "severity", "owner_stage", "affected_surface", "evidence", "recommendation", "release_impact"],
+        "properties": {
+          "finding_id": { "type": "string" },
+          "severity": { "enum": ["blocker", "critical", "high", "medium", "low", "info"] },
+          "owner_stage": { "type": "string" },
+          "affected_surface": { "type": "string" },
+          "evidence": { "type": "string" },
+          "recommendation": { "type": "string" },
+          "release_impact": { "type": "string" }
+        }
+      }
+    },
+    "skipped_unavailable_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["check", "reason", "impact"],
+        "properties": {
+          "check": { "type": "string" },
+          "reason": { "type": "string" },
+          "impact": { "type": "string" },
+          "required_follow_up": { "type": "string" }
+        }
+      }
+    },
+    "devils_advocate_false_positive_pass": { "type": "string" },
     "blockers": { "type": "array", "items": { "type": "string" } }
   }
 }

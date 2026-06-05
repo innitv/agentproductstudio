@@ -2,14 +2,163 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Prototype Report",
   "type": "object",
-  "required": ["status", "inputs_used", "prototype_type", "start_screen", "transition_map", "completion_step"],
+  "required": [
+    "status",
+    "inputs_used",
+    "input_readiness_pass",
+    "prototype_type",
+    "flow_goal",
+    "start_screen",
+    "entry_points",
+    "transition_map",
+    "state_inventory",
+    "alternate_recovery_paths",
+    "completion_step",
+    "manual_test_script",
+    "frontend_handoff_contract"
+  ],
   "properties": {
     "status": { "enum": ["draft", "partial", "blocked", "ready"] },
     "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "input_readiness_pass": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["input", "required_signal", "status"],
+        "properties": {
+          "input": { "type": "string" },
+          "required_signal": { "type": "string" },
+          "status": { "enum": ["ready", "partial", "blocked", "not_applicable"] },
+          "notes": { "type": "string" }
+        }
+      }
+    },
     "prototype_type": { "type": "string" },
+    "flow_goal": {
+      "type": "object",
+      "required": ["user", "goal", "success_outcome", "primary_action"],
+      "properties": {
+        "user": { "type": "string" },
+        "goal": { "type": "string" },
+        "success_outcome": { "type": "string" },
+        "primary_action": { "type": "string" }
+      }
+    },
     "start_screen": { "type": "string" },
-    "transition_map": { "type": "array", "items": { "type": "object" } },
+    "entry_points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["entry_point", "user_intent", "starting_state"],
+        "properties": {
+          "entry_point": { "type": "string" },
+          "user_intent": { "type": "string" },
+          "starting_state": { "type": "string" },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "transition_map": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "trigger", "actor", "to", "expected_state"],
+        "properties": {
+          "from": { "type": "string" },
+          "trigger": { "type": "string" },
+          "actor": { "enum": ["user", "system", "third_party"] },
+          "to": { "type": "string" },
+          "expected_state": { "type": "string" },
+          "copy_source": { "type": "string" },
+          "analytics_test_signal": { "type": "string" }
+        }
+      }
+    },
+    "state_inventory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["surface", "default_state"],
+        "properties": {
+          "surface": { "type": "string" },
+          "default_state": { "type": "string" },
+          "loading": { "type": "string" },
+          "empty": { "type": "string" },
+          "error": { "type": "string" },
+          "validation": { "type": "string" },
+          "success": { "type": "string" },
+          "disabled_permission": { "type": "string" }
+        }
+      }
+    },
+    "alternate_recovery_paths": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["scenario", "trigger", "expected_recovery"],
+        "properties": {
+          "scenario": { "type": "string" },
+          "trigger": { "type": "string" },
+          "expected_recovery": { "type": "string" },
+          "required_copy": { "type": "string" },
+          "owner": { "type": "string" }
+        }
+      }
+    },
+    "microinteraction_motion_spec": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["interaction", "trigger", "feedback"],
+        "properties": {
+          "interaction": { "type": "string" },
+          "trigger": { "type": "string" },
+          "feedback": { "type": "string" },
+          "duration_easing": { "type": "string" },
+          "reduced_motion": { "type": "string" },
+          "keyboard_touch_notes": { "type": "string" }
+        }
+      }
+    },
     "completion_step": { "type": "string" },
-    "missing_interactions": { "type": "array", "items": { "type": "string" } }
+    "instrumentation_test_hooks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["event_or_assertion", "trigger", "pii_risk"],
+        "properties": {
+          "event_or_assertion": { "type": "string" },
+          "trigger": { "type": "string" },
+          "expected_payload_notes": { "type": "string" },
+          "pii_risk": { "enum": ["none", "low", "medium", "high"] },
+          "test_owner": { "type": "string" }
+        }
+      }
+    },
+    "manual_test_script": {
+      "type": "object",
+      "required": ["happy_path", "negative_path", "keyboard_path", "mobile_path"],
+      "properties": {
+        "happy_path": { "type": "array", "items": { "type": "string" } },
+        "negative_path": { "type": "array", "items": { "type": "string" } },
+        "keyboard_path": { "type": "array", "items": { "type": "string" } },
+        "mobile_path": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "frontend_handoff_contract": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["area", "decision", "frontend_note"],
+        "properties": {
+          "area": { "type": "string" },
+          "decision": { "type": "string" },
+          "frontend_note": { "type": "string" }
+        }
+      }
+    },
+    "missing_interactions": { "type": "array", "items": { "type": "string" } },
+    "open_decisions": { "type": "array", "items": { "type": "string" } },
+    "risks": { "type": "array", "items": { "type": "string" } }
   }
 }

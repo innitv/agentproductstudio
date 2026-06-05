@@ -6,6 +6,9 @@
   "properties": {
     "status": { "enum": ["draft", "partial", "blocked", "ready"] },
     "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "message_source_map": { "type": "array", "items": { "$ref": "#/$defs/message_source_item" } },
+    "voice_and_terminology": { "$ref": "#/$defs/voice_and_terminology" },
+    "messaging_strategy": { "type": "array", "items": { "$ref": "#/$defs/messaging_layer" } },
     "hero": {
       "type": "object",
       "required": ["h1", "lead", "primary_cta"],
@@ -19,7 +22,74 @@
     },
     "sections": { "type": "array", "items": { "type": "object" } },
     "faq": { "type": "array", "items": { "type": "object" } },
+    "ux_microcopy": { "type": "array", "items": { "$ref": "#/$defs/microcopy_item" } },
+    "responsive_variants": { "type": "array", "items": { "$ref": "#/$defs/responsive_copy_variant" } },
     "seo": { "type": "object" },
-    "claims_to_validate": { "type": "array", "items": { "type": "object" } }
+    "claims_to_validate": { "type": "array", "items": { "type": "object" } },
+    "copy_to_design_handoff": { "$ref": "#/$defs/copy_to_design_handoff" }
+  },
+  "$defs": {
+    "message_source_item": {
+      "type": "object",
+      "required": ["source_insight", "copy_block", "evidence_status"],
+      "properties": {
+        "source_insight": { "type": "string" },
+        "audience_or_jtbd": { "type": "string" },
+        "copy_block": { "type": "string" },
+        "evidence_status": { "type": "string" },
+        "next_action": { "type": "string" }
+      }
+    },
+    "voice_and_terminology": {
+      "type": "object",
+      "properties": {
+        "tone_rules": { "type": "array", "items": { "type": "string" } },
+        "terms_to_use": { "type": "array", "items": { "type": "string" } },
+        "terms_to_avoid": { "type": "array", "items": { "type": "string" } },
+        "customer_language": { "type": "array", "items": { "type": "string" } },
+        "trust_language": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "messaging_layer": {
+      "type": "object",
+      "required": ["layer", "message"],
+      "properties": {
+        "layer": { "enum": ["problem", "outcome", "mechanism", "proof", "action"] },
+        "message": { "type": "string" },
+        "evidence_or_risk": { "type": "string" },
+        "where_used": { "type": "string" }
+      }
+    },
+    "microcopy_item": {
+      "type": "object",
+      "required": ["surface_or_state", "copy", "purpose"],
+      "properties": {
+        "surface_or_state": { "type": "string" },
+        "copy": { "type": "string" },
+        "purpose": { "type": "string" },
+        "evidence_or_constraint": { "type": "string" }
+      }
+    },
+    "responsive_copy_variant": {
+      "type": "object",
+      "required": ["element", "desktop_copy", "compact_copy"],
+      "properties": {
+        "element": { "type": "string" },
+        "desktop_copy": { "type": "string" },
+        "compact_copy": { "type": "string" },
+        "max_length_guidance": { "type": "string" }
+      }
+    },
+    "copy_to_design_handoff": {
+      "type": "object",
+      "properties": {
+        "final_cta_labels": { "type": "array", "items": { "type": "string" } },
+        "copy_length_constraints": { "type": "array", "items": { "type": "string" } },
+        "required_microcopy": { "type": "array", "items": { "type": "string" } },
+        "content_risks": { "type": "array", "items": { "type": "string" } },
+        "claims_that_must_stay_softened": { "type": "array", "items": { "type": "string" } },
+        "visual_proof_support_needed": { "type": "array", "items": { "type": "string" } }
+      }
+    }
   }
 }

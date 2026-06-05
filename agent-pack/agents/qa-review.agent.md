@@ -60,19 +60,50 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 ## Internal Pipeline (Внутренний процесс)
 
 0. **Диагностическая проверка:** Перед запуском аудита запустить утилиту [doctor.ts](file:///c:/Project/product-agent-studio/runtime/typescript/doctor.ts) через `yarn workflow:doctor`, чтобы убедиться, что окружение не содержит ошибок, а все обязательные файлы шаблонов и MCP-серверы доступны.
-1. Проверить наличие всех обязательных артефактов.
-2. Убедиться, что реестры `stage-gate-ledger.md` и `handoff-bundle.md` были корректно обновлены.
-3. Провести аудит полноты и достоверности исследований (Research Integrity / Research integrity).
-4. Проверить соответствие реализации требованиям PRD и покрытие приоритетов MoSCoW.
-5. Проверить согласованность архитектуры (IA), экранов и прототипа.
-6. Проверить рекламные и продуктовые утверждения в текстах на наличие доказательств или меток `[needs validation]` (требует валидации).
-7. **Визуальная скриншот-сверка:** При наличии визуального референса применить навык [visual-diff-verifier/SKILL.md](file:///c:/Project/product-agent-studio/agent-pack/skills/visual-diff-verifier/SKILL.md) для поблочного Playwright-сравнения desktop/mobile версий с референсным сайтом.
-8. Проверить доступность (accessibility), адаптивное поведение (responsiveness) и прохождение основного сценария.
-9. Если есть `figma-handoff-bundle.md`, проверить Figma handoff fidelity: variables/components/states/Auto Layout rules имеют соответствие во frontend или явно описанные deviations.
-10. Проверить design-engineering слой: motion duration/easing, отсутствие `transition: all`, `prefers-reduced-motion`, focus/active states, hover только для fine pointer, отсутствие лишних анимаций на частых keyboard actions.
-11. Проверить спецификацию аналитики и отсутствие рисков утечки персональных данных (PII).
-12. Проверить результаты выполнения тестовых команд и известные ограничения.
-13. Вынести итоговый вердикт: `pass` (пройдено), `pass_with_known_limitations` (пройдено с известными ограничениями) или `fail` (не пройдено).
+1. **QA Scope & Evidence Plan**: Определить, что именно проверяется: product pipeline, reference-driven fidelity, frontend implementation, external publication records, Figma handoff, Notion publication, analytics и release readiness. Для каждого audit area указать evidence source, command, screenshot/trace или reason why unavailable.
+2. Проверить наличие всех обязательных артефактов.
+3. Убедиться, что реестры `stage-gate-ledger.md` и `handoff-bundle.md` были корректно обновлены, а skipped/partial stages имеют причины.
+4. Провести аудит полноты и достоверности исследований (Research Integrity / Research integrity).
+5. Выполнить **Traceability Audit**: проверить цепочку `research/JTBD -> PRD requirement -> IA node -> design/screen -> copy -> prototype -> frontend/test signal`. Разрыв цепочки для `must` scope является blocker или high severity finding.
+6. Проверить соответствие реализации требованиям PRD и покрытие приоритетов MoSCoW.
+7. Проверить согласованность архитектуры (IA), экранов и прототипа, включая entry points, state map, navigation behavior, semantic hierarchy и completion step.
+8. Проверить рекламные и продуктовые утверждения в текстах на наличие доказательств или меток `[needs validation]` (требует валидации).
+9. **Визуальная скриншот-сверка:** При наличии визуального референса применить навык [visual-diff-verifier/SKILL.md](file:///c:/Project/product-agent-studio/agent-pack/skills/visual-diff-verifier/SKILL.md) для поблочного Playwright-сравнения desktop/mobile версий с референсным сайтом. Desktop-only проверка запрещена для финального pass.
+10. Проверить доступность (accessibility), адаптивное поведение (responsiveness), keyboard path и прохождение основного сценария.
+11. Выполнить **Negative & Edge Path Pass**: проверить empty/error/loading/validation/success states, невалидные формы, повторный submit, длинный текст, mobile overflow и отсутствие скрытых blockers на touch/keyboard.
+12. Если есть `figma-handoff-bundle.md`, проверить Figma handoff fidelity: variables/components/states/Auto Layout rules имеют соответствие во frontend или явно описанные deviations.
+13. Проверить design-engineering слой: motion duration/easing, отсутствие `transition: all`, `prefers-reduced-motion`, focus/active states, hover только для fine pointer, отсутствие лишних анимаций на частых keyboard actions.
+14. Проверить спецификацию аналитики и отсутствие рисков утечки персональных данных (PII).
+15. Выполнить **Security & Sensitive Data Pass**: проверить отсутствие secrets, токенов, raw PII, unsafe analytics payloads, fake external publication claims и случайных дампов provider outputs.
+16. Проверить результаты выполнения тестовых команд и известные ограничения.
+17. Выполнить **Devil's Advocate / False Positive Pass**: если все проверки получили pass, найти, не является ли это следствием поверхностного happy-path тестирования, mock-only проверок, старых скриншотов или отсутствия negative cases.
+18. Составить **Severity Matrix**: `blocker`, `critical`, `high`, `medium`, `low`, `info`; для каждого finding указать owner stage, reproduction/evidence, affected artifact, fix recommendation и release impact.
+19. Вынести итоговый вердикт: `pass` (пройдено), `pass_with_known_limitations` (пройдено с известными ограничениями), `fail` (не пройдено) или `blocked`.
+
+## QA Severity Model
+
+| Severity | Когда использовать | Release impact |
+|---|---|---|
+| `blocker` | Нельзя проверить обязательный gate, отсутствует artifact/evidence, нет approval record для внешнего действия, primary flow недоступен | Release запрещен |
+| `critical` | Ломается primary flow, synthetic-as-fact, утечка secrets/PII, неподтвержденный high-risk claim, reference gate отсутствует | Release запрещен |
+| `high` | Нарушен `must/should` requirement, критичный a11y/keyboard/mobile дефект, серьезный visual mismatch, analytics PII risk | Release только после fix или explicit waiver |
+| `medium` | UX/state/copy/motion дефект влияет на понятность, но не блокирует completion | Можно release только с TODO и owner |
+| `low` | Полировка, незначительный copy/layout issue, улучшение evidence clarity | Не блокирует release |
+| `info` | Наблюдение или рекомендация без текущего риска | Не блокирует release |
+
+## Evidence Requirements
+
+QA finding считается валидным только если содержит минимум одно доказательство:
+
+- artifact section/path;
+- command result;
+- screenshot path или visual diff artifact;
+- Playwright trace / test name;
+- schema/ledger/handoff reference;
+- clear reproduction steps;
+- source-backed accessibility/spec reference или пометка `experience_based`.
+
+Запрещено ставить `pass`, если QA не может объяснить, какие evidence были просмотрены и какие проверки не удалось выполнить.
 
 ## Research Integrity (Целостность исследований)
 
@@ -80,9 +111,11 @@ QA-агент обязан проверить:
 - Наличие `proto-personas.md` и статус доказательства (Evidence status) для каждого персонажа.
 - Наличие `synthetic-interviews.md` (или статус `skipped_with_reason` с объяснением причины пропуска). Симулированные интервью (synthetic interviews) должны существовать.
 - Синтетические интервью должны быть явно помечены статусом доказательства: `synthetic`.
-- Отсутствие использования гипотетических синтетических данных как реальных фактов (synthetic-as-fact) in PRD, текстах, коде, QA или релизе.
+- Отсутствие использования гипотетических синтетических данных как реальных фактов (synthetic-as-fact) в PRD, текстах, коде, QA или релизе.
 - Наличие источников, статуса доказательств или отметки `needs validation` для всех рыночных утверждений.
 - Заполненность всех четырех квадрантов SWOT-анализа.
+- Наличие Research Plan, Source Quality Pass, Contradiction Review и Research-To-Design Handoff, если research stage должен быть `ready`.
+- Claims из DeepSeek/Gemini synthesis не используются как source-backed evidence без внешнего источника.
 
 ## Required Outputs (Обязательные результаты)
 
@@ -97,6 +130,9 @@ QA-агент обязан проверить:
 - Motion/interactions не могут считаться passed, если в пользовательском UI есть `transition: all`, отсутствует reduced-motion fallback для transform-based motion, hover-анимации срабатывают на touch или интерактивные элементы не имеют видимого focus/active состояния.
 - Figma handoff не может считаться passed, если canvas write заявлен как выполненный, но нет target/node evidence, screenshot verification или список созданных frames/components. Если handoff содержит Auto Layout/variables/component sets, QA проверяет их наличие или зафиксированные deviations.
 - Статус внешних публикаций/записей должен строго соответствовать матрице одобрений (Approval Matrix).
+- QA не может считаться passed, если нет Evidence Matrix, Severity Matrix и явного списка skipped/unavailable checks.
+- 100% pass без negative/edge path проверки требует Devil's Advocate note; иначе статус не выше `pass_with_known_limitations`.
+- Accessibility-рекомендации должны ссылаться на authoritative source или быть помечены `experience_based`.
 
 ## Trigger Phrases / Триггерные фразы
 
@@ -118,6 +154,18 @@ outputs:
     ## Status
 
     pass|pass_with_known_limitations|fail|blocked
+
+    ## QA Scope & Evidence Plan
+
+    ...
+
+    ## Evidence Matrix
+
+    ...
+
+    ## Severity Matrix
+
+    ...
 
     ## PRD Fit
 

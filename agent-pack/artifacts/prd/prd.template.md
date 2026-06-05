@@ -13,6 +13,17 @@
 - `research-summary.md`
 - `competitive-analysis.md`
 - `proto-personas.md`
+- `synthetic-interviews.md`
+- `swot.md`
+- `handoff-bundle.md`
+
+---
+
+## Decision Input Audit
+
+| Product decision | Inputs used | Evidence status | Decision state | Notes |
+|---|---|---|---|---|
+|  |  | source-backed / hypothesis / needs_validation | ready / partial / blocked |  |
 
 ---
 
@@ -66,6 +77,14 @@
 
 ---
 
+## Evidence-To-Requirement Map
+
+| Evidence / JTBD / constraint | Product implication | Requirement ID | Priority | Validation state |
+|---|---|---|---|---|
+|  |  | REQ-001 | must / should / could / wont | source-backed / needs_validation |
+
+---
+
 ## MoSCoW
 
 ### MVP Scope (Границы проекта)
@@ -79,6 +98,12 @@
 ---
 
 ## User Stories (Пользовательские истории)
+
+### Story Map
+
+| Journey step | User story IDs | Requirement IDs | Primary state / screen |
+|---|---|---|---|
+|  |  |  |  |
 
 1.  **Пользовательская история 1:**
     *   *Как* [роль],
@@ -94,6 +119,12 @@
 | ID | Requirement | User / business value | Evidence | Priority |
 |---|---|---|---|---|
 | REQ-001 |  |  |  | must |
+
+### Traceability Matrix
+
+| Requirement ID | User story ID | Evidence / JTBD | Acceptance criteria | Analytics / test signal |
+|---|---|---|---|---|
+| REQ-001 | US-001 |  |  |  |
 
 ### Нефункциональные требования (NFR)
 
@@ -117,6 +148,20 @@
 | Event | Trigger | Properties | PII risk | Success signal |
 |---|---|---|---|---|
 |  |  |  |  |  |
+
+---
+
+## PRD-To-IA/Design Handoff
+
+| Handoff field | Notes |
+|---|---|
+| `primary_screen` |  |
+| `primary_action` |  |
+| `critical_user_path` |  |
+| `trust_and_proof` |  |
+| `required_states` |  |
+| `content_constraints` |  |
+| `design_open_questions` |  |
 
 ---
 
@@ -145,4 +190,3 @@ gantt
 
 *   **Этап 1 (MVP)**:
 *   **Этап 2 (Future)**:
-

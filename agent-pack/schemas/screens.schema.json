@@ -2,13 +2,207 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Screens",
   "type": "object",
-  "required": ["status", "inputs_used", "screen_list", "mobile_specification"],
+  "required": [
+    "status",
+    "inputs_used",
+    "input_readiness_pass",
+    "design_system_grounding",
+    "screen_list",
+    "screen_traceability",
+    "desktop_specification",
+    "mobile_specification",
+    "component_inventory",
+    "state_inventory",
+    "responsive_constraints",
+    "accessibility_notes",
+    "figma_readiness",
+    "acceptance_notes"
+  ],
   "properties": {
     "status": { "enum": ["draft", "partial", "blocked", "ready"] },
     "inputs_used": { "type": "array", "items": { "type": "string" } },
-    "screen_list": { "type": "array", "items": { "type": "object" } },
+    "input_readiness_pass": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["input", "required_signal", "status"],
+        "properties": {
+          "input": { "type": "string" },
+          "required_signal": { "type": "string" },
+          "status": { "enum": ["ready", "partial", "blocked", "not_applicable"] },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "design_system_grounding": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["asset", "reuse_decision"],
+        "properties": {
+          "asset": { "type": "string" },
+          "reuse_decision": { "type": "string" },
+          "gap_new_need": { "type": "string" },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "screen_list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["screen", "purpose", "entry_point", "completion_action", "status"],
+        "properties": {
+          "screen": { "type": "string" },
+          "purpose": { "type": "string" },
+          "entry_point": { "type": "string" },
+          "completion_action": { "type": "string" },
+          "prd_requirement": { "type": "string" },
+          "ia_node": { "type": "string" },
+          "status": { "enum": ["draft", "partial", "blocked", "ready"] }
+        }
+      }
+    },
+    "screen_traceability": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["screen", "prd_requirement", "ia_node", "copy_source"],
+        "properties": {
+          "screen": { "type": "string" },
+          "research_jtbd_signal": { "type": "string" },
+          "prd_requirement": { "type": "string" },
+          "ia_node": { "type": "string" },
+          "copy_source": { "type": "string" },
+          "prototype_test_signal": { "type": "string" }
+        }
+      }
+    },
     "desktop_specification": { "type": "string" },
+    "tablet_specification": { "type": "string" },
     "mobile_specification": { "type": "string" },
-    "states": { "type": "array", "items": { "type": "string" } }
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["section", "layout", "copy_source", "components", "states"],
+        "properties": {
+          "section": { "type": "string" },
+          "layout": { "type": "string" },
+          "copy_source": { "type": "string" },
+          "components": { "type": "array", "items": { "type": "string" } },
+          "states": { "type": "array", "items": { "type": "string" } },
+          "acceptance_notes": { "type": "string" }
+        }
+      }
+    },
+    "component_inventory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["component", "source", "states", "auto_layout_intent"],
+        "properties": {
+          "component": { "type": "string" },
+          "source": { "type": "string" },
+          "variants": { "type": "array", "items": { "type": "string" } },
+          "states": { "type": "array", "items": { "type": "string" } },
+          "auto_layout_intent": { "type": "string" },
+          "frontend_owner": { "type": "string" }
+        }
+      }
+    },
+    "state_inventory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["surface", "default_state"],
+        "properties": {
+          "surface": { "type": "string" },
+          "default_state": { "type": "string" },
+          "loading": { "type": "string" },
+          "empty": { "type": "string" },
+          "error": { "type": "string" },
+          "validation": { "type": "string" },
+          "success": { "type": "string" },
+          "disabled_permission": { "type": "string" }
+        }
+      }
+    },
+    "responsive_constraints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["viewport", "constraint", "required_behavior"],
+        "properties": {
+          "viewport": { "type": "string" },
+          "constraint": { "type": "string" },
+          "risk": { "type": "string" },
+          "required_behavior": { "type": "string" }
+        }
+      }
+    },
+    "accessibility_notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["area", "requirement"],
+        "properties": {
+          "area": { "type": "string" },
+          "requirement": { "type": "string" },
+          "evidence_notes": { "type": "string" }
+        }
+      }
+    },
+    "analytics_test_hooks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["signal", "trigger", "pii_risk"],
+        "properties": {
+          "signal": { "type": "string" },
+          "trigger": { "type": "string" },
+          "expected_assertion": { "type": "string" },
+          "pii_risk": { "enum": ["none", "low", "medium", "high"] }
+        }
+      }
+    },
+    "figma_readiness": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["check", "status"],
+        "properties": {
+          "check": { "type": "string" },
+          "status": { "enum": ["passed", "needs_work", "blocked", "not_applicable"] },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "asset_notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["asset", "source_rights", "usage"],
+        "properties": {
+          "asset": { "type": "string" },
+          "source_rights": { "type": "string" },
+          "usage": { "type": "string" },
+          "fallback": { "type": "string" }
+        }
+      }
+    },
+    "acceptance_notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["requirement", "screen_evidence", "status"],
+        "properties": {
+          "requirement": { "type": "string" },
+          "screen_evidence": { "type": "string" },
+          "status": { "enum": ["passed", "needs_work", "blocked"] }
+        }
+      }
+    },
+    "open_questions": { "type": "array", "items": { "type": "string" } }
   }
 }

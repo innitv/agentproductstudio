@@ -22,6 +22,16 @@
 - Citation requirement:
 - External write: denied unless approval exists
 
+## Research Plan
+
+| Dimension | Questions | Required evidence | Status |
+|---|---|---|---|
+| Market/category |  | primary or reputable source | open |
+| Competitors/alternatives |  | competitor/source-backed | open |
+| User scenarios/JTBD |  | source-backed or interview plan | open |
+| Trust/compliance |  | official/legal/primary source | open |
+| Design implications |  | competitor/reference/product evidence | open |
+
 ## Provider Coverage
 
 Required for `deep_research`: `tavily` must return usable sources, `deepseek` must return usable cross-check/check results, and `gemini` must return usable strategic cross-check results for `ready`.
@@ -37,6 +47,11 @@ If either default provider is unavailable, failed or empty, set Status to `parti
 
 | Provider | Error / blocker | Impact | Follow-up |
 |---|---|---|---|
+
+## Source Quality Pass
+
+| Source | Authority | Freshness | Directness | Independence | Specificity | Decision impact | Quality state |
+|---|---|---|---|---|---|---|---|
 
 ## Research Questions
 
@@ -79,6 +94,11 @@ Guardrail: synthetic interviews are used only for hypothesis generation, intervi
 | Finding | Impact | Evidence | Confidence | Product implication |
 |---|---|---|---|---|
 
+## Contradiction Review
+
+| Topic | Provider/source A | Provider/source B | Conflict | Resolution | Claim status |
+|---|---|---|---|---|---|
+
 ## Claims To Validate
 
 | Claim | Current evidence | Risk | Validation method |
@@ -94,6 +114,17 @@ Guardrail: synthetic interviews are used only for hypothesis generation, intervi
 | Source | Provider | Type | URL/path | Used for | Retrieved at | Confidence |
 |---|---|---|---|---|---|---|
 
+## Research-To-Design Handoff
+
+| Handoff field | Notes |
+|---|---|
+| `primary_user_paths` |  |
+| `trust_requirements` |  |
+| `decision_moments` |  |
+| `content_risks` |  |
+| `visual_evidence_needs` |  |
+| `validation_priority` |  |
+
 ## Unknowns
 
 - 
@@ -102,14 +133,18 @@ Guardrail: synthetic interviews are used only for hypothesis generation, intervi
 
 - [ ] Research questions are answered or marked `needs validation`.
 - [ ] Provider Coverage records requested, used, unavailable/failed providers.
+- [ ] Research Plan covers market/category, competitors, user scenarios, trust/compliance and design implications.
+- [ ] Source Quality Pass separates primary/source-backed facts from noisy snippets and model synthesis.
 - [ ] Tavily returned usable sources or Status is `partial`.
 - [ ] DeepSeek returned usable cross-check/check output or Status is `partial`.
 - [ ] DeepSeek output is marked as cross-check/synthesis and not treated as evidence.
 - [ ] Gemini returned usable strategic cross-check output or Status is `partial`.
 - [ ] Gemini output is marked as cross-check/synthesis and not treated as evidence.
+- [ ] Contradiction Review exists and unresolved conflicts are marked `needs_validation`.
 - [ ] Audience segments are defined.
 - [ ] JTBD is complete.
 - [ ] Proto Personas are present or `skipped_with_reason`.
 - [ ] Synthetic Interviews are present or `skipped_with_reason`.
 - [ ] Research Validation Plan is actionable.
 - [ ] Findings separate evidence from hypotheses.
+- [ ] Research-To-Design Handoff exists or has `skipped_with_reason`.

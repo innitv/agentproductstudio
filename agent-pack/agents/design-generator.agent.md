@@ -24,7 +24,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Purpose (Предназначение)
 
-Преобразует информационную архитектуру (IA), направление дизайна и копирайт в детальные спецификации уровней экранов.
+Преобразует информационную архитектуру (IA), направление дизайна, требования PRD и копирайт в детальные спецификации экранов, которые можно использовать как проверяемый контракт для Figma canvas, prototype, frontend и QA.
 
 ## Inputs (Входные данные)
 
@@ -39,19 +39,24 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Internal Pipeline (Внутренний процесс)
 
-1. Проверить согласованность `ia-brief.md`, `design-brief.md`, `copy-deck.md`, `prd.md` и `STYLE_GUIDE.md` при наличии.
-2. Если есть `STYLE_GUIDE.md` или визуальный риск, вызвать skill `design-loop` и сначала создать `design-generator-prompt.md` по шаблону `agent-pack/artifacts/design/design-generator-prompt.template.md`. Prompt ограничивает первичную генерацию 2-3 ключевыми экранами.
-3. Создать `screens.md`: список экранов, цель каждого экрана, секции, component inventory, layout grid, responsive behavior, copy binding, states, data requirements и acceptance notes.
-4. Для reference-driven/high-visual-risk задач провести design loop по результату `screens.md`: сравнить screens с `STYLE_GUIDE.md`, зафиксировать style drift, cheap-looking patterns, missing states и revision block в `design-loop-report.md`.
-5. Если `design-loop-report.md` содержит unresolved style drift, вернуть `partial` или `blocked`; не передавать frontend как `ready`.
-6. Если пользователь запросил Figma canvas write или Figma handoff, вызвать skill `figma-handoff` после `screens.md` и `design-loop-report.md`. Сформировать `figma-handoff-bundle.md` с foundation, variables/styles/components/screens и explicit target.
-7. Перед Figma write проверить:
+0. **Input Readiness Pass**: Проверить, что `prd.md`, `ia-brief.md`, `design-brief.md` и `copy-deck.md` содержат primary screen/action, requirements, state map, responsive notes, copy constraints и claims-to-validate. Если данных не хватает, вернуть `partial` с open questions.
+1. **Screen Scope & Traceability**: Определить screens только из PRD/IA, связав каждый screen с requirement IDs, JTBD/research signal, user goal, entry point и completion action.
+2. **Design-System Grounding**: Проверить `token-map.md`, variants/states policy, ds-baseline policy, STYLE_GUIDE и available design system. Зафиксировать reused tokens/components и gaps; не создавать новый визуальный язык, если есть approved foundation.
+3. Если есть `STYLE_GUIDE.md` или визуальный риск, вызвать skill `design-loop` и сначала создать `design-generator-prompt.md` по шаблону `agent-pack/artifacts/design/design-generator-prompt.template.md`. Prompt ограничивает первичную генерацию 2-3 ключевыми экранами.
+4. **Screen Contract Generation**: Создать `screens.md`: список экранов, screen traceability, sections, component inventory, layout grid, responsive behavior, copy binding, state inventory, data requirements, accessibility notes, analytics/test hooks, asset requirements и acceptance notes.
+5. **Component & State Contract**: Для каждого интерактивного компонента указать source (`copy-deck.md`/design system/custom), variants, states, validation behavior, Auto Layout intent, min/max constraints и ownership для frontend.
+6. **Responsive & Accessibility Pass**: Проверить desktop/tablet/mobile behavior, touch targets, heading hierarchy, landmarks, labels/errors/focus order, contrast/readability risks и overflow constraints.
+7. **Reference/Figma Readiness Pass**: Для reference-driven/high-visual-risk задач проверить section-by-section соответствие `reference-analysis.md`/`STYLE_GUIDE.md`; для Figma handoff проверить variables/styles/components/screens, canvas strategy и screenshot evidence plan.
+8. Для reference-driven/high-visual-risk задач провести design loop по результату `screens.md`: сравнить screens с `STYLE_GUIDE.md`, зафиксировать style drift, cheap-looking patterns, missing states и revision block в `design-loop-report.md`.
+9. Если `design-loop-report.md` содержит unresolved style drift, вернуть `partial` или `blocked`; не передавать frontend как `ready`.
+10. Если пользователь запросил Figma canvas write или Figma handoff, вызвать skill `figma-handoff` после `screens.md` и `design-loop-report.md`. Сформировать `figma-handoff-bundle.md` с foundation, variables/styles/components/screens и explicit target.
+11. Перед Figma write проверить:
    - remote Figma MCP `use_figma` доступен;
    - пользователь дал Figma file URL или target node;
    - `write_allowed=true` и human approval получены;
    - `search_design_system` проверил existing libraries/components;
    - write plan не пытается вписать всю доску в один frame, если удобнее создать отдельные frames на canvas.
-8. Запись в Figma выполняется через `use_figma` маленькими проверяемыми шагами: inspect -> create/update frames -> screenshot -> visual polish -> update `figma-handoff-bundle.md`.
+12. Запись в Figma выполняется через `use_figma` маленькими проверяемыми шагами: inspect -> create/update variables/components/frames -> screenshot -> visual polish -> update `figma-handoff-bundle.md`.
 
 ## Screen-To-Canvas Order (Порядок От Экранов К Canvas)
 
@@ -67,6 +72,10 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 - Спецификации экранов должны строго поддерживать основной пользовательский сценарий из PRD.
 - Не выдумывать тексты, которые противоречат `copy-deck.md`.
+- Не создавать generic screen patterns: layout, section order, density, responsive behavior и visual rhythm должны следовать `design-brief.md`, `STYLE_GUIDE.md` или reference scan.
+- `screens.md` не может быть `ready`, если отсутствуют traceability, component inventory, state inventory, responsive constraints и accessibility notes.
+- Для Figma-ready задач обязательно описывать Auto Layout intent, variables/styles/components, component sets/variants и canvas strategy.
+- Если дизайн-система доступна, сначала reuse tokens/components; новые компоненты допускаются только с reason and gap.
 - Если Figma недоступна, текстовые спецификации экранов в `screens.md` являются полноценным резервным вариантом (fallback).
 - **Правило Figma-макетов**: Отрисовывать макеты на холсте Figma через Figma MCP *только* при явном запросе пользователя, включенном параметре `write_allowed=true` и получении явного согласия пользователя. Не использовать устаревшую модель `create_node`/`update_node`, если в текущей среде доступен официальный remote tool `use_figma`. Перед write нужно показать пользователю scope и target, а после write снять screenshot и исправить очевидные визуальные пересечения.
 

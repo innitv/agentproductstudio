@@ -4,16 +4,24 @@
 
 - `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md` и `recursive-brief.md` существуют.
 - Recursive brief содержит expansion, deepening, consolidation, assumptions и open questions.
+- Routing Classification Pass выполнен: work type, workflow profile, approvals, active run directory и next allowed stage зафиксированы.
+- Context Inventory Pass выполнен: перечислены нормативные инструкции, пользовательские inputs, артефакты и references, которые реально используются.
+- Для каждого запущенного specialist stage есть delegation packet: objective, required inputs, allowed outputs, forbidden actions, quality gate, expected envelope и handoff consumer.
+- Если были противоречия между специалистами/источниками/вводными, Consensus & Conflict Pass записан в ledger/handoff.
 - `yarn workflow:validate ... --through 00-intake` проходит без errors.
 - Если stage исполняется через agentic specialist, structured envelope содержит обязательный `outputs.<artifact_name>` или `outputs.<file_name>` для каждого required artifact stage. `status: success` без полного Markdown artifact output запрещён.
 
 ## Gate 1: целостность исследования
 
 - Research questions существуют.
+- Research Plan покрывает market/category, competitors/alternatives, user scenarios/JTBD, trust/compliance и design implications.
 - Для `deep_research` есть Provider Coverage по `tavily`, `deepseek` и `gemini`.
 - Для `deep_research` статус `ready/success` допустим только если Tavily вернул usable sources, а DeepSeek и Gemini вернули usable cross-check/check/strategy results; иначе `partial` и `needs_validation`.
 - DeepSeek и Gemini обязательны для research checks/cross-check, но их выводы отмечены как synthesis/strategy и не используются как source-backed evidence без внешнего источника.
 - Provider failures, unavailable providers и empty-source cases записаны в research summary, handoff и ledger.
+- Source Quality Pass выполнен: noisy snippets, stale/indirect sources и model synthesis не используются как source-backed facts.
+- Contradiction Review выполнен: расхождения между Tavily/source-backed evidence, DeepSeek и Gemini перенесены в claims-to-validate.
+- `research-summary.md` содержит schema payload или `artifact-json`, чтобы downstream/runtime мог проверять provider coverage и readiness.
 - Audience и JTBD существуют.
 - Есть минимум 2 proto personas или `skipped_with_reason`.
 - Есть 3-5 synthetic interviews или `skipped_with_reason`.
@@ -25,18 +33,33 @@
 - Validation plan существует.
 - `validation plan` достаточно конкретен: понятно, кого интервьюировать, что наблюдать и какой minimum evidence нужен.
 - Facts, hypotheses и unknowns разделены.
+- Research-To-Design Handoff содержит primary user paths, trust requirements, decision moments, content risks, visual evidence needs и validation priority.
 
 ## Gate 2: полнота PRD
 
 - Problem, goals и non-goals существуют.
+- Decision Input Audit фиксирует, какие решения подтверждены источниками, какие являются гипотезами и какие требуют валидации.
+- Evidence-To-Requirement Map связывает research findings/JTBD/constraints с конкретными requirement IDs.
 - Requirements приоритизированы через MoSCoW.
+- `Must` scope покрывает главный пользовательский путь end-to-end и не содержит generic category features без доказанной ценности.
+- Для каждого `must/should` есть trace chain: research/JTBD -> user story -> requirement -> acceptance criterion -> analytics/test signal.
 - Acceptance criteria тестируемы.
+- Acceptance criteria покрывают happy path, edge cases и ключевые UI states: empty/loading/error/success/disabled/focus, если они применимы.
 - Analytics events не содержат PII.
 - Unvalidated claims помечены как `needs validation`.
+- PRD-To-IA/Design Handoff содержит primary screen, primary action, critical user path, trust/proof requirements, required states, content constraints и design open questions.
 
 ## Gate 3: IA, дизайн и copy
 
 - IA содержит primary screen, primary action и primary user flow.
+- IA содержит Input Readiness Audit: primary action, critical user path, acceptance criteria и research/JTBD signals проверены до проектирования структуры.
+- IA содержит User / Context / Content Inventory: структура отвечает на вопросы пользователя, а не на внутреннюю оргструктуру продукта.
+- IA содержит Entry Points & Intent Map для основных источников входа и мотиваций.
+- IA содержит Content Model & Taxonomy: reusable content objects, labels/trigger words, relationships and reuse notes.
+- IA содержит Decision & Friction Map: моменты сомнения, доверия, ввода данных, отказа и помощи связаны с контентом/proof/state.
+- IA содержит State Map: default/loading/empty/error/validation/success/disabled states, если они применимы к основному сценарию.
+- IA содержит Accessibility & Semantics: H1/H2/H3, landmarks, form labels/errors и focus order.
+- IA-To-Design Handoff содержит section order, navigation model, primary flow tree, state requirements, content objects, semantic structure, mobile behavior и design open questions.
 - Design содержит responsive и accessibility notes.
 - Если есть visual reference, `reference-analysis.md` содержит section-by-section visual spec, а `design-brief.md` и `screens.md` явно используют этот spec.
 - Для reference-driven или high-visual-risk задач рекомендуется `STYLE_GUIDE.md`; если он пропущен, `handoff-bundle.md` содержит `skipped_with_reason`.
@@ -45,12 +68,30 @@
 - Если запрошен Figma handoff, `figma-handoff-bundle.md` создан после `screens.md` и содержит canvas strategy, variables/styles/components/screens, Auto Layout rules, approval state и target.
 - Если Figma write выполнен, bundle содержит node/frame evidence, screenshot verification и известные visual gaps.
 - Copy содержит hero, CTA, sections, FAQ, SEO и claims to validate.
+- Copy содержит Message Source Map: важные секции связаны с research/JTBD/PRD/design inputs и evidence status.
+- Copy содержит Voice & Terminology: tone rules, terms to use/avoid, customer language и trust language.
+- Copy содержит UX Microcopy для forms/validation/empty/loading/success/consent states, если такие состояния есть в PRD/design.
+- Copy содержит Responsive Copy Variants для H1, CTA, карточек и validation messages, если эти элементы есть в screen scope.
+- Copy содержит Copy-To-Design Handoff: CTA labels, length constraints, required microcopy, content risks and visual proof/support needs.
 - Copy не использует synthetic interviews как testimonials.
+- Copy не использует fake metrics, fake logos, fake case studies, неподтвержденные ROI/guarantee claims или generic AI/SaaS cliches.
 
 ## Gate 4: экраны и прототип
 
 - Screens согласованы с PRD, IA, design и copy.
+- Screens содержат Input Readiness Pass по PRD, IA, design, copy и reference/style inputs; пропуски фиксируются как `partial`/`blocked`.
+- Screens содержат Design-System Grounding: reused tokens/components/styles и gaps для новых компонентов.
+- Screens содержат Screen Traceability: `research/JTBD -> PRD requirement -> IA node -> copy source -> prototype/test signal`.
+- Screens содержат component inventory, state inventory, responsive constraints и accessibility notes.
+- Screens содержат Figma Readiness: variables/styles, component sets/variants, Auto Layout critical areas, canvas strategy и screenshot verification plan.
+- Screens не могут быть `ready`, если layout или section order основаны на generic/default шаблоне вместо `design-brief.md`, `STYLE_GUIDE.md` или reference scan.
 - Prototype содержит start screen, transition map и completion step.
+- Prototype содержит Input Readiness Pass: PRD, IA, design, screens и copy дали достаточно данных для интерактивной спецификации; пропуски фиксируются как `partial`/`blocked`, а не додумываются.
+- Prototype содержит Flow Goal: user, goal, success outcome и primary action.
+- Prototype содержит entry points, state inventory и alternate/recovery paths для ключевого пользовательского сценария.
+- Prototype содержит manual test script для happy path, negative path, keyboard path и mobile path.
+- Prototype содержит instrumentation/test hooks без PII и frontend handoff contract.
+- Если нужен Figma prototype write, есть approval record с exact target; без approval допустима только handoff-ready specification.
 - Missing interactions явно описаны.
 
 ## Gate 5: фронтенд
@@ -73,8 +114,24 @@
 
 - Test bench описывает primary funnel и PII risk.
 - QA проверяет Research integrity, PRD fit, UX, accessibility, responsive, analytics и secrets.
+- QA содержит QA Scope & Evidence Plan: для каждой области аудита указан источник доказательств, команда/артефакт/скриншот или причина недоступности.
+- QA содержит Traceability Audit: `research/JTBD -> PRD requirement -> IA node -> screen/component -> copy/prototype/test signal`; разрыв для `must` scope блокирует release или требует explicit waiver.
+- QA содержит Evidence Matrix и Severity Matrix с уровнями `blocker`, `critical`, `high`, `medium`, `low`, `info`.
+- QA содержит Negative & Edge Path Pass: empty/loading/error/validation/success states, long text/overflow, duplicate submit, touch/keyboard completion.
+- QA содержит Skipped / Unavailable Checks; полный `pass` запрещен, если обязательные проверки пропущены без причины и follow-up.
+- QA содержит Devil's Advocate / False Positive Pass, если все основные проверки получили `pass`.
 - QA проверяет full-page visual reference screenshot review, если пользователь давал reference URL/site.
+- Для reference-driven workflow QA не принимает desktop-only visual review: нужны desktop/mobile пары секций, `visual-diff-result.json` и `visual-reference-review.md`.
+- Accessibility-выводы в QA должны иметь authoritative source/evidence или явную пометку `experience_based`.
 - Release notes включают changed files, validation и rollback notes.
+- Release notes содержат Release Scope: тип выпуска, exact target, необходимость approval и owner.
+- Release notes содержат Run Ledger Audit по `run-state.json`, `run-meta.json`, `artifact-manifest.json`, `run-index.md`, `stage-gate-ledger.md` и `handoff-bundle.md`.
+- Release notes отделяют текущий release scope от unrelated dirty tree; смешивать старые изменения с текущим выпуском запрещено.
+- Release notes содержат Dependency & Sensitive Delta: package/lockfile, env/secrets, analytics payloads, raw provider outputs и PII risk.
+- Release notes содержат Validation Matrix с command/evidence, result и release impact.
+- Release notes содержат Release Decision Matrix; `ready/released` запрещен без QA pass/pass_with_known_limitations, workflow validation, approval/external records и rollback readiness.
+- Release notes содержат Deployment Plan, Post-Release Smoke Checks и Rollback Plan без destructive defaults. `git reset --hard` не является стандартным rollback.
+- Release notes содержат Approval And External Records для Notion, Figma, deploy и git write либо явный blocker/not_requested.
 - Notion research-only child page publication выполнена для полного workflow и записана в `stage-gate-ledger.md` + `release-notes.md`, либо workflow явно помечен `partial/blocked` с причиной.
 - Перед Notion write создан `publication plan` и dry-run/preview с exact target, source checksum, block count, expected writes и unsupported blocks.
 - Approval на Notion write привязан к точному `action` и `target`; targetless approval не засчитывается.

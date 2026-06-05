@@ -10,6 +10,8 @@
 - Специалисты — это ограниченные возможности (capabilities), которые обычно вызываются как инструменты (tools).
 - Передача управления (handoff) допускается только тогда, когда специалист должен владеть отдельной веткой работы.
 - Финальный ответ собирает только `orchestrator`, а не специалист.
+- Любой переход между агентами оформляется как delegation packet: stage id, цель, входы, разрешенные outputs, запреты, approval state, quality gate и следующий потребитель результата.
+- Оркестратор отвечает за консенсус и разрешение противоречий между research, PRD, IA, design, frontend и QA; специалист не может молча изменить scope или продуктовую трактовку.
 
 ## Граф этапов (Stage Graph)
 
@@ -76,6 +78,34 @@
 - Релиз не может начаться, пока QA не пройдет успешно или не зафиксирует блокировку.
 - Специалисты не формируют финальный ответ пользователю; `orchestrator` обобщает статус.
 
+## Delegation Packet (Контракт передачи специалисту)
+
+Перед запуском stage Оркестратор фиксирует в `handoff-bundle.md` или stage notes:
+
+| Поле | Смысл |
+|---|---|
+| `stage_id` | Какой этап выполняется |
+| `owner_agent` | Какой специалист владеет результатом |
+| `objective` | Один проверяемый результат stage |
+| `required_inputs` | Конкретные артефакты и секции, которые нужно прочитать |
+| `allowed_outputs` | Какие файлы можно создать или обновить |
+| `forbidden_actions` | Что нельзя делать без approval или отдельного stage |
+| `quality_gate` | Какие проверки должны пройти перед handoff |
+| `expected_envelope` | Какой `outputs.<artifact_name>` обязан вернуть специалист |
+| `handoff_consumer` | Какой следующий агент использует результат |
+
+Если delegation packet неполный, stage не должен стартовать.
+
+## Consensus & Conflict Pass
+
+Если результаты специалистов, источники или пользовательские вводные конфликтуют, Оркестратор обязан:
+
+1. Зафиксировать конфликт в `stage-gate-ledger.md`.
+2. Определить владельца решения: research, PRD, IA, design, frontend, QA или пользователь.
+3. Выбрать решение по иерархии: project rules -> approval gates -> source-backed evidence -> user constraints -> quality gates -> downstream impact -> expert synthesis.
+4. Записать rejected alternatives и причину отказа.
+5. Пометить downstream artifacts как invalid/needs update, если конфликт меняет scope, claims, user flow или visual direction.
+
 ## Контроль во время выполнения (Runtime Enforcement)
 
 - Источник определений этапов: `runtime/typescript/workflow-stages.ts`.
@@ -102,3 +132,5 @@ PRD и последующие этапы заблокированы, пока р
 - `partial`: продолжение работы возможно только тогда, когда риски явно зафиксированы, а последующие утверждения сохраняют пометку `needs validation` (требует валидации).
 - `blocked`: остановка работы и запрос недостающих данных, подтверждения или источника.
 - `qa fail`: возврат к соответствующему этапу с последующим повторным запуском валидации.
+- `upstream change`: если пользователь меняет вводные после PRD/IA/design, Оркестратор запускает re-orchestration loop: affected artifacts, downstream invalidation, reusable artifacts, required rerun stages.
+- `specialist drift`: если специалист добавил неподтвержденный scope, claims или visual direction, результат возвращается на stage review и не передается downstream как `success`.

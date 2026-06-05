@@ -52,7 +52,11 @@ contract_schema: agent-pack/templates/skill.template.md
    - действие: keep, soften, remove, validate later.
 5. Tavily/source-backed evidence может подтверждать claims. DeepSeek/Gemini synthesis без внешних источников не считается source-backed evidence.
 6. Проверь SEO metadata: title до 60 символов, description 110-160 символов, без keyword stuffing и заглушек.
-7. Запиши `## Claims To Validate` в `copy-deck.md`; в QA stage добавь findings в `qa-report.md`.
+7. Проверь `Voice & Terminology`: нет запрещенных терминов, generic SaaS/AI cliches, пустых усилителей и фраз, не соответствующих ToV.
+8. Проверь `UX Microcopy`: формы, ошибки, пустые/loading/success states, consent/privacy notes и helper text не противоречат PRD и не собирают PII.
+9. Проверь `Responsive Copy Variants`: у H1, CTA, карточек и validation messages есть короткие варианты, если они нужны для мобильных/компактных экранов.
+10. Проверь `Copy-To-Design Handoff`: CTA labels, length constraints, content risks и proof/support needs переданы downstream.
+11. Запиши `## Claims To Validate` в `copy-deck.md`; в QA stage добавь findings в `qa-report.md`.
 
 ## 4. External research gate
 
@@ -68,3 +72,7 @@ contract_schema: agent-pack/templates/skill.template.md
 - [ ] Нет fake testimonials, fake logos, fake numbers.
 - [ ] Все спорные claims есть в `## Claims To Validate`.
 - [ ] SEO title/description заполнены и соответствуют ограничениям.
+- [ ] Voice & terminology не содержат generic AI/SaaS cliches.
+- [ ] UX microcopy покрывает ключевые состояния интерфейса.
+- [ ] Responsive copy variants подготовлены для компактных элементов.
+- [ ] Copy-To-Design Handoff создан и пригоден для screens/prototype/frontend.

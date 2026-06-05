@@ -6,10 +6,140 @@
   "properties": {
     "status": { "enum": ["draft", "partial", "blocked", "ready"] },
     "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "input_readiness_audit": { "type": "array", "items": { "$ref": "#/$defs/input_readiness_item" } },
+    "user_context_content_inventory": { "type": "array", "items": { "$ref": "#/$defs/user_context_content_item" } },
     "primary_screen": { "type": "string" },
     "primary_action": { "type": "string" },
     "completion_step": { "type": "string" },
+    "entry_points": { "type": "array", "items": { "$ref": "#/$defs/entry_point" } },
     "sitemap": { "type": "array", "items": { "type": "object" } },
-    "primary_user_flow": { "type": "array", "items": { "type": "string" } }
+    "content_model": { "type": "array", "items": { "$ref": "#/$defs/content_object" } },
+    "primary_user_flow": { "type": "array", "items": { "type": "string" } },
+    "primary_flow_tree": { "type": "string" },
+    "decision_friction_map": { "type": "array", "items": { "$ref": "#/$defs/decision_friction_item" } },
+    "state_map": { "type": "array", "items": { "$ref": "#/$defs/state_item" } },
+    "jtbd_to_sections": { "type": "array", "items": { "$ref": "#/$defs/jtbd_section_item" } },
+    "navigation_rules": { "type": "array", "items": { "$ref": "#/$defs/navigation_rule" } },
+    "content_priority": { "type": "array", "items": { "$ref": "#/$defs/content_priority_item" } },
+    "accessibility_semantics": { "$ref": "#/$defs/accessibility_semantics" },
+    "ia_to_design_handoff": { "$ref": "#/$defs/ia_to_design_handoff" }
+  },
+  "$defs": {
+    "input_readiness_item": {
+      "type": "object",
+      "required": ["input", "required_signal", "status"],
+      "properties": {
+        "input": { "type": "string" },
+        "required_signal": { "type": "string" },
+        "status": { "enum": ["ready", "partial", "blocked"] },
+        "notes": { "type": "string" }
+      }
+    },
+    "user_context_content_item": {
+      "type": "object",
+      "required": ["user_or_segment", "user_question", "required_content"],
+      "properties": {
+        "user_or_segment": { "type": "string" },
+        "context_or_entry_mode": { "type": "string" },
+        "user_question": { "type": "string" },
+        "required_content": { "type": "string" },
+        "evidence_status": { "type": "string" }
+      }
+    },
+    "entry_point": {
+      "type": "object",
+      "required": ["entry_point", "user_intent", "first_question"],
+      "properties": {
+        "entry_point": { "type": "string" },
+        "user_intent": { "type": "string" },
+        "first_question": { "type": "string" },
+        "first_required_section_or_state": { "type": "string" }
+      }
+    },
+    "content_object": {
+      "type": "object",
+      "required": ["content_object", "purpose"],
+      "properties": {
+        "content_object": { "type": "string" },
+        "purpose": { "type": "string" },
+        "label_or_trigger_words": { "type": "string" },
+        "relationships": { "type": "string" },
+        "reuse_notes": { "type": "string" }
+      }
+    },
+    "decision_friction_item": {
+      "type": "object",
+      "required": ["moment", "user_risk_or_question", "ia_response"],
+      "properties": {
+        "moment": { "type": "string" },
+        "user_risk_or_question": { "type": "string" },
+        "ia_response": { "type": "string" },
+        "required_proof_copy_or_state": { "type": "string" }
+      }
+    },
+    "state_item": {
+      "type": "object",
+      "required": ["state", "where_it_appears", "user_need"],
+      "properties": {
+        "state": { "type": "string" },
+        "where_it_appears": { "type": "string" },
+        "user_need": { "type": "string" },
+        "required_copy_or_ui_behavior": { "type": "string" }
+      }
+    },
+    "jtbd_section_item": {
+      "type": "object",
+      "required": ["jtbd", "section_or_screen", "content_needed"],
+      "properties": {
+        "jtbd": { "type": "string" },
+        "section_or_screen": { "type": "string" },
+        "content_needed": { "type": "string" },
+        "evidence_status": { "type": "string" }
+      }
+    },
+    "navigation_rule": {
+      "type": "object",
+      "required": ["navigation_element", "purpose"],
+      "properties": {
+        "navigation_element": { "type": "string" },
+        "purpose": { "type": "string" },
+        "visibility": { "type": "string" },
+        "mobile_behavior": { "type": "string" },
+        "rule": { "type": "string" }
+      }
+    },
+    "content_priority_item": {
+      "type": "object",
+      "required": ["priority", "content_or_section", "why_it_comes_here"],
+      "properties": {
+        "priority": { "type": "integer" },
+        "content_or_section": { "type": "string" },
+        "why_it_comes_here": { "type": "string" },
+        "metric_or_validation_signal": { "type": "string" }
+      }
+    },
+    "accessibility_semantics": {
+      "type": "object",
+      "properties": {
+        "h1": { "type": "string" },
+        "heading_hierarchy": { "type": "string" },
+        "landmarks": { "type": "string" },
+        "form_labels_errors": { "type": "string" },
+        "focus_order": { "type": "string" }
+      }
+    },
+    "ia_to_design_handoff": {
+      "type": "object",
+      "properties": {
+        "section_order": { "type": "array", "items": { "type": "string" } },
+        "navigation_model": { "type": "string" },
+        "primary_flow_tree": { "type": "string" },
+        "state_requirements": { "type": "array", "items": { "type": "string" } },
+        "content_objects": { "type": "array", "items": { "type": "string" } },
+        "semantic_structure": { "type": "string" },
+        "mobile_behavior": { "type": "string" },
+        "design_open_questions": { "type": "array", "items": { "type": "string" } }
+      }
+    }
   }
 }

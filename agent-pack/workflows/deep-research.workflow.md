@@ -45,17 +45,21 @@ fallback: needs_validation
 ## Pipeline
 
 1. Прочитать `recursive-brief.md`.
-2. Определить research questions и assumptions.
-3. Запустить multi-source research по policy: Tavily + DeepSeek + Gemini по умолчанию.
-4. Сверить findings между providers и пометить противоречия как `claims_to_validate`.
-5. Собрать sources по policy с provider name, `retrieved_at` и confidence.
-6. Сформировать audience и JTBD.
-7. Создать `proto_personas` со статусом evidence.
-8. Создать `synthetic_interviews` со статусом evidence: `synthetic`.
-9. Создать список конкурентов и альтернатив.
-10. Создать SWOT с evidence/status.
-11. Создать validation plan и claims-to-validate.
-12. Обновить handoff и ledger.
+2. Создать research plan: questions, assumptions, decision needs, source classes, search dimensions и expected handoff для PRD/IA/design.
+3. Сформировать targeted search queries по market/category, competitors/alternatives, user scenarios/JTBD, trust/compliance, pricing/business model и design implications.
+4. Запустить multi-source research по policy: Tavily + DeepSeek + Gemini по умолчанию.
+5. Выполнить source quality pass: authority, freshness, directness, independence, specificity и relevance to decision. Noisy scrape не использовать как самостоятельный finding.
+6. Запустить gap loop: если не хватает источников по конкурентам, primary facts, user evidence или design implications, выполнить дополнительный поиск или пометить `needs_validation`.
+7. Сверить findings между providers и пометить противоречия как `claims_to_validate`.
+8. Собрать sources по policy с provider name, `retrieved_at`, confidence, source type и `used_for`.
+9. Сформировать audience и JTBD.
+10. Создать `proto_personas` со статусом evidence.
+11. Создать `synthetic_interviews` со статусом evidence: `synthetic`.
+12. Создать список конкурентов и альтернатив.
+13. Создать SWOT с evidence/status.
+14. Создать validation plan и claims-to-validate.
+15. Создать research-to-design handoff: primary user paths, trust requirements, decision moments, content risks, visual evidence needs, validation priority.
+16. Обновить handoff и ledger.
 
 ## Обязательная валидация
 
@@ -63,9 +67,13 @@ Research считается COMPLETE только когда:
 
 - все обязательные artifacts существуют;
 - evidence log существует;
+- research plan существует;
+- source quality pass существует;
 - requested/used/unavailable/failures по providers записаны;
 - Tavily, DeepSeek и Gemini вернули usable results для `success`; иначе статус остается `partial`;
+- contradiction review существует, а unresolved conflicts записаны в claims-to-validate;
 - validation plan существует;
+- research-to-design handoff существует или содержит `skipped_with_reason`;
 - unknowns задокументированы;
 - `skipped_with_reason` is present for any missing research unit;
 - ledger обновлён;
