@@ -1,20 +1,20 @@
-# Лучшие практики агентных workflow из внешних систем
+# Лучшие практики агентных workflow
 
 Дата обзора: 2026-06-02.
 
 Этот документ фиксирует практики, которые можно применять в `product-agent-studio` без переноса чужого runtime или шаблонного поведения. Внешние `outputs/*` и старые run artifacts не являются источником правил; этот документ относится только к нормативному слою `AGENTS.md`, `agent-pack/workflows`, `agent-pack/agents`, `agent-pack/templates`, `agent-pack/quality` и runtime-командам.
 
-## Источники
+## Адаптированные наблюдения
 
-| Система | Наблюдение | Что берем |
+| Наблюдение | Что берем |
 |---|---|---|
-| UnionAI `ai-agent-template` | Dynamic workflow + sequential workflow, planner routes tasks, specialists run parallel/sequential, large outputs are summarized before handoff. Source: https://github.com/unionai-oss/ai-agent-template | Разделять fixed pipeline и dynamic routing; сжимать context перед specialist handoff. |
-| Strands `agent-sop` | SOPs are markdown workflows with overview, parameters, step instructions, constraints, examples and troubleshooting. Source: https://github.com/strands-agents/agent-sop | Для повторяемых процедур заводить SOP-документ, а не раздувать `AGENTS.md`. |
-| Tutti | Agent ops loop: intake, execution, review, gate, record; run ledger, dashboard events, policy gates, replayable state. Source: https://github.com/nutthouse/tutti | Удерживать workflow как ops loop и всегда иметь record: ledger, artifacts, logs, validation. |
-| Codex ExecPlan template | One task = one plan; plan stores progress, decisions, surprises, verification and can be cleaned after merge. Source: https://github.com/ninjaa/openai-codex-exec-plan | Для non-product задач использовать task-scoped execution plan вместо чтения старых `outputs`. |
-| Microsoft Conductor | Workflow files support dry-run, validate, explicit inputs, metadata, workspace instructions, human gates and conditional routing. Source: https://github.com/microsoft/conductor | Перед execution иметь validate/preflight; routing decisions должны быть структурными, не устными. |
-| GitHub `awesome-copilot` | Agent/workflow/skill files have frontmatter, naming conventions and validators before publication. Source: https://github.com/github/awesome-copilot | Для новых skills/workflows требовать metadata, naming, validation и README/index update when applicable. |
-| AGENT-ZERO | Single canonical guide, approval gates, architecture-aligned changes, high-signal context and memory/state discipline. Source: https://github.com/msitarzewski/AGENT-ZERO | Не множить корневые инструкции; использовать linked procedures и focused context. |
+| Dynamic workflow + sequential workflow: planner routes tasks, specialists run parallel/sequential, large outputs are summarized before handoff. | Разделять fixed pipeline и dynamic routing; сжимать context перед specialist handoff. |
+| SOPs are markdown workflows with overview, parameters, step instructions, constraints, examples and troubleshooting. | Для повторяемых процедур заводить SOP-документ, а не раздувать `AGENTS.md`. |
+| Agent ops loop: intake, execution, review, gate, record; run ledger, dashboard events, policy gates, replayable state. | Удерживать workflow как ops loop и всегда иметь record: ledger, artifacts, logs, validation. |
+| One task = one plan; plan stores progress, decisions, surprises, verification and can be cleaned after merge. | Для non-product задач использовать task-scoped execution plan вместо чтения старых `outputs`. |
+| Workflow files support dry-run, validate, explicit inputs, metadata, workspace instructions, human gates and conditional routing. | Перед execution иметь validate/preflight; routing decisions должны быть структурными, не устными. |
+| Agent/workflow/skill files have frontmatter, naming conventions and validators before publication. | Для новых skills/workflows требовать metadata, naming, validation и README/index update when applicable. |
+| Single canonical guide, approval gates, architecture-aligned changes, high-signal context and memory/state discipline. | Не множить корневые инструкции; использовать linked procedures и focused context. |
 
 ## Принципы для нашего проекта
 

@@ -76,6 +76,11 @@
 - QA проверяет full-page visual reference screenshot review, если пользователь давал reference URL/site.
 - Release notes включают changed files, validation и rollback notes.
 - Notion research-only child page publication выполнена для полного workflow и записана в `stage-gate-ledger.md` + `release-notes.md`, либо workflow явно помечен `partial/blocked` с причиной.
+- Перед Notion write создан `publication plan` и dry-run/preview с exact target, source checksum, block count, expected writes и unsupported blocks.
+- Approval на Notion write привязан к точному `action` и `target`; targetless approval не засчитывается.
+- Markdown экспорт опубликован как структурированные Notion blocks, а не как один raw code block.
+- Для Notion API/MCP записи зафиксированы block count, chunk count, retry count и обработка request limits/429.
+- Повторная публикация имеет idempotency strategy: existing page/database lookup, source checksum/export marker или явный versioning policy.
 - Notion publication не содержит full workflow dump, schema/frontmatter, raw JSON payloads или code-block копии всех артефактов.
 - Полный `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard` возвращает no errors для complete workflow без visual reference.
 - Полный `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference` возвращает no errors для complete workflow с visual reference.

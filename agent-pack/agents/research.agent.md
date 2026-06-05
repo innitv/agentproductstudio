@@ -106,14 +106,6 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - Синтетические интервью допускаются только для проверки гипотез, краевых сценариев или формирования вопросов для тестирования, но не как доказательство факта.
 - Если данные по какому-либо артефакту отсутствуют, создать файл со статусом `skipped_with_reason` (пропущено с объяснением причины) или `blocked`, но не пропускать создание файла физически.
 
-## Evidence Notes (Полезные ссылки и методология)
-
-- JTBD используется для понимания прогресса и задач пользователя, в соответствии с логикой product discovery из материалов Intercom Jobs-to-be-Done: https://www.intercom.com/books/jobs-to-be-done
-- Процесс исследования продукта должен быть итеративным и ориентированным на доказательства, согласно руководству Atlassian product discovery: https://www.atlassian.com/agile/product-management/discovery
-- Синтетические пользователи могут помогать в предварительном тестировании сценариев и генерации гипотез, но не должны заменять реальные исследования пользователей (см. статьи UXAtlas и UXArmy):
-  - https://www.uxatlas.io/articles/synthetic-users-evidence
-  - https://uxarmy.com/blog/synthetic-participants-ux-research/
-
 ## Trigger Phrases / Триггерные фразы
 
 Этот агент активируется и запускает процесс исследования по следующим фразам:

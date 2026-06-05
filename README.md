@@ -1,8 +1,10 @@
 # Пак оркестра субагентов для Codex
 
-Назначение: собрать рабочую архитектуру, где один запрос продуктового дизайнера запускает управляемую цепочку исследования, PRD, IA, UX/UI, screen specification, прототипа, копирайтинга, разработки, тестового стенда, ревью и подготовки результата к передаче.
+Назначение: собрать рабочую архитектуру, где один продуктовый запрос запускает управляемую цепочку исследования, PRD, IA, UX/UI, screen specification, прототипа, копирайтинга, разработки, тестового стенда, ревью и подготовки результата к передаче.
 
-Пак опирается на официальные подходы OpenAI:
+Это не prompt pack и не набор разрозненных ролей. Проект устроен как **artifact-driven agent system**: Codex внутри IDE/чата читает корневые правила, маршрутизирует задачу через специализированных агентов, сохраняет проверяемые артефакты в `outputs/<project-slug>/<YYYY-MM-DD>/`, обновляет ledger/handoff и завершает работу только после quality gates или явного blocker.
+
+Пак задает собственный рабочий регламент:
 - `AGENTS.md` как основной слой инструкций для Codex в репозитории.
 - Узкие субагенты с понятной ответственностью.
 - Оркестрация через handoffs или agents-as-tools.
@@ -19,11 +21,49 @@
 1. `orchestrator` принимает продуктовый запрос, фиксирует допущения и выбирает маршрут.
 2. Специалисты вызываются как bounded capabilities / agents-as-tools и возвращают результат по контракту.
 3. Handoff используется редко: только если специалист должен сам вести дальнейший диалог или отдельную ветку работы.
-4. Каждый этап создаёт проверяемый артефакт: `recursive_brief`, `research_summary`, `prd`, `ia_brief`, `design_brief`, `screens`, `copy_deck`, `prototype_report`, `frontend_result`, `test_bench_result`, `qa_report`, `release_notes`. Условный внешний артефакт: `notion_prd_export`.
+4. Каждый этап создаёт проверяемый артефакт: `recursive_brief`, research pack, `prd`, `ia_brief`, `design_brief`, `screens`, `copy_deck`, `prototype_report`, `frontend_result`, `test_bench_result`, `qa_report`, `release_notes`. Опциональные слои: `STYLE_GUIDE.md`, `design-generator-prompt.md`, `design-loop-report.md`, `figma-handoff-bundle.md`, `storybook-result.md`, `notion-research-export-ru.md`, `notion_prd_export`.
 5. `orchestrator` объединяет артефакты, проверяет quality gates и отдаёт финальный результат.
 6. `orchestrator` сам решает порядок запуска субагентов по зависимостям и может параллелить независимые этапы.
 
 Важное правило: специалисты не равны инструментам. Search, browser, Figma, Notion, GitHub, deployment и другие MCP/tools являются заменяемым tool layer. Роль агента описывает ответственность и контракт результата, а не конкретного провайдера.
+
+## Стартовый operating contract
+
+Каждый запуск начинается с классификации задачи:
+
+- `full product workflow`: нужен полный artifact-driven pipeline от intake/research до release.
+- `reference-driven workflow`: пользователь дал URL/screenshot/«как этот сайт»; обязателен reference scan, visual spec и visual reference review.
+- `quick draft`: допустим только по явному запросу пользователя; результат помечается `partial`/`draft`.
+- `limited engineering task`: узкая правка в коде/документации; можно использовать task-scoped ExecPlan вместо полного workflow.
+- `external write`: Notion, Figma, deploy, git write без текущего запроса и model-provider calls требуют exact approval.
+- `cleanup/sorting`: работа с outputs/temp/products/archive или грязным деревом выполняется отдельно от feature work.
+
+Первый рабочий цикл:
+
+```text
+classify request
+  -> choose route/profile
+  -> create or inspect run ledger
+  -> read required artifacts
+  -> route to bounded specialist/skill
+  -> validate output
+  -> update handoff + stage gate ledger
+  -> synthesize final answer from orchestrator
+```
+
+Done означает: нужные артефакты созданы или обновлены, `inputs_used` зафиксированы, проверки выполнены или blocker записан, внешние действия имеют approval record, а финальный ответ перечисляет измененные файлы, validation и остаточные риски.
+
+## Ключевые понятия
+
+| Понятие | Значение |
+| --- | --- |
+| `orchestrator` | Владелец маршрута, финального synthesis и статуса workflow. |
+| Specialist agent | Ограниченная capability с входами, выходами и guardrails. |
+| Skill | Повторяемая процедура с metadata, validation commands и stage ownership. |
+| Artifact | Проверяемый Markdown/JSON результат этапа, который читают downstream agents. |
+| Run ledger | `run-state.json`, `run-meta.json`, `artifact-manifest.json`, `run-index.md`, `handoff-bundle.md`, `stage-gate-ledger.md`. |
+| Quality gate | Локальная проверка, schema/doc audit, screenshot evidence, approval gate или documented blocker. |
+| Handoff | Сжатый контекст для следующего этапа: решения, assumptions, risks, open questions и next artifact. |
 
 Практический маршрут:
 
@@ -113,7 +153,11 @@ agent-pack/artifacts/
     notion-prd-export.template.md
   design/
     reference-analysis.template.md
+    style-guide.template.md
     design-brief.template.md
+    design-generator-prompt.template.md
+    design-loop-report.template.md
+    figma-handoff-bundle.template.md
     screens.template.md
     visual-reference-review.template.md
   ia/
@@ -124,6 +168,7 @@ agent-pack/artifacts/
     prototype-report.template.md
   frontend/
     frontend-result.template.md
+    storybook-result.template.md
   test-bench/
     test-bench-result.template.md
   qa/
@@ -220,6 +265,15 @@ agent-pack/workflows/
   deep-research.workflow.md
   landing-agent-orchestration.workflow.md
   ds-baseline.workflow.md
+agent-pack/skills/
+  landing-builder/
+  visual-diff-verifier/
+  style-decompose/
+  design-loop/
+  figma-handoff/
+  design-engineering/
+  ds-to-storybook/
+  notion-sync/
 agent-pack/templates/
   agent-output-contract.schema.md
   file-format-conventions.md

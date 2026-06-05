@@ -1,0 +1,15 @@
+{
+  "project_slug": "a3pay-cjm",
+  "run_date": "2026-06-05",
+  "run_id": "2026-06-05-1780631705177",
+  "created_at": "2026-06-05T03:55:05.175Z",
+  "updated_at": "2026-06-05T09:25:42.547Z",
+  "workflow_profile": "standard",
+  "execution_mode": "local",
+  "status": "pending",
+  "source_request": "Workflow run",
+  "output_dir": "C:\\Project\\product-agent-studio\\outputs\\a3pay-cjm\\2026-06-05",
+  "has_reference": false,
+  "notion_publication": "unknown",
+  "last_validated_at": "2026-06-05T03:55:05.175Z"
+}
