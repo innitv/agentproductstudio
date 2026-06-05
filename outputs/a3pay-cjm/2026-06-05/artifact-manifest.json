@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-05T09:25:42.558Z",
+  "generated_at": "2026-06-05T21:02:23.403Z",
   "run_id": "2026-06-05-1780631705177",
   "workflow_profile": "standard",
   "artifacts": [
@@ -29,15 +29,19 @@
       "stage_title": "Intake and Recursive Brief",
       "producer_stage": "00-intake",
       "producer_agent": "orchestrator",
-      "consumers": [],
+      "consumers": [
+        "07-prototype",
+        "11-qa",
+        "12-release"
+      ],
       "status": "completed",
       "exists": true,
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "active",
-      "size_bytes": 4314,
-      "updated_at": "2026-06-05T09:18:44.723Z",
-      "checksum_sha256": "f723be06d1b18027f83c04cb5a459be796a4f4339d0f13519ffcb5f6726ff546"
+      "size_bytes": 4591,
+      "updated_at": "2026-06-05T20:59:04.013Z",
+      "checksum_sha256": "7d26f851eaba10ceaa3fbe357f028bc871cebcb95321e62ef46dc113e97df2c8"
     },
     {
       "artifact_name": "stage_gate_ledger",
@@ -47,15 +51,18 @@
       "stage_title": "Intake and Recursive Brief",
       "producer_stage": "00-intake",
       "producer_agent": "orchestrator",
-      "consumers": [],
+      "consumers": [
+        "11-qa",
+        "12-release"
+      ],
       "status": "completed",
       "exists": true,
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "active",
-      "size_bytes": 8852,
-      "updated_at": "2026-06-05T09:19:57.444Z",
-      "checksum_sha256": "553027b62fc3f56ef1699c0685b46677b8ec1af17731f95750420e7a9e866a2d"
+      "size_bytes": 8998,
+      "updated_at": "2026-06-05T20:59:04.014Z",
+      "checksum_sha256": "6afd5da52fdb1e47b0437e193a1ae7b839446693d7f934b621c168e10539683f"
     },
     {
       "artifact_name": "recursive_brief",
@@ -105,7 +112,7 @@
       "lifecycle": "active",
       "schema": "agent-pack/schemas/research-summary.schema.json",
       "size_bytes": 24530,
-      "updated_at": "2026-06-05T09:25:30.389Z",
+      "updated_at": "2026-06-05T21:00:33.942Z",
       "checksum_sha256": "04d6b820a810088d000282d04938e69d8abdb9fb12f55f919ba4c3be0e52b084"
     },
     {
@@ -116,14 +123,16 @@
       "stage_title": "Deep Research",
       "producer_stage": "01-research",
       "producer_agent": "research",
-      "consumers": [],
+      "consumers": [
+        "11-qa"
+      ],
       "status": "completed",
       "exists": true,
       "human_readable": true,
       "safe_to_publish": true,
       "lifecycle": "active",
       "size_bytes": 7739,
-      "updated_at": "2026-06-05T09:25:30.389Z",
+      "updated_at": "2026-06-05T21:00:33.942Z",
       "checksum_sha256": "3cccccb5778ea83f24bff8f22ec0279498ac1161ea866fb2e656980cf06c2beb"
     },
     {
@@ -134,14 +143,16 @@
       "stage_title": "Deep Research",
       "producer_stage": "01-research",
       "producer_agent": "research",
-      "consumers": [],
+      "consumers": [
+        "11-qa"
+      ],
       "status": "completed",
       "exists": true,
       "human_readable": true,
       "safe_to_publish": true,
       "lifecycle": "active",
       "size_bytes": 5960,
-      "updated_at": "2026-06-05T09:25:30.389Z",
+      "updated_at": "2026-06-05T21:00:33.943Z",
       "checksum_sha256": "0f7567de20a61aca2c81cd1a33a4341c9db6b6322a4a33461e7ad1ccc9f9b22e"
     },
     {
@@ -152,14 +163,16 @@
       "stage_title": "Deep Research",
       "producer_stage": "01-research",
       "producer_agent": "research",
-      "consumers": [],
+      "consumers": [
+        "11-qa"
+      ],
       "status": "completed",
       "exists": true,
       "human_readable": true,
       "safe_to_publish": true,
       "lifecycle": "active",
       "size_bytes": 5494,
-      "updated_at": "2026-06-05T09:25:30.390Z",
+      "updated_at": "2026-06-05T21:00:33.943Z",
       "checksum_sha256": "2b3273c8e6a928b379bd49e01f1f0be610f7955fa805dccd18d6e3c1dd161899"
     },
     {
@@ -170,14 +183,16 @@
       "stage_title": "Deep Research",
       "producer_stage": "01-research",
       "producer_agent": "research",
-      "consumers": [],
+      "consumers": [
+        "11-qa"
+      ],
       "status": "completed",
       "exists": true,
       "human_readable": true,
       "safe_to_publish": true,
       "lifecycle": "active",
       "size_bytes": 4115,
-      "updated_at": "2026-06-05T09:25:30.390Z",
+      "updated_at": "2026-06-05T21:00:33.943Z",
       "checksum_sha256": "b4f1af85bdad6ec53cae40666f90bdc80497aef69c6cf7325f9c25eb8b32320e"
     },
     {
@@ -193,6 +208,8 @@
         "03-ia",
         "04-design",
         "05-copy",
+        "06-screens",
+        "07-prototype",
         "08-frontend",
         "10-test-bench",
         "11-qa"
@@ -238,6 +255,7 @@
       "consumers": [
         "05-copy",
         "06-screens",
+        "07-prototype",
         "08-frontend",
         "09-visual-reference",
         "11-qa"
@@ -259,6 +277,7 @@
       "producer_agent": "copywriting",
       "consumers": [
         "06-screens",
+        "07-prototype",
         "08-frontend",
         "11-qa"
       ],
@@ -321,7 +340,8 @@
       "consumers": [
         "09-visual-reference",
         "10-test-bench",
-        "11-qa"
+        "11-qa",
+        "12-release"
       ],
       "status": "missing",
       "exists": false,
@@ -339,7 +359,8 @@
       "producer_stage": "10-test-bench",
       "producer_agent": "test-bench",
       "consumers": [
-        "11-qa"
+        "11-qa",
+        "12-release"
       ],
       "status": "missing",
       "exists": false,
@@ -396,9 +417,9 @@
       "human_readable": true,
       "safe_to_publish": true,
       "lifecycle": "active",
-      "size_bytes": 59568,
-      "updated_at": "2026-06-05T09:15:16.126Z",
-      "checksum_sha256": "74bc52931e6fb9de9ca5db8d5640225185aba377c240a072408fc8e09baf9dbe"
+      "size_bytes": 59765,
+      "updated_at": "2026-06-05T21:02:12.866Z",
+      "checksum_sha256": "e22872c86dd6ba29049df5fbd65da5ed933781ae5812947e62461277f14c2caa"
     },
     {
       "artifact_name": "figma_handoff_bundle",

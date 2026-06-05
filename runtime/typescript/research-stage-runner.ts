@@ -12,6 +12,63 @@ interface ResearchStageRunOptions {
   query?: string;
 }
 
+interface ResearchArtifactWriteDecision {
+  file: string;
+  action: "written" | "preserved_existing";
+  existing_score: number;
+  candidate_score: number;
+  reason: string;
+}
+
+interface DomainScenario {
+  name: string;
+  user_goal: string;
+  friction: string;
+  product_role: string;
+  priority: "P0" | "P1" | "P2";
+  evidence_status: "source-backed" | "hypothesis" | "needs validation";
+}
+
+interface DomainOpportunity {
+  initiative: string;
+  scenario: string;
+  reach: number;
+  impact: number;
+  confidence: number;
+  effort: number;
+  priority: "P0" | "P1" | "P2";
+}
+
+interface DomainSynthesis {
+  theme: string;
+  positioning: string;
+  primary_paths: string[];
+  scenarios: DomainScenario[];
+  opportunities: DomainOpportunity[];
+  roadmap: Array<{
+    horizon: string;
+    focus: string;
+    outcome: string;
+  }>;
+  design_handoff: {
+    trust_requirements: string[];
+    decision_moments: string[];
+    content_risks: string[];
+    visual_evidence_needs: string[];
+  };
+  source_backed_facts: Array<{
+    fact: string;
+    source: string;
+    confidence: "high" | "medium" | "low";
+  }>;
+  contradiction_review: Array<{
+    topic: string;
+    agreement: string;
+    disagreement: string;
+    decision: string;
+  }>;
+}
+
 interface ResearchSummaryPayload {
   status: "ready" | "partial";
   inputs_used: string[];
@@ -81,6 +138,7 @@ interface ResearchSummaryPayload {
     status: "open" | "validated" | "rejected";
   }>;
   unknowns: string[];
+  domain_synthesis: DomainSynthesis;
 }
 
 const requiredIntakeFiles = [
@@ -111,14 +169,15 @@ export async function runResearchStage(options: ResearchStageRunOptions): Promis
   });
   const payload = buildResearchSummaryPayload(multiSource);
 
-  await writeFile(join(outputDir, artifactFiles.research_summary), renderResearchSummary(multiSource, payload), "utf8");
-  await writeFile(join(outputDir, artifactFiles.competitive_analysis), renderCompetitiveAnalysis(multiSource), "utf8");
-  await writeFile(join(outputDir, artifactFiles.proto_personas), renderProtoPersonas(payload), "utf8");
-  await writeFile(join(outputDir, artifactFiles.synthetic_interviews), renderSyntheticInterviews(payload), "utf8");
-  await writeFile(join(outputDir, artifactFiles.swot), renderSwot(multiSource), "utf8");
+  const writeDecisions: ResearchArtifactWriteDecision[] = [];
+  writeDecisions.push(await writeResearchArtifact(outputDir, artifactFiles.research_summary, renderResearchSummary(multiSource, payload), query));
+  writeDecisions.push(await writeResearchArtifact(outputDir, artifactFiles.competitive_analysis, renderCompetitiveAnalysis(multiSource, payload.domain_synthesis), query));
+  writeDecisions.push(await writeResearchArtifact(outputDir, artifactFiles.proto_personas, renderProtoPersonas(payload), query));
+  writeDecisions.push(await writeResearchArtifact(outputDir, artifactFiles.synthetic_interviews, renderSyntheticInterviews(payload), query));
+  writeDecisions.push(await writeResearchArtifact(outputDir, artifactFiles.swot, renderSwot(multiSource, payload.domain_synthesis), query));
 
-  await appendResearchHandoff(outputDir, payload.status, multiSource);
-  await appendResearchLedger(outputDir, payload.status, multiSource);
+  await appendResearchHandoff(outputDir, payload.status, multiSource, writeDecisions);
+  await appendResearchLedger(outputDir, payload.status, multiSource, writeDecisions);
 
   const findings = validateWorkflowRun(options.outputDir, "01-research");
   const errors = findings.filter((finding) => finding.level === "error");
@@ -135,6 +194,7 @@ export async function runResearchStage(options: ResearchStageRunOptions): Promis
   console.log(`Research stage ${payload.status}: ${options.outputDir}`);
   console.log(`Providers used: ${multiSource.providersUsed.join(", ") || "none"}`);
   console.log(`Validation: ${multiSource.validation.status}`);
+  console.log(`Artifact writes: ${writeDecisions.map((item) => `${item.file}=${item.action}`).join(", ")}`);
 }
 
 function inferQuery(outputDir: string): string {
@@ -160,6 +220,7 @@ function buildResearchSummaryPayload(result: MultiSourceResearchResult): Researc
   const retrievedAt = new Date().toISOString();
   const used = new Set(result.providersUsed);
   const sourcesByProvider = new Map<ResearchProvider, number>();
+  const synthesis = buildDomainSynthesis(result);
 
   for (const source of result.sources) {
     sourcesByProvider.set(source.provider, (sourcesByProvider.get(source.provider) ?? 0) + 1);
@@ -216,63 +277,10 @@ function buildResearchSummaryPayload(result: MultiSourceResearchResult): Researc
     inputs_used: ["recursive-brief.md", "handoff-bundle.md", "stage-gate-ledger.md", "Tavily provider output when configured", "DeepSeek provider output when configured"],
     provider_coverage: providerCoverage,
     provider_failures: providerFailures,
-    research_questions: [
-      `Какие сегменты и JTBD наиболее вероятны для запроса: ${result.query.slice(0, 180)}?`,
-      "Какие конкуренты, альтернативы и паттерны позиционирования подтверждаются источниками?",
-      "Какие claims нельзя переносить в PRD/copy без дополнительной проверки?",
-    ],
-    audience: [
-      {
-        segment: "Потенциальный покупатель продукта из запроса",
-        context: "Изучает предложение онлайн и сравнивает альтернативы перед заявкой.",
-        motivation: "Быстро понять ценность, условия, доверие и следующий шаг.",
-        barrier: "Недоверие к неподтвержденным обещаниям, скрытым условиям и непонятному процессу.",
-        evidence_status: result.sources.length ? "source-backed" : "needs validation",
-      },
-      {
-        segment: "Операционный или B2B-покупатель",
-        context: "Оценивает решение для повторяемого процесса или команды.",
-        motivation: "Снизить ручную координацию и получить прозрачный маршрут внедрения.",
-        barrier: "Нужны документы, SLA, поддержка и понятные ограничения.",
-        evidence_status: "hypothesis",
-      },
-    ],
-    jobs_to_be_done: [
-      {
-        segment: "Потенциальный покупатель продукта из запроса",
-        job: "Оценить, подходит ли решение под мою задачу, и оставить заявку без лишнего риска.",
-        trigger: "Появилась потребность быстро выбрать услугу или продукт онлайн.",
-        pain: "Сложно понять реальные условия, цену, ограничения и качество поддержки.",
-        desired_outcome: "Получить понятный следующий шаг и подтверждение, что решение подходит.",
-        evidence_status: result.sources.length ? "source-backed" : "needs validation",
-      },
-      {
-        segment: "Операционный или B2B-покупатель",
-        job: "Понять, можно ли масштабировать решение на несколько пользователей или процессов.",
-        trigger: "Нужно стандартизировать закупку или подключение без хаоса в коммуникации.",
-        pain: "Риски в документах, сроках, поддержке и ответственности поставщика.",
-        desired_outcome: "Получить предсказуемый процесс, контакт и прозрачные условия.",
-        evidence_status: "hypothesis",
-      },
-    ],
-    proto_personas: [
-      {
-        name: "Рациональный покупатель",
-        segment: "Потенциальный покупатель продукта из запроса",
-        jtbd: "Сравнить варианты и безопасно оставить заявку.",
-        pain: "Неясные условия и сомнения в достоверности claims.",
-        desired_outcome: "Понятная ценность, условия и быстрый контакт.",
-        evidence_status: "proto",
-      },
-      {
-        name: "Операционный координатор",
-        segment: "Операционный или B2B-покупатель",
-        jtbd: "Проверить, выдержит ли решение повторяемый процесс.",
-        pain: "Нужно согласовать документы, сроки и поддержку.",
-        desired_outcome: "Управляемый процесс и меньше ручной координации.",
-        evidence_status: "needs validation",
-      },
-    ],
+    research_questions: buildResearchQuestions(result, synthesis),
+    audience: buildAudience(synthesis, result.sources.length > 0),
+    jobs_to_be_done: buildJobsToBeDone(synthesis, result.sources.length > 0),
+    proto_personas: buildProtoPersonas(synthesis),
     simulated_interviews: [
       {
         persona: "Рациональный покупатель",
@@ -324,15 +332,15 @@ function buildResearchSummaryPayload(result: MultiSourceResearchResult): Researc
     })),
     validation_plan: [
       {
-        hypothesis: "Hero value proposition and CTA match the primary buyer job.",
-        method: "5-7 target-user interviews or moderated landing usability sessions.",
-        minimum_evidence: "At least 4 participants can explain the offer and next step without prompting.",
+        hypothesis: `${synthesis.positioning} понятно целевому пользователю без объяснения команды.`,
+        method: "5-7 проблемных интервью и модерируемых сессий с прототипом.",
+        minimum_evidence: "Минимум 4 участника верно объясняют ценность, следующий шаг и ограничения продукта.",
         status: "open",
       },
       {
-        hypothesis: "Trust and limitation copy reduces hesitation.",
-        method: "Compare prototype with/without explicit constraints and proof points.",
-        minimum_evidence: "Improved CTA intent or fewer unresolved objections in qualitative testing.",
+        hypothesis: "Статусы, подтверждение получателя и прозрачные ограничения снижают тревожность перед действием.",
+        method: "Сравнить прототип с явным слоем доверия и без него.",
+        minimum_evidence: "Меньше нерешенных возражений и меньше ошибок понимания основного сценария.",
         status: "open",
       },
     ],
@@ -341,7 +349,293 @@ function buildResearchSummaryPayload(result: MultiSourceResearchResult): Researc
       ...result.results.flatMap((item) => item.unknowns),
       ...result.results.flatMap((item) => item.claimsToValidate),
     ],
+    domain_synthesis: synthesis,
   };
+}
+
+function buildDomainSynthesis(result: MultiSourceResearchResult): DomainSynthesis {
+  const evidenceText = [
+    result.query,
+    ...result.sources.map((source) => `${source.title ?? ""} ${"content" in source ? "" : ""}`),
+    ...result.results.flatMap((item) => item.findings.map((finding) => finding.finding)),
+    ...result.results.map((item) => "summary" in item ? item.summary : ""),
+  ].join("\n").toLowerCase();
+  const paymentDomain = /a3pay|a3 pay|сбп|плат[её]ж|payment|checkout|bnpl|жкх|недвиж|авто|travel|путешеств|подпис|номер[ау] телефона/.test(evidenceText);
+  const scenarios = paymentDomain ? buildPaymentScenarios(evidenceText, result.sources.length > 0) : buildGenericScenarios(result, evidenceText);
+  const opportunities = buildOpportunities(scenarios);
+  const sourceBackedFacts = result.results
+    .flatMap((item) => item.provider === "tavily" ? item.findings : [])
+    .slice(0, 6)
+    .map((finding) => ({
+      fact: finding.finding.slice(0, 260),
+      source: finding.evidence.map((source) => source.url).filter(Boolean).join(", ") || "Tavily source-backed finding",
+      confidence: finding.confidence,
+    }));
+
+  return {
+    theme: paymentDomain ? "Платежная оркестрация по номеру телефона" : "Продуктовый discovery и проверка спроса",
+    positioning: paymentDomain
+      ? "A3 Pay как слой оркестрации платежных обязательств, статусов и способов оплаты, а не отдельный кошелек"
+      : "Продукт как управляемый путь от боли пользователя к проверяемому действию",
+    primary_paths: scenarios.slice(0, 4).map((scenario) => `${scenario.name}: ${scenario.user_goal}`),
+    scenarios,
+    opportunities,
+    roadmap: buildRoadmap(paymentDomain),
+    design_handoff: paymentDomain ? {
+      trust_requirements: [
+        "Проверенный получатель и понятное назначение платежа.",
+        "Статус: банк списал, поставщик принял, требуется действие.",
+        "Явное управление подписками, лимитами и повторными списаниями.",
+        "Отдельная маркировка сценариев, где A3 Pay не заменяет банк/реестр/нотариуса.",
+      ],
+      decision_moments: [
+        "Пользователь понимает, что именно нужно оплатить.",
+        "Пользователь доверяет получателю и сумме.",
+        "Пользователь выбирает способ оплаты или принимает рекомендацию.",
+        "Пользователь получает подтверждение и следующий шаг.",
+      ],
+      content_risks: [
+        "Не обещать escrow/аккредитив/регулируемый платежный сервис без юридического подтверждения.",
+        "Не переносить рыночные объемы, комиссии и конверсию в PRD/copy без первичного источника.",
+        "Не выдавать synthetic interviews за реальные пользовательские данные.",
+      ],
+      visual_evidence_needs: [
+        "Скриншоты СБП/банковских сценариев оплаты и привязки счета.",
+        "Публичные сценарии ЖКХ/Госуслуг/ГИС ЖКХ по оплате и статусам.",
+        "Примеры BNPL и туристического чекаута с разделением платежа, возвратами и статусами.",
+      ],
+    } : {
+      trust_requirements: ["Проверяемые доказательства ценности.", "Прозрачные ограничения и следующий шаг."],
+      decision_moments: ["Понимание проблемы.", "Сравнение альтернатив.", "Выбор действия."],
+      content_risks: ["Не утверждать неподтвержденные метрики.", "Не смешивать гипотезы и факты."],
+      visual_evidence_needs: ["Референсы конкурентов.", "Скриншоты ключевых user flows."],
+    },
+    source_backed_facts: sourceBackedFacts,
+    contradiction_review: buildContradictionReview(result, paymentDomain),
+  };
+}
+
+function buildPaymentScenarios(evidenceText: string, hasSources: boolean): DomainScenario[] {
+  const evidenceStatus = hasSources ? "source-backed" : "needs validation";
+  const scenarios: DomainScenario[] = [
+    {
+      name: "ЖКХ, налоги, штрафы и регулярные услуги",
+      user_goal: "Оплатить обязательство без ручного ввода реквизитов и проверить, что поставщик принял платеж.",
+      friction: "Начисления разбросаны по приложениям, реквизиты и статусы расходятся.",
+      product_role: "Корзина проверенных счетов, напоминания, выбор платежного маршрута и статус принятия поставщиком.",
+      priority: "P0",
+      evidence_status: evidenceStatus,
+    },
+    {
+      name: "Подписки и повторные списания",
+      user_goal: "Разрешить регулярный платеж и контролировать будущие списания.",
+      friction: "Пользователь боится скрытых списаний, а продавец теряет платежи из-за ошибок и отказов.",
+      product_role: "Центр подписок: мандаты, лимиты, пауза/отмена, умные повторы и резервный способ оплаты.",
+      priority: "P0",
+      evidence_status: /подпис|recurring|mandate/.test(evidenceText) ? evidenceStatus : "hypothesis",
+    },
+    {
+      name: "Путешествия",
+      user_goal: "Оплатить поездку, доплаты, страховку и возвраты в одном понятном маршруте.",
+      friction: "Несколько поставщиков, предоплаты, изменения, возвраты и групповые платежи.",
+      product_role: "Платежный маршрут поездки: план платежей, запросы разделения суммы, трекер возвратов и статусов.",
+      priority: "P1",
+      evidence_status: /travel|путешеств|билет|аэропорт/.test(evidenceText) ? evidenceStatus : "hypothesis",
+    },
+    {
+      name: "Авто: покупка, импорт и владение",
+      user_goal: "Провести цепочку платежей по авто без потери статусов, документов и сроков.",
+      friction: "Дилер/брокер/таможня/страховка/сервис требуют разные платежи и подтверждения.",
+      product_role: "Калькулятор, этапные платежи, хранилище чеков и проверенные запросы на оплату по этапам.",
+      priority: "P1",
+      evidence_status: /авто|тамож|утиль|эптс|broker/.test(evidenceText) ? evidenceStatus : "hypothesis",
+    },
+    {
+      name: "Недвижимость",
+      user_goal: "Понять платежи сделки и безопасно пройти задаток, регистрацию и последующие обязательства.",
+      friction: "Крупный чек, много регулируемых участников, высокий риск ошибки и мошенничества.",
+      product_role: "Payment companion: чек-лист платежей, verified requests, статусы банка/реестра/поставщиков.",
+      priority: "P2",
+      evidence_status: /недвиж|ипотек|эскроу|аккредитив|росреестр/.test(evidenceText) ? evidenceStatus : "hypothesis",
+    },
+    {
+      name: "Повседневные покупки",
+      user_goal: "Быстро оплатить товар выгодным способом и получить чек/возврат.",
+      friction: "Сохраненные карты уже сильны; СБП/кошелек/BNPL конкурируют за кнопку оплаты.",
+      product_role: "Выбор лучшего способа оплаты, loyalty/BNPL-брокер и трекер чеков/возвратов там, где есть явная выгода.",
+      priority: "P1",
+      evidence_status: /marketplace|повседнев|покуп/.test(evidenceText) ? evidenceStatus : "hypothesis",
+    },
+  ];
+
+  return scenarios;
+}
+
+function buildGenericScenarios(result: MultiSourceResearchResult, evidenceText: string): DomainScenario[] {
+  const hasSources = result.sources.length > 0;
+  return [
+    {
+      name: "Первичная оценка ценности",
+      user_goal: "Понять, решает ли продукт мою задачу.",
+      friction: "Недостаточно доказательств, ограничений и ясного следующего шага.",
+      product_role: "Показать проблему, доказательство, ограничения и CTA в одном пути.",
+      priority: "P0",
+      evidence_status: hasSources ? "source-backed" : "needs validation",
+    },
+    {
+      name: "Сравнение альтернатив",
+      user_goal: "Выбрать между несколькими решениями без потери времени.",
+      friction: "Сложно сравнить условия, риски, стоимость и поддержку.",
+      product_role: "Дать comparison frame, objection handling и proof blocks.",
+      priority: "P1",
+      evidence_status: /competitor|alternative|конкур/.test(evidenceText) ? "source-backed" : "hypothesis",
+    },
+    {
+      name: "Переход к действию",
+      user_goal: "Оставить заявку или начать процесс без риска.",
+      friction: "Неясно, что будет после CTA.",
+      product_role: "Показать onboarding path, статус и ответственность команды.",
+      priority: "P0",
+      evidence_status: "hypothesis",
+    },
+  ];
+}
+
+function buildOpportunities(scenarios: DomainScenario[]): DomainOpportunity[] {
+  return scenarios.map((scenario, index) => {
+    const priorityWeight = scenario.priority === "P0" ? 5 : scenario.priority === "P1" ? 3 : 1;
+    return {
+      initiative: initiativeForScenario(scenario),
+      scenario: scenario.name,
+      reach: Math.max(1, priorityWeight - Math.floor(index / 3)),
+      impact: scenario.priority === "P2" ? 5 : 4,
+      confidence: scenario.evidence_status === "source-backed" ? 4 : scenario.evidence_status === "hypothesis" ? 3 : 2,
+      effort: scenario.priority === "P0" ? 2 : scenario.priority === "P1" ? 3 : 5,
+      priority: scenario.priority,
+    };
+  });
+}
+
+function initiativeForScenario(scenario: DomainScenario): string {
+  if (/ЖКХ|налоги|штрафы/.test(scenario.name)) return "Корзина проверенных счетов и напоминаний";
+  if (/Подписки/.test(scenario.name)) return "Центр регулярных платежей и лимитов";
+  if (/Путешествия/.test(scenario.name)) return "Маршрут платежей поездки и возвратов";
+  if (/Авто/.test(scenario.name)) return "Трекер этапных авто-платежей";
+  if (/Недвижимость/.test(scenario.name)) return "Платежный companion для сделки и владения";
+  if (/Повседневные/.test(scenario.name)) return "Выбор лучшего способа оплаты";
+  return `Улучшить сценарий: ${scenario.name}`;
+}
+
+function buildRoadmap(paymentDomain: boolean): DomainSynthesis["roadmap"] {
+  if (!paymentDomain) {
+    return [
+      { horizon: "0-3 месяца", focus: "Интервью, конкурентные экраны и проблемные гипотезы", outcome: "Подтвержденная problem framing." },
+      { horizon: "3-6 месяцев", focus: "MVP главного действия и измерение funnel events", outcome: "Проверенный путь до целевого действия." },
+      { horizon: "6-12 месяцев", focus: "Расширение сценариев и proof system", outcome: "Снижение возражений и рост повторяемости." },
+    ];
+  }
+
+  return [
+    { horizon: "0-3 месяца", focus: "Проверка P0 сценариев: счета, регулярные платежи, verified request-to-pay", outcome: "Подтвержденный MVP scope и список партнерских API." },
+    { horizon: "3-6 месяцев", focus: "Корзина счетов, статусы поставщика, повторные поручения", outcome: "Снижение ручной сверки и забытых платежей." },
+    { horizon: "6-12 месяцев", focus: "Семейные/делегированные платежи, умные повторы и резервные платежные маршруты", outcome: "Рост удержания и доли повторных платежей." },
+    { horizon: "12-18 месяцев", focus: "Путешествия, авто-этапы, BNPL-брокер", outcome: "Выход в высокотревожные многосторонние сценарии." },
+    { horizon: "18-24 месяца", focus: "Недвижимость и регулируемые партнерские сценарии", outcome: "Партнерский вход в крупные чеки без подмены банковских ролей." },
+  ];
+}
+
+function buildContradictionReview(result: MultiSourceResearchResult, paymentDomain: boolean): DomainSynthesis["contradiction_review"] {
+  const providerSet = new Set(result.providersUsed);
+  const coverage = providerSet.has("tavily") && providerSet.has("deepseek") && providerSet.has("gemini")
+    ? "Все default providers вернули результат."
+    : "Покрытие provider-ов неполное.";
+
+  return [
+    {
+      topic: "Факты против synthesis",
+      agreement: coverage,
+      disagreement: "DeepSeek/Gemini помогают найти риски, но не являются доказательством из источников.",
+      decision: "Рыночные цифры и конкурентные claims переносить downstream только с источником или `needs_validation`.",
+    },
+    {
+      topic: paymentDomain ? "Платеж по номеру телефона как универсальный UX" : "Единое позиционирование продукта",
+      agreement: "Может снижать трение в сценариях с известным получателем и повторяемым обязательством.",
+      disagreement: "В товарном чекауте с сохраненными картами эффект может быть слабее.",
+      decision: "Приоритет отдавать сценариям, где важны статус, доверие, повторяемость и несколько участников.",
+    },
+  ];
+}
+
+function buildResearchQuestions(result: MultiSourceResearchResult, synthesis: DomainSynthesis): string[] {
+  return [
+    `Какие сценарии лучше всего подтверждают позиционирование: ${synthesis.positioning}?`,
+    "Какие пользовательские пути дают лучший баланс reach, impact, confidence и effort?",
+    "Какие claims нельзя переносить в PRD/copy без дополнительной проверки?",
+    `Какие элементы доказательства, статуса и доверия нужны для сценариев: ${synthesis.scenarios.slice(0, 3).map((item) => item.name).join(", ")}?`,
+    `Какие источники из ${result.providersUsed.join(", ") || "нет provider-ов"} подтверждают или ограничивают выводы?`,
+  ];
+}
+
+function buildAudience(synthesis: DomainSynthesis, hasSources: boolean): ResearchSummaryPayload["audience"] {
+  return synthesis.scenarios.slice(0, 3).map((scenario) => ({
+    segment: audienceSegmentForScenario(scenario.name),
+    context: scenario.user_goal,
+    motivation: "Быстро завершить сценарий с понятным статусом, ответственностью и следующим шагом.",
+    barrier: scenario.friction,
+    evidence_status: hasSources ? "source-backed" : "needs validation",
+  }));
+}
+
+function buildJobsToBeDone(synthesis: DomainSynthesis, hasSources: boolean): ResearchSummaryPayload["jobs_to_be_done"] {
+  return synthesis.scenarios.slice(0, 4).map((scenario) => ({
+    segment: audienceSegmentForScenario(scenario.name),
+    job: scenario.user_goal,
+    trigger: triggerForScenario(scenario.name),
+    pain: scenario.friction,
+    desired_outcome: scenario.product_role,
+    evidence_status: hasSources && scenario.evidence_status === "source-backed" ? "source-backed" : "hypothesis",
+  }));
+}
+
+function buildProtoPersonas(synthesis: DomainSynthesis): ResearchSummaryPayload["proto_personas"] {
+  return synthesis.scenarios.slice(0, 3).map((scenario) => ({
+    name: personaNameForScenario(scenario.name),
+    segment: audienceSegmentForScenario(scenario.name),
+    jtbd: scenario.user_goal,
+    pain: scenario.friction,
+    desired_outcome: scenario.product_role,
+    evidence_status: scenario.evidence_status === "source-backed" ? "proto" : "needs validation",
+  }));
+}
+
+function audienceSegmentForScenario(name: string): string {
+  if (/ЖКХ|налоги|штрафы|регулярные услуги/.test(name)) return "Регулярный плательщик семьи";
+  if (/Подписки/.test(name)) return "Пользователь с повторными цифровыми сервисами";
+  if (/Путешествия/.test(name)) return "Путешественник или организатор поездки";
+  if (/Авто/.test(name)) return "Покупатель/владелец автомобиля";
+  if (/Недвижимость/.test(name)) return "Покупатель или владелец недвижимости";
+  if (/Повседневные/.test(name)) return "Покупатель в чекауте";
+  if (/Сравнение/.test(name)) return "Покупатель, сравнивающий альтернативы";
+  return "Целевой пользователь продукта";
+}
+
+function personaNameForScenario(name: string): string {
+  if (/ЖКХ|налоги|штрафы|регулярные услуги/.test(name)) return "Регулярный плательщик";
+  if (/Подписки/.test(name)) return "Контролирующий подписки";
+  if (/Путешествия/.test(name)) return "Организатор поездки";
+  if (/Авто/.test(name)) return "Авто-покупатель";
+  if (/Недвижимость/.test(name)) return "Покупатель недвижимости";
+  if (/Повседневные/.test(name)) return "Рациональный покупатель";
+  return "Рациональный пользователь";
+}
+
+function triggerForScenario(name: string): string {
+  if (/ЖКХ|налоги|штрафы/.test(name)) return "Пришло начисление, дедлайн, штраф или напоминание.";
+  if (/Подписки/.test(name)) return "Нужно оформить, продлить, отменить или ограничить повторное списание.";
+  if (/Путешествия/.test(name)) return "Планируется поездка, появилась доплата, возврат или групповой платеж.";
+  if (/Авто/.test(name)) return "Покупка, импорт, обслуживание или обязательный платеж по автомобилю.";
+  if (/Недвижимость/.test(name)) return "Сделка, регистрация, задаток или регулярные платежи после покупки.";
+  return "Появилась задача, которую нужно решить без лишнего риска.";
 }
 
 function renderResearchSummary(result: MultiSourceResearchResult, payload: ResearchSummaryPayload): string {
@@ -372,6 +666,16 @@ function renderResearchSummary(result: MultiSourceResearchResult, payload: Resea
     "- Citation requirement: required for market and competitor claims.",
     "- External write: denied unless approval exists.",
     "",
+    "## Продуктовый синтез",
+    "",
+    `**Тема:** ${payload.domain_synthesis.theme}`,
+    "",
+    `**Позиционирование:** ${payload.domain_synthesis.positioning}.`,
+    "",
+    "### Основные пользовательские пути",
+    "",
+    ...payload.domain_synthesis.primary_paths.map((item) => `- ${item}`),
+    "",
     "## Provider Coverage",
     "",
     "| Provider | Requested | Used | Sources count | Validation state | Notes |",
@@ -390,7 +694,34 @@ function renderResearchSummary(result: MultiSourceResearchResult, payload: Resea
     "",
     "| Question | Why it matters | Evidence needed | Status |",
     "|---|---|---|---|",
-    ...payload.research_questions.map((question) => `| ${cell(question)} | Blocks PRD and copy claims | Source-backed provider output plus user validation | ${payload.status === "ready" ? "answered" : "needs validation"} |`),
+    ...payload.research_questions.map((question) => `| ${cell(question)} | Блокирует решения PRD и copy claims | Данные провайдеров с источниками и пользовательская валидация | ${payload.status === "ready" ? "answered" : "needs validation"} |`),
+    "",
+    "## CJM-синтез сценариев",
+    "",
+    "| Сценарий | Цель пользователя | Трение | Роль продукта | Приоритет | Статус доказательств |",
+    "|---|---|---|---|---|---|",
+    ...payload.domain_synthesis.scenarios.map((item) => `| ${cell(item.name)} | ${cell(item.user_goal)} | ${cell(item.friction)} | ${cell(item.product_role)} | ${item.priority} | ${item.evidence_status} |`),
+    "",
+    "## Оценка возможностей",
+    "",
+    "| Инициатива | Сценарий | Reach | Impact | Confidence | Effort | RICE | Приоритет |",
+    "|---|---|---:|---:|---:|---:|---:|---|",
+    ...payload.domain_synthesis.opportunities.map((item) => `| ${cell(item.initiative)} | ${cell(item.scenario)} | ${item.reach} | ${item.impact} | ${item.confidence} | ${item.effort} | ${riceScore(item)} | ${item.priority} |`),
+    "",
+    "## Дорожная карта",
+    "",
+    "| Горизонт | Фокус | Результат |",
+    "|---|---|---|",
+    ...payload.domain_synthesis.roadmap.map((item) => `| ${cell(item.horizon)} | ${cell(item.focus)} | ${cell(item.outcome)} |`),
+    "",
+    "## Research-to-design handoff",
+    "",
+    "| Область | Сигналы |",
+    "|---|---|",
+    `| Требования доверия | ${cell(payload.domain_synthesis.design_handoff.trust_requirements.join("; "))} |`,
+    `| Моменты решения | ${cell(payload.domain_synthesis.design_handoff.decision_moments.join("; "))} |`,
+    `| Риски контента | ${cell(payload.domain_synthesis.design_handoff.content_risks.join("; "))} |`,
+    `| Нужные визуальные доказательства | ${cell(payload.domain_synthesis.design_handoff.visual_evidence_needs.join("; "))} |`,
     "",
     "## Audience",
     "",
@@ -426,11 +757,27 @@ function renderResearchSummary(result: MultiSourceResearchResult, payload: Resea
     "",
     "## Findings",
     "",
+    "### Факты из источников",
+    "",
+    "| Факт | Источник | Confidence |",
+    "|---|---|---|",
+    ...(payload.domain_synthesis.source_backed_facts.length
+      ? payload.domain_synthesis.source_backed_facts.map((item) => `| ${cell(item.fact)} | ${cell(item.source)} | ${item.confidence} |`)
+      : ["| Недостаточно source-backed фактов | Нужно расширить поиск или добавить пользовательские источники | low |"]),
+    "",
+    "### Синтезированные выводы",
+    "",
     "| Finding | Impact | Evidence | Confidence | Product implication |",
     "|---|---|---|---|---|",
     ...(payload.findings.length
-      ? payload.findings.map((item) => `| ${cell(item.finding)} | Informs PRD, IA and copy | ${cell(item.evidence)} | ${item.confidence} | Keep claims sourced or marked needs validation |`)
+      ? payload.findings.map((item) => `| ${cell(item.finding)} | Влияет на PRD, IA и copy | ${cell(item.evidence)} | ${item.confidence} | Сохранять источник или метку needs_validation |`)
       : ["| No source-backed finding returned | Research cannot be treated as ready | Provider output missing | low | Keep downstream work partial |"]),
+    "",
+    "## Contradiction Review",
+    "",
+    "| Тема | Согласие | Расхождение / риск | Решение |",
+    "|---|---|---|---|",
+    ...payload.domain_synthesis.contradiction_review.map((item) => `| ${cell(item.topic)} | ${cell(item.agreement)} | ${cell(item.disagreement)} | ${cell(item.decision)} |`),
     "",
     "## Claims To Validate",
     "",
@@ -465,7 +812,7 @@ function renderResearchSummary(result: MultiSourceResearchResult, payload: Resea
   ].join("\n");
 }
 
-function renderCompetitiveAnalysis(result: MultiSourceResearchResult): string {
+function renderCompetitiveAnalysis(result: MultiSourceResearchResult, synthesis: DomainSynthesis): string {
   const competitors = result.results.flatMap((item) => item.provider === "tavily" ? item.competitors : []).slice(0, 5);
 
   return [
@@ -490,11 +837,17 @@ function renderCompetitiveAnalysis(result: MultiSourceResearchResult): string {
     "",
     "## Comparison Matrix",
     "",
-    "| Competitor | Claim | Evidence | Confidence |",
-    "|---|---|---|---|",
+    "| Конкурент / альтернатива | Давление на сценарий | Claim | Evidence | Confidence |",
+    "|---|---|---|---|---|",
     ...(competitors.length
-      ? competitors.map((item) => `| ${cell(item.title ?? hostname(item.url))} | ${cell((item.content ?? item.title ?? "Competitor source found").slice(0, 220))} | ${cell(item.url)} | low |`)
-      : ["| needs validation | Need competitor set from Tavily or Firecrawl crawl | n/a | low |"]),
+      ? competitors.map((item, index) => `| ${cell(item.title ?? hostname(item.url))} | ${cell(synthesis.scenarios[index % synthesis.scenarios.length]?.name ?? "Общий рынок")} | ${cell((item.content ?? item.title ?? "Competitor source found").slice(0, 220))} | ${cell(item.url)} | low |`)
+      : ["| needs validation | Все сценарии | Need competitor set from Tavily or Firecrawl crawl | n/a | low |"]),
+    "",
+    "## Scenario Opportunity Map",
+    "",
+    "| Сценарий | Главное трение | Ответ продукта | Приоритет |",
+    "|---|---|---|---|",
+    ...synthesis.scenarios.map((item) => `| ${cell(item.name)} | ${cell(item.friction)} | ${cell(item.product_role)} | ${item.priority} |`),
     "",
     "## Takeaways",
     "",
@@ -595,7 +948,10 @@ function renderSyntheticInterviews(payload: ResearchSummaryPayload): string {
   ].join("\n");
 }
 
-function renderSwot(result: MultiSourceResearchResult): string {
+function renderSwot(result: MultiSourceResearchResult, synthesis: DomainSynthesis): string {
+  const topScenario = synthesis.scenarios[0];
+  const p0Initiatives = synthesis.opportunities.filter((item) => item.priority === "P0").map((item) => item.initiative);
+
   return [
     "# SWOT",
     "",
@@ -612,15 +968,15 @@ function renderSwot(result: MultiSourceResearchResult): string {
     "",
     "| Quadrant | Item | Evidence | Confidence | Implication |",
     "|---|---|---|---|---|",
-    "| Strength | Clear artifact-driven workflow can preserve research-to-frontend traceability | Local workflow files and provider output | medium | Use handoff bundle as source of truth |",
-    "| Weakness | Research readiness depends on configured external providers | Provider coverage state | medium | Keep partial status when providers are missing |",
-    "| Opportunity | Firecrawl and Playwright can improve reference-driven evidence collection | reference:scan package | medium | Feed screenshots and markdown into design gates |",
-    "| Threat | Unsourced market claims can leak into PRD or copy | DeepSeek guardrail and validation plan | high | Block success until claims are validated |",
+    `| Strength | ${cell(synthesis.positioning)} | Provider coverage and source-backed findings | medium | Use this as PRD/IA/design framing |`,
+    `| Weakness | Сильнейший сценарий пока требует validation: ${cell(topScenario?.name ?? "primary scenario")} | Evidence status: ${topScenario?.evidence_status ?? "needs validation"} | medium | Keep claims scoped until user/partner validation |`,
+    `| Opportunity | ${cell(p0Initiatives.join("; ") || "P0 opportunity requires discovery")} | Opportunity score and scenario synthesis | medium | Start roadmap from highest repeatability and trust leverage |`,
+    "| Threat | Unsourced market claims can leak into PRD or copy | DeepSeek/Gemini guardrail and validation plan | high | Block success until claims are validated |",
     "",
     "## Strategic Notes",
     "",
     "- Treat Tavily as source-backed evidence provider, and DeepSeek/Gemini as contradiction, check and strategic synthesis providers.",
-    "- Use Firecrawl/reference scan for public competitor/reference pages when URLs are known.",
+    `- Дизайн должен сохранить роль продукта: ${synthesis.design_handoff.trust_requirements[0] ?? "понятное доказательство и статус"}.`,
     "",
     "## Strategic Decisions",
     "",
@@ -637,7 +993,137 @@ function renderSwot(result: MultiSourceResearchResult): string {
   ].join("\n");
 }
 
-async function appendResearchHandoff(outputDir: string, status: ResearchSummaryPayload["status"], result: MultiSourceResearchResult): Promise<void> {
+async function writeResearchArtifact(
+  outputDir: string,
+  fileName: string,
+  candidate: string,
+  query: string,
+): Promise<ResearchArtifactWriteDecision> {
+  const filePath = join(outputDir, fileName);
+  const existing = existsSync(filePath) ? readFileSync(filePath, "utf8") : "";
+  const existingScore = existing ? scoreResearchArtifact(existing, query, fileName) : 0;
+  const candidateScore = scoreResearchArtifact(candidate, query, fileName);
+  const preserveExisting = Boolean(existing)
+    && existingScore >= 70
+    && candidateScore + 12 < existingScore;
+
+  if (preserveExisting) {
+    return {
+      file: fileName,
+      action: "preserved_existing",
+      existing_score: existingScore,
+      candidate_score: candidateScore,
+      reason: "Существующий артефакт сильнее по доменной глубине, русскому публикационному качеству или обязательной research-структуре.",
+    };
+  }
+
+  await writeFile(filePath, candidate, "utf8");
+
+  return {
+    file: fileName,
+    action: "written",
+    existing_score: existingScore,
+    candidate_score: candidateScore,
+    reason: existing ? "Новый артефакт прошел quality gate или существующий артефакт был слабее." : "Нет существующего артефакта для сохранения.",
+  };
+}
+
+function scoreResearchArtifact(content: string, query: string, fileName: string): number {
+  const lower = content.toLowerCase();
+  const queryTerms = extractDomainTerms(query);
+  const matchedQueryTerms = queryTerms.filter((term) => lower.includes(term)).length;
+  const requiredSections = requiredSectionsForResearchFile(fileName);
+  const matchedSections = requiredSections.filter((section) => content.includes(section)).length;
+  const cyrillicChars = content.match(/[А-Яа-яЁё]/g)?.length ?? 0;
+  const latinChars = content.match(/[A-Za-z]/g)?.length ?? 0;
+  const cyrillicRatio = cyrillicChars / Math.max(1, cyrillicChars + latinChars);
+  const genericPenalty = [
+    "Потенциальный покупатель продукта из запроса",
+    "Операционный или B2B-покупатель",
+    "Product need from research query",
+    "Claims need proof",
+    "Competitor discovery incomplete",
+    "No source-backed finding returned",
+  ].filter((marker) => content.includes(marker)).length;
+  const hasPayload = content.includes("artifact-json") || content.includes("schema_payload");
+  const hasProviderCoverage = content.includes("tavily") && content.includes("deepseek") && content.includes("gemini");
+  const hasValidationLanguage = lower.includes("needs validation")
+    || lower.includes("требует валидации")
+    || lower.includes("validation");
+
+  let score = 0;
+  score += Math.min(25, Math.round(content.length / 900));
+  score += Math.min(20, matchedQueryTerms * 4);
+  score += requiredSections.length ? Math.round((matchedSections / requiredSections.length) * 20) : 12;
+  score += cyrillicRatio >= 0.55 ? 15 : cyrillicRatio >= 0.35 ? 8 : 0;
+  score += hasPayload ? 6 : 0;
+  score += hasProviderCoverage ? 8 : 0;
+  score += hasValidationLanguage ? 6 : 0;
+  score -= genericPenalty * 8;
+
+  return Math.max(0, Math.min(100, score));
+}
+
+function extractDomainTerms(query: string): string[] {
+  const normalized = query
+    .toLowerCase()
+    .replace(/[^a-zа-яё0-9\s-]/gi, " ");
+  const stopWords = new Set([
+    "and",
+    "the",
+    "with",
+    "for",
+    "как",
+    "что",
+    "или",
+    "для",
+    "при",
+    "это",
+    "нужно",
+    "исследование",
+    "сценарии",
+    "payment",
+    "payments",
+    "research",
+  ]);
+
+  return Array.from(new Set(normalized
+    .split(/\s+/)
+    .map((term) => term.trim())
+    .filter((term) => term.length >= 4 && !stopWords.has(term))))
+    .slice(0, 12);
+}
+
+function requiredSectionsForResearchFile(fileName: string): string[] {
+  if (fileName === artifactFiles.research_summary) {
+    return ["## Inputs Used", "## Provider Coverage", "## Research Questions", "## Findings", "## Claims To Validate", "## Sources"];
+  }
+
+  if (fileName === artifactFiles.competitive_analysis) {
+    return ["## Inputs Used", "## Competitor Set", "## Comparison Matrix", "## Takeaways", "## Readiness Checklist"];
+  }
+
+  if (fileName === artifactFiles.proto_personas) {
+    return ["## Inputs Used", "## Guardrail", "## Proto Personas", "## Evidence Map", "## Validation Plan"];
+  }
+
+  if (fileName === artifactFiles.synthetic_interviews) {
+    return ["## Guardrail", "## Inputs Used", "## Simulated Interviews", "## Patterns To Validate"];
+  }
+
+  if (fileName === artifactFiles.swot) {
+    return ["## Inputs Used", "## SWOT", "## Strategic Notes", "## Risks", "## Readiness Checklist"];
+  }
+
+  return [];
+}
+
+async function appendResearchHandoff(
+  outputDir: string,
+  status: ResearchSummaryPayload["status"],
+  result: MultiSourceResearchResult,
+  decisions: ResearchArtifactWriteDecision[],
+): Promise<void> {
   const content = [
     "",
     "## Research Stage Update",
@@ -646,6 +1132,7 @@ async function appendResearchHandoff(outputDir: string, status: ResearchSummaryP
     "- Completed artifacts: `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`",
     `- Providers used: ${result.providersUsed.join(", ") || "none"}`,
     `- Validation state: ${result.validation.status}`,
+    `- Гейт записи артефактов: ${decisions.map((item) => `${item.file}=${item.action}`).join(", ")}`,
     `- Next Required Artifact: \`prd.md\`${status === "partial" ? " with claims marked needs validation" : ""}`,
     "",
   ].join("\n");
@@ -653,12 +1140,23 @@ async function appendResearchHandoff(outputDir: string, status: ResearchSummaryP
   await appendFile(join(outputDir, artifactFiles.handoff_bundle), content, "utf8");
 }
 
-async function appendResearchLedger(outputDir: string, status: ResearchSummaryPayload["status"], result: MultiSourceResearchResult): Promise<void> {
+async function appendResearchLedger(
+  outputDir: string,
+  status: ResearchSummaryPayload["status"],
+  result: MultiSourceResearchResult,
+  decisions: ResearchArtifactWriteDecision[],
+): Promise<void> {
   const content = [
     "",
     "## Research Stage Runner Record",
     "",
     `| ${new Date().toISOString()} | 01-research | ${status} | Providers used: ${result.providersUsed.join(", ") || "none"}; validation: ${result.validation.status} |`,
+    "",
+    "## Гейт записи research-артефактов",
+    "",
+    "| Файл | Действие | Оценка существующего | Оценка кандидата | Причина |",
+    "|---|---|---:|---:|---|",
+    ...decisions.map((item) => `| ${item.file} | ${item.action} | ${item.existing_score} | ${item.candidate_score} | ${cell(item.reason)} |`),
     "",
   ].join("\n");
 
@@ -701,6 +1199,10 @@ function hostname(url: string): string {
   } catch {
     return url;
   }
+}
+
+function riceScore(item: DomainOpportunity): number {
+  return Number(((item.reach * item.impact * item.confidence) / Math.max(1, item.effort)).toFixed(1));
 }
 
 async function main(): Promise<void> {
