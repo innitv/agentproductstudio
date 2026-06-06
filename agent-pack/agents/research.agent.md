@@ -70,7 +70,8 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 16. Сформировать список утверждений для валидации (`claims-to-validate`) и план валидации.
 17. Подготовить research-to-design handoff: какие выводы влияют на IA, CJM, visual hierarchy, trust patterns, accessibility, proof blocks, forms/controls и copy claims.
 18. Перед финальной записью выполнить candidate quality/write gate: проверка обязательных секций, доменной конкретики, русскоязычности публикационных секций, provider coverage, source-backed facts и отсутствия generic placeholders.
-19. Обновить `handoff-bundle.md` и `stage-gate-ledger.md`.
+19. Если research stage готовит `notion-research-export-ru.md`, выполнить publication shape self-check: personas, CJM/user paths, competitive matrix и ICE/RICE должны быть таблицами или схемами, иначе export остается `partial`/`needs_revision` до исправления.
+20. Обновить `handoff-bundle.md` и `stage-gate-ledger.md`.
 
 ## Evidence Quality Model (Модель качества доказательств)
 
@@ -141,6 +142,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - Перед synthesis обязателен `source quality pass`: убрать noisy snippets, отделить primary facts от model synthesis, отметить stale/indirect sources.
 - Если `research-summary.md` не содержит schema payload или `artifact-json`, агент должен исправить файл до передачи downstream.
 - Если runner или provider tool перегенерировал артефакты слишком шаблонно и ухудшил доменную детализацию, агент обязан восстановить детальный human-readable pack и сохранить provider coverage как validation evidence.
+- Если publication export превращает personas, CJM/user paths, competitive matrix или ICE/RICE в длинные текстовые карточки вместо таблиц/схем, агент обязан исправить export до запроса Notion approval.
 - Запрещено заменять обязательный поиск по внешним источникам (Tavily/DeepSeek/Gemini) простым браузерным сканированием (browser scan) или синтетической генерацией. Браузер/пользовательские источники могут использоваться как резерв (fallback) только с пометкой `needs_validation`.
 - Если Tavily/DeepSeek/Gemini требуют подтверждения на внешний API-вызов, агент исследований должен запросить approval через Оркестратор. Без подтверждения этап остается в статусе `partial`/`blocked`.
 - Каждая протоперсона должна содержать явный статус доказательства (`Evidence status`).

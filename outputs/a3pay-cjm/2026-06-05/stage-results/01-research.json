@@ -1,27 +1,12 @@
 {
   "stage_id": "01-research",
   "title": "Deep Research",
-  "status": "completed",
-  "artifacts_created": [
-    "research-summary.md",
-    "competitive-analysis.md",
-    "proto-personas.md",
-    "synthetic-interviews.md",
-    "swot.md"
-  ],
-  "inputs_used": [
-    "recursive-brief.md",
-    "notion-research-export-ru.md",
-    "Tavily provider output",
-    "DeepSeek contradiction review",
-    "Gemini strategy synthesis review",
-    "research-summary.md",
-    "Tavily/DeepSeek/Gemini validation pass",
-    "proto-personas.md",
-    "competitive-analysis.md",
-    "provider validation pass"
-  ],
+  "status": "failed",
+  "artifacts_created": [],
+  "inputs_used": [],
   "warnings": [],
-  "errors": [],
-  "completed_at": "2026-06-05T03:55:05.175Z"
+  "errors": [
+    "Research stage validation failed with 1 error(s)."
+  ],
+  "completed_at": "2026-06-06T07:43:00.657Z"
 }

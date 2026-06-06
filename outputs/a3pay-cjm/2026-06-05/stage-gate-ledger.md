@@ -87,3 +87,18 @@ Research stage должен иметь обязательные artifacts, `inpu
 ## Research Stage Runner Record
 
 | 2026-06-05T20:59:04.012Z | 01-research | ready | Providers used: tavily, deepseek, gemini; validation: pass |
+
+| 2026-06-06T07:42:32.286Z | workflow-engine rerun 01-research | reset | Forced rerun reset 01-research, 02-prd, 03-ia, 04-design, 05-copy, 06-screens, 07-prototype, 08-frontend, 10-test-bench, 11-qa, 12-release |
+## Research Stage Runner Record
+
+| 2026-06-06T07:43:00.644Z | 01-research | ready | Providers used: tavily, deepseek, gemini; validation: pass |
+
+## Гейт записи research-артефактов
+
+| Файл | Действие | Оценка существующего | Оценка кандидата | Причина |
+|---|---|---:|---:|---|
+| research-summary.md | written | 85 | 84 | Новый артефакт прошел quality gate или существующий артефакт был слабее. |
+| competitive-analysis.md | written | 46 | 38 | Новый артефакт прошел quality gate или существующий артефакт был слабее. |
+| proto-personas.md | written | 45 | 37 | Новый артефакт прошел quality gate или существующий артефакт был слабее. |
+| synthetic-interviews.md | written | 43 | 29 | Новый артефакт прошел quality gate или существующий артефакт был слабее. |
+| swot.md | written | 36 | 28 | Новый артефакт прошел quality gate или существующий артефакт был слабее. |

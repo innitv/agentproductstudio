@@ -3,16 +3,15 @@ schema_payload:
   {
     "status": "ready",
     "inputs_used": [
-      "approval-state.json",
       "artifact-manifest.json",
       "cjm-map.md",
       "competitive-analysis.md",
-      "figma-handoff-bundle.md",
-      "handoff-backups/2026-06-06T07-42-32-305Z-01-research-handoff-bundle-full.md",
+      "handoff-backups/2026-06-06T08-20-47-719Z-01-research-handoff-bundle-full.md",
       "handoff-bundle-full.md",
       "handoff-bundle.md",
       "notion-publication-plan.md",
       "notion-research-export-ru.md",
+      "opportunity-roadmap.md",
       "proto-personas.md",
       "recursive-brief.md",
       "research-summary.md",
@@ -20,6 +19,10 @@ schema_payload:
       "run-meta.json",
       "run-plan.md",
       "run-state.json",
+      "source-log.md",
+      "stage-gate-ledger.md",
+      "stage-results/00-intake.json",
+      "stage-results/01-research.json",
       "Tavily provider output when configured",
       "DeepSeek provider output when configured",
       "Gemini provider output when configured"
@@ -166,37 +169,37 @@ schema_payload:
     ],
     "findings": [
       {
-        "finding": "A3Pay CJM integrates multiple payment methods into one user scenario for paying goods and services via phone. Research pack to be uploaded in Notion and Figma updated. A3Pay offers secure, comprehensive payment services.",
-        "evidence": "https://www.a-3.ru, https://www.comnews.ru/digital-economy/content/229896/2023-11-01/2023-w44/1012/platyozhnyy-servis-a3-zapustil-servis-dlya-oplaty-uslug-zhkkh-adresu, https://pthwy.ru, https://blog.sailet.kz/payment_systems, https://chernobrovov.ru/articles/kak-postroit-cjm-3-sposoba-razrabotki-karty-vzaimodejstviya-s-potrebitelem.html",
+        "finding": "A3 Pay is a Russian payment service facilitating regular payments for utilities and services. It integrates with banks and payment systems for seamless transactions. The service supports over 300 providers across Russia.",
+        "evidence": "https://www.a-3.ru, https://mobifinance.ru/archive/2022/sponsors?id_exhibitor=5696, https://surf.ru/kak-sozdat-platezhnuyu-sistemu, https://www.youtube.com/watch?v=AfypOVaB5r0, https://www.forbes.ru/svoi-biznes/548594-subbotnij-vencur-2-mlrd-rublej-v-plateznyj-servis-a3-i-375-mln-v-startap-voloza",
         "confidence": "medium"
       },
       {
-        "finding": "платежей, направление получателям платежей информации о результатах проведения платежей. [...] ООО «Платёжный сервис А3» аккредитовано в качестве организации, осуществляющей деятельность в области информационных технологий, в марте 2022 г. Компания оказывает услуги информационного и технологического обслуживания участникам расчётов (кредитным организациям, банковским платежным агентам, получателям платежей и плательщикам) — код вида деятельности в области информационных технологий 20.01. Посредс",
+        "finding": "платежей, направление получателям платежей информации о результатах проведения платежей. [...] платёжные сервисы\n\n### Конструктор для оплаты услуг\n\nНастраиваемая форма платежа для сайта или приложения, через которую клиенты могут оплатить любые услуги. Доступ к базе 60+ тыс. организаций и 122+ млн лицевых счетов.\n\nimgDesktopimgMobilea3\n\nпоставщики услуг\n\n### Приём платежей в топ-банках страны\n\nОперативное подключение возможности отображать информацию о задолженностях и принимать платежи в крупне",
         "evidence": "https://www.a-3.ru",
-        "confidence": "medium"
-      },
-      {
-        "finding": "— сказал Тагир Кадыров, директор департамента продуктов и инноваций компании \"Платёжный сервис А3\". [...] \"Возможность совершать все платежи стимулирует людей использовать конкретный банк. Поэтому предоставление максимально широкого спектра услуг в рамках одного приложения — одна из важных задач в борьбе за пользователя. Решение компании А3 является уникальным в своем роде, позволяя собирать все счета в одном месте и максимально оперативно высылать уведомления пользователю. На текущий момент око",
-        "evidence": "https://www.comnews.ru/digital-economy/content/229896/2023-11-01/2023-w44/1012/platyozhnyy-servis-a3-zapustil-servis-dlya-oplaty-uslug-zhkkh-adresu",
-        "confidence": "medium"
-      },
-      {
-        "finding": "successfully completed\n\nSettings\n\nRecord video\n\nCapture face\n\nРазделить платеж\n\nНеопубликованные изменения\n\nПревью\n\nОпубликовать\n\nОтредактировал\n\nАнтон Коренев в 13:32\n\n1.\n\nПожалуйста, найдите ка…\n\n2.\n\nНасколько легко было вы...\n\n3.\n\nWe noticed that you spent some\n\n4.\n\nShare your feedback: what can we\n\n5.\n\nWhat else can we do to impr\n\nИнтуитивный конструктор\n\nИспользуйте любые блоки, комбинируйте их между собой и выстраивайте между ними любую логику\n\nМои карты\n\nВсе карты\n\n132 994,55 ₽\n\nМИР \\5573",
-        "evidence": "https://pthwy.ru",
-        "confidence": "medium"
-      },
-      {
-        "finding": "##### Преимущества:\n\n Высокий уровень безопасности и защиты платежей, обеспечиваемый шифрованием данных.\n Большое количество функций и возможность кастомизации платежной системы под конкретные потребности.\n Поддержка широкого спектра методов оплаты и валют.\n Единый интерфейс, позволяющий осуществлять платежи через несколько банков.\n\n##### Недостатки:\n\n Долгий процесс оформления, так как для подключения каждого метода оплаты требуется заключение отдельного договора.\n Интеграция платежной системы ",
-        "evidence": "https://blog.sailet.kz/payment_systems",
         "confidence": "low"
       },
       {
-        "finding": "We are asked to act as a \"research cross-check assistant\" and provide a concise cross-check of the research query, based on the provided artifacts. We should produce sections: likely audience and JTBD hypotheses, competitor discovery angles, risks and contradictions to verify, claims_to_validate, unknowns. We are not to invent sources, and any unsupported claims should be marked as needs_validation.\n\nWe have the freedom to use the provided artifacts to infer what might be validated or not. The q",
+        "finding": "Платёжный сервис А3\n\n## Платёжный сервис А3\n\n“Платёжный сервис А3” - продуктовая IT-компания, которая уже 15 лет специализируется на рынке регулярных платежей за услуги.  \n  \n Компания создает инновационные продукты для оптимизации регулярных платежей, делая оплату услуг в привычных каналах простой и удобной для пользователя.  \n  \n “Платёжный сервис А3” помогает банкам осуществлять прием платежей в пользу поставщиков регулярных услуг: жилищно-коммунальные услуги, мобильная связь, интернет, телев",
+        "evidence": "https://mobifinance.ru/archive/2022/sponsors?id_exhibitor=5696",
+        "confidence": "low"
+      },
+      {
+        "finding": "Весь процесс занимает от миллисекунд (для карточных платежей) до нескольких дней (для международных банковских переводов). При проектировании своей системы нужно закладывать архитектуру, способную обрабатывать каждый этап с нужной скоростью и надёжностью.\n\n### Ключевые участники экосистемы\n\nПлатёжная система не существует в вакууме — она часть большой экосистемы, где у каждого участника своя роль и интересы.\n\n| Участник | Роль |\n --- |\n| Плательщик | Инициирует транзакцию |\n| Получатель (мерчант",
+        "evidence": "https://surf.ru/kak-sozdat-platezhnuyu-sistemu",
+        "confidence": "low"
+      },
+      {
+        "finding": "Если вы хотите увидеть работу ИИ изнутри и собрать свой первый проект за 3 дня, присоединяйтесь к марафону ... платежной системы на сайте",
+        "evidence": "https://www.youtube.com/watch?v=AfypOVaB5r0",
+        "confidence": "low"
+      },
+      {
+        "finding": "We need to provide a cross-check analysis of the given CJM map and research summary context, as an independent research cross-check assistant. The user request: \"Пользователь попросил провести новое полное исследование по тематике A3 Pay согласно полноценному research flow проекта, используя расширенный research request с Desktop. ... Провести новое исследование платежных сценариев России для A3 Pay: собрать source-backed картину платежной экосистемы, CJM ключевых жизненных сценариев, конкурентн",
         "evidence": "DeepSeek cross-check only; not source-backed evidence.",
         "confidence": "low"
       },
       {
-        "finding": "Глубокий структурированный анализ продукта A3Pay, основанный на предоставленных артефактах и запросе на исследование.\n\n## Анализ продукта A3Pay: Платежные сценарии в России\n\n### 1. Вероятные сегменты аудитории и их гипотезы JTBD (Jobs To Be Done)\n\nНа основе предоставленной карты CJM и описания продукта A3Pay как агрегатора платежей по номеру телефона, можно выделить следующие сегменты аудитории и их гипотетические JTBD:\n\n**1.1. Сегмент: \"Занятые профессионалы / Семьи\"**\n*   **Характеристики:** В",
+        "finding": "## Глубокий анализ платежных сценариев России для A3 Pay\n\nНа основе предоставленной карты CJM (`cjm-map.md`) и общего запроса на исследование, я провел анализ для формирования стратегических рекомендаций по продукту A3 Pay на российском рынке.\n\n### 1. Вероятные сегменты аудитории и гипотезы их JTBD (Jobs To Be Done)\n\nАнализ ключевых платежных сценариев позволяет выделить следующие сегменты аудитории и их гипотетические JTBD:\n\n**Сегмент 1: Крупные покупатели/продавцы (Недвижимость, Автомобили)**\n",
         "evidence": "Gemini deep strategy synthesis & cross-check.",
         "confidence": "medium"
       }
@@ -208,70 +211,70 @@ schema_payload:
         "url_or_path": "https://www.a-3.ru",
         "type": "web",
         "used_for": "Research finding and competitor/context evidence",
-        "retrieved_at": "2026-06-06T07:43:00.633Z",
+        "retrieved_at": "2026-06-06T08:21:17.409Z",
         "confidence": "medium"
       },
       {
-        "title": "\"Платёжный сервис А3\" запустил сервис для оплаты услуг ЖКХ по адресу | ComNews",
+        "title": "| XV Международная конференция «ЦИФРОВЫЕ/МОБИЛЬНЫЕ ФИНАНСЫ 2025»",
         "provider": "tavily",
-        "url_or_path": "https://www.comnews.ru/digital-economy/content/229896/2023-11-01/2023-w44/1012/platyozhnyy-servis-a3-zapustil-servis-dlya-oplaty-uslug-zhkkh-adresu",
+        "url_or_path": "https://mobifinance.ru/archive/2022/sponsors?id_exhibitor=5696",
         "type": "web",
         "used_for": "Research finding and competitor/context evidence",
-        "retrieved_at": "2026-06-06T07:43:00.633Z",
+        "retrieved_at": "2026-06-06T08:21:17.409Z",
         "confidence": "medium"
       },
       {
-        "title": "Pathway",
+        "title": "Как создать платёжную систему в 2026: архитектура, технологии, стоимость",
         "provider": "tavily",
-        "url_or_path": "https://pthwy.ru",
+        "url_or_path": "https://surf.ru/kak-sozdat-platezhnuyu-sistemu",
         "type": "web",
         "used_for": "Research finding and competitor/context evidence",
-        "retrieved_at": "2026-06-06T07:43:00.633Z",
+        "retrieved_at": "2026-06-06T08:21:17.409Z",
         "confidence": "medium"
       },
       {
-        "title": "Как интегрировать платежную систему в свой продукт? - Блог Sailet",
+        "title": "Как принимать платежи на сайте? Полная схема интеграции",
         "provider": "tavily",
-        "url_or_path": "https://blog.sailet.kz/payment_systems",
+        "url_or_path": "https://www.youtube.com/watch?v=AfypOVaB5r0",
         "type": "web",
         "used_for": "Research finding and competitor/context evidence",
-        "retrieved_at": "2026-06-06T07:43:00.633Z",
+        "retrieved_at": "2026-06-06T08:21:17.409Z",
         "confidence": "medium"
       },
       {
-        "title": "Как построить CJM: 3 способа разработки карты взаимодействия с потребителем - Алексей Чернобровов",
+        "title": "Субботний венчур: 2 млрд рублей в «Платежный сервис А3» и $375 млн в стартап Воложа | Forbes.ru",
         "provider": "tavily",
-        "url_or_path": "https://chernobrovov.ru/articles/kak-postroit-cjm-3-sposoba-razrabotki-karty-vzaimodejstviya-s-potrebitelem.html",
+        "url_or_path": "https://www.forbes.ru/svoi-biznes/548594-subbotnij-vencur-2-mlrd-rublej-v-plateznyj-servis-a3-i-375-mln-v-startap-voloza",
         "type": "web",
         "used_for": "Research finding and competitor/context evidence",
-        "retrieved_at": "2026-06-06T07:43:00.633Z",
+        "retrieved_at": "2026-06-06T08:21:17.409Z",
         "confidence": "medium"
       },
       {
-        "title": "CJM (Customer Journey Map): что такое карта пути клиента в маркетинге, этапы, пример построения | Paper Planes",
+        "title": "Untitled",
         "provider": "tavily",
-        "url_or_path": "https://paper-planes.ru/customer_journey_map",
+        "url_or_path": "https://code41.com/ru/projects/reg01/home",
         "type": "web",
         "used_for": "Research finding and competitor/context evidence",
-        "retrieved_at": "2026-06-06T07:43:00.633Z",
+        "retrieved_at": "2026-06-06T08:21:17.409Z",
         "confidence": "medium"
       },
       {
-        "title": "Экспертное бюро",
+        "title": "Quarterly financial statements Data for Russian firms - PMC - NIH",
         "provider": "tavily",
-        "url_or_path": "https://bimeister.com/ru/expert/product_design",
+        "url_or_path": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12934216",
         "type": "web",
         "used_for": "Research finding and competitor/context evidence",
-        "retrieved_at": "2026-06-06T07:43:00.633Z",
+        "retrieved_at": "2026-06-06T08:21:17.409Z",
         "confidence": "medium"
       },
       {
-        "title": "Как создать customer journey map: объясняем на примерах",
+        "title": "Твоя подписка perplexity pro от Airtel перестала работать? - Reddit",
         "provider": "tavily",
-        "url_or_path": "https://www.unisender.com/ru/blog/customer-journey-map",
+        "url_or_path": "https://www.reddit.com/r/perplexity_ai/comments/1q6c1o0/your_perplexity_pro_from_airtel_subscription?tl=ru",
         "type": "web",
         "used_for": "Research finding and competitor/context evidence",
-        "retrieved_at": "2026-06-06T07:43:00.633Z",
+        "retrieved_at": "2026-06-06T08:21:17.409Z",
         "confidence": "medium"
       }
     ],
@@ -412,29 +415,29 @@ schema_payload:
       ],
       "roadmap": [
         {
-          "horizon": "0-3 months",
-          "focus": "Research validation, partner interviews, service-payment MVP scope",
-          "outcome": "Confirm P0 use cases and API feasibility."
+          "horizon": "0-3 месяца",
+          "focus": "Проверка P0 сценариев: счета, регулярные платежи, verified request-to-pay",
+          "outcome": "Подтвержденный MVP scope и список партнерских API."
         },
         {
-          "horizon": "3-6 months",
-          "focus": "Bill basket, verified phone requests, provider status MVP",
-          "outcome": "Increase repeat payments and reduce payment-status support."
+          "horizon": "3-6 месяцев",
+          "focus": "Корзина счетов, статусы поставщика, повторные поручения",
+          "outcome": "Снижение ручной сверки и забытых платежей."
         },
         {
-          "horizon": "6-12 months",
-          "focus": "Recurring mandates, family/delegated payments, smart retries",
-          "outcome": "Build retention loop and recurring payment share."
+          "horizon": "6-12 месяцев",
+          "focus": "Семейные/делегированные платежи, умные повторы и резервные платежные маршруты",
+          "outcome": "Рост удержания и доли повторных платежей."
         },
         {
-          "horizon": "12-18 months",
-          "focus": "BNPL broker, travel itinerary, auto payment milestones",
-          "outcome": "Expand into higher-AOV multi-party scenarios."
+          "horizon": "12-18 месяцев",
+          "focus": "Путешествия, авто-этапы, BNPL-брокер",
+          "outcome": "Выход в высокотревожные многосторонние сценарии."
         },
         {
-          "horizon": "18-24 months",
-          "focus": "Real estate companion and bank/notary partnerships",
-          "outcome": "Enter high-trust, low-frequency scenarios without replacing regulated actors."
+          "horizon": "18-24 месяца",
+          "focus": "Недвижимость и регулируемые партнерские сценарии",
+          "outcome": "Партнерский вход в крупные чеки без подмены банковских ролей."
         }
       ],
       "design_handoff": {
@@ -463,33 +466,33 @@ schema_payload:
       },
       "source_backed_facts": [
         {
-          "fact": "A3Pay CJM integrates multiple payment methods into one user scenario for paying goods and services via phone. Research pack to be uploaded in Notion and Figma updated. A3Pay offers secure, comprehensive payment services.",
-          "source": "https://www.a-3.ru, https://www.comnews.ru/digital-economy/content/229896/2023-11-01/2023-w44/1012/platyozhnyy-servis-a3-zapustil-servis-dlya-oplaty-uslug-zhkkh-adresu, https://pthwy.ru, https://blog.sailet.kz/payment_systems, https://chernobrovov.ru/articles/kak-postroit-cjm-3-sposoba-razrabotki-karty-vzaimodejstviya-s-potrebitelem.html",
+          "fact": "A3 Pay is a Russian payment service facilitating regular payments for utilities and services. It integrates with banks and payment systems for seamless transactions. The service supports over 300 providers across Russia.",
+          "source": "https://www.a-3.ru, https://mobifinance.ru/archive/2022/sponsors?id_exhibitor=5696, https://surf.ru/kak-sozdat-platezhnuyu-sistemu, https://www.youtube.com/watch?v=AfypOVaB5r0, https://www.forbes.ru/svoi-biznes/548594-subbotnij-vencur-2-mlrd-rublej-v-plateznyj-servis-a3-i-375-mln-v-startap-voloza",
           "confidence": "medium"
         },
         {
-          "fact": "платежей, направление получателям платежей информации о результатах проведения платежей. [...] ООО «Платёжный сервис А3» аккредитовано в качестве организации, осуществляющей деятельность в области информационных технологий, в марте 2022 г. Компания оказывает у",
+          "fact": "платежей, направление получателям платежей информации о результатах проведения платежей. [...] платёжные сервисы\n\n### Конструктор для оплаты услуг\n\nНастраиваемая форма платежа для сайта или приложения, через которую клиенты могут оплатить любые услуги. Доступ ",
           "source": "https://www.a-3.ru",
-          "confidence": "medium"
-        },
-        {
-          "fact": "— сказал Тагир Кадыров, директор департамента продуктов и инноваций компании \"Платёжный сервис А3\". [...] \"Возможность совершать все платежи стимулирует людей использовать конкретный банк. Поэтому предоставление максимально широкого спектра услуг в рамках одно",
-          "source": "https://www.comnews.ru/digital-economy/content/229896/2023-11-01/2023-w44/1012/platyozhnyy-servis-a3-zapustil-servis-dlya-oplaty-uslug-zhkkh-adresu",
-          "confidence": "medium"
-        },
-        {
-          "fact": "successfully completed\n\nSettings\n\nRecord video\n\nCapture face\n\nРазделить платеж\n\nНеопубликованные изменения\n\nПревью\n\nОпубликовать\n\nОтредактировал\n\nАнтон Коренев в 13:32\n\n1.\n\nПожалуйста, найдите ка…\n\n2.\n\nНасколько легко было вы...\n\n3.\n\nWe noticed that you spent ",
-          "source": "https://pthwy.ru",
-          "confidence": "medium"
-        },
-        {
-          "fact": "##### Преимущества:\n\n Высокий уровень безопасности и защиты платежей, обеспечиваемый шифрованием данных.\n Большое количество функций и возможность кастомизации платежной системы под конкретные потребности.\n Поддержка широкого спектра методов оплаты и валют.\n Е",
-          "source": "https://blog.sailet.kz/payment_systems",
           "confidence": "low"
         },
         {
-          "fact": "В рамках общей цели улучшения взаимодействия с потребителем, можно выделить несколько основных задач построения CJM: [...] Тем не менее, несмотря на вышеуказанные недостатки, ручной метод разработки CJM удобно использовать в условиях ограниченного времени, ког",
-          "source": "https://chernobrovov.ru/articles/kak-postroit-cjm-3-sposoba-razrabotki-karty-vzaimodejstviya-s-potrebitelem.html",
+          "fact": "Платёжный сервис А3\n\n## Платёжный сервис А3\n\n“Платёжный сервис А3” - продуктовая IT-компания, которая уже 15 лет специализируется на рынке регулярных платежей за услуги.  \n  \n Компания создает инновационные продукты для оптимизации регулярных платежей, делая о",
+          "source": "https://mobifinance.ru/archive/2022/sponsors?id_exhibitor=5696",
+          "confidence": "low"
+        },
+        {
+          "fact": "Весь процесс занимает от миллисекунд (для карточных платежей) до нескольких дней (для международных банковских переводов). При проектировании своей системы нужно закладывать архитектуру, способную обрабатывать каждый этап с нужной скоростью и надёжностью.\n\n###",
+          "source": "https://surf.ru/kak-sozdat-platezhnuyu-sistemu",
+          "confidence": "low"
+        },
+        {
+          "fact": "Если вы хотите увидеть работу ИИ изнутри и собрать свой первый проект за 3 дня, присоединяйтесь к марафону ... платежной системы на сайте",
+          "source": "https://www.youtube.com/watch?v=AfypOVaB5r0",
+          "confidence": "low"
+        },
+        {
+          "fact": "На информационном ресурсе применяются рекомендательные технологии (информационные технологии предоставления информации на основе сбора, систематизации и анализа сведений, относящихся к предпочтениям пользователей сети «Интернет», находящихся на территории Росс",
+          "source": "https://www.forbes.ru/svoi-biznes/548594-subbotnij-vencur-2-mlrd-rublej-v-plateznyj-servis-a3-i-375-mln-v-startap-voloza",
           "confidence": "low"
         }
       ],
@@ -523,16 +526,15 @@ schema_payload:
 
 ## Inputs Used
 
-- approval-state.json
 - artifact-manifest.json
 - cjm-map.md
 - competitive-analysis.md
-- figma-handoff-bundle.md
-- handoff-backups/2026-06-06T07-42-32-305Z-01-research-handoff-bundle-full.md
+- handoff-backups/2026-06-06T08-20-47-719Z-01-research-handoff-bundle-full.md
 - handoff-bundle-full.md
 - handoff-bundle.md
 - notion-publication-plan.md
 - notion-research-export-ru.md
+- opportunity-roadmap.md
 - proto-personas.md
 - recursive-brief.md
 - research-summary.md
@@ -540,6 +542,10 @@ schema_payload:
 - run-meta.json
 - run-plan.md
 - run-state.json
+- source-log.md
+- stage-gate-ledger.md
+- stage-results/00-intake.json
+- stage-results/01-research.json
 - Tavily provider output when configured
 - DeepSeek provider output when configured
 - Gemini provider output when configured
@@ -614,11 +620,11 @@ schema_payload:
 
 | Горизонт | Фокус | Результат |
 |---|---|---|
-| 0-3 months | Research validation, partner interviews, service-payment MVP scope | Confirm P0 use cases and API feasibility. |
-| 3-6 months | Bill basket, verified phone requests, provider status MVP | Increase repeat payments and reduce payment-status support. |
-| 6-12 months | Recurring mandates, family/delegated payments, smart retries | Build retention loop and recurring payment share. |
-| 12-18 months | BNPL broker, travel itinerary, auto payment milestones | Expand into higher-AOV multi-party scenarios. |
-| 18-24 months | Real estate companion and bank/notary partnerships | Enter high-trust, low-frequency scenarios without replacing regulated actors. |
+| 0-3 месяца | Проверка P0 сценариев: счета, регулярные платежи, verified request-to-pay | Подтвержденный MVP scope и список партнерских API. |
+| 3-6 месяцев | Корзина счетов, статусы поставщика, повторные поручения | Снижение ручной сверки и забытых платежей. |
+| 6-12 месяцев | Семейные/делегированные платежи, умные повторы и резервные платежные маршруты | Рост удержания и доли повторных платежей. |
+| 12-18 месяцев | Путешествия, авто-этапы, BNPL-брокер | Выход в высокотревожные многосторонние сценарии. |
+| 18-24 месяца | Недвижимость и регулируемые партнерские сценарии | Партнерский вход в крупные чеки без подмены банковских ролей. |
 
 ## Research-to-design handoff
 
@@ -668,7 +674,7 @@ Guardrail: synthetic interviews are used only for hypothesis generation and vali
 
 | Name | Type | Category | Core offer | Source | Evidence status |
 |---|---|---|---|---|---|
-| A3 — сервис электронных платежей и эквайринга для бизнеса | alternative | market context | платежей, направление получателям платежей информации о результатах проведения платежей. [...] ООО «Платёжный сервис А3» аккредитовано в качестве организации, осуществляющей деятел | https://www.a-3.ru | source-backed |
+| Competitor discovery incomplete | alternative | unknown | Needs configured Tavily/Firecrawl run | n/a | needs validation |
 
 ## Findings
 
@@ -676,24 +682,24 @@ Guardrail: synthetic interviews are used only for hypothesis generation and vali
 
 | Факт | Источник | Confidence |
 |---|---|---|
-| A3Pay CJM integrates multiple payment methods into one user scenario for paying goods and services via phone. Research pack to be uploaded in Notion and Figma updated. A3Pay offers secure, comprehensive payment services. | https://www.a-3.ru, https://www.comnews.ru/digital-economy/content/229896/2023-11-01/2023-w44/1012/platyozhnyy-servis-a3-zapustil-servis-dlya-oplaty-uslug-zhkkh-adresu, https://pthwy.ru, https://blog.sailet.kz/payment_systems, https://chernobrovov.ru/articles/kak-postroit-cjm-3-sposoba-razrabotki-karty-vzaimodejstviya-s-potrebitelem.html | medium |
-| платежей, направление получателям платежей информации о результатах проведения платежей. [...] ООО «Платёжный сервис А3» аккредитовано в качестве организации, осуществляющей деятельность в области информационных технологий, в марте 2022 г. Компания оказывает у | https://www.a-3.ru | medium |
-| — сказал Тагир Кадыров, директор департамента продуктов и инноваций компании "Платёжный сервис А3". [...] "Возможность совершать все платежи стимулирует людей использовать конкретный банк. Поэтому предоставление максимально широкого спектра услуг в рамках одно | https://www.comnews.ru/digital-economy/content/229896/2023-11-01/2023-w44/1012/platyozhnyy-servis-a3-zapustil-servis-dlya-oplaty-uslug-zhkkh-adresu | medium |
-| successfully completed  Settings  Record video  Capture face  Разделить платеж  Неопубликованные изменения  Превью  Опубликовать  Отредактировал  Антон Коренев в 13:32  1.  Пожалуйста, найдите ка…  2.  Насколько легко было вы...  3.  We noticed that you spent | https://pthwy.ru | medium |
-| ##### Преимущества:   Высокий уровень безопасности и защиты платежей, обеспечиваемый шифрованием данных.  Большое количество функций и возможность кастомизации платежной системы под конкретные потребности.  Поддержка широкого спектра методов оплаты и валют.  Е | https://blog.sailet.kz/payment_systems | low |
-| В рамках общей цели улучшения взаимодействия с потребителем, можно выделить несколько основных задач построения CJM: [...] Тем не менее, несмотря на вышеуказанные недостатки, ручной метод разработки CJM удобно использовать в условиях ограниченного времени, ког | https://chernobrovov.ru/articles/kak-postroit-cjm-3-sposoba-razrabotki-karty-vzaimodejstviya-s-potrebitelem.html | low |
+| A3 Pay is a Russian payment service facilitating regular payments for utilities and services. It integrates with banks and payment systems for seamless transactions. The service supports over 300 providers across Russia. | https://www.a-3.ru, https://mobifinance.ru/archive/2022/sponsors?id_exhibitor=5696, https://surf.ru/kak-sozdat-platezhnuyu-sistemu, https://www.youtube.com/watch?v=AfypOVaB5r0, https://www.forbes.ru/svoi-biznes/548594-subbotnij-vencur-2-mlrd-rublej-v-plateznyj-servis-a3-i-375-mln-v-startap-voloza | medium |
+| платежей, направление получателям платежей информации о результатах проведения платежей. [...] платёжные сервисы  ### Конструктор для оплаты услуг  Настраиваемая форма платежа для сайта или приложения, через которую клиенты могут оплатить любые услуги. Доступ | https://www.a-3.ru | low |
+| Платёжный сервис А3  ## Платёжный сервис А3  “Платёжный сервис А3” - продуктовая IT-компания, которая уже 15 лет специализируется на рынке регулярных платежей за услуги.       Компания создает инновационные продукты для оптимизации регулярных платежей, делая о | https://mobifinance.ru/archive/2022/sponsors?id_exhibitor=5696 | low |
+| Весь процесс занимает от миллисекунд (для карточных платежей) до нескольких дней (для международных банковских переводов). При проектировании своей системы нужно закладывать архитектуру, способную обрабатывать каждый этап с нужной скоростью и надёжностью.  ### | https://surf.ru/kak-sozdat-platezhnuyu-sistemu | low |
+| Если вы хотите увидеть работу ИИ изнутри и собрать свой первый проект за 3 дня, присоединяйтесь к марафону ... платежной системы на сайте | https://www.youtube.com/watch?v=AfypOVaB5r0 | low |
+| На информационном ресурсе применяются рекомендательные технологии (информационные технологии предоставления информации на основе сбора, систематизации и анализа сведений, относящихся к предпочтениям пользователей сети «Интернет», находящихся на территории Росс | https://www.forbes.ru/svoi-biznes/548594-subbotnij-vencur-2-mlrd-rublej-v-plateznyj-servis-a3-i-375-mln-v-startap-voloza | low |
 
 ### Синтезированные выводы
 
 | Finding | Impact | Evidence | Confidence | Product implication |
 |---|---|---|---|---|
-| A3Pay CJM integrates multiple payment methods into one user scenario for paying goods and services via phone. Research pack to be uploaded in Notion and Figma updated. A3Pay offers secure, comprehensive payment services. | Влияет на PRD, IA и copy | https://www.a-3.ru, https://www.comnews.ru/digital-economy/content/229896/2023-11-01/2023-w44/1012/platyozhnyy-servis-a3-zapustil-servis-dlya-oplaty-uslug-zhkkh-adresu, https://pthwy.ru, https://blog.sailet.kz/payment_systems, https://chernobrovov.ru/articles/kak-postroit-cjm-3-sposoba-razrabotki-karty-vzaimodejstviya-s-potrebitelem.html | medium | Сохранять источник или метку needs_validation |
-| платежей, направление получателям платежей информации о результатах проведения платежей. [...] ООО «Платёжный сервис А3» аккредитовано в качестве организации, осуществляющей деятельность в области информационных технологий, в марте 2022 г. Компания оказывает услуги информационного и технологического обслуживания участникам расчётов (кредитным организациям, банковским платежным агентам, получателям платежей и плательщикам) — код вида деятельности в области информационных технологий 20.01. Посредс | Влияет на PRD, IA и copy | https://www.a-3.ru | medium | Сохранять источник или метку needs_validation |
-| — сказал Тагир Кадыров, директор департамента продуктов и инноваций компании "Платёжный сервис А3". [...] "Возможность совершать все платежи стимулирует людей использовать конкретный банк. Поэтому предоставление максимально широкого спектра услуг в рамках одного приложения — одна из важных задач в борьбе за пользователя. Решение компании А3 является уникальным в своем роде, позволяя собирать все счета в одном месте и максимально оперативно высылать уведомления пользователю. На текущий момент око | Влияет на PRD, IA и copy | https://www.comnews.ru/digital-economy/content/229896/2023-11-01/2023-w44/1012/platyozhnyy-servis-a3-zapustil-servis-dlya-oplaty-uslug-zhkkh-adresu | medium | Сохранять источник или метку needs_validation |
-| successfully completed  Settings  Record video  Capture face  Разделить платеж  Неопубликованные изменения  Превью  Опубликовать  Отредактировал  Антон Коренев в 13:32  1.  Пожалуйста, найдите ка…  2.  Насколько легко было вы...  3.  We noticed that you spent some  4.  Share your feedback: what can we  5.  What else can we do to impr  Интуитивный конструктор  Используйте любые блоки, комбинируйте их между собой и выстраивайте между ними любую логику  Мои карты  Все карты  132 994,55 ₽  МИР \5573 | Влияет на PRD, IA и copy | https://pthwy.ru | medium | Сохранять источник или метку needs_validation |
-| ##### Преимущества:   Высокий уровень безопасности и защиты платежей, обеспечиваемый шифрованием данных.  Большое количество функций и возможность кастомизации платежной системы под конкретные потребности.  Поддержка широкого спектра методов оплаты и валют.  Единый интерфейс, позволяющий осуществлять платежи через несколько банков.  ##### Недостатки:   Долгий процесс оформления, так как для подключения каждого метода оплаты требуется заключение отдельного договора.  Интеграция платежной системы | Влияет на PRD, IA и copy | https://blog.sailet.kz/payment_systems | low | Сохранять источник или метку needs_validation |
-| We are asked to act as a "research cross-check assistant" and provide a concise cross-check of the research query, based on the provided artifacts. We should produce sections: likely audience and JTBD hypotheses, competitor discovery angles, risks and contradictions to verify, claims_to_validate, unknowns. We are not to invent sources, and any unsupported claims should be marked as needs_validation.  We have the freedom to use the provided artifacts to infer what might be validated or not. The q | Влияет на PRD, IA и copy | DeepSeek cross-check only; not source-backed evidence. | low | Сохранять источник или метку needs_validation |
-| Глубокий структурированный анализ продукта A3Pay, основанный на предоставленных артефактах и запросе на исследование.  ## Анализ продукта A3Pay: Платежные сценарии в России  ### 1. Вероятные сегменты аудитории и их гипотезы JTBD (Jobs To Be Done)  На основе предоставленной карты CJM и описания продукта A3Pay как агрегатора платежей по номеру телефона, можно выделить следующие сегменты аудитории и их гипотетические JTBD:  **1.1. Сегмент: "Занятые профессионалы / Семьи"** *   **Характеристики:** В | Влияет на PRD, IA и copy | Gemini deep strategy synthesis & cross-check. | medium | Сохранять источник или метку needs_validation |
+| A3 Pay is a Russian payment service facilitating regular payments for utilities and services. It integrates with banks and payment systems for seamless transactions. The service supports over 300 providers across Russia. | Влияет на PRD, IA и copy | https://www.a-3.ru, https://mobifinance.ru/archive/2022/sponsors?id_exhibitor=5696, https://surf.ru/kak-sozdat-platezhnuyu-sistemu, https://www.youtube.com/watch?v=AfypOVaB5r0, https://www.forbes.ru/svoi-biznes/548594-subbotnij-vencur-2-mlrd-rublej-v-plateznyj-servis-a3-i-375-mln-v-startap-voloza | medium | Сохранять источник или метку needs_validation |
+| платежей, направление получателям платежей информации о результатах проведения платежей. [...] платёжные сервисы  ### Конструктор для оплаты услуг  Настраиваемая форма платежа для сайта или приложения, через которую клиенты могут оплатить любые услуги. Доступ к базе 60+ тыс. организаций и 122+ млн лицевых счетов.  imgDesktopimgMobilea3  поставщики услуг  ### Приём платежей в топ-банках страны  Оперативное подключение возможности отображать информацию о задолженностях и принимать платежи в крупне | Влияет на PRD, IA и copy | https://www.a-3.ru | low | Сохранять источник или метку needs_validation |
+| Платёжный сервис А3  ## Платёжный сервис А3  “Платёжный сервис А3” - продуктовая IT-компания, которая уже 15 лет специализируется на рынке регулярных платежей за услуги.       Компания создает инновационные продукты для оптимизации регулярных платежей, делая оплату услуг в привычных каналах простой и удобной для пользователя.       “Платёжный сервис А3” помогает банкам осуществлять прием платежей в пользу поставщиков регулярных услуг: жилищно-коммунальные услуги, мобильная связь, интернет, телев | Влияет на PRD, IA и copy | https://mobifinance.ru/archive/2022/sponsors?id_exhibitor=5696 | low | Сохранять источник или метку needs_validation |
+| Весь процесс занимает от миллисекунд (для карточных платежей) до нескольких дней (для международных банковских переводов). При проектировании своей системы нужно закладывать архитектуру, способную обрабатывать каждый этап с нужной скоростью и надёжностью.  ### Ключевые участники экосистемы  Платёжная система не существует в вакууме — она часть большой экосистемы, где у каждого участника своя роль и интересы.  \| Участник \| Роль \|  --- \| \| Плательщик \| Инициирует транзакцию \| \| Получатель (мерчант | Влияет на PRD, IA и copy | https://surf.ru/kak-sozdat-platezhnuyu-sistemu | low | Сохранять источник или метку needs_validation |
+| Если вы хотите увидеть работу ИИ изнутри и собрать свой первый проект за 3 дня, присоединяйтесь к марафону ... платежной системы на сайте | Влияет на PRD, IA и copy | https://www.youtube.com/watch?v=AfypOVaB5r0 | low | Сохранять источник или метку needs_validation |
+| We need to provide a cross-check analysis of the given CJM map and research summary context, as an independent research cross-check assistant. The user request: "Пользователь попросил провести новое полное исследование по тематике A3 Pay согласно полноценному research flow проекта, используя расширенный research request с Desktop. ... Провести новое исследование платежных сценариев России для A3 Pay: собрать source-backed картину платежной экосистемы, CJM ключевых жизненных сценариев, конкурентн | Влияет на PRD, IA и copy | DeepSeek cross-check only; not source-backed evidence. | low | Сохранять источник или метку needs_validation |
+| ## Глубокий анализ платежных сценариев России для A3 Pay  На основе предоставленной карты CJM (`cjm-map.md`) и общего запроса на исследование, я провел анализ для формирования стратегических рекомендаций по продукту A3 Pay на российском рынке.  ### 1. Вероятные сегменты аудитории и гипотезы их JTBD (Jobs To Be Done)  Анализ ключевых платежных сценариев позволяет выделить следующие сегменты аудитории и их гипотетические JTBD:  **Сегмент 1: Крупные покупатели/продавцы (Недвижимость, Автомобили)** | Влияет на PRD, IA и copy | Gemini deep strategy synthesis & cross-check. | medium | Сохранять источник или метку needs_validation |
 
 ## Contradiction Review
 
@@ -722,14 +728,14 @@ Guardrail: synthetic interviews are used only for hypothesis generation and vali
 
 | Source | Provider | Type | URL/path | Used for | Retrieved at | Confidence |
 |---|---|---|---|---|---|---|
-| A3 — сервис электронных платежей и эквайринга для бизнеса | tavily | web | https://www.a-3.ru | Research finding and competitor/context evidence | 2026-06-06T07:43:00.633Z | medium |
-| "Платёжный сервис А3" запустил сервис для оплаты услуг ЖКХ по адресу \| ComNews | tavily | web | https://www.comnews.ru/digital-economy/content/229896/2023-11-01/2023-w44/1012/platyozhnyy-servis-a3-zapustil-servis-dlya-oplaty-uslug-zhkkh-adresu | Research finding and competitor/context evidence | 2026-06-06T07:43:00.633Z | medium |
-| Pathway | tavily | web | https://pthwy.ru | Research finding and competitor/context evidence | 2026-06-06T07:43:00.633Z | medium |
-| Как интегрировать платежную систему в свой продукт? - Блог Sailet | tavily | web | https://blog.sailet.kz/payment_systems | Research finding and competitor/context evidence | 2026-06-06T07:43:00.633Z | medium |
-| Как построить CJM: 3 способа разработки карты взаимодействия с потребителем - Алексей Чернобровов | tavily | web | https://chernobrovov.ru/articles/kak-postroit-cjm-3-sposoba-razrabotki-karty-vzaimodejstviya-s-potrebitelem.html | Research finding and competitor/context evidence | 2026-06-06T07:43:00.633Z | medium |
-| CJM (Customer Journey Map): что такое карта пути клиента в маркетинге, этапы, пример построения \| Paper Planes | tavily | web | https://paper-planes.ru/customer_journey_map | Research finding and competitor/context evidence | 2026-06-06T07:43:00.633Z | medium |
-| Экспертное бюро | tavily | web | https://bimeister.com/ru/expert/product_design | Research finding and competitor/context evidence | 2026-06-06T07:43:00.633Z | medium |
-| Как создать customer journey map: объясняем на примерах | tavily | web | https://www.unisender.com/ru/blog/customer-journey-map | Research finding and competitor/context evidence | 2026-06-06T07:43:00.633Z | medium |
+| A3 — сервис электронных платежей и эквайринга для бизнеса | tavily | web | https://www.a-3.ru | Research finding and competitor/context evidence | 2026-06-06T08:21:17.409Z | medium |
+| \| XV Международная конференция «ЦИФРОВЫЕ/МОБИЛЬНЫЕ ФИНАНСЫ 2025» | tavily | web | https://mobifinance.ru/archive/2022/sponsors?id_exhibitor=5696 | Research finding and competitor/context evidence | 2026-06-06T08:21:17.409Z | medium |
+| Как создать платёжную систему в 2026: архитектура, технологии, стоимость | tavily | web | https://surf.ru/kak-sozdat-platezhnuyu-sistemu | Research finding and competitor/context evidence | 2026-06-06T08:21:17.409Z | medium |
+| Как принимать платежи на сайте? Полная схема интеграции | tavily | web | https://www.youtube.com/watch?v=AfypOVaB5r0 | Research finding and competitor/context evidence | 2026-06-06T08:21:17.409Z | medium |
+| Субботний венчур: 2 млрд рублей в «Платежный сервис А3» и $375 млн в стартап Воложа \| Forbes.ru | tavily | web | https://www.forbes.ru/svoi-biznes/548594-subbotnij-vencur-2-mlrd-rublej-v-plateznyj-servis-a3-i-375-mln-v-startap-voloza | Research finding and competitor/context evidence | 2026-06-06T08:21:17.409Z | medium |
+| Untitled | tavily | web | https://code41.com/ru/projects/reg01/home | Research finding and competitor/context evidence | 2026-06-06T08:21:17.409Z | medium |
+| Quarterly financial statements Data for Russian firms - PMC - NIH | tavily | web | https://pmc.ncbi.nlm.nih.gov/articles/PMC12934216 | Research finding and competitor/context evidence | 2026-06-06T08:21:17.409Z | medium |
+| Твоя подписка perplexity pro от Airtel перестала работать? - Reddit | tavily | web | https://www.reddit.com/r/perplexity_ai/comments/1q6c1o0/your_perplexity_pro_from_airtel_subscription?tl=ru | Research finding and competitor/context evidence | 2026-06-06T08:21:17.409Z | medium |
 
 ## Unknowns
 

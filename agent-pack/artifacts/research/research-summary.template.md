@@ -168,6 +168,17 @@ Guardrail: synthetic interviews are used only for hypothesis generation, intervi
 | File | Action | Candidate score | Existing score | Gate result | Reason |
 |---|---|---:|---:|---|---|
 
+## Publication Shape Gate
+
+Required before `notion-research-export-ru.md` can be published to Notion.
+
+| Section | Required shape | Status | Evidence |
+|---|---|---|---|
+| Personas | comparative table: Persona / Segment / Context / JTBD / Pain / Value / Evidence status | pass / needs_revision / skipped_with_reason |  |
+| CJM/user paths | table or scheme: Stage / Goal / Actions / Actors / Pains / Opportunity | pass / needs_revision / skipped_with_reason |  |
+| Competitors | competitor or positioning table | pass / needs_revision / skipped_with_reason |  |
+| ICE/RICE/backlog | scoring table | pass / needs_revision / skipped_with_reason |  |
+
 ## Unknowns
 
 - 
@@ -196,3 +207,4 @@ Guardrail: synthetic interviews are used only for hypothesis generation, intervi
 - [ ] Findings separate evidence from hypotheses.
 - [ ] Research-To-Design Handoff exists or has `skipped_with_reason`.
 - [ ] Candidate Quality / Write Gate is recorded before overwriting existing research artifacts.
+- [ ] Publication Shape Gate passes before Notion approval/publication.

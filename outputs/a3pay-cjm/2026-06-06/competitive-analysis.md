@@ -13,13 +13,13 @@ Status: ready
 
 | Name | Type | Source URL | Last Verified | Evidence Status |
 |---|---|---|---|---|
-| A3 — сервис электронных платежей и эквайринга для бизнеса | market alternative | https://www.a-3.ru | 2026-06-06T07:43:00.639Z | source-backed |
+| Competitor discovery incomplete | unknown | n/a | n/a | needs validation |
 
 ## Comparison Matrix
 
 | Конкурент / альтернатива | Давление на сценарий | Claim | Evidence | Confidence |
 |---|---|---|---|---|
-| A3 — сервис электронных платежей и эквайринга для бизнеса | ЖКХ, налоги, штрафы и регулярные услуги | платежей, направление получателям платежей информации о результатах проведения платежей. [...] ООО «Платёжный сервис А3» аккредитовано в качестве организации, осуществляющей деятельность в области информационных технолог | https://www.a-3.ru | low |
+| needs validation | Все сценарии | Need competitor set from Tavily or Firecrawl crawl | n/a | low |
 
 ## Scenario Opportunity Map
 

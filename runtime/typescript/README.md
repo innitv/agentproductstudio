@@ -69,6 +69,7 @@ yarn workflow:agentic-stages
 yarn workflow:agentic-preflight outputs/<project-slug>/<YYYY-MM-DD> --strict
 yarn workflow:agentic-approval-commands outputs/<project-slug>/<YYYY-MM-DD> --by human --missing-only
 yarn workflow:agentic-readiness outputs/<project-slug>/<YYYY-MM-DD> --strict
+yarn workflow:approval-request outputs/<project-slug>/<YYYY-MM-DD> notion_research_publish --target <notion-parent-page-id> --by human --reason "Публикация research pack в Notion"
 yarn workflow:approve outputs/<project-slug>/<YYYY-MM-DD> notion_research_publish --target <notion-parent-page-id> --by human
 yarn workflow:deny outputs/<project-slug>/<YYYY-MM-DD> notion_research_publish --target <notion-parent-page-id> --by human
 yarn workflow:approvals outputs/<project-slug>/<YYYY-MM-DD>

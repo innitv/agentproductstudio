@@ -3,7 +3,8 @@ import { join, resolve } from "node:path";
 
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
-const positional = args.filter((arg) => arg !== "--dry-run");
+const skipPublicationShapeGate = args.includes("--skip-publication-shape-gate");
+const positional = args.filter((arg) => arg !== "--dry-run" && arg !== "--skip-publication-shape-gate");
 const [parentArg, exportPathArg, titleArg] = positional;
 
 if (!parentArg || !exportPathArg) {
@@ -24,6 +25,12 @@ const markdown = readFileSync(exportPath, "utf8");
 const parsed = splitResearchMarkdown(markdown);
 const publishUnits = groupResearchSections(parsed.sections);
 const hubTitle = titleArg?.trim() || parsed.title || "Пакет исследования";
+const shapeGate = validatePublicationShape(parsed.sections);
+
+if (!skipPublicationShapeGate && !shapeGate.pass) {
+  console.error(formatPublicationShapeGate(shapeGate));
+  process.exit(1);
+}
 
 if (dryRun) {
   const plan = publishUnits.map((unit) => ({
@@ -41,6 +48,7 @@ if (dryRun) {
     child_pages: plan,
     child_page_count: plan.length,
     estimated_total_blocks: plan.reduce((sum, item) => sum + item.estimated_blocks, 0),
+    publication_shape_gate: shapeGate,
   }, null, 2));
   process.exit(0);
 }
@@ -145,7 +153,7 @@ function groupResearchSections(sections) {
     },
     {
       title: "03 Прото-персоны",
-      match: /^(Прото-персоны|Персона \d+:.*)$/i,
+      match: /^(Прото-персоны|Матрица приоритета персон|Персона \d+:.*)$/i,
     },
     {
       title: "04 Синтетические интервью и вопросы для интервью",
@@ -153,7 +161,7 @@ function groupResearchSections(sections) {
     },
     {
       title: "05 CJM и сценарии",
-      match: /^(Общая модель CJM|Сценарий \d+:.*)$/i,
+      match: /^(Общая модель CJM|Матрица сценариев CJM|P\d CJM:.*|Сценарий \d+:.*)$/i,
     },
     {
       title: "06 ICE/RICE бэклог и инициативы",
@@ -199,6 +207,116 @@ function demoteSectionMarkdown(markdown) {
     .split(/\r?\n/)
     .map((line) => line.startsWith("# ") ? `## ${line.slice(2)}` : line)
     .join("\n");
+}
+
+function validatePublicationShape(sections) {
+  const rules = [
+    {
+      id: "personas_table",
+      label: "Прото-персоны должны быть сравнительной таблицей",
+      sectionMatch: /^(Прото-персоны|Персона \d+:.*)$/i,
+      requiredHeaders: ["персона", "jtbd", "боль"],
+      hint: "Добавь таблицу с колонками: Персона / Сегмент / Контекст / JTBD / Боль / Ценность / Evidence status.",
+    },
+    {
+      id: "cjm_table",
+      label: "CJM должен быть таблицей или схемой",
+      sectionMatch: /^(CJM и сценарии|Общая модель CJM|Матрица сценариев CJM|P\d CJM:.*|Сценарий \d+:.*)$/i,
+      requiredHeaders: ["этап", "бол"],
+      hint: "Добавь таблицу с колонками: Этап / Цель / Действия / Участники / Боли / Возможность.",
+    },
+    {
+      id: "competitors_table",
+      label: "Конкурентный контекст должен содержать таблицу",
+      sectionMatch: /^(Конкурентный контекст|Набор конкурентов|Матрица позиционирования)$/i,
+      requiredHeaders: ["игрок"],
+      hint: "Добавь таблицу конкурентов или позиционирования.",
+    },
+    {
+      id: "scoring_table",
+      label: "ICE/RICE должен содержать таблицу scoring",
+      sectionMatch: /^(ICE\/RICE backlog|ICE\/RICE бэклог|Детализация backlog|Детализация бэклога)$/i,
+      requiredHeaders: ["сценарий"],
+      hint: "Добавь таблицу ICE/RICE с колонками scoring.",
+    },
+  ];
+
+  const checks = rules.map((rule) => {
+    const matchedSections = sections.filter((section) => rule.sectionMatch.test(section.title));
+    const tableSummaries = matchedSections.flatMap((section) => extractMarkdownTables(section.markdown).map((table) => ({
+      section: section.title,
+      headers: table.headers,
+      row_count: table.rowCount,
+      matches_required_headers: rule.requiredHeaders.every((required) =>
+        table.headers.some((header) => header.toLowerCase().includes(required)),
+      ),
+    })));
+    const hasMatchingTable = tableSummaries.some((table) => table.row_count > 0 && table.matches_required_headers);
+
+    return {
+      id: rule.id,
+      label: rule.label,
+      status: hasMatchingTable ? "pass" : "fail",
+      matched_sections: matchedSections.map((section) => section.title),
+      tables: tableSummaries,
+      hint: rule.hint,
+    };
+  });
+
+  return {
+    pass: checks.every((check) => check.status === "pass"),
+    checks,
+  };
+}
+
+function extractMarkdownTables(markdown) {
+  const lines = markdown.split(/\r?\n/);
+  const tables = [];
+  let tableLines = [];
+
+  const flush = () => {
+    if (tableLines.length >= 2) {
+      const rows = tableLines
+        .filter((line) => !/^\|\s*:?-+/.test(line))
+        .map((line) => line.split("|").slice(1, -1).map((cell) => cleanInline(cell.trim())));
+      if (rows.length) {
+        tables.push({
+          headers: rows[0] ?? [],
+          rowCount: Math.max(0, rows.length - 1),
+        });
+      }
+    }
+    tableLines = [];
+  };
+
+  for (const line of lines) {
+    if (line.trim().startsWith("|")) {
+      tableLines.push(line.trim());
+    } else {
+      flush();
+    }
+  }
+  flush();
+
+  return tables;
+}
+
+function formatPublicationShapeGate(shapeGate) {
+  const lines = [
+    "Notion publication shape gate failed.",
+    "",
+    "Research export contains critical analytical sections that would be published as prose instead of tables/schemes.",
+    "Fix `notion-research-export-ru.md` before publication, or use --skip-publication-shape-gate only for legacy/archive exports.",
+    "",
+    "| Check | Status | Matched sections | Hint |",
+    "|---|---|---|---|",
+  ];
+
+  for (const check of shapeGate.checks) {
+    lines.push(`| ${check.label} | ${check.status} | ${check.matched_sections.join(", ") || "none"} | ${check.hint} |`);
+  }
+
+  return lines.join("\n");
 }
 
 function buildHubBlocks(parsed, childResults) {

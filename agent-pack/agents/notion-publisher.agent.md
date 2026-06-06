@@ -40,8 +40,8 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 1. Проверить наличие артефактов исследований и их читаемость для человека.
 2. Создать русскоязычный экспорт только для результатов исследований без схем, YAML frontmatter, необработанного JSON или полных дампов кодовых блоков.
-3. Сформировать publication plan и dry-run/preview до внешней записи: target, mode, layout strategy, source artifacts, checksum, block/page/database count, database schema, unsupported blocks и expected writes.
-4. Если целевая страница или одобрение отсутствуют, создать резервный файл Markdown и установить статус `partial` или `blocked` с `recommended_next_step` для получения approval. Не позволять Оркестратору завершать воркфлоу со статусом `success` без публикации.
+3. Сформировать publication plan и dry-run/preview до внешней записи: target, mode, layout strategy, source artifacts, checksum, block/page/database count, database schema, unsupported blocks, expected writes и результат `Publication Shape Gate`.
+4. Если целевая страница, интерактивное approval или publication shape gate отсутствуют, создать резервный файл Markdown и установить статус `partial` или `blocked` с `recommended_next_step` для получения approval или исправления export. Не позволять Оркестратору завершать воркфлоу со статусом `success` без публикации.
 5. Если целевая страница и одобрение получены, выбрать способ публикации по объему: короткий export — отдельная дочерняя страница (separate Notion child page); подробный research pack — hub page с дочерними страницами по разделам; рабочие сущности — базы данных.
 6. При наличии `prd.md` и `proto-personas.md` создать две связанные базы данных в Notion (Персоны и User Stories), связать их через Relation и наполнить User Stories интерактивными чек-листами Acceptance Criteria.
 7. Записать URL/ID созданной страницы или зафиксировать блокирующую проблему.
@@ -55,6 +55,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - Предпочитай remote Notion MCP/OAuth, если доступен write-capable MCP. Local MCP/API fallback допустим только с локальными credentials и без вывода token в команды, логи или artifacts.
 - Markdown публикуется как структурированные Notion blocks. Запрещено выгружать весь Markdown одним raw code block.
 - Подробный research pack запрещено публиковать одной длинной страницей: используй hub page + child pages, а для сущностей типа personas/backlog/stories — базы данных.
+- Personas, CJM/user paths, competitive matrix и ICE/RICE/backlog должны публиковаться таблицами или схемами. Если `notion-research-export-ru.md` содержит эти разделы только прозой, Notion write блокируется до исправления export.
 - Не создавай микространицы: для подробного research pack целевой диапазон 6-12 child pages; короткие блоки меньше 8-10 Notion blocks или одиночные служебные секции должны оставаться внутри крупной страницы. Toggle/drawer используй выборочно: короткие блоки до 15 blocks оставляй inline; сворачивай длинные reference lists, validation details и повторяемые карточки инициатив/задач.
 - Для Notion API соблюдай лимиты: append children чанками до 100 blocks, обрабатывай `429` через `Retry-After`/backoff, фиксируй retry count.
 - Повторная публикация должна иметь idempotency strategy: existing child page/database search, source checksum/export marker или явно выбранная versioning strategy.
@@ -80,4 +81,4 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 - `outputs.notion_research_export_ru` содержит полный Markdown для локального research-only экспорта.
 - `outputs.notion_publication_record` содержит человекочитаемую запись для `stage-gate-ledger.md` и `release-notes.md`: publication plan summary, dry-run result, layout strategy, статус публикации, Notion hub/page/database ids/urls, block/page/database counts или blocker.
-- Для внешней записи в Notion требуется точное human approval действие: `notion_research_publish`, `notion_prd_export` или `notion_agile_export` с целевым page/database target. Если approval, `NOTION_TOKEN`, parent page или права интеграции отсутствуют, агент возвращает `partial` или `blocked`; финальный `success` запрещен.
+- Для внешней записи в Notion требуется точное human approval действие: `notion_research_publish`, `notion_prd_export` или `notion_agile_export` с целевым page/database target. Предпочтительный способ получения — `workflow:approval-request`; `workflow:approve`/`workflow:deny` используются только после явного ответа пользователя или при недоступном TTY. Если approval, `NOTION_TOKEN`, parent page, права интеграции или publication shape gate отсутствуют, агент возвращает `partial` или `blocked`; финальный `success` запрещен.

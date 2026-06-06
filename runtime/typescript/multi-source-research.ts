@@ -25,12 +25,21 @@ export interface ProviderFailure {
   error: string;
 }
 
+export interface ProviderFallback {
+  from: ResearchProvider;
+  to: ResearchProvider;
+  reason: string;
+  status: "used" | "already_used" | "unavailable" | "failed";
+  notes: string;
+}
+
 export interface MultiSourceResearchResult {
   query: string;
   providersRequested: ResearchProvider[];
   providersUsed: ResearchProvider[];
   unavailableProviders: ResearchProvider[];
   failures: ProviderFailure[];
+  fallbacks: ProviderFallback[];
   results: Array<TavilyResearchResult | DeepSeekResearchResult | GeminiResearchResult>;
   sources: Array<{ provider: ResearchProvider; url: string; title?: string }>;
   validation: {
@@ -105,17 +114,91 @@ export async function runMultiSourceResearch(input: MultiSourceResearchInput): P
     });
   });
 
+  const fallbacks = await applyProviderFallbacks({
+    input,
+    results,
+    failures,
+  });
+
   return {
     query: input.query,
     providersRequested,
     providersUsed: results.map((result) => result.provider),
     unavailableProviders,
     failures,
+    fallbacks,
     results,
     sources: collectSources(results),
-    validation: validateMultiSourceCoverage(input.mode, results, unavailableProviders, failures),
-    unknowns: buildUnknowns(providersRequested, unavailableProviders, failures, results.length),
+    validation: validateMultiSourceCoverage(input.mode, results, unavailableProviders, failures, fallbacks),
+    unknowns: buildUnknowns(providersRequested, unavailableProviders, failures, fallbacks, results.length),
   };
+}
+
+async function applyProviderFallbacks(args: {
+  input: MultiSourceResearchInput;
+  results: MultiSourceResearchResult["results"];
+  failures: ProviderFailure[];
+}): Promise<ProviderFallback[]> {
+  const fallbacks: ProviderFallback[] = [];
+  const tavilyFailure = args.failures.find((failure) => failure.provider === researchProviders.tavily);
+
+  if (!tavilyFailure || !isTavilyLimitError(tavilyFailure.error)) {
+    return fallbacks;
+  }
+
+  const fallback: ProviderFallback = {
+    from: researchProviders.tavily,
+    to: researchProviders.deepseek,
+    reason: "tavily_limit",
+    status: "unavailable",
+    notes: "Tavily reached a rate/daily limit. DeepSeek may continue synthesis, but it is not source-backed evidence.",
+  };
+
+  if (args.results.some((result) => result.provider === researchProviders.deepseek)) {
+    fallbacks.push({
+      ...fallback,
+      status: "already_used",
+      notes: "Tavily reached a rate/daily limit. DeepSeek already returned results in this run and should be used only for synthesis/claims-to-validate.",
+    });
+    return fallbacks;
+  }
+
+  if (!isProviderConfigured(researchProviders.deepseek)) {
+    fallbacks.push({
+      ...fallback,
+      status: "unavailable",
+      notes: "Tavily reached a rate/daily limit, but DEEPSEEK_API_KEY is not configured.",
+    });
+    return fallbacks;
+  }
+
+  try {
+    const result = await runDeepSeekResearch({
+      query: [
+        args.input.query,
+        "",
+        "Fallback context: Tavily hit a rate or daily limit. Continue research as DeepSeek synthesis only.",
+        "Mark all market facts, quantitative claims and external-source claims as needs_validation unless supplied in the prompt.",
+      ].join("\n"),
+      productContext: args.input.productContext,
+      geography: args.input.geography,
+      language: args.input.language,
+    });
+    args.results.push(result);
+    fallbacks.push({
+      ...fallback,
+      status: "used",
+      notes: "DeepSeek was used as a fallback after Tavily limit. Output is synthesis only and does not satisfy Tavily source-backed coverage.",
+    });
+  } catch (error) {
+    fallbacks.push({
+      ...fallback,
+      status: "failed",
+      notes: error instanceof Error ? error.message : String(error),
+    });
+  }
+
+  return fallbacks;
 }
 
 function resolveProviderOrder(
@@ -164,6 +247,7 @@ function validateMultiSourceCoverage(
   results: MultiSourceResearchResult["results"],
   unavailableProviders: ResearchProvider[],
   failures: ProviderFailure[],
+  fallbacks: ProviderFallback[],
 ): MultiSourceResearchResult["validation"] {
   const checks: string[] = [];
   const used = new Set(results.map((result) => result.provider));
@@ -191,6 +275,10 @@ function validateMultiSourceCoverage(
     }
 
     checks.push(`${provider}: did not return results.`);
+  }
+
+  for (const fallback of fallbacks) {
+    checks.push(`${fallback.from}: fallback to ${fallback.to} ${fallback.status} (${fallback.reason}).`);
   }
 
   const status = defaultMultiSourceResearchProviders.every((provider) => used.has(provider))
@@ -227,6 +315,7 @@ function buildUnknowns(
   providersRequested: ResearchProvider[],
   unavailableProviders: ResearchProvider[],
   failures: ProviderFailure[],
+  fallbacks: ProviderFallback[],
   resultsCount: number,
 ): string[] {
   const unknowns: string[] = [];
@@ -243,9 +332,17 @@ function buildUnknowns(
     unknowns.push(`Provider failures need review: ${failures.map((failure) => failure.provider).join(", ")}.`);
   }
 
+  if (fallbacks.some((fallback) => fallback.from === researchProviders.tavily && fallback.to === researchProviders.deepseek)) {
+    unknowns.push("Tavily limit triggered DeepSeek fallback; source-backed evidence remains incomplete until Tavily, web search or another source-backed provider succeeds.");
+  }
+
   if (!providersRequested.length) {
     unknowns.push("Source policy resolved to an empty provider list.");
   }
 
   return unknowns;
+}
+
+function isTavilyLimitError(error: string): boolean {
+  return /429|rate.?limit|daily.?cap|daily_cap_reached|too many requests|quota|limit/i.test(error);
 }

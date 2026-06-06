@@ -72,7 +72,7 @@ export async function requireApproval(request: ApprovalRequest): Promise<Approva
       request.target ? `Target: ${request.target}.` : undefined,
       denialNote,
       `Причина: ${request.reason}.`,
-      `Перед выполнением внешнего действия запиши approval через yarn workflow:approve; runtime сохранит запись в ${approvalStateFileName}.`,
+      `Перед выполнением внешнего действия используй интерактивный yarn workflow:approval-request; если TTY недоступен, после явного ответа пользователя запиши yarn workflow:approve или yarn workflow:deny. Runtime сохранит запись в ${approvalStateFileName}.`,
     ].filter(Boolean).join(" "),
   };
 }

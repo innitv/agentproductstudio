@@ -78,8 +78,13 @@ contract_schema: agent-pack/templates/skill.template.md
    - `database_index`: для рабочих сущностей, которые нужно фильтровать/сортировать: personas, user stories, backlog, opportunities, risks, sources, interview insights.
    - `hybrid`: hub + дочерние страницы + базы данных для сущностей.
    - micro-page gate: для `hub_with_child_pages` цель 6-12 дочерних страниц; отдельная дочерняя страница должна содержать не меньше 8-10 Notion blocks или несколько связанных секций. Короткие служебные блоки, одиночные выводы, мини-SWOT части, краткие персоны и вопросы группируй в крупную страницу. Toggle/drawer используй выборочно: короткие блоки до 15 blocks оставляй inline, если они читаются без перегруза; сворачивай длинные reference lists, validation details и повторяемые карточки инициатив/задач.
+   - CJM, personas, roadmap, ICE/RICE и конкурентные матрицы публикуй таблично или схемой. Не превращай CJM в набор длинных текстовых карточек, если есть этапы, боли, участники и opportunities: минимум нужна таблица `Этап / Цель / Действия / Участники / Боли / Возможность`.
+   - Персоны публикуй как сравнительную таблицу `Персона / Сегмент / Контекст / JTBD / Боль / Ценность / Evidence status`; подробные описания по персонам можно убирать в selective toggles после таблицы.
 6. Выполни dry-run/preview: построить block/page/database plan без записи в Notion. Если converter/MCP недоступен, зафиксируй fallback как `manual_import`.
-7. В конце `01-research` явно спроси в чате: `Разрешить публикацию пакета исследований в Notion?` Approval должен быть точным по `action` и `target`.
+7. В конце `01-research` используй интерактивный approval request, чтобы пользователь выбрал ответ, а не пропустил строку в чате:
+   - предпочтительный runtime command: `yarn workflow:approval-request outputs/<project-slug>/<YYYY-MM-DD> notion_research_publish --target <notion-parent-page-id> --by human --reason "Публикация research pack в Notion"`;
+   - если runtime TTY недоступен, задай отдельный заметный вопрос в чате: `Разрешить публикацию пакета исследований в Notion?` и после ответа запиши `yarn workflow:approve` или `yarn workflow:deny`;
+   - approval должен быть точным по `action` и `target`.
 8. Если пользователь разрешил, проверь Notion mode:
    - предпочитай remote Notion MCP/OAuth, если он доступен и имеет write tools;
    - local MCP/API fallback допускается только при локальном `NOTION_TOKEN` и доступном parent page;
@@ -141,7 +146,7 @@ Evidence записи должна включать:
 - [ ] Layout strategy выбран до publication approval.
 - [ ] Подробный research pack опубликован как hub + child pages, а не одной длинной страницей.
 - [ ] Publication plan и dry-run/preview созданы до внешней записи.
-- [ ] Approval задан явно в чате.
+- [ ] Approval получен через `workflow:approval-request` или отдельный заметный вопрос в чате, если TTY недоступен.
 - [ ] Approval содержит exact target.
 - [ ] Published content не содержит raw/schema/machine payloads.
 - [ ] Markdown опубликован как Notion blocks, а не как единый raw code block.

@@ -319,6 +319,7 @@ function buildResearchSummaryPayload(result: MultiSourceResearchResult, artifact
 
   const providerCoverage = result.providersRequested.map((provider) => {
     const failure = result.failures.find((item) => item.provider === provider);
+    const fallback = result.fallbacks.find((item) => item.from === provider || item.to === provider);
     const isUsed = used.has(provider);
     const isUnavailable = result.unavailableProviders.includes(provider);
 
@@ -329,9 +330,13 @@ function buildResearchSummaryPayload(result: MultiSourceResearchResult, artifact
       sources_count: sourcesByProvider.get(provider) ?? 0,
       validation_state: isUsed ? "pass" as const : failure ? "failed" as const : isUnavailable ? "skipped" as const : "needs_validation" as const,
       notes: provider === researchProviders.deepseek
-        ? "DeepSeek is a check provider and not source-backed evidence."
+        ? fallback?.to === provider
+          ? `${fallback.notes} DeepSeek is a check provider and not source-backed evidence.`
+          : "DeepSeek is a check provider and not source-backed evidence."
         : provider === researchProviders.gemini
         ? "Gemini is a strategy and cross-check provider."
+        : fallback?.from === provider
+        ? `${failure?.error ?? "Provider failed."} Fallback: ${fallback.notes}`
         : failure?.error ?? (isUnavailable ? "Provider was requested but not configured or executable locally." : "Provider returned usable output."),
     };
   });
@@ -341,7 +346,9 @@ function buildResearchSummaryPayload(result: MultiSourceResearchResult, artifact
       provider: failure.provider,
       error: failure.error,
       impact: "Research stage cannot be marked ready if this is a required default provider.",
-      follow_up: `Configure or rerun ${failure.provider}; keep downstream claims marked needs validation until resolved.`,
+      follow_up: result.fallbacks.find((fallback) => fallback.from === failure.provider)
+        ? `Fallback was applied; keep downstream claims marked needs validation until source-backed coverage is restored.`
+        : `Configure or rerun ${failure.provider}; keep downstream claims marked needs validation until resolved.`,
     })),
     ...result.unavailableProviders.map((provider) => ({
       provider,

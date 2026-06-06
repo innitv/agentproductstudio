@@ -1,12 +1,12 @@
 # Run Index
 
-- Run ID: 2026-06-05-1780631705177
+- Run ID: 2026-06-06-1780732134119
 - Goal: Workflow run
-- Status: failed
+- Status: pending
 - Profile: standard
 - Execution mode: local
-- Current stage: 01-research
-- Updated: 2026-06-06T07:43:00.657Z
+- Current stage: none
+- Updated: 2026-06-06T09:16:42.493Z
 
 ## What To Read First
 
@@ -17,16 +17,16 @@
 - `stage-gate-ledger.md` (stage_gate_ledger, completed)
 - `competitive-analysis.md` (competitive_analysis, completed)
 - `proto-personas.md` (proto_personas, completed)
-- `synthetic-interviews.md` (synthetic_interviews, failed)
+- `synthetic-interviews.md` (synthetic_interviews, completed)
 
 ## Progress
 
-- Completed artifacts: 11/22
-- Blocking stages: 1
+- Completed artifacts: 11/21
+- Blocking stages: 0
 
 ## Blocking Stages
 
-- 01-research Deep Research: failed - Research stage validation failed with 1 error(s).
+- No blocked, failed or partial stages.
 
 ## Artifact Groups
 
@@ -41,7 +41,7 @@
 | research-summary.md | completed | 01-research research | yes |
 | competitive-analysis.md | completed | 01-research research | yes |
 | proto-personas.md | completed | 01-research research | yes |
-| synthetic-interviews.md | failed | 01-research research | yes |
+| synthetic-interviews.md | completed | 01-research research | yes |
 | swot.md | completed | 01-research research | yes |
 | prd.md | missing | 02-prd prd | yes |
 | ia-brief.md | missing | 03-ia ia | yes |
@@ -63,7 +63,6 @@
 | File | Status | Producer | Safe to publish |
 |---|---|---|---|
 | notion-research-export-ru.md | completed | 01-research notion-publisher | yes |
-| figma-handoff-bundle.md | completed | optional-figma-handoff design | no |
 
 ### external record
 
@@ -75,4 +74,4 @@
 
 ## Next Action
 
-Resolve 01-research Deep Research (failed) before continuing.
+Create or rerun required artifact `prd.md` for 02-prd.

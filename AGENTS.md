@@ -163,8 +163,9 @@ Notion research publication обязательна для полного workflo
 
 - Перед запросом approval подготовь человекочитаемый `notion-research-export-ru.md` без workflow dump, schema/frontmatter, raw JSON и code-block копий артефактов.
 - Перед публикацией проверь `notion-research-export-ru.md` через Russian Publication Gate: не должно быть английских/испанских заголовков, table headers, section labels, CTA, статусов или описаний, кроме технических терминов из правил языка. Запрещено публиковать краткую выжимку вместо полного research pack, если пользователь не попросил summary explicitly.
+- Перед публикацией подробного research pack выполни **Publication Shape Gate**: `personas`, `CJM`, competitive matrix и `ICE/RICE` должны быть опубликованы таблицами или схемами, а не набором длинных текстовых карточек. Для hub-публикации `tooling/scripts/publish-notion-research-hub.mjs` выполняет этот gate на dry-run и перед внешней записью; без `publication_shape_gate.pass=true` Notion write запрещен.
 - До внешней записи подготовь `publication plan` и dry-run/preview: exact target, mode, source artifacts, checksum, block count, unsupported blocks и expected writes.
-- В конце `01-research` спроси: «Разрешить публикацию пакета исследований в Notion?»
+- В конце `01-research` используй интерактивный approval request: `yarn workflow:approval-request outputs/<project-slug>/<YYYY-MM-DD> notion_research_publish --target <notion-parent-page-id> --by human --reason "Публикация research pack в Notion"`. Если TTY недоступен, задай отдельный заметный вопрос в чате и затем запиши `workflow:approve` или `workflow:deny`.
 - До публикации выбери Notion layout strategy:
   - `flat_child_page` разрешен только для коротких export до 120 blocks и до 6 крупных разделов;
   - `hub_with_child_pages` обязателен для подробного research pack, если ожидается больше 120 blocks, больше 6 крупных разделов или есть CJM/competitive/personas/interviews/SWOT/backlog/roadmap в одном export;
@@ -233,7 +234,7 @@ Approval records ведутся через runtime gate. Матрица дейс
 
 Approval matching строгий по `target`: targetless approval не покрывает targeted request, а targeted approval не покрывает targetless request. Для agentic model-provider calls target имеет формат `openai_agents_sdk:<owner>:<stage-id>`.
 
-**КРИТИЧЕСКИ ВАЖНО:** Агент НЕ имеет права молча пропускать отправку запросов на одобрение. Если требуется внешнее действие (например, выгрузка в Notion на этапе 01-research), агент обязан явно задать вопрос пользователю в чате: «Разрешить публикацию пакета исследований/Agile-задач в Notion?». Запрещается тихо переводить этап в статус blocked/partial, не попытавшись сначала интерактивно запросить разрешение у человека в текущей сессии диалога.
+**КРИТИЧЕСКИ ВАЖНО:** Агент НЕ имеет права молча пропускать отправку запросов на одобрение. Если требуется внешнее действие (например, выгрузка в Notion на этапе 01-research), агент обязан сначала использовать интерактивный approval request (`workflow:approval-request`) с exact target. Если TTY/интерактивный выбор недоступен, агент обязан явно задать отдельный заметный вопрос пользователю в чате: «Разрешить публикацию пакета исследований/Agile-задач в Notion?» и после ответа записать `workflow:approve` или `workflow:deny`. Запрещается тихо переводить этап в статус blocked/partial, не попытавшись сначала интерактивно запросить разрешение у человека в текущей сессии диалога.
 
 ## 9. MCP, инструменты и данные
 

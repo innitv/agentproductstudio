@@ -64,6 +64,7 @@ source_policy:
 - If any default provider is unavailable, failed, or returns no usable output, the research gate is `partial` and must record `needs_validation`.
 - Do not use broad web if user requests `local_only`, `user_sources_only`, or `official_docs`.
 - If provider is unavailable, switch only to an allowed fallback.
+- If `tavily` fails with a rate, quota or daily limit, local runtime may continue with `deepseek` as a fallback synthesis provider when `DEEPSEEK_API_KEY` is configured. This fallback must be recorded in provider coverage/failures and does not satisfy source-backed Tavily coverage; market facts remain `needs_validation` until Tavily, web search, browser, Firecrawl or another source-backed provider succeeds.
 - If no allowed provider is available, return `partial` with `needs validation` or `blocked` if policy requires it.
 - Every market, competitor or quantitative claim needs evidence or `needs validation`.
 - Do not collect unnecessary personal data.

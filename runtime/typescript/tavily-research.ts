@@ -118,10 +118,16 @@ async function searchTavily(args: {
   });
 
   if (!response.ok) {
-    throw new Error(`Tavily research failed: ${response.status} ${response.statusText}`);
+    const errorText = await response.text().catch(() => "");
+    const details = errorText ? ` ${truncateErrorDetails(errorText)}` : "";
+    throw new Error(`Tavily research failed: ${response.status} ${response.statusText}.${details}`);
   }
 
   return response.json() as Promise<TavilySearchResponse>;
+}
+
+function truncateErrorDetails(value: string): string {
+  return value.replace(/\s+/g, " ").trim().slice(0, 500);
 }
 
 function buildTavilyQuery(input: TavilyResearchInput): string {

@@ -1,0 +1,43 @@
+{
+  "stage_id": "01-research",
+  "title": "Deep Research",
+  "status": "completed",
+  "artifacts_created": [
+    "research-summary.md",
+    "competitive-analysis.md",
+    "proto-personas.md",
+    "synthetic-interviews.md",
+    "swot.md"
+  ],
+  "inputs_used": [
+    "artifact-manifest.json",
+    "cjm-map.md",
+    "competitive-analysis.md",
+    "handoff-backups/2026-06-06T08-20-47-719Z-01-research-handoff-bundle-full.md",
+    "handoff-bundle-full.md",
+    "handoff-bundle.md",
+    "notion-publication-plan.md",
+    "notion-research-export-ru.md",
+    "opportunity-roadmap.md",
+    "proto-personas.md",
+    "recursive-brief.md",
+    "research-summary.md",
+    "run-index.md",
+    "run-meta.json",
+    "run-plan.md",
+    "run-state.json",
+    "source-log.md",
+    "stage-gate-ledger.md",
+    "stage-results/00-intake.json",
+    "stage-results/01-research.json",
+    "Tavily provider output when configured",
+    "DeepSeek provider output when configured",
+    "Gemini provider output when configured",
+    "`research-summary.md`",
+    "`proto-personas.md`",
+    "`competitive-analysis.md`"
+  ],
+  "warnings": [],
+  "errors": [],
+  "completed_at": "2026-06-06T08:21:50.195Z"
+}

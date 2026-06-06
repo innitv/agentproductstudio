@@ -1,5 +1,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { createInterface } from "node:readline/promises";
+import { stdin as input, stdout as output } from "node:process";
 import { formatModelProviderApprovalTarget } from "./agentic-approval-targets";
 import { formatAgenticRolloutStatus, getAgenticRolloutConfig } from "./agentic-rollout";
 import {
@@ -18,6 +20,27 @@ import { formatSkillUsageInspection, inspectSkillUsage } from "./skill-usage";
 import { getWorkflowEngineStatus, rerunWorkflowStage, resumeWorkflowEngine, startWorkflowEngine } from "./workflow-engine";
 import { workflowStages } from "./workflow-stages";
 import type { WorkflowExecutionMode } from "./workflow-state";
+
+const explicitWorkflowCommands = new Set([
+  "start",
+  "resume",
+  "status",
+  "list",
+  "inspect",
+  "outputs",
+  "skills",
+  "cleanup-temp",
+  "archive",
+  "run-stage",
+  "approve",
+  "deny",
+  "approval-request",
+  "approvals",
+  "agentic-stages",
+  "agentic-readiness",
+  "agentic-approval-commands",
+  "agentic-preflight",
+]);
 
 export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<void> {
   loadLocalEnv();
@@ -166,6 +189,53 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
     return;
   }
 
+  if (command === "approval-request") {
+    const outputDir = rest[0];
+    const action = rest[1] as ApprovalAction | undefined;
+    if (!outputDir || !action) {
+      throw new Error("Usage: yarn workflow:approval-request outputs/<project-slug>/<YYYY-MM-DD> <approval-action> --target <value> [--by name] [--notes text] [--reason text]");
+    }
+
+    assertApprovalAction(action);
+    const parsed = parseApprovalArgs(rest.slice(2));
+    const reason = readFlagValue(rest.slice(2), "--reason");
+    const resolvedOutputDir = resolve(process.cwd(), outputDir);
+    const decision = await promptApprovalDecision({
+      outputDir,
+      action,
+      target: parsed.target,
+      by: parsed.by ?? "human",
+      notes: parsed.notes,
+      reason,
+    });
+
+    if (decision === "cancel") {
+      console.log("Approval request cancelled: record was not changed.");
+      return;
+    }
+
+    if (decision === "approve") {
+      await recordApproval(resolvedOutputDir, {
+        action,
+        approved: true,
+        approved_by: parsed.by ?? "human",
+        target: parsed.target,
+        notes: parsed.notes ?? reason,
+      });
+      console.log(`Approval recorded: ${action}${parsed.target ? ` -> ${parsed.target}` : ""}`);
+      return;
+    }
+
+    await recordApprovalDenial(resolvedOutputDir, {
+      action,
+      approved_by: parsed.by ?? "human",
+      target: parsed.target,
+      notes: parsed.notes ?? reason,
+    });
+    console.log(`Approval denied: ${action}${parsed.target ? ` -> ${parsed.target}` : ""}`);
+    return;
+  }
+
   if (command === "approvals") {
     const outputDir = rest[0];
     if (!outputDir) {
@@ -230,10 +300,14 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
     return;
   }
 
-  throw new Error("Usage: workflow engine command must be one of: start, resume, status, list, inspect, outputs, skills, cleanup-temp, archive, run-stage, approve, deny, approvals, agentic-stages, agentic-readiness, agentic-approval-commands, agentic-preflight\nOr use a natural trigger phrase!");
+  throw new Error("Usage: workflow engine command must be one of: start, resume, status, list, inspect, outputs, skills, cleanup-temp, archive, run-stage, approve, deny, approval-request, approvals, agentic-stages, agentic-readiness, agentic-approval-commands, agentic-preflight\nOr use a natural trigger phrase!");
 }
 
 async function tryRunIntentCommand(command: string | undefined, rest: string[], rawArgs: string[]): Promise<boolean> {
+  if (command && explicitWorkflowCommands.has(command) && !["start", "resume", "status", "run-stage"].includes(command)) {
+    return false;
+  }
+
   const fullInput = rawArgs.join(" ").trim();
   let intent = null;
   if (command && ["start", "resume", "status", "run-stage"].includes(command)) {
@@ -344,6 +418,57 @@ function parseApprovalArgs(args: string[]): { target?: string; by?: string; note
     by: readFlagValue(args, "--by"),
     notes: readFlagValue(args, "--notes"),
   };
+}
+
+async function promptApprovalDecision(request: {
+  outputDir: string;
+  action: ApprovalAction;
+  target?: string;
+  by: string;
+  notes?: string;
+  reason?: string;
+}): Promise<"approve" | "deny" | "cancel"> {
+  if (!input.isTTY) {
+    throw new Error("Interactive approval request requires a TTY. Use workflow:approve or workflow:deny only after explicit human approval.");
+  }
+
+  const lines = [
+    "",
+    "=== Approval Request ===",
+    `Run: ${request.outputDir}`,
+    `Action: ${request.action}`,
+    `Target: ${request.target ?? "not set"}`,
+    `Approved by: ${request.by}`,
+    request.reason ? `Reason: ${request.reason}` : undefined,
+    request.notes ? `Notes: ${request.notes}` : undefined,
+    "",
+    "Выберите действие:",
+    "1 - Разрешить и записать approval",
+    "2 - Запретить и записать denial",
+    "3 - Отмена, ничего не записывать",
+    "",
+  ].filter(Boolean);
+
+  console.log(lines.join("\n"));
+
+  const rl = createInterface({ input, output });
+  try {
+    while (true) {
+      const answer = (await rl.question("Ваш выбор [1/2/3]: ")).trim().toLowerCase();
+      if (["1", "y", "yes", "да", "approve", "разрешить"].includes(answer)) {
+        return "approve";
+      }
+      if (["2", "n", "no", "нет", "deny", "запретить"].includes(answer)) {
+        return "deny";
+      }
+      if (["3", "c", "cancel", "отмена"].includes(answer)) {
+        return "cancel";
+      }
+      console.log("Введите 1, 2 или 3.");
+    }
+  } finally {
+    rl.close();
+  }
 }
 
 function assertApprovalAction(action: string): asserts action is ApprovalAction {

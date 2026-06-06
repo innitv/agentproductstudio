@@ -1,0 +1,12 @@
+{
+  "approvals": [
+    {
+      "action": "notion_research_publish",
+      "approved": true,
+      "approved_at": "2026-06-06T08:22:00.000Z",
+      "approved_by": "human",
+      "target": "3696473174e58006af5fd367ef89d978",
+      "notes": "User approved publication in current chat; target reused from previous A3Pay Notion publication plan."
+    }
+  ]
+}

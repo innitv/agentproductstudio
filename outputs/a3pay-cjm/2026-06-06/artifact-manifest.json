@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-06-06T07:43:00.678Z",
-  "run_id": "2026-06-05-1780631705177",
+  "generated_at": "2026-06-06T09:16:42.506Z",
+  "run_id": "2026-06-06-1780732134119",
   "workflow_profile": "standard",
   "artifacts": [
     {
@@ -17,9 +17,9 @@
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "active",
-      "size_bytes": 4416,
-      "updated_at": "2026-06-05T09:25:21.679Z",
-      "checksum_sha256": "345829e42ce935c1a6d8e7eca1c405a5a4342abbb73eee8a22258772b9cd3413"
+      "size_bytes": 4610,
+      "updated_at": "2026-06-06T09:16:03.220Z",
+      "checksum_sha256": "e9f0b412d4316be6e2515e20cbc7eacc55d367c04317f7de7a8b1f74673eaa04"
     },
     {
       "artifact_name": "handoff_bundle",
@@ -39,9 +39,9 @@
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "active",
-      "size_bytes": 2323,
-      "updated_at": "2026-06-06T07:43:00.645Z",
-      "checksum_sha256": "54dae60a2f91aeaf9027c2c575efd73839f4cfdcf2ea370cd1e93db9a3483bab"
+      "size_bytes": 4101,
+      "updated_at": "2026-06-06T09:15:22.753Z",
+      "checksum_sha256": "c5d4ec984044f62ebf535c0b89185474eccfaed03c1a63d0e4385d8f8aac554b"
     },
     {
       "artifact_name": "stage_gate_ledger",
@@ -60,9 +60,9 @@
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "active",
-      "size_bytes": 10408,
-      "updated_at": "2026-06-06T07:43:00.645Z",
-      "checksum_sha256": "faf9d5110afbb37d4770d7fdfb27ed12d04231a900ba04f118aa15c8d5ebf957"
+      "size_bytes": 6336,
+      "updated_at": "2026-06-06T09:15:22.715Z",
+      "checksum_sha256": "067ffab14db34002433ac97c5ac2534bc0c6dcdc985657d30574c01e91123bb1"
     },
     {
       "artifact_name": "recursive_brief",
@@ -84,9 +84,9 @@
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "active",
-      "size_bytes": 3825,
-      "updated_at": "2026-06-05T03:56:05.186Z",
-      "checksum_sha256": "41bd13c37e5ca40b0d1a35dbff6f1861fb292a36e36ee94fe76b864094926584"
+      "size_bytes": 3865,
+      "updated_at": "2026-06-06T07:53:52.209Z",
+      "checksum_sha256": "cda2f86665e1b2669f6b6b4318817f4ee119e41e8521cfa3f17f61e5be059642"
     },
     {
       "artifact_name": "research_summary",
@@ -111,9 +111,9 @@
       "safe_to_publish": true,
       "lifecycle": "active",
       "schema": "agent-pack/schemas/research-summary.schema.json",
-      "size_bytes": 75446,
-      "updated_at": "2026-06-06T07:43:00.640Z",
-      "checksum_sha256": "365fab05f15b22f75aabbb4d9bc111cb6fd3c23fc1cc6e005194bb2fd70dad54"
+      "size_bytes": 74689,
+      "updated_at": "2026-06-06T08:21:17.421Z",
+      "checksum_sha256": "260b57e9c36319f03d70419270f0733b2dc867b8e3295a5affc50050f6f61b9f"
     },
     {
       "artifact_name": "competitive_analysis",
@@ -131,9 +131,9 @@
       "human_readable": true,
       "safe_to_publish": true,
       "lifecycle": "active",
-      "size_bytes": 4083,
-      "updated_at": "2026-06-06T07:43:00.641Z",
-      "checksum_sha256": "b969d491c3924d6d42459a98ce6be31709dca8ead5e8628cde4c16ed047e7b82"
+      "size_bytes": 3455,
+      "updated_at": "2026-06-06T08:21:17.422Z",
+      "checksum_sha256": "b0c496f786a2f6b055054882b1610836d23f1182450e0bb3135a3c2b8d654d33"
     },
     {
       "artifact_name": "proto_personas",
@@ -152,7 +152,7 @@
       "safe_to_publish": true,
       "lifecycle": "active",
       "size_bytes": 3576,
-      "updated_at": "2026-06-06T07:43:00.642Z",
+      "updated_at": "2026-06-06T08:21:17.423Z",
       "checksum_sha256": "6fe389125ac616de338a83b978c49dbfca67f0a18f99bd39dade012643fa90ca"
     },
     {
@@ -166,13 +166,13 @@
       "consumers": [
         "11-qa"
       ],
-      "status": "failed",
+      "status": "completed",
       "exists": true,
       "human_readable": true,
       "safe_to_publish": true,
-      "lifecycle": "blocked",
+      "lifecycle": "active",
       "size_bytes": 3028,
-      "updated_at": "2026-06-06T07:43:00.643Z",
+      "updated_at": "2026-06-06T08:21:17.423Z",
       "checksum_sha256": "1ebbe6bf6765b27ca02511c13e1a9ce9a093493ebada49dfeffc63a49c6481c2"
     },
     {
@@ -192,7 +192,7 @@
       "safe_to_publish": true,
       "lifecycle": "active",
       "size_bytes": 1754,
-      "updated_at": "2026-06-06T07:43:00.644Z",
+      "updated_at": "2026-06-06T08:21:17.424Z",
       "checksum_sha256": "a1808e2fa107263c9fd5db1bc3c81ae9b34b79607f72874a43846fa350b6d085"
     },
     {
@@ -417,27 +417,9 @@
       "human_readable": true,
       "safe_to_publish": true,
       "lifecycle": "active",
-      "size_bytes": 59765,
-      "updated_at": "2026-06-05T21:02:12.866Z",
-      "checksum_sha256": "e22872c86dd6ba29049df5fbd65da5ed933781ae5812947e62461277f14c2caa"
-    },
-    {
-      "artifact_name": "figma_handoff_bundle",
-      "file": "figma-handoff-bundle.md",
-      "artifact_type": "export",
-      "stage_id": "optional-figma-handoff",
-      "stage_title": "Figma Handoff Bundle",
-      "producer_stage": "optional-figma-handoff",
-      "producer_agent": "design",
-      "consumers": [],
-      "status": "completed",
-      "exists": true,
-      "human_readable": true,
-      "safe_to_publish": false,
-      "lifecycle": "active",
-      "size_bytes": 4740,
-      "updated_at": "2026-06-05T04:53:23.717Z",
-      "checksum_sha256": "df3bb3ad8c876273f48d9cd293e4cb0ec5080433114a5a2c54000468f73da730"
+      "size_bytes": 35131,
+      "updated_at": "2026-06-06T09:05:52.159Z",
+      "checksum_sha256": "bc09a00c07660e687096a2001a3c5001413c2ae8c867db8d124288f295d8ca03"
     },
     {
       "artifact_name": "approval_state",
@@ -453,9 +435,9 @@
       "human_readable": false,
       "safe_to_publish": false,
       "lifecycle": "active",
-      "size_bytes": 593,
-      "updated_at": "2026-06-05T03:43:03.088Z",
-      "checksum_sha256": "90ec194b700fe8969e3ed6fe21187928343b6e4f0a462a6de8660ec7579aa3e5"
+      "size_bytes": 354,
+      "updated_at": "2026-06-06T08:21:40.219Z",
+      "checksum_sha256": "fed53d7381da0e5dbfe69a982a2c110b8f19c9f7b4847a31bfd82e9c4a3a228d"
     }
   ]
 }
