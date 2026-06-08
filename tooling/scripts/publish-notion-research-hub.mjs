@@ -752,8 +752,8 @@ function validatePublicationCrossLinks(markdown, sections) {
     },
     {
       id: "decision_trail",
-      label: "Research hub should include a decision trail",
-      status: /(^|\n)##\s+(?:Цепочка решений|Decision trail)(?:\s|\r?$)/iu.test(markdown) ? "pass" : "fail",
+      label: "Research hub should include `Цепочка решений`",
+      status: /(^|\n)##\s+Цепочка решений(?:\s|\r?$)/iu.test(markdown) ? "pass" : "fail",
       hint: "Добавь раздел `Цепочка решений` с цепочкой: доказательство -> интерпретация -> продуктовое решение -> подробности.",
     },
     {

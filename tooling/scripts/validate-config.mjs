@@ -53,11 +53,11 @@ const projectTextFilesForPackageManagerPolicy = [
 const researchEnforcementFiles = [
   {
     file: "agent-pack/agents/research.agent.md",
-    requiredSnippets: ["proto_personas", "simulated_interviews", "synthetic", "tavily", "deepseek", "gemini", "providers", "browser scan", "Required provider skipped", "lazyweb_evidence_need"],
+    requiredSnippets: ["proto_personas", "simulated_interviews", "synthetic", "tavily", "deepseek", "gemini", "providers", "browser scan", "Required provider skipped", "lazyweb_evidence_need", "Publication Cross-Link Gate", "Research Content Lint", "Notion Data Shape Plan", "database_index_candidates"],
   },
   {
     file: "agent-pack/artifacts/research/research-summary.template.md",
-    requiredSnippets: ["Proto Personas", "Synthetic Interviews", "Research Validation Plan", "skipped_with_reason", "Provider Coverage", "deepseek", "gemini", "Anti-AI-Slop Gate", "User Flow под CJM", "Связь возможностей с CJM"],
+    requiredSnippets: ["Proto Personas", "Synthetic Interviews", "Research Validation Plan", "skipped_with_reason", "Provider Coverage", "deepseek", "gemini", "Anti-AI-Slop Gate", "User Flow под CJM", "Связь возможностей с CJM", "Publication Cross-Link Gate", "Research Content Lint", "Notion Data Shape Plan", "notion_data_shape_plan"],
   },
   {
     file: "agent-pack/artifacts/research/proto-personas.template.md",
@@ -113,7 +113,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/templates/surface-output-contract.template.md",
-    requiredSnippets: ["Surface Type", "Coverage Gate", "Evidence-To-Output Map", "Surface Quality Bar", "Write -> Verify -> Fix Plan"],
+    requiredSnippets: ["Surface Type", "Coverage Gate", "Evidence-To-Output Map", "Surface Quality Bar", "Write -> Verify -> Fix Plan", "Notion Data Shape Plan", "database_index"],
   },
   {
     file: "agent-pack/templates/agent-output-contract.schema.md",
@@ -142,6 +142,10 @@ const researchEnforcementFiles = [
   {
     file: "agent-pack/artifacts/release/release-notes.template.md",
     requiredSnippets: ["Surface Output Summary"],
+  },
+  {
+    file: "agent-pack/artifacts/prd/notion-prd-export.template.md",
+    requiredSnippets: ["Notion Data Shape Plan", "database_index", "Idempotency key"],
   },
   {
     file: "agent-pack/guardrails/approval-matrix.md",

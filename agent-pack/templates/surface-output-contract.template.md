@@ -49,8 +49,18 @@
 | `dashboard_console` | decision hierarchy, chart-to-question fit, metric definitions, no chartjunk, data quality labels, scan time under 5 seconds for primary KPI |
 | `landing` | first viewport product signal, offer clarity, trust proof, CTA flow, responsive screenshots, no generic template |
 | `prototype` | transition map, task path, state coverage, clickable/interaction notes |
-| `notion_wiki` / `research_report` | publication completeness, structured tables/schemes, cross-links, navigation, source/evidence status |
+| `notion_wiki` / `research_report` | publication completeness, structured tables/schemes, cross-links, navigation, source/evidence status, `notion_data_shape_plan` for page/table/database choice |
 | `presentation` | narrative arc, slide hierarchy, no overloaded slides, source notes for claims |
+
+### Notion Data Shape Plan
+
+Заполняется для `notion_wiki`, `research_report` и любых external publication surfaces, которые могут стать страницами или базами Notion.
+
+| Entity / section | Recommended shape | Reason | Schema preview / properties | Idempotency key |
+|---|---|---|---|---|
+| `<section>` | `hub_page` / `child_page` / `notion_table_block` / `database_index` / `toggle` |  |  |  |
+
+Правило: если сущность нужно фильтровать, сортировать, обновлять или связывать с другими сущностями, preferred shape = `database_index`. Если таблица нужна только для чтения внутри отчета, preferred shape = `notion_table_block`.
 
 ## 6. Write -> Verify -> Fix Plan
 
@@ -66,4 +76,3 @@
 | Deviation | Reason | Approval / waiver | Downstream impact |
 |---|---|---|---|
 | `<none>` |  |  |  |
-

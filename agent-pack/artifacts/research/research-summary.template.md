@@ -218,6 +218,44 @@ Required before `notion-research-export-ru.md` can be published to Notion.
 | Competitors | competitor or positioning table | pass / needs_revision / skipped_with_reason |  |
 | ICE/RICE/backlog | scoring table | pass / needs_revision / skipped_with_reason |  |
 
+## Publication Cross-Link Gate
+
+Required before detailed Notion hub publication.
+
+| Check | Status | Evidence / location |
+|---|---|---|
+| `Карта связей исследования` exists and links personas, CJM, ICE/RICE, roadmap/SWOT, validation and sources | pass / needs_revision / skipped_with_reason |  |
+| `Цепочка решений` exists with `доказательство -> интерпретация -> продуктовое решение -> подробности` | pass / needs_revision / skipped_with_reason |  |
+| Cross-references are Markdown links or Notion-ready page mentions, not plain `см. раздел` text | pass / needs_revision / skipped_with_reason |  |
+
+## Research Content Lint
+
+Required before Notion/Figma/external publication.
+
+| Command | Status | Blocking findings |
+|---|---|---|
+| `yarn research:lint outputs/<project-slug>/<YYYY-MM-DD>` | not_run / pass / fail |  |
+
+## Notion Data Shape Plan
+
+Required before detailed Notion hub publication. Use this to decide whether data belongs in child pages, table blocks or database indexes.
+
+| Entity / section | Recommended Notion shape | Why | Schema preview / key properties |
+|---|---|---|---|
+| Overview / narrative | `hub_page` / `child_page` |  |  |
+| Personas | `database_index` / `notion_table_block` / `child_page` |  |  |
+| CJM frictions | `database_index` / `notion_table_block` / `child_page` |  |  |
+| Opportunities / ICE-RICE | `database_index` / `notion_table_block` / `child_page` |  |  |
+| Validation claims | `database_index` / `notion_table_block` / `child_page` |  |  |
+| Sources | `database_index` / `toggle` / `child_page` |  |  |
+
+| Dry-run field | Required value |
+|---|---|
+| `notion_data_shape_plan.selected_layout` |  |
+| `notion_data_shape_plan.database_index_candidates` | personas / cjm_frictions / opportunities / validation_claims / sources as applicable |
+| `notion_data_shape_plan.idempotency_strategy` | hub page, child pages and database rows |
+| `notion_data_shape_plan.api_limits` | append chunk size, request payload limits and rate limit handling |
+
 ## Unknowns
 
 - 
@@ -251,3 +289,6 @@ Required before `notion-research-export-ru.md` can be published to Notion.
 - [ ] Research-To-Design Handoff exists or has `skipped_with_reason`.
 - [ ] Candidate Quality / Write Gate is recorded before overwriting existing research artifacts.
 - [ ] Publication Shape Gate passes before Notion approval/publication.
+- [ ] Publication Cross-Link Gate passes before Notion approval/publication.
+- [ ] Research Content Lint is run or recorded as blocked before external publication.
+- [ ] Notion Data Shape Plan exists for detailed hub publication.

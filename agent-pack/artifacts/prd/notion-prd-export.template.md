@@ -43,8 +43,20 @@
 - Status: `not_run` / `passed` / `passed_with_warnings` / `blocked`
 - Converter/tool:
 - Block plan:
+- Notion data shape plan:
 - Database schema preview:
 - Warnings:
+
+## Notion Data Shape Plan
+
+| Entity / section | Recommended Notion shape | Why | Schema preview / properties | Idempotency key |
+|---|---|---|---|---|
+| PRD narrative | `child_page` |  |  |  |
+| Requirements | `database_index` / `notion_table_block` |  |  |  |
+| MoSCoW priorities | `database_index` / `notion_table_block` |  |  |  |
+| Acceptance Criteria | `to_do` blocks / `database_index` |  |  |  |
+| User Stories | `database_index` |  |  |  |
+| Personas | `database_index` |  |  |  |
 
 ## Page Structure
 
