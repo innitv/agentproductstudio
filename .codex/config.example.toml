@@ -116,6 +116,10 @@ url = "https://gitlab.com/api/v4/mcp"
 [mcp_servers.tavily]
 url = "https://mcp.tavily.com/mcp/?tavilyApiKey=${TAVILY_API_KEY}"
 
+[mcp_servers.lazyweb]
+url = "https://www.lazyweb.com/mcp"
+bearer_token_env_var = "LAZYWEB_MCP_TOKEN"
+
 [mcp_servers.notion]
 command = "yarn"
 args = ["notion:mcp"]

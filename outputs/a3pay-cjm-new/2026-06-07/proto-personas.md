@@ -2,9 +2,9 @@
 
 ## Использованные входные материалы
 
-- `research-summary.md`
-- `cjm-map.md`
-- `opportunity-roadmap.md`
+- [research-summary.md](research-summary.md)
+- [cjm-map.md](cjm-map.md)
+- [opportunity-roadmap.md](opportunity-roadmap.md)
 - Source-backed market facts and product hypotheses
 
 ## Ограничение

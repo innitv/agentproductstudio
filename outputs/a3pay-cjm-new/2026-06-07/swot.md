@@ -2,10 +2,10 @@
 
 ## Использованные входные материалы
 
-- `research-summary.md`
-- `competitive-analysis.md`
-- `cjm-map.md`
-- `opportunity-roadmap.md`
+- [research-summary.md](research-summary.md)
+- [competitive-analysis.md](competitive-analysis.md)
+- [cjm-map.md](cjm-map.md)
+- [opportunity-roadmap.md](opportunity-roadmap.md)
 
 ## SWOT-матрица
 

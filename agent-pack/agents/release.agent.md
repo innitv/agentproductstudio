@@ -43,6 +43,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 0. **Release Scope Classification**: Определить тип выпуска: artifact-only, code change, Figma/Notion external publication, deploy, git handoff или mixed release. Для каждого типа указать exact target и требуется ли approval.
 1. **QA & Gate Verification**: Убедиться, что `qa-report.md` имеет статус `pass` или `pass_with_known_limitations`, а known limitations не блокируют release. Если QA `fail/blocked`, вернуть `blocked`.
 2. **Run Ledger Audit**: Проверить `run-state.json`, `run-meta.json`, `artifact-manifest.json`, `run-index.md`, `stage-gate-ledger.md` и `handoff-bundle.md`; release нельзя считать `ready`, если ledger расходится с фактическими артефактами.
+2a. **Surface Output Summary**: Собрать все пользовательские поверхности релиза: Notion/Figma/frontend/prototype/presentation/handoff. Для каждой указать заявленный scope, фактический output, verification evidence и unresolved deviations.
 3. **Change Inventory**: Собрать фактически измененные файлы из git, созданные/обновленные `outputs/*`, runtime artifacts, external records и generated reports. Разделить changes на product artifacts, code, config, tests, docs, external records и unrelated dirty tree.
 4. **Dependency & Sensitive Delta**: Проверить изменения `package.json`, lockfile, env/templates, analytics payloads, secrets и raw provider outputs. Новые зависимости, secrets или PII risk фиксируются отдельной строкой release risk.
 5. **Validation Matrix**: Собрать результаты `workflow:validate`, `validate:config`, `docs:audit`, `typecheck`, build/test/Playwright/visual diff, Notion/Figma dry-run records и skipped checks. Для каждого check указать command, result, evidence path и release impact.
@@ -62,6 +63,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - **Готовность к откату**: Команды отката (rollback) должны быть автономными, проверенными и не зависящими от работоспособности текущего сбойного инстанса. Разрушительные команды требуют отдельного approval.
 - **Не смешивать unrelated dirty tree**: Release notes должны явно отделять изменения текущего release scope от старых/параллельных изменений в рабочем дереве.
 - **No silent external success**: Notion/Figma/deploy/git write не считаются выполненными без record: exact target, approval, timestamp/status и evidence.
+- **No incomplete surface success**: release не может быть `ready`, если Surface Output Gate для видимых поверхностей отсутствует или показывает `failed/blocked` без explicit waiver.
 
 ## Required Output
 

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-08T06:18:44.094Z",
+  "generated_at": "2026-06-08T18:17:19.669Z",
   "run_id": "a3pay-cjm-new-2026-06-07",
   "workflow_profile": "standard",
   "artifacts": [
@@ -39,9 +39,9 @@
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "partial",
-      "size_bytes": 3807,
-      "updated_at": "2026-06-08T06:18:34.984Z",
-      "checksum_sha256": "02ec3be72b30a26081529fc1701caffde3d5d5258fdba5902ec0923339d3a413"
+      "size_bytes": 5498,
+      "updated_at": "2026-06-08T09:59:53.255Z",
+      "checksum_sha256": "1b44549fa692aaed5f7993c200dc90edc8ae3b31dd225d38a03ca9ef948c1699"
     },
     {
       "artifact_name": "stage_gate_ledger",
@@ -60,9 +60,9 @@
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "partial",
-      "size_bytes": 6817,
-      "updated_at": "2026-06-08T06:18:34.889Z",
-      "checksum_sha256": "cf23e71f440af9bcdee3cd4619defb08bb88fe78ad349a72f17dfa9bae4c2555"
+      "size_bytes": 8837,
+      "updated_at": "2026-06-08T09:59:44.808Z",
+      "checksum_sha256": "d7fff151c250940075f319f7d506c257a6f1638afb0de32728591cb584dea3f0"
     },
     {
       "artifact_name": "recursive_brief",
@@ -111,9 +111,9 @@
       "safe_to_publish": true,
       "lifecycle": "partial",
       "schema": "agent-pack/schemas/research-summary.schema.json",
-      "size_bytes": 21076,
-      "updated_at": "2026-06-08T06:15:59.021Z",
-      "checksum_sha256": "a16b8d8f93a0d11e27edbb5ed267950db8d4ce025f8bf343888f4d5d9e7e6208"
+      "size_bytes": 32022,
+      "updated_at": "2026-06-08T17:11:06.489Z",
+      "checksum_sha256": "75a72d52560b52c6f28c69673e3ef46bcfeb29fb6888a05d4e18ec87f5f4dc39"
     },
     {
       "artifact_name": "competitive_analysis",
@@ -131,9 +131,9 @@
       "human_readable": true,
       "safe_to_publish": true,
       "lifecycle": "partial",
-      "size_bytes": 4639,
-      "updated_at": "2026-06-08T06:15:59.117Z",
-      "checksum_sha256": "9b1476eadf371c26fe79cd69d69e38bb39100a5d1bffdd77a56391e40144a63f"
+      "size_bytes": 4672,
+      "updated_at": "2026-06-08T09:11:50.278Z",
+      "checksum_sha256": "0e60b7221cb7ad47a2aa6146b4379460ca11adff975a3eabd6ed56f567ddaf4f"
     },
     {
       "artifact_name": "proto_personas",
@@ -151,9 +151,9 @@
       "human_readable": true,
       "safe_to_publish": true,
       "lifecycle": "partial",
-      "size_bytes": 3460,
-      "updated_at": "2026-06-08T06:15:59.205Z",
-      "checksum_sha256": "07a1f99957aade096a57fd7378d1305ed8073a5e35647a5d430718b2c7004505"
+      "size_bytes": 3517,
+      "updated_at": "2026-06-08T09:11:50.494Z",
+      "checksum_sha256": "b43a18c223a10dceb8525041896d1cdcb6d10ea8d29f89a04cbbcc98c246b458"
     },
     {
       "artifact_name": "synthetic_interviews",
@@ -171,9 +171,9 @@
       "human_readable": true,
       "safe_to_publish": true,
       "lifecycle": "partial",
-      "size_bytes": 3102,
-      "updated_at": "2026-06-08T06:15:59.249Z",
-      "checksum_sha256": "48c0405bd2d159d685101219fac20d1346e384440d8fa08eae8b4039feb54404"
+      "size_bytes": 3154,
+      "updated_at": "2026-06-08T09:11:50.575Z",
+      "checksum_sha256": "6bb77494117b2ccffe5a02beede3563767a1e08f6b09f31253cf892fc45381a9"
     },
     {
       "artifact_name": "swot",
@@ -191,9 +191,9 @@
       "human_readable": true,
       "safe_to_publish": true,
       "lifecycle": "partial",
-      "size_bytes": 2338,
-      "updated_at": "2026-06-08T06:15:59.287Z",
-      "checksum_sha256": "b29805491b1355267fc2e6bb7a70c31c41644e79a3a11431bef59d0c83bfb0f5"
+      "size_bytes": 2420,
+      "updated_at": "2026-06-08T09:11:50.630Z",
+      "checksum_sha256": "e4bf7e6c4ab7b7a828b0a7e22adfe0e42cf97f8b1969ea12dc3c57fa56a9e7ae"
     },
     {
       "artifact_name": "prd",
@@ -405,9 +405,9 @@
       "safe_to_publish": false,
       "lifecycle": "partial",
       "schema": "agent-pack/schemas/release-notes.schema.json",
-      "size_bytes": 8004,
-      "updated_at": "2026-06-08T06:18:34.938Z",
-      "checksum_sha256": "b9b3e2d8e22bb0adfc0f7149cb43edf2ee354561995b64116be05a4e27675e65"
+      "size_bytes": 9637,
+      "updated_at": "2026-06-08T10:00:02.479Z",
+      "checksum_sha256": "178b81ad9b8bd89debbbdb372df0b679dd5886ae07bbfaf8a7e4ea7cd569ea5a"
     },
     {
       "artifact_name": "notion_research_export_ru",
@@ -423,9 +423,9 @@
       "human_readable": true,
       "safe_to_publish": true,
       "lifecycle": "active",
-      "size_bytes": 58640,
-      "updated_at": "2026-06-08T06:16:11.152Z",
-      "checksum_sha256": "ab42812a42809789f251cc4f557d2e3c9d74f8c126a08e181ae54279dd834999"
+      "size_bytes": 106444,
+      "updated_at": "2026-06-08T17:23:37.354Z",
+      "checksum_sha256": "8674046230bf3f469c54a56b35175f67129e330da1b143e0fac0cfc39509abfc"
     },
     {
       "artifact_name": "approval_state",
@@ -441,9 +441,9 @@
       "human_readable": false,
       "safe_to_publish": false,
       "lifecycle": "active",
-      "size_bytes": 1327,
-      "updated_at": "2026-06-08T06:17:18.694Z",
-      "checksum_sha256": "bcb2ae4ed8f483674aa0e0fb0d9c7b089fc4c8fecb13c074abfa94c322826bdd"
+      "size_bytes": 2273,
+      "updated_at": "2026-06-08T09:48:33.836Z",
+      "checksum_sha256": "66e8bf1a8220fc25f12a2fce36b89180046e6c1f88b1d10f7d6f5705b3e0c0d7"
     },
     {
       "artifact_name": "notion_publication_result",

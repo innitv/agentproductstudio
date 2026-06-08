@@ -2,8 +2,8 @@
 
 ## Использованные входные материалы
 
-- `research-summary.md`
-- `cjm-map.md`
+- [research-summary.md](research-summary.md)
+- [cjm-map.md](cjm-map.md)
 - Tavily/web sources: Банк России, СБП/НСПК, Data Insight, ЮKassa, T-Pay/Yandex Pay public materials, BNPL market sources
 
 ## Набор конкурентов

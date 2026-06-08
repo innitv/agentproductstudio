@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { lintResearchMarkdown } from "./lint-research-content.mjs";
 
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
@@ -12,7 +13,7 @@ if (!parentArg || !exportPathArg) {
   process.exit(1);
 }
 
-const token = readNotionToken();
+const token = dryRun ? null : readNotionToken();
 const parentPageId = extractPageId(parentArg);
 const exportPath = resolve(process.cwd(), exportPathArg);
 
@@ -27,6 +28,8 @@ const publishUnits = groupResearchSections(parsed.sections);
 const hubTitle = titleArg?.trim() || parsed.title || "Пакет исследования";
 const shapeGate = validatePublicationShape(parsed.sections);
 const completenessGate = validatePublicationCompleteness(exportPath, markdown, parsed.sections);
+const crossLinkGate = validatePublicationCrossLinks(markdown, parsed.sections);
+const antiSlopGate = validatePublicationAntiSlop(markdown, parsed.sections);
 
 if (!skipPublicationShapeGate && !shapeGate.pass) {
   console.error(formatPublicationShapeGate(shapeGate));
@@ -35,6 +38,16 @@ if (!skipPublicationShapeGate && !shapeGate.pass) {
 
 if (!completenessGate.pass) {
   console.error(formatPublicationCompletenessGate(completenessGate));
+  process.exit(1);
+}
+
+if (!crossLinkGate.pass) {
+  console.error(formatPublicationCrossLinkGate(crossLinkGate));
+  process.exit(1);
+}
+
+if (!antiSlopGate.pass) {
+  console.error(formatPublicationAntiSlopGate(antiSlopGate));
   process.exit(1);
 }
 
@@ -56,6 +69,8 @@ if (dryRun) {
     estimated_total_blocks: plan.reduce((sum, item) => sum + item.estimated_blocks, 0),
     publication_shape_gate: shapeGate,
     publication_completeness_gate: completenessGate,
+    publication_cross_link_gate: crossLinkGate,
+    publication_anti_slop_gate: antiSlopGate,
   }, null, 2));
   process.exit(0);
 }
@@ -258,15 +273,15 @@ function validatePublicationShape(sections) {
       label: "Прото-персоны должны быть сравнительной таблицей",
       markers: ["personas"],
       sectionMatch: /^(Прото-персоны|Персона \d+:.*)$/i,
-      requiredHeaders: ["персона", "jtbd", "боль"],
-      hint: "Добавь таблицу с колонками: Персона / Сегмент / Контекст / JTBD / Боль / Ценность / Evidence status.",
+      requiredHeaderGroups: [["персона"], ["jtbd", "задач"], ["боль"]],
+      hint: "Добавь таблицу с колонками: Персона / Сегмент / Контекст / Задача / Боль / Ценность / Статус доказательств.",
     },
     {
       id: "cjm_table",
       label: "CJM должен быть таблицей или схемой",
       markers: ["cjm"],
       sectionMatch: /^(CJM и сценарии|Общая модель CJM|Матрица сценариев CJM|P\d CJM:.*|Сценарий \d+:.*)$/i,
-      requiredHeaders: ["этап", "бол"],
+      requiredHeaderGroups: [["этап"], ["бол"]],
       hint: "Добавь таблицу с колонками: Этап / Цель / Действия / Участники / Боли / Возможность.",
     },
     {
@@ -274,7 +289,7 @@ function validatePublicationShape(sections) {
       label: "Конкурентный контекст должен содержать таблицу",
       markers: ["competitors"],
       sectionMatch: /^(Конкурентный контекст|Набор конкурентов|Матрица позиционирования)$/i,
-      requiredHeaders: ["игрок"],
+      requiredHeaderGroups: [["игрок", "competitor", "name"]],
       hint: "Добавь таблицу конкурентов или позиционирования.",
     },
     {
@@ -282,7 +297,7 @@ function validatePublicationShape(sections) {
       label: "ICE/RICE должен содержать таблицу scoring",
       markers: ["scoring"],
       sectionMatch: /^(ICE\/RICE backlog|ICE\/RICE бэклог|Детализация backlog|Детализация бэклога)$/i,
-      requiredHeaders: ["сценарий"],
+      requiredHeaderGroups: [["сценарий", "инициатива"]],
       hint: "Добавь таблицу ICE/RICE с колонками scoring.",
     },
   ];
@@ -295,8 +310,10 @@ function validatePublicationShape(sections) {
       section: section.title,
       headers: table.headers,
       row_count: table.rowCount,
-      matches_required_headers: rule.requiredHeaders.every((required) =>
-        table.headers.some((header) => header.toLowerCase().includes(required)),
+      matches_required_headers: rule.requiredHeaderGroups.every((alternatives) =>
+        alternatives.some((required) =>
+          table.headers.some((header) => header.toLowerCase().includes(required)),
+        ),
       ),
     })));
     const hasMatchingTable = tableSummaries.some((table) => table.row_count > 0 && table.matches_required_headers);
@@ -493,6 +510,122 @@ function formatPublicationCompletenessGate(completenessGate) {
   return lines.join("\n");
 }
 
+function validatePublicationCrossLinks(markdown, sections) {
+  const sectionTitles = sections.map((section) => section.title);
+  const markers = new Set(sections.flatMap((section) => section.markers ?? []));
+  const isDetailedHub = sections.length > 6 || ["personas", "cjm", "competitors", "scoring"].filter((marker) => markers.has(marker)).length >= 3;
+  const checks = [
+    {
+      id: "cross_link_map",
+      label: "Research hub should include a cross-link map",
+      status: /(^|\n)##\s+Карта связей исследования(?:\s|\r?$)/iu.test(markdown) ? "pass" : "fail",
+      hint: "Добавь раздел `Карта связей исследования` с переходами к personas, CJM, ICE/RICE, roadmap/SWOT, validation и sources.",
+    },
+    {
+      id: "decision_trail",
+      label: "Research hub should include a decision trail",
+      status: /(^|\n)##\s+(?:Цепочка решений|Decision trail)(?:\s|\r?$)/iu.test(markdown) ? "pass" : "fail",
+      hint: "Добавь раздел `Цепочка решений` с цепочкой: доказательство -> интерпретация -> продуктовое решение -> подробности.",
+    },
+    {
+      id: "core_references",
+      label: "Cross-link sections should reference core child sections",
+      status: hasCrossLinkCoreReferences(markdown, sectionTitles) ? "pass" : "fail",
+      hint: "В cross-link map должны упоминаться personas/персоны, CJM, ICE/RICE, roadmap/SWOT, validation/валидация или sources/источники.",
+    },
+  ];
+
+  if (!isDetailedHub) {
+    return {
+      pass: true,
+      status: "not_applicable",
+      reason: "Export is short enough that hub-level cross-links are optional.",
+      section_titles: sectionTitles,
+      checks,
+    };
+  }
+
+  return {
+    pass: checks.every((check) => check.status === "pass"),
+    status: checks.every((check) => check.status === "pass") ? "pass" : "fail",
+    section_titles: sectionTitles,
+    checks,
+  };
+}
+
+function hasCrossLinkCoreReferences(markdown, sectionTitles) {
+  const text = `${markdown}\n${sectionTitles.join("\n")}`.toLowerCase();
+  const groups = [
+    [/persona/i, /персон/i],
+    [/cjm/i, /сценари/i],
+    [/ice\/rice/i, /бэклог/i, /приоритет/i],
+    [/roadmap/i, /дорожн/i, /swot/i],
+    [/validation/i, /валидац/i, /sources/i, /источник/i],
+  ];
+
+  return groups.filter((patterns) => patterns.some((pattern) => pattern.test(text))).length >= 4;
+}
+
+function formatPublicationCrossLinkGate(crossLinkGate) {
+  const lines = [
+    "Notion publication cross-link gate failed.",
+    "",
+    "Detailed research hub must include clickable navigation between related research sections before publication.",
+    "Fix `notion-research-export-ru.md` by adding `Карта связей исследования` and `Цепочка решений`, or run an approval-gated Notion cross-link pass for an already published hub.",
+    "",
+    "| Check | Status | Hint |",
+    "|---|---|---|",
+  ];
+
+  for (const check of crossLinkGate.checks) {
+    lines.push(`| ${check.label} | ${check.status} | ${check.hint} |`);
+  }
+
+  return lines.join("\n");
+}
+
+function validatePublicationAntiSlop(markdown, sections) {
+  const sectionText = sections.map((section) => `${section.title}\n${section.markdown}`).join("\n\n");
+  const result = lintResearchMarkdown(`${markdown}\n\n${sectionText}`, {
+    sourceName: "notion-research-export",
+  });
+
+  return {
+    pass: result.pass,
+    status: result.status,
+    checks: result.checks,
+  };
+}
+
+function formatPublicationAntiSlopGate(antiSlopGate) {
+  const lines = [
+    "Notion publication anti-AI-slop gate failed.",
+    "",
+    "Research export must be specific, scenario-driven and validated before external publication.",
+    "",
+    "| Check | Status | Value | Hint |",
+    "|---|---|---|---|",
+  ];
+
+  for (const check of antiSlopGate.checks) {
+    lines.push(`| ${check.label} | ${check.status} | ${formatGateValue(check.value)} | ${check.hint} |`);
+  }
+
+  return lines.join("\n");
+}
+
+function formatGateValue(value) {
+  if (Array.isArray(value)) {
+    return value.length ? JSON.stringify(value).replace(/\|/g, "\\|") : "none";
+  }
+
+  if (value && typeof value === "object") {
+    return JSON.stringify(value).replace(/\|/g, "\\|");
+  }
+
+  return String(value ?? "").replace(/\|/g, "\\|");
+}
+
 function formatCompletenessValue(value) {
   if (Array.isArray(value)) {
     return value.join(", ").replace(/\|/g, "\\|");
@@ -510,6 +643,8 @@ function buildHubBlocks(parsed, childResults) {
     blocks.push(...markdownToBlocks(parsed.lead));
   }
 
+  blocks.push(...buildHubCrossLinkBlocks(childResults));
+
   blocks.push(heading(2, "Навигация по разделам"));
   for (const child of childResults) {
     blocks.push(bulletedListItem(`${child.title} — ${child.blocks} blocks; разделы: ${child.source_sections.join(", ")}`));
@@ -519,6 +654,117 @@ function buildHubBlocks(parsed, childResults) {
   blocks.push(paragraph(`Создано дочерних страниц: ${childResults.length}.`));
   blocks.push(paragraph(`Стратегия: hub page + grouped child pages + selective toggle/drawer sections, без микространиц и без лишнего сворачивания коротких блоков.`));
   return blocks;
+}
+
+function buildHubCrossLinkBlocks(childResults) {
+  const childByPrefix = new Map(childResults.map((child) => [child.title.slice(0, 2), child]));
+  const overview = childByPrefix.get("00");
+  const competitors = childByPrefix.get("02");
+  const personas = childByPrefix.get("03");
+  const interviews = childByPrefix.get("04");
+  const cjm = childByPrefix.get("05");
+  const scoring = childByPrefix.get("06");
+  const roadmap = childByPrefix.get("07");
+  const validation = childByPrefix.get("08");
+
+  const rows = [
+    [
+      textRich("Почему A3 Pay должен помогать с доверием, назначением, чеком, статусом и возвратом, а не быть еще одной кнопкой оплаты"),
+      richJoin([mentionPageRich(overview), textRich(" и "), mentionPageRich(competitors)]),
+    ],
+    [
+      textRich("Какие сценарии дают лучший стартовый рынок"),
+      richJoin([mentionPageRich(cjm), textRich(" и "), mentionPageRich(scoring)]),
+    ],
+    [
+      textRich("Для кого это важно и какие боли проверять"),
+      richJoin([mentionPageRich(personas), textRich(" и "), mentionPageRich(interviews)]),
+    ],
+    [
+      textRich("Почему приоритеты идут именно в таком порядке"),
+      richJoin([mentionPageRich(scoring), textRich(" и "), mentionPageRich(roadmap)]),
+    ],
+    [
+      textRich("Какие риски мешают статусу ready"),
+      richJoin([mentionPageRich(roadmap), textRich(" и "), mentionPageRich(validation)]),
+    ],
+  ];
+
+  const decisionRows = [
+    [
+      textRich("Безналичные платежи и СБП стали массовыми, но UX распределен между банками, QR, PSP и порталами."),
+      textRich("Конкурировать отдельным способом оплаты рискованно; ценность выше там, где пользователь теряет контекст и доверие."),
+      textRich("Связать получателя, назначение, способ оплаты, чек и статус в одном понятном сценарии."),
+      richJoin([mentionPageRich(overview), textRich(", "), mentionPageRich(competitors)]),
+    ],
+    [
+      textRich("Малый бизнес и услуги уже используют переводы/QR, но клиенту не хватает счета, назначения, чека и статуса."),
+      textRich("Это частый сценарий без тяжелой юридической нагрузки крупной сделки."),
+      textRich("Запускать счет по телефону, профиль получателя, чек и сценарий возврата."),
+      richJoin([mentionPageRich(cjm), textRich(", "), mentionPageRich(scoring)]),
+    ],
+    [
+      textRich("Регулярные счета дают частоту, но конкурируют с банками, Госуслугами и ГИС ЖКХ."),
+      textRich("Центр счетов ценен только если человек реально видит прошлые платежи, сроки, чеки и следующий счет лучше, чем в банковском кабинете."),
+      textRich("Проверить готовность подключать счета и возвращаться каждый месяц до тяжелой интеграции."),
+      richJoin([mentionPageRich(cjm), textRich(", "), mentionPageRich(validation)]),
+    ],
+    [
+      textRich("Крупные сделки дают высокий эффект, но завязаны на документы, банки, эскроу/аккредитив и правовую роль."),
+      textRich("Это не стартовое ядро продукта, потому что ошибка здесь требует юридической и партнерской готовности."),
+      textRich("Начинать с понятного статуса и передачи в банк-партнер после проверки юридической модели."),
+      richJoin([mentionPageRich(roadmap)]),
+    ],
+  ];
+
+  return [
+    heading(2, "Карта связей исследования"),
+    tableBlock([
+      [textRich("Если нужно понять"), textRich("Куда перейти")],
+      ...rows,
+    ]),
+    heading(2, "Цепочка решений"),
+    tableBlock([
+      [textRich("Доказательство"), textRich("Интерпретация"), textRich("Продуктовое решение"), textRich("Подробности")],
+      ...decisionRows,
+    ]),
+  ];
+}
+
+function tableBlock(rows) {
+  const width = Math.max(...rows.map((row) => row.length));
+  return {
+    object: "block",
+    type: "table",
+    table: {
+      table_width: width,
+      has_column_header: rows.length > 1,
+      has_row_header: false,
+      children: rows.map((row) => ({
+        object: "block",
+        type: "table_row",
+        table_row: {
+          cells: Array.from({ length: width }, (_, index) => row[index] ?? textRich("")),
+        },
+      })),
+    },
+  };
+}
+
+function textRich(content) {
+  return [{ type: "text", text: { content: String(content ?? "").slice(0, 1900) } }];
+}
+
+function mentionPageRich(child) {
+  if (!child?.page_id) {
+    return textRich("раздел не найден");
+  }
+
+  return [{ type: "mention", mention: { type: "page", page: { id: child.page_id } } }];
+}
+
+function richJoin(parts) {
+  return parts.flat().filter(Boolean);
 }
 
 async function createChildPage(parentPageId, title) {

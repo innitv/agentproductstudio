@@ -81,15 +81,54 @@ If either default provider is unavailable, failed or empty, set Status to `parti
 | Positioning |  |
 | Primary paths |  |
 
+## Anti-AI-Slop Gate
+
+Заполни перед финальной записью. Gate проверяет качество объяснения целиком, а не только отдельные слова. Если вывод можно перенести в другой продукт без изменения смысла, если нет наблюдаемого поведения, механизма влияния или проверки, статус артефакта не может быть `ready`.
+
+| Проверка | Статус | Исправление / ссылка |
+|---|---|---|
+| Нет финальных выводов, построенных на абстрактных продуктовых ярлыках без конкретного сценария | pass / needs_revision |  |
+| Каждый крупный вывод проходит тест "нельзя без изменений вставить в другой продукт" | pass / needs_revision |  |
+| Обещания улучшения раскрыты через механизм: почему -> где в пути -> чем продукт помогает -> как проверяем | pass / needs_revision |  |
+| Метрики описаны как наблюдаемое действие пользователя или бизнеса | pass / needs_revision |  |
+| Таблицы не повторяют один шаблон строк с заменой существительных | pass / needs_revision |  |
+| Каждый крупный вывод объяснен через реальную ситуацию пользователя или бизнеса | pass / needs_revision |  |
+| Есть связка `персона -> ситуация -> трение -> решение -> проверка` | pass / needs_revision |  |
+| Research не является только тезисной выжимкой | pass / needs_revision |  |
+
+## Цепочка решений
+
+| Доказательство | Что это значит в жизни | Продуктовое решение | Где раскрыто подробнее |
+|---|---|---|---|
+
 ## CJM-синтез сценариев
 
-| Сценарий | Цель пользователя | Трение | Роль продукта | Приоритет | Статус доказательств |
-|---|---|---|---|---|---|
+| Сценарий | Персона/контекст | Цель пользователя | Что происходит в жизни | Трение | Роль продукта | Приоритет | Статус доказательств |
+|---|---|---|---|---|---|---|---|
+
+## Подробные кейсы под CJM
+
+Required: для каждого P0/P1 сценария минимум 2-4 кейса. Не заменять этот раздел краткой выжимкой.
+
+| Сценарий | Кейс | Персона | Ситуация | Вопрос пользователя | Что ломается | Что делает продукт | Как проверяем |
+|---|---|---|---|---|---|---|---|
+
+## User Flow под CJM
+
+Required: для основных сценариев показать этапы до оплаты, во время оплаты, после оплаты и при исключениях.
+
+| Сценарий | Этап | Действие пользователя | Вопрос пользователя | Боль/барьер | Решение продукта | Метрика |
+|---|---|---|---|---|---|---|
 
 ## Оценка возможностей
 
 | Инициатива | Сценарий | Reach | Impact | Confidence | Effort | RICE | Приоритет |
 |---|---|---:|---:|---:|---:|---:|---|
+
+## Связь возможностей с CJM
+
+| Инициатива | CJM-сценарий | Конкретное трение | Почему это важно | Validation method | Риск без проверки |
+|---|---|---|---|---|---|
 
 ## Дорожная карта
 
@@ -200,6 +239,10 @@ Required before `notion-research-export-ru.md` can be published to Notion.
 - [ ] Audience segments are defined.
 - [ ] JTBD is complete.
 - [ ] CJM/user paths are present or `skipped_with_reason`.
+- [ ] Anti-AI-Slop Gate passed: abstract pattern words are removed or explained through real-life scenarios.
+- [ ] Narrative Depth Gate passed: detailed cases and user flows are present, not only bullet summaries.
+- [ ] CJM includes user questions, pains, product response, metrics and validation method.
+- [ ] Opportunity scoring is tied to CJM frictions and validation methods.
 - [ ] Opportunity scoring or prioritized opportunity list is present when research feeds PRD/IA/design.
 - [ ] Proto Personas are present or `skipped_with_reason`.
 - [ ] Synthetic Interviews are present or `skipped_with_reason`.

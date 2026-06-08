@@ -47,6 +47,11 @@
 | Artifact | Producer Stage | Status | Evidence / Notes |
 |---|---|---|---|
 
+## Surface Output Summary
+
+| Surface | Declared Scope | Actual Output | Verification Evidence | Deviations / Risk |
+|---|---|---|---|---|
+
 ## What Changed
 
 ## Dependency & Sensitive Delta

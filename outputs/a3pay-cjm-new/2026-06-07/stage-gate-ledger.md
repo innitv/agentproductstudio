@@ -57,6 +57,15 @@
 | 2026-06-08 | `node tooling/scripts/publish-notion-research-hub.mjs ...` | pass | Published full Notion hub `37964731-74e5-8197-8293-e78a19a0632c` with 9 child pages and 480 blocks. |
 | 2026-06-08 | `node tooling/scripts/generate-notion-research-export.mjs ...` | pass | Regenerated export with human-readable Russian headings and invisible machine markers. |
 | 2026-06-08 | `node tooling/scripts/publish-notion-research-hub.mjs ...` | pass | Published current Notion hub `37964731-74e5-81b1-bff5-f189cc8c0887` with human-readable headings, 9 child pages and 473 blocks. |
+| 2026-06-08 | `yarn workflow:approval-request ... figma_write` | tty_unavailable | Runtime approval request requires a TTY; fallback was a separate explicit approval question in the current chat. |
+| 2026-06-08 | `yarn workflow:approve ... figma_write` | pass | Explicit user approval recorded for target `new_figma_file:a3pay-research-visualization-2026-06-08`. |
+| 2026-06-08 | Figma MCP `use_figma` | pass | Created `A3 Pay Research Board v2` page in Figma file `O1EK1ODspMvmJA7emTNnYd` with 19 data visualization frames. |
+| 2026-06-08 | Figma MCP `get_screenshot` + frame inventory | pass | Page node `5:2`; 19 frames confirmed through `figma.currentPage.children`; screenshot smoke passed for canvas `4480x6780`. |
+| 2026-06-08 | Lazyweb MCP direct probe | partial | `initialize` succeeded; `tools/list` returned `MCP_RATE_LIMITED`, so Lazyweb visual references were not embedded. |
+| 2026-06-08 | Research output cross-link pass | pass | Added local Markdown links, `Карта связей исследования`, `Decision trail`, and `research-output-improvement-review.md`. |
+| 2026-06-08 | `yarn workflow:approve ... notion_research_publish` | pass | Explicit user approval recorded for target `notion_hub:3796473174e581b1bff5f189cc8c0887`. |
+| 2026-06-08 | Notion MCP `update_page` cross-link pass | pass | Updated hub and `00 Обзор` with cross-link map and decision trail. |
+| 2026-06-08 | Notion MCP `fetch` verification | pass | Hub and overview include new cross-link sections and page links. |
 
 ## Publication Gate
 
@@ -69,6 +78,10 @@
 | Notion publication | published | Hub URL: https://www.notion.so/3796473174e5813381fdd90afcd6f41d |
 | Full Notion republication | superseded | Full hub URL: https://www.notion.so/3796473174e581978293e78a19a0632c |
 | Current Notion publication | published | Human-readable headings hub URL: https://www.notion.so/3796473174e581b1bff5f189cc8c0887 |
+| Figma write approval | pass | `approval-state.json`: `figma_write` approved for `https://www.figma.com/design/O1EK1ODspMvmJA7emTNnYd`. |
+| Figma visualization | completed | File URL: https://www.figma.com/design/O1EK1ODspMvmJA7emTNnYd; page `A3 Pay Research Board v2`; 19 frames. |
+| Research output links | completed | Local artifacts updated; Notion hub external update not performed. |
+| Notion cross-link pass | completed | Hub URL: https://app.notion.com/p/3796473174e581b1bff5f189cc8c0887 |
 
 ## Process Deviations
 

@@ -30,6 +30,26 @@
 - Libraries/components reused:
 - Что создается с нуля:
 
+## Surface Output Contract
+
+| Field | Value |
+|---|---|
+| Surface type | `figma_board` / `handoff` |
+| Expected frames / pages |  |
+| Expected entities / sections |  |
+| Coverage result | pending / pass / partial / blocked |
+| Verification evidence required | Figma node IDs, screenshot, Auto Layout smoke check |
+
+### Data / Artifact Coverage
+
+| Source Artifact / Data Group | Expected Frame / Component | Status | Notes |
+|---|---|---|---|
+
+### Evidence-To-Frame Map
+
+| Evidence / Source | Frame / Component | Visual Treatment | Verification Signal |
+|---|---|---|---|
+
 ## Foundation
 
 ### Primitive Variables

@@ -37,6 +37,12 @@ If the workflow contains a visual reference, frontend must read `reference-analy
 
 Before handoff, verify hero/nav/color/typography/spacing/card/CTA/form/footer patterns against the visual spec and record intentional differences for `visual-reference-review.md`.
 
+## Lazyweb Implementation Check
+
+Для визуально значимых изменений frontend читает `lazyweb_evidence` из `reference-analysis.md`, `STYLE_GUIDE.md`, `design-brief.md` и `handoff-bundle.md`. Если evidence отсутствует, но задача UI-heavy/high-visual-risk и Lazyweb tools доступны, использовать `lazyweb-quick-references` или `lazyweb-design-improve` до финальной визуальной проверки.
+
+Lazyweb для frontend используется как benchmark/critique layer: density, information hierarchy, controls, empty/loading/error states, responsive behavior, navigation и trust patterns. Он не заменяет утвержденный `design-brief.md` и не разрешает копировать trade dress чужого продукта. Не отправлять приватные локальные screenshots/code в Lazyweb compare tools без отдельного approval.
+
 ## Inputs
 
 - `handoff-bundle.md` (сжатый в рамках **State Truncation Gate**, содержащий только YAML/JSON payloads предыдущих стадий)
@@ -54,6 +60,7 @@ Before handoff, verify hero/nav/color/typography/spacing/card/CTA/form/footer pa
 1. **Анализ архитектуры**: Изучить структуру директорий репозитория, зависимости в `package.json` и убедиться, что все необходимые входные артефакты созданы.
 2. **Получение сжатого контекста**: Прочитать сжатый `handoff-bundle.md` для понимания согласованных решений и рамок без избыточного контекста исследований.
 3. **Frontend Thesis**: До кода зафиксировать в рабочем черновике `visual thesis`, `content plan`, `interaction thesis` и `defaults to reject`. Эти пункты не обязаны становиться отдельным артефактом, но их итоговые решения должны попасть в `frontend-result.md`.
+3a. **Surface Output Contract Pass**: определить тип поверхности (`landing`, `product_ui`, `dashboard_console`, `frontend` или blended), expected views/components/states, upstream coverage, evidence-to-output map и verification plan по `agent-pack/templates/surface-output-contract.template.md`.
 4. **Surface Routing**: Определить тип поверхности: `marketing/landing`, `app/dashboard/console` или blended. Для blended задач разделить presentation view и operational view вместо смешивания hero-композиции с dashboard-интерфейсом.
 5. **Применение Навыков**: Использовать навык [landing-builder/SKILL.md](file:///c:/Project/product-agent-studio/agent-pack/skills/landing-builder/SKILL.md) для сборки премиальных кастомных интерфейсов с нуля на чистом Tailwind и React без готовых библиотек.
 6. **Синхронизация С Figma Handoff**: Если есть `figma-handoff-bundle.md`, сопоставить Figma variables/component inventory/component states с frontend tokens/components. Не игнорировать `Auto Layout intent`: он переводится в Flex/Grid, min/max constraints, stable dimensions и text wrapping rules.
@@ -62,10 +69,10 @@ Before handoff, verify hero/nav/color/typography/spacing/card/CTA/form/footer pa
 9. **Адаптивность и A11y**: Применить правила адаптивной верстки (Flex/Grid) для мобильных устройств, планшетов и десктопа. Добавить aria-labels, семантические теги HTML5, клавиатурный фокус и не использовать цвет как единственный индикатор состояния.
 10. **Интеграция аналитики**: Внедрить анонимные дата-атрибуты для отслеживания шагов воронки без сбора персональных данных.
 11. **Motion и interaction polish**: Проверить, что анимации имеют явную цель, UI transitions обычно короче 300ms, нет `transition: all`, hover-анимации ограничены `@media (hover: hover) and (pointer: fine)`, есть `prefers-reduced-motion`, press/focus/disabled/loading/error states и нет лишней анимации на частых keyboard actions.
-12. **Frontend QA Inventory**: До финального ответа пройти инвентаризацию claims, controls, state changes, responsive constraints, long-text behavior и visual-critical zones. Для визуально значимой UI-задачи приложить desktop/mobile screenshot evidence или явный blocker.
+12. **Frontend QA Inventory**: До финального ответа пройти инвентаризацию claims, controls, state changes, responsive constraints, long-text behavior, Surface Output Contract coverage и visual-critical zones. Для визуально значимой UI-задачи приложить desktop/mobile screenshot evidence или явный blocker. Если использовался Lazyweb, записать в `frontend-result.md`, какие patterns были применены, отклонены или помечены как непригодные.
 13. **Storybook export**: Если пользователь запросил компонентную библиотеку или handoff, подготовить optional `storybook-result.md` по шаблону `agent-pack/artifacts/frontend/storybook-result.template.md`.
 14. **Тестирование и сборка**: Запустить проверку типов, линтинг, сборку и автотесты. Исправить любые ошибки компилятора или верстки.
-15. **Запись результатов**: Создать итоговый отчет фронтенда с описанием измененных файлов, логов тестов и известных ограничений.
+15. **Запись результатов**: Создать итоговый отчет фронтенда с описанием Surface Output Summary, измененных файлов, логов тестов и известных ограничений.
 
 ## Guardrails
 
@@ -76,6 +83,8 @@ Before handoff, verify hero/nav/color/typography/spacing/card/CTA/form/footer pa
 - **Figma handoff fidelity**: Если `figma-handoff-bundle.md` содержит variables, component sets, variants или Auto Layout rules, frontend должен либо реализовать их эквиваленты в коде, либо явно записать deviation в `frontend-result.md`.
 - **Surface fidelity**: Landing/marketing surface должен давать сильный first viewport brand/product signal; dashboard/console surface должен показывать primary workspace/action, а не набор равных decorative cards.
 - **Evidence-first UI**: Визуально значимые изменения не закрываются одной сборкой. Нужны browser/Playwright desktop и mobile checks либо честный `blocked`/`partial` с причиной.
+- **Surface coverage first**: Нельзя закрывать UI как `success`, если реализована только часть заявленных screens/views/states без карты coverage/deviation в `frontend-result.md`.
+- **Lazyweb evidence fidelity**: Если upstream artifacts содержат `lazyweb_evidence`, frontend должен либо реализовать релевантные паттерны, либо явно записать deviation в `frontend-result.md`. Запрещено использовать Lazyweb screenshots как шаблон для прямого копирования брендинга, композиции один-в-один или чужого trade dress.
 - **Целостность состояний**: Строго следовать карте переходов прототипа. Не создавать компоненты, у которых не описаны состояния загрузки, ошибок и пустых экранов.
 - **Изоляция представлений (Modular Views Architecture):** Целевая верстка презентационных страниц, промо-лендингов и калькуляторов должна жить в отдельном presentation view внутри `apps/frontend/src/views/`. Для обновления существующего лендинга используй [LandingView.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/views/LandingView.tsx); для нового самостоятельного продукта допустим отдельный `<ProductName>View.tsx`. Файл [ConsoleView.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/views/ConsoleView.tsx) является защищенной внутренней B2B-консолью управления оркестрацией и не должен модифицироваться кодом лендингов. Файл [App.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/App.tsx) должен оставаться легким роутером и может меняться только для подключения/выбора view. Все общие типы выносятся в [types.ts](file:///c:/Project/product-agent-studio/apps/frontend/src/types.ts).
 - **Сохранение кода пользователя**: Не перезаписывать и не портить файлы кода пользователя без явного согласования.
@@ -93,6 +102,8 @@ Before handoff, verify hero/nav/color/typography/spacing/card/CTA/form/footer pa
 ## Output Contract
 
 Возвращай structured envelope по `agent-pack/templates/agent-output-contract.schema.md`. Если используется fenced block, допустимы `agent-output-yaml` или `agent-output-json`. В `outputs.frontend_result` положи полное Markdown-содержимое `frontend-result.md` с обязательными секциями из `runtime/typescript/workflow-stages.ts`. Если входы неполные, State Truncation Gate не выполнен или требуется approval/provider, возвращай `partial`/`blocked`, а не `success`.
+
+Для UI/frontend surface поле `surface_output` обязательно и должно описывать implemented views/components/states, upstream coverage, verification evidence и unresolved deviations.
 
 ```yaml
 agent_name: frontend

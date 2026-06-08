@@ -16,6 +16,21 @@ skills_used:
   - <skill-id из agent metadata, если применялся>
 outputs:
   <имя_артефакта>: <содержимое_или_метаданные>
+surface_output:
+  surface_type: <тип_поверхности_или_not_applicable>
+  scope_contract: <краткое_описание_scope_или_ссылка_на_surface-output-contract>
+  coverage_gate:
+    - input: <artifact/section>
+      output_location: <page/frame/screen/component/section>
+      status: covered|partial|skipped
+  evidence_to_output_map:
+    - evidence_source: <source/artifact/reference>
+      decision: <продуктовое_или_дизайн_решение>
+      output_location: <где_это_реализовано>
+      status: applied|rejected|deferred
+  verification:
+    - check: <metadata/screenshot/build/test/object_inventory>
+      result: pass|partial|fail|blocked
 assumptions:
   - <допущения>
 risks:
@@ -30,6 +45,10 @@ recommended_next_step: <рекомендуемый_следующий_шаг>
 - `inputs_used` обязан ссылаться на файлы из каталога `outputs/<project-slug>/<YYYY-MM-DD>/`.
 - `skills_used` опционален, но если stage применял skill из agent frontmatter, укажи его id из `agent-pack/skills/*/SKILL.md`.
 - `outputs` обязан содержать созданный артефакт текущего этапа (stage) по artifact name из `runtime/typescript/route.config.ts` или по file name из `runtime/typescript/workflow-stages.ts`.
+- `surface_output` обязателен для `figma_board`, `product_ui`, `dashboard_console`, `landing`, `prototype`, `frontend`, `notion_wiki`, `research_report`, `presentation` и `handoff` outputs. Для неприменимых инженерных задач укажи `surface_type: not_applicable` и причину в `scope_contract`.
+- `coverage_gate` должен показывать, какие ключевые входные артефакты/разделы попали в результат. Если есть `partial` или `skipped` по важному входу, `status: success` запрещен без waiver/deviation record.
+- `evidence_to_output_map` должен связывать evidence с конкретным решением и местом в output. Простое перечисление источников в `inputs_used` не считается применением evidence.
+- `verification` должен содержать реальную проверку результата: metadata/object inventory/screenshot/build/test/browser evidence или явный blocker.
 - Если stage создаёт Markdown-файл, значение `outputs.<artifact>` должно быть полным Markdown-содержимым целевого файла, включая обязательные секции из `workflow-stages.ts`.
 - `status: success` запрещён, если отсутствует хотя бы один обязательный artifact key текущего stage. В таком случае возвращай `partial` с warning/risk или `blocked`, если без артефакта нельзя продолжать.
 - Статус `partial` (частичный успех) допустим только при наличии заполненных полей `risks` и/или `open_questions`.
@@ -63,4 +82,19 @@ assumptions: []
 risks: []
 open_questions: []
 recommended_next_step: Передать PRD на IA stage.
+surface_output:
+  surface_type: research_report
+  scope_contract: "PRD как продуктовая поверхность для IA/design/frontend; покрывает problem, goals, requirements, acceptance criteria."
+  coverage_gate:
+    - input: research-summary.md
+      output_location: "Problem / Evidence to requirement map"
+      status: covered
+  evidence_to_output_map:
+    - evidence_source: research-summary.md
+      decision: "P0 требования сформированы из source-backed findings"
+      output_location: "Requirements"
+      status: applied
+  verification:
+    - check: schema_readiness
+      result: pass
 ```

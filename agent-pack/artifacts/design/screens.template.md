@@ -38,6 +38,25 @@
 | Icons / assets |  |  |  |
 | Layout / spacing rules |  |  |  |
 
+## Surface Output Contract
+
+| Field | Value |
+|---|---|
+| Surface type | `figma_board` / `product_ui` / `dashboard_console` / `landing` / `prototype` / `handoff` |
+| Expected output units | screens / frames / sections / states / components |
+| Coverage result | pending / pass / partial / blocked |
+| Verification plan | screenshot / browser / prototype / QA / manual review |
+
+### Coverage Gate
+
+| Input Source | Required Signal | Output Unit | Included / Excluded | Reason / Notes |
+|---|---|---|---|---|
+
+### Evidence-To-Output Map
+
+| Evidence / Source | Interpretation | Screen / Frame / Component | Verification Signal |
+|---|---|---|---|
+
 ## Screen List
 
 | Screen | Purpose | Entry Point | Completion Action | PRD Requirement | IA Node | Status |

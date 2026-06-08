@@ -6,10 +6,31 @@
 - Recursive brief содержит expansion, deepening, consolidation, assumptions и open questions.
 - Routing Classification Pass выполнен: work type, workflow profile, approvals, active run directory и next allowed stage зафиксированы.
 - Context Inventory Pass выполнен: перечислены нормативные инструкции, пользовательские inputs, артефакты и references, которые реально используются.
+- Surface-Aware Output Gate выполнен для каждого stage, который создает пользовательскую поверхность (`research_report`, `notion_wiki`, `figma_board`, `product_ui`, `dashboard_console`, `landing`, `prototype`, `frontend`, `presentation`, `handoff`): есть Surface Output Contract, coverage gate, evidence-to-output map и verification plan.
 - Для каждого запущенного specialist stage есть delegation packet: objective, required inputs, allowed outputs, forbidden actions, quality gate, expected envelope и handoff consumer.
 - Если были противоречия между специалистами/источниками/вводными, Consensus & Conflict Pass записан в ledger/handoff.
 - `yarn workflow:validate ... --through 00-intake` проходит без errors.
 - Если stage исполняется через agentic specialist, structured envelope содержит обязательный `outputs.<artifact_name>` или `outputs.<file_name>` для каждого required artifact stage. `status: success` без полного Markdown artifact output запрещён.
+
+## Universal Gate: Surface-Aware Output Gate
+
+- Surface Type Gate: агент явно указывает, что именно создается как видимая поверхность, и выбирает правила качества по типу поверхности, а не по привычному шаблону.
+- Output Scope Contract: перед генерацией зафиксированы expected units вывода: frames, screens, sections, pages, tables, entities, states или components. `success` запрещен, если создана только краткая выжимка вместо заявленного охвата.
+- Coverage Gate: все ключевые входные данные из research/PRD/IA/copy/screens/reference/Lazyweb связаны с конкретными output units или явно исключены через `skipped_with_reason`.
+- Evidence-To-Output Map: для важных решений есть цепочка `source/evidence -> interpretation -> output unit -> verification signal`.
+- Surface Quality Bar: для каждой поверхности указаны критерии визуального/структурного качества: hierarchy, density, navigation, states, responsive, accessibility, references, Russian Publication Gate и data visualization fit, если применимо.
+- Write -> Verify -> Fix Gate: после записи или реализации есть metadata/screenshot/browser/build/test/QA evidence; если evidence нет, статус не выше `partial`/`blocked`.
+
+## Universal Gate: Anti-AI-Slop Gate
+
+- Видимый пользователю артефакт не должен звучать как набор абстрактных AI-клише. Gate оценивает весь текст, а не только наличие отдельных слов. Слова `orchestration`, `rails`, `wedge`, `trust layer`, `seamless`, `unlock`, `flywheel`, `layer`, `companion`, `playbook` являются индикаторами риска, но не полным списком.
+- Slop-сигналы: уверенный вывод без наблюдаемого поведения; универсальная фраза без доменной детали; обещание улучшения без механизма; метрика без пользовательского действия; одинаковые строки таблицы, где меняются только существительные; roadmap без причины порядка; persona без ситуации; CJM без вопроса пользователя.
+- Каждый крупный вывод должен пройти тест "можно ли это вставить в другой продукт без изменений". Если да, нужен rewrite с доменной спецификой.
+- Обещания вроде "повысить доверие", "улучшить опыт", "снизить трение", "ускорить рост" должны быть раскрыты через `почему -> где в пути -> чем продукт помогает -> как проверяем`.
+- Для research, CJM, roadmap, Notion hub, Figma board и handoff обязательна цепочка `персона/сегмент -> жизненная ситуация -> трение -> решение -> проверка`.
+- Если пользователь просит "проработать", "подробно", "не выжимку", `success` запрещен без подробных кейсов, user flow и связи с CJM.
+- QA помечает результат `needs_revision`, если ключевые решения объяснены только тезисами и не связаны с пользовательским поведением, метриками или проверкой гипотез.
+- Для research pack и Notion export дополнительно запускается исполняемый `Research Content Lint`: `yarn research:lint outputs/<project-slug>/<YYYY-MM-DD>` или `yarn research:lint <research-export-md>`. Lint реализует Rules 1-6 и блокирует external write при `status=fail`.
 
 ## Gate 1: целостность исследования
 
@@ -38,6 +59,9 @@
 - Research-To-Design Handoff содержит primary user paths, trust requirements, decision moments, content risks, visual evidence needs и validation priority.
 - Candidate quality/write gate выполнен до записи или перезаписи research artifacts: обязательные секции, доменная конкретика, русскоязычность публикационных секций, provider coverage, source-backed facts, claims-to-validate и отсутствие generic placeholders проверены; результат gate записан в handoff или ledger.
 - Provider validation `pass` сам по себе не равен research quality `ready`: если rendered artifacts generic, не используют run context или теряют важные existing artifacts, stage должен быть `partial`/`needs_validation` или сохранить более полный artifact.
+- Anti-AI-Slop Gate выполнен: ключевые выводы не оставлены на уровне `orchestration/rails/wedge/trust layer`, а объяснены через реальные ситуации.
+- CJM Depth Gate выполнен: для основных сценариев есть кейсы, user flow, вопрос пользователя, боль, решение продукта, метрика и способ проверки.
+- Roadmap Trace Gate выполнен: P0/P1 инициативы связаны с конкретными CJM frictions и validation method.
 
 ## Gate 2: полнота PRD
 
@@ -70,6 +94,7 @@
 - Если создан `STYLE_GUIDE.md`, он содержит два слоя: presentation/render и UI structure, а также явные tokens, composition metrics, allowed/disallowed patterns и anti-patterns.
 - Если создан `design-loop-report.md`, он содержит таблицу `Before | After | Why`, style drift и revision block.
 - Если запрошен Figma handoff, `figma-handoff-bundle.md` создан после `screens.md` и содержит canvas strategy, variables/styles/components/screens, Auto Layout rules, approval state и target.
+- Если создается Figma board или Figma-ready handoff, Surface Output Contract содержит список expected frames/sections/entities, карту данных к фреймам и критерии screenshot verification. Неполная доска без coverage rationale блокирует `ready`.
 - Если Figma write выполнен, bundle содержит node/frame evidence, screenshot verification и известные visual gaps.
 - Copy содержит hero, CTA, sections, FAQ, SEO и claims to validate.
 - Copy содержит Message Source Map: важные секции связаны с research/JTBD/PRD/design inputs и evidence status.
@@ -84,6 +109,7 @@
 
 - Screens согласованы с PRD, IA, design и copy.
 - Screens содержат Input Readiness Pass по PRD, IA, design, copy и reference/style inputs; пропуски фиксируются как `partial`/`blocked`.
+- Screens содержат Surface Output Contract для screen surface: expected screens/sections/states, evidence-to-screen map, coverage gate и verification plan.
 - Screens содержат Design-System Grounding: reused tokens/components/styles и gaps для новых компонентов.
 - Screens содержат Screen Traceability: `research/JTBD -> PRD requirement -> IA node -> copy source -> prototype/test signal`.
 - Screens содержат component inventory, state inventory, responsive constraints и accessibility notes.
@@ -101,6 +127,7 @@
 ## Gate 5: фронтенд
 
 - Frontend читает все upstream artifacts.
+- Frontend содержит Surface Output Contract summary в `frontend-result.md`: surface type, implemented views/components/states, upstream coverage, visual/browser verification и unresolved deviations.
 - Если frontend сделан в режиме `quick draft`, gate не может быть `passed`: допустим только `passed_with_notes`/`partial` с явным списком skipped upstream artifacts.
 - Secrets не добавлены.
 - Базовые responsive и accessibility требования реализованы.
@@ -118,6 +145,7 @@
 
 - Test bench описывает primary funnel и PII risk.
 - QA проверяет Research integrity, PRD fit, UX, accessibility, responsive, analytics и secrets.
+- QA проверяет Surface-Aware Output Gate по всем созданным пользовательским поверхностям и фиксирует результат в Evidence Matrix.
 - QA содержит QA Scope & Evidence Plan: для каждой области аудита указан источник доказательств, команда/артефакт/скриншот или причина недоступности.
 - QA содержит Traceability Audit: `research/JTBD -> PRD requirement -> IA node -> screen/component -> copy/prototype/test signal`; разрыв для `must` scope блокирует release или требует explicit waiver.
 - QA содержит Evidence Matrix и Severity Matrix с уровнями `blocker`, `critical`, `high`, `medium`, `low`, `info`.
@@ -128,6 +156,7 @@
 - Для reference-driven workflow QA не принимает desktop-only visual review: нужны desktop/mobile пары секций, `visual-diff-result.json` и `visual-reference-review.md`.
 - Accessibility-выводы в QA должны иметь authoritative source/evidence или явную пометку `experience_based`.
 - Release notes включают changed files, validation и rollback notes.
+- Release notes содержат Surface Output Summary: какие поверхности изменены, какой scope был заявлен, какая verification evidence есть, какие deviations остались.
 - Release notes содержат Release Scope: тип выпуска, exact target, необходимость approval и owner.
 - Release notes содержат Run Ledger Audit по `run-state.json`, `run-meta.json`, `artifact-manifest.json`, `run-index.md`, `stage-gate-ledger.md` и `handoff-bundle.md`.
 - Release notes отделяют текущий release scope от unrelated dirty tree; смешивать старые изменения с текущим выпуском запрещено.

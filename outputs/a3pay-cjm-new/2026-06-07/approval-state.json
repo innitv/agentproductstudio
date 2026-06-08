@@ -23,6 +23,29 @@
       "target": "3696473174e58006af5fd367ef89d978",
       "notes": "Пользователь явно разрешил публикацию обновленной версии research pack A3 Pay с человекочитаемыми заголовками в текущем чате 2026-06-08.",
       "approved_at": "2026-06-08T06:17:18.692Z"
+    },
+    {
+      "action": "figma_write",
+      "approved": true,
+      "approved_by": "human",
+      "target": "new_figma_file:a3pay-research-visualization-2026-06-08",
+      "notes": "Пользователь в текущем чате явно написал: разрешаю",
+      "approved_at": "2026-06-08T08:17:02.900Z"
+    },
+    {
+      "action": "notion_research_publish",
+      "approved": true,
+      "approved_by": "human",
+      "target": "notion_hub:3796473174e581b1bff5f189cc8c0887",
+      "notes": "Пользователь в текущем чате явно написал: разрешаю, после запроса approval на Notion cross-link pass",
+      "approved_at": "2026-06-08T09:14:36.660Z"
+    },
+    {
+      "action": "figma_write",
+      "approved": true,
+      "approved_by": "human",
+      "target": "https://www.figma.com/design/O1EK1ODspMvmJA7emTNnYd",
+      "approved_at": "2026-06-08T09:48:33.834Z"
     }
   ]
 }

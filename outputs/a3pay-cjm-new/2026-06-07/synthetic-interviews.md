@@ -2,9 +2,9 @@
 
 ## Использованные входные материалы
 
-- `proto-personas.md`
-- `cjm-map.md`
-- `research-summary.md`
+- [proto-personas.md](proto-personas.md)
+- [cjm-map.md](cjm-map.md)
+- [research-summary.md](research-summary.md)
 
 ## Ограничение
 

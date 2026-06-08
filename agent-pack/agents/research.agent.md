@@ -54,7 +54,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 1. Выполнить **Artifact Context Inventory**: прочитать весь доступный контекст текущего run directory, включая `run-plan.md`, `recursive-brief.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, прошлые research/export/CJM artifacts, `stage-results/*.json` и пользовательские local artifacts. Не ограничиваться одним `recursive-brief.md`, если рядом уже есть более точные output-файлы.
 2. Превратить artifact context в `research-plan`: 3-7 исследовательских вопросов, целевые сегменты, географию, временные рамки, expected decisions для PRD/IA/design и список источников, которые нельзя подменять синтезом.
-3. Разложить тему на измерения поиска: рынок/категория, конкуренты/альтернативы, пользовательские сценарии, trust/compliance, UX/patterns, pricing/business model, риски и дизайн-последствия.
+3. Разложить тему на измерения поиска: рынок/категория, конкуренты/альтернативы, пользовательские сценарии, trust/compliance, UX/patterns, pricing/business model, риски и дизайн-последствия. Для UI-heavy задач добавить `lazyweb_evidence_need`: какие screen types, competitors, flows или UI patterns должны быть получены через Lazyweb на design stage.
 4. Сформировать targeted search queries по каждому измерению. Если запрос слишком широкий, разбить его на подзапросы и не начинать synthesis до получения минимального evidence coverage. Query должен учитывать ограничения и решения, уже зафиксированные в run artifacts.
 5. Определить политику источников и классы доказательств: официальные/подтвержденные (official/source-backed), конкуренты (competitor), сообщества/отзывы (community/review), внутренние (internal), гипотезы (hypothesis), синтетические (synthetic).
 6. Запустить исследование по нескольким источникам: `tavily` + `deepseek` + `gemini` по умолчанию, затем использовать разрешенные резервные провайдеры (`user_sources`, `openai_docs`, `web_search`, `browser`) по мере необходимости.
@@ -63,14 +63,17 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 9. Сверить результаты между провайдерами: совпадающие утверждения получают более высокий уровень доверия (confidence). Провести фазу **Contradiction Review (Анализ противоречий)**: сопоставить выводы Tavily, DeepSeek и Gemini, явно зафиксировав любые конфликтующие факты, цифры или конкурентные различия в специальном обязательном подразделе `## Contradiction Review` внутри файла `research-summary.md`. Все такие противоречия должны быть перенесены в раздел `claims_to_validate` со статусом `needs validation`.
 10. Собрать источники и зафиксировать URL-адреса источников или локальные пути к файлам, имя провайдера, дату получения (`retrieved_at`), тип источника, уровень доверия и применимость к продуктовым решениям.
 11. Синтезировать сегменты аудитории, CJM/user paths и сценарии Jobs To Be Done (JTBD), не смешивая реальные evidence, model synthesis и assumptions.
+11a. Выполнить **Anti-AI-Slop Gate** для research artifacts: проверить не только отдельные слова, а весь текст на абстрактность, взаимозаменяемость и отсутствие причинно-следственной логики. Абстрактные паттерные формулировки (`orchestration`, `rails`, `wedge`, `trust layer`, `seamless`, `unlock`, `flywheel`, `layer`, `companion`) являются индикаторами риска, но не исчерпывают gate. Любой вывод без наблюдаемого поведения, доменной детали, механизма влияния и способа проверки должен быть переписан.
+11b. Для каждого ключевого сценария добавить не только краткий вывод, но и подробные кейсы: персона, ситуация, вопрос пользователя, действие, трение, решение продукта, метрика и проверка гипотезы.
 12. Создать профайлы протоперсон (`proto-personas`) на основе JTBD, болей, желаемых результатов и контекста принятия решений.
 13. Создать симулированные интервью (`synthetic-interviews`) исключительно как материал для генерации гипотез.
 14. Сформировать пул конкурентов, альтернатив и матрицу сравнения; если прямые конкуренты не найдены, явно описать substitute/alternative workflows.
 15. Создать SWOT-анализ с указанием доказательств и статуса по каждому пункту.
 16. Сформировать список утверждений для валидации (`claims-to-validate`) и план валидации.
-17. Подготовить research-to-design handoff: какие выводы влияют на IA, CJM, visual hierarchy, trust patterns, accessibility, proof blocks, forms/controls и copy claims.
+17. Подготовить research-to-design handoff: какие выводы влияют на IA, CJM, visual hierarchy, trust patterns, accessibility, proof blocks, forms/controls и copy claims. Если Lazyweb доступен и source policy разрешает внешний MCP, добавить список запросов для `lazyweb-design-research`/`lazyweb-quick-references`; если недоступен, зафиксировать `skipped_with_reason=lazyweb_unavailable`.
 18. Перед финальной записью выполнить candidate quality/write gate: проверка обязательных секций, доменной конкретики, русскоязычности публикационных секций, provider coverage, source-backed facts и отсутствия generic placeholders.
 19. Если research stage готовит `notion-research-export-ru.md`, выполнить publication shape self-check: personas, CJM/user paths, competitive matrix и ICE/RICE должны быть таблицами или схемами, иначе export остается `partial`/`needs_revision` до исправления.
+19a. Выполнить **Narrative Depth Gate**: export не может быть только executive summary или тезисной выжимкой. Обязательны подробные жизненные кейсы, user flow под CJM и связь `CJM friction -> initiative -> validation method` для P0/P1 инициатив.
 20. Обновить `handoff-bundle.md` и `stage-gate-ledger.md`.
 
 ## Evidence Quality Model (Модель качества доказательств)
@@ -123,6 +126,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - Использование Gemini API для стратегического анализа, если это разрешено политикой источников
 - Официальная документация
 - Анализ сайтов конкурентов
+- Lazyweb MCP/skills для UI-evidence, если source policy разрешает внешний MCP и пользовательские приватные данные не отправляются без отдельного approval
 - Структурированный синтез данных
 
 ### Forbidden (Запрещено)
@@ -138,6 +142,9 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - Для глубоких исследований (`deep_research`) успешный статус требует получения результатов минимум от трех провайдеров: `tavily`, `deepseek` и `gemini`; в противном случае устанавливается статус `partial`.
 - Использование DeepSeek и Gemini обязательно для проведения перекрестных проверок и стратегического анализа, но их собственные рассуждения не считаются подтвержденными источниками (source-backed evidence) сами по себе. Их выводы используются для поиска противоречий, рисков, гипотез и формирования `claims_to_validate`.
 - **Правило Contradiction Review:** При интеграции результатов поиска от Tavily, DeepSeek и Gemini агент обязан составить таблицу перекрёстного анализа противоречий. Любые расхождения в данных, конкурентных заявлениях или условиях должны быть явно задокументированы в подразделе `## Contradiction Review` файла `research-summary.md` и помечены как `needs_validation`. Запрещено молча игнорировать или сглаживать расхождения между провайдерами.
+- **Lazyweb как UI-evidence, не market source:** Lazyweb references считаются evidence для visual patterns, screen composition, flows и interaction examples. Они не заменяют source-backed market facts, pricing claims, legal/compliance facts или реальные пользовательские интервью.
+- **Anti-AI-Slop Gate:** Research artifacts не должны подменять объяснение наборами паттерных слов или универсальными фразами. Проверяй весь текст по slop-сигналам: утверждение можно вставить в любой продукт; нет конкретного пользователя/ситуации; нет механизма влияния; нет ограничения или trade-off; метрика не выражена как действие; строки таблицы повторяют один шаблон; roadmap не объясняет порядок. Минимальная приемка: `кто платит/покупает -> что пытается сделать -> где сомневается -> что делает продукт -> почему это должно сработать -> как проверяем`.
+- **CJM Depth Gate:** CJM не считается готовой, если содержит только stage table. Для каждого основного сценария нужны ключевые кейсы, user flow, вопрос пользователя, боль, решение продукта, метрика и связь с roadmap.
 - Документ `research-summary.md` обязан фиксировать запрошенных провайдеров (`providers requested`), фактически использованных провайдеров (`providers used`), недоступных провайдеров, сбои и статус валидации.
 - Перед synthesis обязателен `source quality pass`: убрать noisy snippets, отделить primary facts от model synthesis, отметить stale/indirect sources.
 - Если `research-summary.md` не содержит schema payload или `artifact-json`, агент должен исправить файл до передачи downstream.

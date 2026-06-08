@@ -15,6 +15,7 @@
 - `handoff-bundle.md` обновлен после завершения этапа;
 - неизвестные аспекты (unknowns), предположения (assumptions), риски (risks) и следующий требуемый артефакт (next required artifact) явно перенесены дальше;
 - фактические локальные команды, решения и ручные approvals фиксируются в заметках этапа;
+- если этап создает пользовательскую поверхность, заполнен Surface Output Gate: тип поверхности, заявленный охват, coverage result, evidence map и verification evidence;
 - external writes имеют явную approval-запись в `approval-state.json`; если последняя matching-запись является denial, действие считается заблокированным;
 - `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard` не возвращает ошибок для пакета стандартного профиля (standard profile) без визуального референса;
 - `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference` не возвращает ошибок для пакета профиля референса (reference profile) с визуальным референсом;
@@ -42,6 +43,16 @@
 
 | Время | Команда | Результат | Заметки |
 |---|---|---|---|
+
+## Surface Output Gates
+
+| Этап | Поверхность | Заявленный охват | Coverage result | Evidence map | Verification evidence | Статус |
+|---|---|---|---|---|---|---|
+| 04-design |  |  |  |  |  | pending |
+| 06-screens |  |  |  |  |  | pending |
+| 08-frontend |  |  |  |  |  | pending |
+| 11-qa |  |  |  |  |  | pending |
+| 12-release |  |  |  |  |  | pending |
 
 ## Agentic Preflight
 

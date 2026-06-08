@@ -36,6 +36,7 @@
 | PRD traceability |  |  | pending / pass / fail / blocked |
 | IA / screens / prototype |  |  | pending / pass / fail / blocked |
 | Frontend implementation |  |  | pending / pass / fail / blocked |
+| Surface Output Gates |  |  | pending / pass / fail / blocked |
 | Accessibility |  |  | pending / pass / fail / blocked |
 | Responsive |  |  | pending / pass / fail / blocked |
 | Visual reference |  |  | not_applicable / pending / pass / fail / blocked |
@@ -67,6 +68,16 @@
 |---|---|---|---|---|---|
 
 ## IA / Screens / Prototype Consistency
+
+## Surface Output Gates
+
+| Surface | Contract Source | Declared Scope | Actual Output | Coverage Result | Verification Evidence | QA Result |
+|---|---|---|---|---|---|---|
+
+## Surface Evidence Map
+
+| Surface | Evidence / Source | Output Unit | Verification Signal | Notes |
+|---|---|---|---|---|
 
 ## Copy Claims
 

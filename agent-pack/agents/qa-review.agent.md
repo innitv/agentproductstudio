@@ -64,6 +64,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 2. Проверить наличие всех обязательных артефактов.
 3. Убедиться, что реестры `stage-gate-ledger.md` и `handoff-bundle.md` были корректно обновлены, а skipped/partial stages имеют причины.
 4. Провести аудит полноты и достоверности исследований (Research Integrity / Research integrity).
+4a. Выполнить **Surface-Aware Output Audit**: для каждой пользовательской поверхности проверить Surface Output Contract, coverage gate, evidence-to-output map, verification evidence и deviations. Неполный Figma board, screen spec, Notion hub или frontend без coverage rationale является blocker/high finding.
 5. Выполнить **Traceability Audit**: проверить цепочку `research/JTBD -> PRD requirement -> IA node -> design/screen -> copy -> prototype -> frontend/test signal`. Разрыв цепочки для `must` scope является blocker или high severity finding.
 6. Проверить соответствие реализации требованиям PRD и покрытие приоритетов MoSCoW.
 7. Проверить согласованность архитектуры (IA), экранов и прототипа, включая entry points, state map, navigation behavior, semantic hierarchy и completion step.
@@ -131,6 +132,7 @@ QA-агент обязан проверить:
 - Figma handoff не может считаться passed, если canvas write заявлен как выполненный, но нет target/node evidence, screenshot verification или список созданных frames/components. Если handoff содержит Auto Layout/variables/component sets, QA проверяет их наличие или зафиксированные deviations.
 - Статус внешних публикаций/записей должен строго соответствовать матрице одобрений (Approval Matrix).
 - QA не может считаться passed, если нет Evidence Matrix, Severity Matrix и явного списка skipped/unavailable checks.
+- QA не может считаться passed, если созданная пользовательская поверхность не имеет Surface Output Contract или verification evidence.
 - 100% pass без negative/edge path проверки требует Devil's Advocate note; иначе статус не выше `pass_with_known_limitations`.
 - Accessibility-рекомендации должны ссылаться на authoritative source или быть помечены `experience_based`.
 
@@ -143,6 +145,8 @@ QA-агент обязан проверить:
 ## Output Contract (Контракт вывода)
 
 Возвращай structured envelope по `agent-pack/templates/agent-output-contract.schema.md`. Если используется fenced block, допустимы `agent-output-yaml` или `agent-output-json`. В `outputs.qa_report` положи полное Markdown-содержимое `qa-report.md` с обязательными секциями из `runtime/typescript/workflow-stages.ts`. Если есть missing artifacts, active blockers или нерешённый visual reference gate, возвращай `partial`/`blocked`, а не `success`.
+
+Если QA проверяет surface outputs, поле `surface_output` в envelope отражает audited surfaces, coverage result, evidence sources и unresolved deviations.
 
 ```yaml
 agent_name: qa-review

@@ -7,6 +7,7 @@ const requiredFiles = [
   "AGENTS.md",
   ".codex/config.example.toml",
   "integrations/mcp/mcp-servers.example.json",
+  "integrations/mcp/lazyweb.md",
   "integrations/mcp/notion-local-token.mcp.example.json",
   "runtime/typescript/run-landing-workflow.ts",
   "runtime/typescript/workflow.manifest.ts",
@@ -20,7 +21,9 @@ const requiredFiles = [
   "runtime/typescript/firecrawl.ts",
   "runtime/typescript/reference-scan.ts",
   "runtime/typescript/research-stage-runner.ts",
+  "tooling/scripts/lint-research-content.mjs",
   "agent-pack/templates/agent-output-contract.schema.md",
+  "agent-pack/templates/surface-output-contract.template.md",
   "agent-pack/guardrails/guardrails.policy.md",
   "agent-pack/guardrails/approval-matrix.md",
 ];
@@ -35,13 +38,14 @@ const scannedFiles = [
 const projectTextFilesForPackageManagerPolicy = [
   "AGENTS.md",
   "README.md",
-  "PROJECT_CONNECTION_WORK_PLAN.md",
+  "archive/project-plans/PROJECT_CONNECTION_WORK_PLAN.md",
   "integrations/mcp/mcp-servers.example.json",
   ".codex/config.example.toml",
   ".codex/rules/safe-commands.example.toml",
   ".gitignore",
   ".idea/workspace.xml",
   "integrations/mcp/repository-and-browser-mcp.md",
+  "integrations/mcp/lazyweb.md",
   "runtime/typescript/README.md",
   "agent-pack/agents/frontend.agent.md",
 ];
@@ -49,15 +53,15 @@ const projectTextFilesForPackageManagerPolicy = [
 const researchEnforcementFiles = [
   {
     file: "agent-pack/agents/research.agent.md",
-    requiredSnippets: ["proto_personas", "simulated_interviews", "synthetic", "tavily", "deepseek", "gemini", "providers", "browser scan", "Required provider skipped"],
+    requiredSnippets: ["proto_personas", "simulated_interviews", "synthetic", "tavily", "deepseek", "gemini", "providers", "browser scan", "Required provider skipped", "lazyweb_evidence_need"],
   },
   {
     file: "agent-pack/artifacts/research/research-summary.template.md",
-    requiredSnippets: ["Proto Personas", "Synthetic Interviews", "Research Validation Plan", "skipped_with_reason", "Provider Coverage", "deepseek", "gemini"],
+    requiredSnippets: ["Proto Personas", "Synthetic Interviews", "Research Validation Plan", "skipped_with_reason", "Provider Coverage", "deepseek", "gemini", "Anti-AI-Slop Gate", "User Flow под CJM", "Связь возможностей с CJM"],
   },
   {
     file: "agent-pack/artifacts/research/proto-personas.template.md",
-    requiredSnippets: ["Required", "Evidence status", "Validation Plan"],
+    requiredSnippets: ["Required", "Evidence status", "Validation Plan", "Anti-AI-Slop Gate", "CJM Link"],
   },
   {
     file: "agent-pack/artifacts/research/synthetic-interviews.template.md",
@@ -69,15 +73,15 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/quality/quality-gates.md",
-    requiredSnippets: ["прото-персоны", "synthetic interviews", "validation plan", "Provider Coverage", "Tavily", "DeepSeek", "Gemini"],
+    requiredSnippets: ["прото-персоны", "synthetic interviews", "validation plan", "Provider Coverage", "Tavily", "DeepSeek", "Gemini", "Surface-Aware Output Gate", "Write -> Verify -> Fix Gate", "Anti-AI-Slop Gate", "CJM Depth Gate", "Roadmap Trace Gate", "Research Content Lint"],
   },
   {
     file: "agent-pack/agents/qa-review.agent.md",
-    requiredSnippets: ["Research integrity", "proto-personas", "synthetic interviews", "synthetic-as-fact"],
+    requiredSnippets: ["Research integrity", "proto-personas", "synthetic interviews", "synthetic-as-fact", "Surface-Aware Output Audit", "Surface Output Contract"],
   },
   {
     file: "agent-pack/workflows/artifact-driven-pipeline.md",
-    requiredSnippets: ["proto_personas", "simulated_interviews", "skipped_with_reason", "evidence_status: synthetic"],
+    requiredSnippets: ["proto_personas", "simulated_interviews", "skipped_with_reason", "evidence_status: synthetic", "Surface Output Contract", "Anti-AI-Slop Gate", "Narrative Depth Gate", "Research Content Lint"],
   },
   {
     file: "agent-pack/workflows/deep-research.workflow.md",
@@ -85,27 +89,59 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/workflows/artifact-driven-pipeline.md",
-    requiredSnippets: ["Notion Research Publication Gate", "Reference-Driven Visual Spec Gate", "section-by-section visual spec", "research-only human-readable", "publish-notion-research-page", "stage-gate-ledger.md", "release-notes.md"],
+    requiredSnippets: ["Notion Research Publication Gate", "Reference-Driven Visual Spec Gate", "section-by-section visual spec", "research-only human-readable", "Publication Cross-Link Gate", "Карта связей исследования", "publish-notion-research-page", "stage-gate-ledger.md", "release-notes.md"],
   },
   {
     file: "agent-pack/agents/design.agent.md",
-    requiredSnippets: ["Visual Reference Rule", "section-by-section visual spec", "frontend stage is blocked"],
+    requiredSnippets: ["Visual Reference Rule", "Lazyweb Evidence Rule", "lazyweb_evidence", "section-by-section visual spec", "frontend stage is blocked", "Surface Output Contract Pass", "surface_output"],
   },
   {
     file: "agent-pack/agents/frontend.agent.md",
-    requiredSnippets: ["Visual Reference Rule", "section-by-section structural mapping", "generic landing template"],
+    requiredSnippets: ["Visual Reference Rule", "Lazyweb Implementation Check", "lazyweb_evidence", "section-by-section structural mapping", "generic landing template", "Surface Output Contract Pass", "Surface Output Summary", "surface_output"],
   },
   {
     file: "agent-pack/agents/notion-publisher.agent.md",
-    requiredSnippets: ["research-only child page publication is mandatory", "separate Notion child page", "notion-research-export-ru.md", "stage-gate-ledger.md", "release-notes.md"],
+    requiredSnippets: ["research-only child page publication is mandatory", "separate Notion child page", "notion-research-export-ru.md", "Publication Cross-Link Gate", "Цепочка решений", "Publication Anti-AI-Slop Gate", "Research Content Lint", "stage-gate-ledger.md", "release-notes.md", "Surface Output Contract", "surface_output"],
   },
   {
     file: "AGENTS.md",
-    requiredSnippets: ["публикация research в Notion обязательна", "section-by-section visual spec", "шаблонный стиль", "Не заменяй требуемый источник", "Не обходи approval", "человекочитаемый research pack", "отдельную child page", "Notion research page publication record"],
+    requiredSnippets: ["публикация research в Notion обязательна", "Lazyweb Evidence Gate", "section-by-section visual spec", "шаблонный стиль", "Не заменяй требуемый источник", "Не обходи approval", "человекочитаемый research pack", "отдельную child page", "Publication Cross-Link Gate", "Карта связей исследования", "Anti-AI-Slop Gate", "Research Content Lint", "Notion research page publication record", "Surface-Aware Output Framework", "Surface Type Gate", "Write -> Verify -> Fix Gate"],
   },
   {
     file: "agent-pack/guardrails/guardrails.policy.md",
-    requiredSnippets: ["Не подменяй required provider", "documented failure", "Assumptions не могут заменять Findings"],
+    requiredSnippets: ["Не подменяй required provider", "documented failure", "Assumptions не могут заменять Findings", "Surface Output Contract", "evidence-to-output map", "Anti-AI-Slop Gate", "Тезисная выжимка не заменяет проработку"],
+  },
+  {
+    file: "agent-pack/templates/surface-output-contract.template.md",
+    requiredSnippets: ["Surface Type", "Coverage Gate", "Evidence-To-Output Map", "Surface Quality Bar", "Write -> Verify -> Fix Plan"],
+  },
+  {
+    file: "agent-pack/templates/agent-output-contract.schema.md",
+    requiredSnippets: ["surface_output", "coverage_gate", "evidence_to_output_map", "verification"],
+  },
+  {
+    file: "agent-pack/templates/stage-gate-ledger.template.md",
+    requiredSnippets: ["Surface Output Gates", "Coverage result", "Verification evidence"],
+  },
+  {
+    file: "agent-pack/artifacts/design/screens.template.md",
+    requiredSnippets: ["Surface Output Contract", "Coverage Gate", "Evidence-To-Output Map"],
+  },
+  {
+    file: "agent-pack/artifacts/design/figma-handoff-bundle.template.md",
+    requiredSnippets: ["Surface Output Contract", "Evidence-To-Frame Map"],
+  },
+  {
+    file: "agent-pack/artifacts/frontend/frontend-result.template.md",
+    requiredSnippets: ["Surface Output Summary", "Upstream Coverage", "Evidence-To-Implementation Map"],
+  },
+  {
+    file: "agent-pack/artifacts/qa/qa-report.template.md",
+    requiredSnippets: ["Surface Output Gates", "Surface Evidence Map"],
+  },
+  {
+    file: "agent-pack/artifacts/release/release-notes.template.md",
+    requiredSnippets: ["Surface Output Summary"],
   },
   {
     file: "agent-pack/guardrails/approval-matrix.md",
@@ -114,6 +150,30 @@ const researchEnforcementFiles = [
   {
     file: "tooling/scripts/publish-notion-research-page.mjs",
     requiredSnippets: ["page-title", "createChildPage", "markdownToBlocks"],
+  },
+  {
+    file: "tooling/scripts/generate-notion-research-export.mjs",
+    requiredSnippets: ["buildCrossLinkControlSections", "Карта связей исследования", "Цепочка решений"],
+  },
+  {
+    file: "tooling/scripts/publish-notion-research-hub.mjs",
+    requiredSnippets: ["validatePublicationCrossLinks", "publication_cross_link_gate", "validatePublicationAntiSlop", "publication_anti_slop_gate", "lintResearchMarkdown", "buildHubCrossLinkBlocks", "mentionPageRich"],
+  },
+  {
+    file: "tooling/scripts/lint-research-content.mjs",
+    requiredSnippets: ["lintResearchMarkdown", "no_shallow_summary", "cjm_depth_required", "roadmap_trace_required", "generic_claim_detector", "portable_sentence_detector", "repetitive_table_rows"],
+  },
+  {
+    file: "package.json",
+    requiredSnippets: ["\"research:lint\"", "tooling/scripts/lint-research-content.mjs"],
+  },
+  {
+    file: "integrations/mcp/lazyweb.md",
+    requiredSnippets: ["Lazyweb MCP", "lazyweb_get_workflows", "lazyweb_search", "human approval", "reload/restart"],
+  },
+  {
+    file: ".codex/config.example.toml",
+    requiredSnippets: ["mcp_servers.lazyweb", "LAZYWEB_MCP_TOKEN"],
   },
   {
     file: "runtime/typescript/research.config.ts",

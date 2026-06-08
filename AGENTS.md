@@ -19,6 +19,7 @@ Definition of Done для этого проекта:
 
 - обязательные артефакты созданы или обновлены;
 - каждый stage явно фиксирует `inputs_used`;
+- для любого крупного пользовательского output создан или встроен **Surface Output Contract**: surface type, scope, coverage, evidence-to-output map, quality bar и verification plan;
 - `handoff-bundle.md` и `stage-gate-ledger.md` обновлены;
 - validation/gates выполнены или blocker записан как `partial`/`blocked`;
 - внешние действия имеют approval record с exact target;
@@ -69,6 +70,30 @@ yarn workflow:doctor
 State Truncation Gate: начиная с `08-frontend`, оркестратор обязан передавать специалистам сжатый `handoff-bundle.md` через `runtime/typescript/context-truncator.ts`, а не всю историю переписки.
 
 Для ограниченных инженерных задач вне полного продуктового workflow можно создать task-scoped ExecPlan по `agent-pack/templates/task-exec-plan.template.md`. Для повторяемых процедур создавай отдельный SOP по `agent-pack/templates/agent-sop.template.md` и подключай его ссылкой из релевантного workflow/agent/skill вместо раздувания `AGENTS.md`.
+
+Для любого результата, который пользователь будет читать, смотреть, проверять или использовать как интерфейс/доску/страницу/прототип/реализацию, действует **Surface-Aware Output Framework**:
+
+1. **Surface Type Gate:** сначала определить не источник данных, а конечную поверхность (`research_report`, `notion_wiki`, `figma_board`, `product_ui`, `dashboard_console`, `landing`, `prototype`, `frontend`, `presentation`, `handoff`).
+2. **Output Scope Contract:** перед созданием результата зафиксировать цель, аудиторию, обязательные входы, must-cover sections, ожидаемое число страниц/фреймов/экранов/состояний, non-goals и Definition of Done по `agent-pack/templates/surface-output-contract.template.md`.
+3. **Coverage Gate:** каждый ключевой входной раздел должен иметь output location и статус `covered|partial|skipped`. Если важный раздел `partial/skipped`, финальный статус не может быть `success` без waiver/deviation record.
+4. **Surface Quality Bar:** применять gate по типу поверхности: для Figma — canvas structure/object inventory/screenshot; для frontend — responsive/states/a11y/browser evidence; для dashboard — chart-to-question fit/no chartjunk/metric definitions; для Notion/report — completeness/tables/cross-links; для landing — first viewport signal/CTA/trust proof.
+5. **Evidence Layer Gate:** evidence должен быть связан с конкретным решением и местом результата через `Evidence source -> decision -> output location -> applied/rejected/deferred`; простое чтение источников не считается применением evidence.
+6. **Write -> Verify -> Fix Gate:** после любой записи или генерации проверить реальное состояние результата через metadata/object inventory/screenshot/build/test; найденные gaps исправить или записать deviation.
+
+Для research, CJM, Notion/Figma-публикаций и любых стратегических артефактов дополнительно действует **Anti-AI-Slop Gate**:
+
+- Gate проверяет не список слов, а качество результата. Запрещенный словарь — только ранний сигнал; даже без этих слов артефакт может быть `needs_revision`, если он абстрактный, взаимозаменяемый или не связан с реальным поведением.
+- Не использовать паттерные AI-формулировки как готовый вывод: `orchestration`, `rails`, `wedge`, `trust layer`, `seamless`, `unlock`, `north star`, `engine`, `flywheel`, `layer`, `companion`, `playbook`, если они не являются точным техническим термином в контексте. Если термин нужен, рядом должно быть русское бытовое объяснение.
+- Считать AI slop любое уверенное утверждение без конкретного наблюдаемого поведения, доменного контекста, причинно-следственной логики, ограничения, источника или способа проверки.
+- Не допускать универсальных фраз, которые можно перенести в другой продукт без потери смысла. Каждый крупный вывод должен содержать доменную деталь: участника, ситуацию, канал, объект оплаты/действия, документ, событие, риск, ограничение рынка или пользовательский страх.
+- Не допускать пустых обещаний: "повысит доверие", "улучшит UX", "снизит friction", "ускорит рост", "даст seamless experience" допустимы только если указано, через какой механизм, в каком моменте пути и по какой метрике это проверяется.
+- Проверять разнообразие структуры: если таблица или разделы повторяют один шаблон и отличаются только существительными, это `needs_revision`.
+- Раскрывать метрики через поведение: `conversion`, `retention`, `activation`, `engagement`, `trust` должны быть описаны как конкретное действие пользователя или бизнеса.
+- Каждый крупный вывод обязан быть раскрыт через реальную ситуацию: кто пользователь, что он пытается сделать, где сомневается, что происходит до оплаты, в момент оплаты и после нее.
+- Запрещено отдавать только тезисную выжимку, если пользователь просит проработку: после executive summary должны быть подробные кейсы, user flow, CJM или сценарная таблица с связью `персона -> ситуация -> трение -> решение -> проверка`.
+- Для CJM обязательны не только stage tables, но и ключевые кейсы, user flow, вопрос пользователя на каждом этапе, боль, решение продукта и метрика.
+- Roadmap и ICE/RICE не должны жить отдельно от CJM: каждая P0/P1 инициатива должна ссылаться на конкретное трение из CJM и на способ проверки в интервью, прототипе или данных.
+- Публикационные экспорты и генераторы не должны вставлять hardcoded англоязычные клише; дефолтные контрольные блоки должны быть на русском и объяснять продукт через жизненные сценарии.
 
 ## 4. Artifact-Driven Pipeline
 
@@ -129,6 +154,7 @@ Source of truth:
 
 Опциональный design enhancement layer для задач с визуальным риском, reference-driven задач, Figma handoff или Storybook export:
 
+- `Lazyweb evidence layer` перед `reference-analysis.md`/`STYLE_GUIDE.md`/`design-brief.md`: для UI-паттернов, конкурентных экранов, onboarding/paywall/dashboard/settings/checkout examples и design critique используй Lazyweb MCP + skills, если они установлены и source policy разрешает внешний MCP. Lazyweb не заменяет технический scan заданного пользователем референса; он дополняет его реальными продуктовым скриншотами и flows.
 - `STYLE_GUIDE.md` после `reference-analysis.md`: декомпозиция стиля на слой подачи/рендера и слой UI-структуры, явные токены, метрики композиции, allowed/disallowed patterns и anti-patterns.
 - `design-generator-prompt.md` перед генерацией экранов: продуктовый контекст + правила стиля + constraints для 2-3 экранов.
 - `design-loop-report.md` после визуальной итерации: таблица Before/After/Why, style drift и revision block.
@@ -165,6 +191,8 @@ Notion research publication обязательна для полного workflo
 - Перед публикацией проверь `notion-research-export-ru.md` через Russian Publication Gate: не должно быть английских/испанских заголовков, table headers, section labels, CTA, статусов или описаний, кроме технических терминов из правил языка. Запрещено публиковать краткую выжимку вместо полного research pack, если пользователь не попросил summary explicitly.
 - Перед публикацией выполни **Publication Completeness Gate**: `notion-research-export-ru.md` должен быть собран из полного research pack (`research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`, а также `cjm-map.md`/`opportunity-roadmap.md`, если они есть), а не из краткой выжимки. Для hub-публикации export должен быть сопоставим с исходными research artifacts по объему и покрытию; если он выглядит как summary/digest, Notion write запрещен до регенерации полного export.
 - Перед публикацией подробного research pack выполни **Publication Shape Gate**: `personas`, `CJM`, competitive matrix и `ICE/RICE` должны быть опубликованы таблицами или схемами, а не набором длинных текстовых карточек. Для hub-публикации `tooling/scripts/publish-notion-research-hub.mjs` выполняет этот gate на dry-run и перед внешней записью; без `publication_shape_gate.pass=true` Notion write запрещен.
+- Перед публикацией или обновлением подробного research hub выполни **Publication Cross-Link Gate**: если research pack ссылается на другие разделы, дочерние страницы или артефакты (`см. персоны`, `см. CJM`, `ICE/RICE`, `SWOT`, `источники`, `валидация`, `roadmap`), эти ссылки должны быть кликабельными. Для локальных Markdown artifacts используй Markdown links; для Notion hub используй Notion page mentions или ссылки на реальные дочерние страницы. Hub обязан содержать `Карта связей исследования` и `Цепочка решений` с цепочкой `доказательство → интерпретация → продуктовое решение → подробности`. Если cross-link gate не пройден, Notion write запрещен до исправления export или отдельного cross-link pass.
+- Перед публикацией подробного research pack выполни исполняемый **Research Content Lint**: `yarn research:lint outputs/<project-slug>/<YYYY-MM-DD>` или точечно `yarn research:lint <research-export-md>`. Lint реализует Rules 1-6 Anti-AI-Slop Gate: не тезисная выжимка, CJM/user-flow depth, связь roadmap с CJM и валидацией, claims с механизмом, неуниверсальные формулировки и неповторяющиеся строки таблиц. Если lint падает, Notion/Figma/external write запрещен до исправления источников, шаблонов или export.
 - До внешней записи подготовь `publication plan` и dry-run/preview: exact target, mode, source artifacts, checksum, block count, unsupported blocks и expected writes.
 - В конце `01-research` используй интерактивный approval request: `yarn workflow:approval-request outputs/<project-slug>/<YYYY-MM-DD> notion_research_publish --target <notion-parent-page-id> --by human --reason "Публикация research pack в Notion"`. Если TTY недоступен, задай отдельный заметный вопрос в чате и затем запиши `workflow:approve` или `workflow:deny`.
 - До публикации выбери Notion layout strategy:
@@ -191,18 +219,19 @@ Notion research publication обязательна для полного workflo
    - Запрещено пропускать этот шаг или симулировать его прохождение фейковыми/старыми отчетами.
    - Если API-ключ `FIRECRAWL_API_KEY` не задан в `.env`, сканирование должно быть выполнено через локальный Playwright-сценарий (он работает без внешних API). Полученные скриншоты десктопа и мобильной версии референса должны быть физически сохранены в `reports/visual-review/` и детально проанализированы.
    - Игнорирование этого правила или использование старых/несвязанных скриншотов из папки отчетов считается критической ошибкой качества (Critical Quality Failure).
-2. Создать `reference-analysis.md` на основе данных сканирования с section-by-section visual spec: hero/nav, фон, цвета, typography scale, spacing, layout grid, section order, cards, CTA, forms/controls, media, footer, mobile behavior, allowed/disallowed patterns.
-3. Подготовить `design-brief.md` и `screens.md`, которые явно читают эту спецификацию.
-4. Если требуется Figma canvas write, получить human approval и `write_allowed=true`; только после этого создавать/обновлять холст Figma по `integrations/mcp/figma-canvas-write-guide.md`.
+2. **Lazyweb Evidence Gate:** Для задач с UI-риском, конкурентными паттернами или запросом на визуализацию/дизайн сначала используй Lazyweb MCP/skills как evidence layer: `lazyweb-design-research` для глубокого benchmark, `lazyweb-quick-references` для быстрых экранов, `lazyweb-design-improve` для critique существующего UI, `lazyweb-design-brainstorm` для нестандартных направлений и `lazyweb-ab-test-research` только при явном запросе на monetization/A/B evidence. Если Lazyweb tools недоступны в текущей сессии, зафиксируй `skipped_with_reason=lazyweb_unavailable_reload_required` и продолжай через обычный reference scan/web research.
+3. Создать `reference-analysis.md` на основе данных сканирования и Lazyweb evidence при наличии с section-by-section visual spec: hero/nav, фон, цвета, typography scale, spacing, layout grid, section order, cards, CTA, forms/controls, media, footer, mobile behavior, allowed/disallowed patterns.
+4. Подготовить `design-brief.md` и `screens.md`, которые явно читают эту спецификацию.
+5. Если требуется Figma canvas write, получить human approval и `write_allowed=true`; только после этого создавать/обновлять холст Figma по `integrations/mcp/figma-canvas-write-guide.md`.
    - Перед записью и перед финальным screenshot обязательно пройти Russian Publication Gate для видимого текста Figma: frame names, headers, labels, cards, chips и descriptions на русском; старые draft-фреймы должны быть обновлены, скрыты или явно помечены `superseded`.
-5. До утверждения макетов пользователем frontend заблокирован.
-6. После реализации выполнить **двустороннюю поблочную съёмку** — обязательно захватывать поблочные скриншоты ОДНОВРЕМЕННО с **референсного сайта** И **локальной реализации** с одинаковыми именами секций:
+6. До утверждения макетов пользователем frontend заблокирован.
+7. После реализации выполнить **двустороннюю поблочную съёмку** — обязательно захватывать поблочные скриншоты ОДНОВРЕМЕННО с **референсного сайта** И **локальной реализации** с одинаковыми именами секций:
    - `reference-desktop-section-<name>.png` / `reference-mobile-section-<name>.png` — секции оригинального референса.
    - `local-desktop-section-<name>.png` / `local-mobile-section-<name>.png` — соответствующие секции локального сайта.
    - Запрещено ограничиваться только full-page скриншотами или скриншотами лишь одной стороны: без пары «референс → реализация» сверка невозможна.
    - Скрипт `tooling/scripts/capture-local-screenshots.mjs` ОБЯЗАН захватывать обе стороны в одном запуске.
-7. После захвата парных скриншотов запустить `yarn reference:diff <reference-report-dir> <local-report-dir> [output-dir]` и сохранить `visual-diff-result.json`.
-8. Зафиксировать результат в `visual-reference-review.md` с поблочным сравнением reference → implementation → status → corrections, ссылаясь на реальные пары скриншотов и `visual-diff-result.json`.
+8. После захвата парных скриншотов запустить `yarn reference:diff <reference-report-dir> <local-report-dir> [output-dir]` и сохранить `visual-diff-result.json`.
+9. Зафиксировать результат в `visual-reference-review.md` с поблочным сравнением reference → implementation → status → corrections, ссылаясь на реальные пары скриншотов, Lazyweb evidence при наличии и `visual-diff-result.json`.
 
 Запрещено:
 

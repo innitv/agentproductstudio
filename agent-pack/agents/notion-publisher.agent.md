@@ -40,12 +40,15 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 1. Проверить наличие артефактов исследований и их читаемость для человека.
 2. Создать русскоязычный экспорт только для результатов исследований без схем, YAML frontmatter, необработанного JSON или полных дампов кодовых блоков.
-3. Сформировать publication plan и dry-run/preview до внешней записи: target, mode, layout strategy, source artifacts, checksum, block/page/database count, database schema, unsupported blocks, expected writes и результат `Publication Shape Gate`.
+3. Сформировать Surface Output Contract для `notion_wiki`: expected hub/child pages/databases/sections, coverage gate по research pack, evidence-to-output map, Russian Publication Gate, cross-link coverage и verification plan.
+4. Сформировать publication plan и dry-run/preview до внешней записи: target, mode, layout strategy, source artifacts, checksum, block/page/database count, database schema, unsupported blocks, expected writes и результаты `Publication Shape Gate`, `Publication Completeness Gate`, `Publication Cross-Link Gate`.
 4. Если целевая страница, интерактивное approval или publication shape gate отсутствуют, создать резервный файл Markdown и установить статус `partial` или `blocked` с `recommended_next_step` для получения approval или исправления export. Не позволять Оркестратору завершать воркфлоу со статусом `success` без публикации.
 5. Если целевая страница и одобрение получены, выбрать способ публикации по объему: короткий export — отдельная дочерняя страница (separate Notion child page); подробный research pack — hub page с дочерними страницами по разделам; рабочие сущности — базы данных.
 6. До approval и внешней записи выполнить Publication Completeness Gate: `notion-research-export-ru.md` должен быть собран из всех доступных research artifacts, а не из краткой выжимки. Если export существенно меньше полного source pack или не покрывает ключевые разделы (`personas`, `CJM`, competitors, ICE/RICE/backlog, roadmap/SWOT/sources), вернуть `partial/needs_revision` и регенерировать export.
-6. При наличии `prd.md` и `proto-personas.md` создать две связанные базы данных в Notion (Персоны и User Stories), связать их через Relation и наполнить User Stories интерактивными чек-листами Acceptance Criteria.
-7. Записать URL/ID созданной страницы или зафиксировать блокирующую проблему.
+7. До approval и внешней записи выполнить Publication Cross-Link Gate: подробный hub должен содержать `Карта связей исследования` и `Цепочка решений`, а ссылки на personas, CJM, ICE/RICE, roadmap/SWOT, validation и sources должны вести на реальные Markdown artifacts или Notion child pages. Если gate не пройден, вернуть `partial/needs_revision` и исправить export; для уже опубликованного hub выполнить отдельный approval-gated cross-link pass.
+7a. До approval и внешней записи выполнить Publication Anti-AI-Slop Gate и `Research Content Lint`: `yarn research:lint outputs/<project-slug>/<YYYY-MM-DD>` или `yarn research:lint <research-export-md>`. Проверка должна проходить Rules 1-6: не тезисная выжимка, CJM/user-flow depth, roadmap trace, claims с механизмом, неуниверсальные формулировки и неповторяющиеся таблицы. `publish-notion-research-hub.mjs` обязан использовать тот же смысл проверки и падать до Notion write, если lint/gate не пройден.
+8. При наличии `prd.md` и `proto-personas.md` создать две связанные базы данных в Notion (Персоны и User Stories), связать их через Relation и наполнить User Stories интерактивными чек-листами Acceptance Criteria.
+9. Записать URL/ID созданной страницы или зафиксировать блокирующую проблему.
 
 ## Guardrails (Ограничения и правила)
 
@@ -56,7 +59,10 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - Предпочитай remote Notion MCP/OAuth, если доступен write-capable MCP. Local MCP/API fallback допустим только с локальными credentials и без вывода token в команды, логи или artifacts.
 - Markdown публикуется как структурированные Notion blocks. Запрещено выгружать весь Markdown одним raw code block.
 - Подробный research pack запрещено публиковать одной длинной страницей: используй hub page + child pages, а для сущностей типа personas/backlog/stories — базы данных.
+- Notion surface не может считаться готовой, если нет Surface Output Contract и карты `research section/entity -> hub/child page/database/table`.
 - Personas, CJM/user paths, competitive matrix и ICE/RICE/backlog должны публиковаться таблицами или схемами. Если `notion-research-export-ru.md` содержит эти разделы только прозой или выглядит как summary/digest при наличии полного research pack, Notion write блокируется до исправления export.
+- Подробный Notion hub должен связывать разделы между собой: `Карта связей исследования` и `Цепочка решений` обязательны, а текстовые отсылки к персонам, CJM, ICE/RICE, roadmap/SWOT, validation и sources должны быть кликабельными Markdown links или Notion page mentions. Запрещено оставлять важные переходы только как текст `см. файл`/`см. раздел`.
+- Notion export не может считаться готовым, если он звучит как тезисная AI-выжимка: для ключевых решений нужны реальные кейсы, user flow под CJM и связь с проверкой гипотез.
 - Не создавай микространицы: для подробного research pack целевой диапазон 6-12 child pages; короткие блоки меньше 8-10 Notion blocks или одиночные служебные секции должны оставаться внутри крупной страницы. Toggle/drawer используй выборочно: короткие блоки до 15 blocks оставляй inline; сворачивай длинные reference lists, validation details и повторяемые карточки инициатив/задач.
 - Для Notion API соблюдай лимиты: append children чанками до 100 blocks, обрабатывай `429` через `Retry-After`/backoff, фиксируй retry count.
 - Повторная публикация должна иметь idempotency strategy: existing child page/database search, source checksum/export marker или явно выбранная versioning strategy.
@@ -83,3 +89,4 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - `outputs.notion_research_export_ru` содержит полный Markdown для локального research-only экспорта.
 - `outputs.notion_publication_record` содержит человекочитаемую запись для `stage-gate-ledger.md` и `release-notes.md`: publication plan summary, dry-run result, layout strategy, статус публикации, Notion hub/page/database ids/urls, block/page/database counts или blocker.
 - Для внешней записи в Notion требуется точное human approval действие: `notion_research_publish`, `notion_prd_export` или `notion_agile_export` с целевым page/database target. Предпочтительный способ получения — `workflow:approval-request`; `workflow:approve`/`workflow:deny` используются только после явного ответа пользователя или при недоступном TTY. Если approval, `NOTION_TOKEN`, parent page, права интеграции или publication shape gate отсутствуют, агент возвращает `partial` или `blocked`; финальный `success` запрещен.
+- Для Notion publication surface поле `surface_output` обязательно.
