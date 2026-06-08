@@ -167,6 +167,7 @@
 - Release notes содержат Approval And External Records для Notion, Figma, deploy и git write либо явный blocker/not_requested.
 - Notion research-only child page publication выполнена для полного workflow и записана в `stage-gate-ledger.md` + `release-notes.md`, либо workflow явно помечен `partial/blocked` с причиной.
 - Перед Notion write создан `publication plan` и dry-run/preview с exact target, source checksum, block count, expected writes и unsupported blocks.
+- Перед Notion write dry-run содержит `notion_data_shape_plan`: selected layout, child pages, table blocks, `database_index_candidates`, schema preview, idempotency strategy и API limits. Сущности, которые нужно фильтровать, сортировать, обновлять или связывать, не должны публиковаться только prose/table block без rationale.
 - Перед Notion write пройден `Publication Shape Gate`: personas, CJM/user paths, competitive matrix и ICE/RICE/backlog представлены таблицами или схемами; для hub-публикации dry-run содержит `publication_shape_gate.pass=true`.
 - Approval на Notion write привязан к точному `action` и `target`; targetless approval не засчитывается.
 - Markdown экспорт опубликован как структурированные Notion blocks, а не как один raw code block.

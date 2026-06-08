@@ -30,6 +30,41 @@ const shapeGate = validatePublicationShape(parsed.sections);
 const completenessGate = validatePublicationCompleteness(exportPath, markdown, parsed.sections);
 const crossLinkGate = validatePublicationCrossLinks(markdown, parsed.sections);
 const antiSlopGate = validatePublicationAntiSlop(markdown, parsed.sections);
+const dataShapePlan = buildNotionDataShapePlan(markdown, parsed.sections, publishUnits);
+const publicationBlockers = getPublicationBlockers({
+  shapeGate,
+  completenessGate,
+  crossLinkGate,
+  antiSlopGate,
+  skipPublicationShapeGate,
+});
+
+if (dryRun) {
+  const plan = publishUnits.map((unit) => ({
+    title: unit.title,
+    source_sections: unit.sourceSections,
+    estimated_blocks: countBlocksDeep(markdownToBlocks(unit.markdown, { sectionToggles: true })),
+    top_level_blocks: markdownToBlocks(unit.markdown, { sectionToggles: true }).length,
+    toggle_count: countBlocksByType(markdownToBlocks(unit.markdown, { sectionToggles: true }), "toggle"),
+  }));
+  console.log(JSON.stringify({
+    mode: "dry_run",
+    publication_allowed: publicationBlockers.length === 0,
+    publication_blockers: publicationBlockers,
+    layout_strategy: "hub_with_grouped_child_pages_and_selective_toggles",
+    hub_title: hubTitle,
+    parent_page_id: parentPageId,
+    child_pages: plan,
+    child_page_count: plan.length,
+    estimated_total_blocks: plan.reduce((sum, item) => sum + item.estimated_blocks, 0),
+    publication_shape_gate: shapeGate,
+    publication_completeness_gate: completenessGate,
+    publication_cross_link_gate: crossLinkGate,
+    publication_anti_slop_gate: antiSlopGate,
+    notion_data_shape_plan: dataShapePlan,
+  }, null, 2));
+  process.exit(publicationBlockers.length === 0 ? 0 : 1);
+}
 
 if (!skipPublicationShapeGate && !shapeGate.pass) {
   console.error(formatPublicationShapeGate(shapeGate));
@@ -49,30 +84,6 @@ if (!crossLinkGate.pass) {
 if (!antiSlopGate.pass) {
   console.error(formatPublicationAntiSlopGate(antiSlopGate));
   process.exit(1);
-}
-
-if (dryRun) {
-  const plan = publishUnits.map((unit) => ({
-    title: unit.title,
-    source_sections: unit.sourceSections,
-    estimated_blocks: countBlocksDeep(markdownToBlocks(unit.markdown, { sectionToggles: true })),
-    top_level_blocks: markdownToBlocks(unit.markdown, { sectionToggles: true }).length,
-    toggle_count: countBlocksByType(markdownToBlocks(unit.markdown, { sectionToggles: true }), "toggle"),
-  }));
-  console.log(JSON.stringify({
-    mode: "dry_run",
-    layout_strategy: "hub_with_grouped_child_pages_and_selective_toggles",
-    hub_title: hubTitle,
-    parent_page_id: parentPageId,
-    child_pages: plan,
-    child_page_count: plan.length,
-    estimated_total_blocks: plan.reduce((sum, item) => sum + item.estimated_blocks, 0),
-    publication_shape_gate: shapeGate,
-    publication_completeness_gate: completenessGate,
-    publication_cross_link_gate: crossLinkGate,
-    publication_anti_slop_gate: antiSlopGate,
-  }, null, 2));
-  process.exit(0);
 }
 
 const hubId = await createChildPage(parentPageId, hubTitle);
@@ -98,7 +109,28 @@ await appendChildren(hubId, hubBlocks);
 console.log(`Created Notion research hub ${hubId} under parent ${parentPageId}.`);
 console.log(`Created ${childResults.length} child pages.`);
 console.log(`Published ${childResults.reduce((sum, item) => sum + item.blocks, 0) + hubBlocks.length} human-readable Russian blocks across hub and child pages.`);
-console.log(JSON.stringify({ hub_id: hubId, child_pages: childResults }, null, 2));
+console.log(JSON.stringify({ hub_id: hubId, child_pages: childResults, notion_data_shape_plan: dataShapePlan }, null, 2));
+
+function getPublicationBlockers({ shapeGate, completenessGate, crossLinkGate, antiSlopGate, skipPublicationShapeGate }) {
+  return [
+    !skipPublicationShapeGate && !shapeGate.pass ? {
+      gate: "publication_shape_gate",
+      reason: "Structured sections would not publish as tables/schemes.",
+    } : undefined,
+    !completenessGate.pass ? {
+      gate: "publication_completeness_gate",
+      reason: "Export is too shallow or misses core research coverage.",
+    } : undefined,
+    !crossLinkGate.pass ? {
+      gate: "publication_cross_link_gate",
+      reason: "Detailed hub does not have required clickable cross-links.",
+    } : undefined,
+    !antiSlopGate.pass ? {
+      gate: "publication_anti_slop_gate",
+      reason: "Export contains AI-slop signals or lacks scenario/validation depth.",
+    } : undefined,
+  ].filter(Boolean);
+}
 
 function readNotionToken() {
   const envPath = join(process.cwd(), ".env");
@@ -382,6 +414,203 @@ function formatPublicationShapeGate(shapeGate) {
   }
 
   return lines.join("\n");
+}
+
+function buildNotionDataShapePlan(markdown, sections, publishUnits) {
+  const estimatedTotalBlocks = publishUnits.reduce((sum, unit) =>
+    sum + countBlocksDeep(markdownToBlocks(unit.markdown, { sectionToggles: true })), 0);
+  const sectionCount = sections.length;
+  const childPageCount = publishUnits.length;
+  const tablesBySection = sections.flatMap((section) => extractMarkdownTables(section.markdown).map((table) => ({
+    section: section.title,
+    headers: table.headers,
+    row_count: table.rowCount,
+  })));
+
+  const entityPlans = buildEntityIndexPlans(sections, tablesBySection);
+  const checks = [
+    {
+      id: "hub_shape",
+      label: "Большой research pack публикуется как hub + grouped child pages",
+      status: childPageCount >= 6 && childPageCount <= 12 ? "pass" : "warn",
+      value: { child_page_count: childPageCount, expected: "6-12" },
+      hint: "Если child pages меньше 6 или больше 12, проверь группировку: Notion должен быть читаемым hub, а не простыней или набором микространиц.",
+    },
+    {
+      id: "database_preview_for_entities",
+      label: "Структурированные сущности имеют database schema preview",
+      status: entityPlans.length ? "pass" : "warn",
+      value: entityPlans.map((plan) => plan.entity),
+      hint: "Personas, CJM frictions, opportunities, validation claims и sources лучше готовить как database_index, если их нужно фильтровать/обновлять.",
+    },
+    {
+      id: "table_block_for_readonly_matrices",
+      label: "Read-only матрицы остаются Notion table blocks",
+      status: tablesBySection.length ? "pass" : "warn",
+      value: { table_count: tablesBySection.length },
+      hint: "Если таблица нужна только для чтения в отчете, table block проще и надежнее database.",
+    },
+    {
+      id: "api_limits_plan",
+      label: "План учитывает лимиты Notion API",
+      status: "pass",
+      value: { append_chunk_size: 80, notion_append_limit: 100, estimated_total_blocks: estimatedTotalBlocks },
+      hint: "Append children выполняется чанками меньше 100 blocks; большие страницы разбиваются на child pages.",
+    },
+  ];
+
+  return {
+    status: checks.every((check) => check.status === "pass") ? "pass" : "pass_with_warnings",
+    selected_layout: selectLayoutStrategy({ estimatedTotalBlocks, sectionCount, childPageCount, entityPlans }),
+    page_strategy: {
+      hub: "Главная страница: краткая навигация, карта связей, цепочка решений и ссылки на дочерние страницы.",
+      child_pages: publishUnits.map((unit) => ({
+        title: unit.title,
+        source_sections: unit.sourceSections,
+        recommended_shape: "child_page",
+      })),
+      toggles: "Использовать только для длинных validation/source lists и повторяемых карточек; короткие выводы оставлять inline.",
+      tables: tablesBySection.map((table) => ({
+        section: table.section,
+        recommended_shape: recommendTableShape(table),
+        row_count: table.row_count,
+        headers: table.headers,
+      })),
+    },
+    database_index_candidates: entityPlans,
+    idempotency_strategy: {
+      hub_page: "Искать existing child page по hub title + source checksum/export marker; иначе создавать новую версию.",
+      child_pages: "Сопоставлять по normalized title внутри hub; не создавать дубликат при повторном запуске.",
+      database_rows: "Для будущего database_index использовать stable key: entity type + normalized name/scenario + source section.",
+      source_checksum: "Сохранять checksum export/source artifacts в publication record.",
+    },
+    api_limits: {
+      append_children_chunk_size: 80,
+      notion_append_children_limit: 100,
+      request_payload_limit: "держать page chunks заметно ниже 500KB и rich text до 1900 chars",
+      rate_limit_policy: "при 429 ждать Retry-After и повторять append/create operation",
+    },
+    checks,
+  };
+}
+
+function buildEntityIndexPlans(sections, tablesBySection) {
+  const definitions = [
+    {
+      entity: "personas",
+      label: "Прото-персоны",
+      match: /персон|persona/iu,
+      recommended_shape: "database_index",
+      when: "Если personas нужно фильтровать по сегменту, боли, evidence status или связывать с CJM/opportunities.",
+      properties: [
+        { name: "Название", type: "title" },
+        { name: "Сегмент", type: "select" },
+        { name: "Ситуация", type: "rich_text" },
+        { name: "Задача", type: "rich_text" },
+        { name: "Боль", type: "rich_text" },
+        { name: "Evidence status", type: "select" },
+        { name: "Связанный CJM", type: "relation_future" },
+      ],
+    },
+    {
+      entity: "cjm_frictions",
+      label: "CJM frictions",
+      match: /cjm|сценари|путь пользователя|трение|боль/iu,
+      recommended_shape: "database_index",
+      when: "Если нужно отслеживать friction -> opportunity -> validation -> roadmap.",
+      properties: [
+        { name: "Этап", type: "select" },
+        { name: "Сценарий", type: "title" },
+        { name: "Вопрос пользователя", type: "rich_text" },
+        { name: "Боль", type: "rich_text" },
+        { name: "Решение", type: "rich_text" },
+        { name: "Метрика", type: "rich_text" },
+        { name: "Priority", type: "select" },
+      ],
+    },
+    {
+      entity: "opportunities",
+      label: "Opportunities / ICE-RICE backlog",
+      match: /ice\/rice|backlog|бэклог|opportunit|инициатив|roadmap|приоритет/iu,
+      recommended_shape: "database_index",
+      when: "Если инициативы нужно сортировать по priority, effort, evidence и статусу проверки.",
+      properties: [
+        { name: "Инициатива", type: "title" },
+        { name: "Сценарий", type: "rich_text" },
+        { name: "CJM friction", type: "relation_future" },
+        { name: "RICE/ICE", type: "number" },
+        { name: "Effort", type: "select" },
+        { name: "Validation method", type: "rich_text" },
+        { name: "Статус", type: "status" },
+      ],
+    },
+    {
+      entity: "validation_claims",
+      label: "Claims to validate",
+      match: /валидац|validation|гипотез|claims|проверить|minimum evidence/iu,
+      recommended_shape: "database_index",
+      when: "Если claims должны жить как рабочий список проверок после публикации отчета.",
+      properties: [
+        { name: "Claim", type: "title" },
+        { name: "Источник", type: "rich_text" },
+        { name: "Метод проверки", type: "select" },
+        { name: "Minimum evidence", type: "rich_text" },
+        { name: "Owner", type: "people" },
+        { name: "Статус", type: "status" },
+      ],
+    },
+    {
+      entity: "sources",
+      label: "Источники",
+      match: /источник|sources|provider|tavily|deepseek|gemini|url|http/iu,
+      recommended_shape: "database_index",
+      when: "Если sources нужно переиспользовать, фильтровать по provider/source quality и связывать с выводами.",
+      properties: [
+        { name: "Источник", type: "title" },
+        { name: "URL", type: "url" },
+        { name: "Provider", type: "select" },
+        { name: "Evidence type", type: "select" },
+        { name: "Использовано в выводе", type: "rich_text" },
+        { name: "Дата проверки", type: "date" },
+      ],
+    },
+  ];
+
+  return definitions
+    .map((definition) => {
+      const matchedSections = sections.filter((section) => definition.match.test(`${section.title}\n${section.markdown}`));
+      const relatedTables = tablesBySection.filter((table) =>
+        matchedSections.some((section) => section.title === table.section)
+      );
+      const { match, ...publicDefinition } = definition;
+      return {
+        ...publicDefinition,
+        matched_sections: matchedSections.map((section) => section.title),
+        evidence: {
+          matching_section_count: matchedSections.length,
+          table_count: relatedTables.length,
+          table_rows: relatedTables.reduce((sum, table) => sum + table.row_count, 0),
+        },
+      };
+    })
+    .filter((plan) => plan.matched_sections.length > 0);
+}
+
+function recommendTableShape(table) {
+  const headers = table.headers.join(" ").toLowerCase();
+  if (/статус|owner|priority|rice|ice|effort|evidence|источник|url|метрик|валидац|персон|сценар/i.test(headers) && table.row_count >= 3) {
+    return "database_index_candidate";
+  }
+
+  return "notion_table_block";
+}
+
+function selectLayoutStrategy({ estimatedTotalBlocks, sectionCount, childPageCount, entityPlans }) {
+  if (estimatedTotalBlocks > 120 || sectionCount > 6 || childPageCount > 6) {
+    return entityPlans.length >= 3 ? "hub_with_child_pages_plus_database_index_preview" : "hub_with_child_pages";
+  }
+
+  return "flat_child_page_or_hub";
 }
 
 function validatePublicationCompleteness(exportPath, markdown, sections) {
