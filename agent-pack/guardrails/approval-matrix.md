@@ -19,3 +19,13 @@
 | Required provider unavailable or approval denied | stage status | blocked/partial, must be recorded |
 
 Target matching is strict: a targetless approval never satisfies a targeted request, and a targeted approval never satisfies a targetless request.
+
+## Interactive Approval Protocol
+
+Любой action из матрицы, который требует approval, должен проходить через интерактивный вопрос:
+
+- сначала используй `yarn workflow:approval-request <run> <action> --target <exact-target> --by human --reason "<reason>"`;
+- если TTY недоступен, задай отдельный заметный вопрос в чате до действия и только после ответа запиши `workflow:approve` или `workflow:deny`;
+- общий запрос пользователя «сделай/опубликуй/продолжай» не заменяет интерактивный approval, если action требует exact target или отдельный waiver;
+- для `model_provider_call` и `external_research_provider_call` вопрос должен явно называть provider, stage/run target и какие данные покинут локальную песочницу;
+- если интерактивный вопрос был пропущен, запиши process deviation record в `stage-gate-ledger.md`, `handoff-bundle.md` и `release-notes.md` вместо того, чтобы помечать gate как корректно пройденный.

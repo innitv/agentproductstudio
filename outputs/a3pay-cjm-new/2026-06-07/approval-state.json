@@ -1,0 +1,12 @@
+{
+  "approvals": [
+    {
+      "action": "notion_research_publish",
+      "approved": true,
+      "approved_by": "human",
+      "target": "3696473174e58006af5fd367ef89d978",
+      "notes": "Пользователь в текущем чате попросил опубликовать последнее неопубликованное изменение; target reused from previous A3 Pay Notion publication.",
+      "approved_at": "2026-06-08T04:09:27.020Z"
+    }
+  ]
+}

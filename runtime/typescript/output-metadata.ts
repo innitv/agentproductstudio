@@ -569,6 +569,16 @@ async function createDiscoveredArtifactEntries(
       safeToPublish: false,
     },
     {
+      artifactName: "notion_publication_result",
+      file: "notion-publication-result.md",
+      artifactType: "external_record" as const,
+      producerStage: "12-release",
+      producerAgent: "notion-publisher",
+      stageTitle: "Notion Publication Result",
+      humanReadable: true,
+      safeToPublish: false,
+    },
+    {
       artifactName: "visual_diff_result",
       file: "visual-diff-result.json",
       artifactType: "evidence" as const,

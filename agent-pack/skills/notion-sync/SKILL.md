@@ -85,6 +85,7 @@ contract_schema: agent-pack/templates/skill.template.md
    - предпочтительный runtime command: `yarn workflow:approval-request outputs/<project-slug>/<YYYY-MM-DD> notion_research_publish --target <notion-parent-page-id> --by human --reason "Публикация research pack в Notion"`;
    - если runtime TTY недоступен, задай отдельный заметный вопрос в чате: `Разрешить публикацию пакета исследований в Notion?` и после ответа запиши `yarn workflow:approve` или `yarn workflow:deny`;
    - approval должен быть точным по `action` и `target`.
+   - общая фраза пользователя «опубликуй», «давай», «продолжай» или похожий текущий запрос не заменяет этот интерактивный шаг; сначала покажи exact target, source artifact и expected writes.
 8. Если пользователь разрешил, проверь Notion mode:
    - предпочитай remote Notion MCP/OAuth, если он доступен и имеет write tools;
    - local MCP/API fallback допускается только при локальном `NOTION_TOKEN` и доступном parent page;
@@ -93,6 +94,7 @@ contract_schema: agent-pack/templates/skill.template.md
 10. Для повторной публикации используй idempotency rule: ищи existing hub/child page/export marker по title/source checksum и обновляй/создавай новую версию только по явно выбранной стратегии.
 11. Если используется Notion API, соблюдай request limits: append children чанками до 100 blocks, обрабатывай `429` через `Retry-After`/backoff, фиксируй retry count.
 12. Запиши publication URL/page id в `stage-gate-ledger.md`, `handoff-bundle.md` и, если workflow дошел до release, `release-notes.md`.
+13. Если Notion write был выполнен без интерактивного approval request или отдельного заметного вопроса в чате, не исправляй историю задним числом. Запиши `process_deviation` в `stage-gate-ledger.md`, `handoff-bundle.md` и `release-notes.md`: action, target, что было опубликовано, какой approval step пропущен, как предотвращать повторение.
 
 ## 4. Процедура PRD/Agile export
 
@@ -146,8 +148,9 @@ Evidence записи должна включать:
 - [ ] Layout strategy выбран до publication approval.
 - [ ] Подробный research pack опубликован как hub + child pages, а не одной длинной страницей.
 - [ ] Publication plan и dry-run/preview созданы до внешней записи.
-- [ ] Approval получен через `workflow:approval-request` или отдельный заметный вопрос в чате, если TTY недоступен.
+- [ ] Approval получен через `workflow:approval-request` или отдельный заметный вопрос в чате, если TTY недоступен; общий command/request пользователя не засчитан как approval.
 - [ ] Approval содержит exact target.
+- [ ] Если approval flow нарушен, создан `process_deviation` record.
 - [ ] Published content не содержит raw/schema/machine payloads.
 - [ ] Markdown опубликован как Notion blocks, а не как единый raw code block.
 - [ ] Для API/MCP записи учтены chunking/rate-limit/retry.

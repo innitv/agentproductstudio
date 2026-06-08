@@ -1,0 +1,15 @@
+{
+  "project_slug": "a3pay-cjm-new",
+  "run_date": "2026-06-07",
+  "run_id": "a3pay-cjm-new-2026-06-07",
+  "created_at": "2026-06-07T00:00:00+05:00",
+  "updated_at": "2026-06-08T04:19:54.054Z",
+  "workflow_profile": "standard",
+  "execution_mode": "local",
+  "status": "partial",
+  "source_request": "Полный новый research workflow A3 Pay с нуля: платежная экосистема России, CJM, конкуренты, ICE/RICE, roadmap 12-24 месяца.",
+  "output_dir": "C:\\Project\\product-agent-studio\\outputs\\a3pay-cjm-new\\2026-06-07",
+  "has_reference": false,
+  "notion_publication": "partial",
+  "last_validated_at": "2026-06-07T08:24:10.895Z"
+}
