@@ -1,13 +1,13 @@
 # Карта возможностей и roadmap A3 Pay
 
-## Inputs Used
+## Использованные входные материалы
 
 - `research-summary.md`
 - `cjm-map.md`
 - `competitive-analysis.md`
 - `proto-personas.md`
 
-## Opportunity Backlog
+## Бэклог возможностей
 
 | Возможность | Сценарий | Пользовательская ценность | Бизнес-ценность | Сложность | Приоритет |
 |---|---|---|---|---|---|
@@ -21,7 +21,7 @@
 | Property payment companion | Недвижимость | Понятный статус эскроу/аккредитива | Bank/developer partnerships | very high | P2 |
 | Loyalty-aware routing | Retail/e-commerce | Лучший способ оплаты с учетом выгоды | Conversion/AOV | high | P2 |
 
-## ICE Matrix
+## Матрица ICE
 
 | Initiative | Impact | Confidence | Ease | ICE | Notes |
 |---|---:|---:|---:|---:|---|
@@ -33,7 +33,7 @@
 | Safe auto deposit | 9 | 5 | 3 | 7.5 | Высокий чек, сложные партнерства. |
 | Property companion | 10 | 4 | 2 | 5.0 | Стратегический, но не стартовый. |
 
-## RICE Matrix
+## Матрица RICE
 
 | Initiative | Reach | Impact | Confidence | Effort | RICE | Priority |
 |---|---:|---:|---:|---:|---:|---|
@@ -46,7 +46,7 @@
 | Safe auto deposit | 4 | 9 | 5 | 6 | 30.0 | P1 |
 | Property companion | 3 | 10 | 4 | 8 | 15.0 | P2 |
 
-## Roadmap 12-24 месяца
+## Дорожная карта на 12-24 месяца
 
 | Горизонт | Product focus | Capabilities | Success metrics |
 |---|---|---|---|
@@ -56,9 +56,8 @@
 | 12-18 месяцев | Embedded finance | Payment plan selector, travel/education/healthcare pilots | AOV lift, approval rate, default/complaint rate |
 | 18-24 месяца | High-ticket companion | Auto deposit, property status companion, bank partner workflows | partner pilots, safe deposits, completed high-ticket flows |
 
-## Product Strategy
+## Продуктовая стратегия
 
 Сначала закрепиться в сценариях с высокой частотой и умеренным compliance: услуги, ЖКХ/регулярные счета, long-tail e-commerce. Затем расширяться в high-AOV вертикали через партнеров, не беря на себя custody денежных средств до появления юридической и операционной готовности.
 
 Главная формула позиционирования: "A3 Pay превращает номер телефона в понятный платежный маршрут: счет, способ оплаты, чек, статус и возврат в одном месте".
-

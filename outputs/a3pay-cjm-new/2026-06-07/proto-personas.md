@@ -1,23 +1,23 @@
-# Proto Personas
+# Прото-персоны
 
-## Inputs Used
+## Использованные входные материалы
 
 - `research-summary.md`
 - `cjm-map.md`
 - `opportunity-roadmap.md`
 - Source-backed market facts and product hypotheses
 
-## Guardrail
+## Ограничение
 
 Proto personas являются гипотезами для планирования интервью и проверки сценариев. Они не считаются доказательством реального пользовательского поведения.
 
-## Decision Context
+## Контекст решений
 
 Персоны нужны для проверки wedge-сценариев A3 Pay: bills hub, phone invoice, checkout/refund vault, high-ticket companion.
 
-## Proto Personas
+## Прото-персоны
 
-## Personas
+## Таблица персон
 
 | Persona | Segment | Context | JTBD | Pain | A3 Pay value | Evidence status |
 |---|---|---|---|---|---|---|
@@ -26,9 +26,9 @@ Proto personas являются гипотезами для планирован
 | Мария, 29 | E-commerce/travel buyer | Покупает в маркетплейсах, у небольших магазинов, бронирует поездки | "Хочу выбрать самый выгодный и безопасный способ оплаты" | Неясные возвраты, много способов, BNPL/кэшбэк неочевидны | Unified checkout and payment plan selector | hypothesis/source-informed |
 | Алексей, 38 | High-ticket buyer | Покупает авто или недвижимость | "Хочу провести крупный платеж без риска ошибиться" | Несколько сторон, документы, банк, сроки, аванс | Safe deposit/status companion | hypothesis/needs_validation |
 
-## Interview Recruiting Plan
+## План рекрутинга для интервью
 
-## Validation Plan
+## План валидации
 
 | Segment | Count | Screening criteria | Key questions |
 |---|---:|---|---|

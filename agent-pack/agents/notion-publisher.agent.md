@@ -43,6 +43,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 3. Сформировать publication plan и dry-run/preview до внешней записи: target, mode, layout strategy, source artifacts, checksum, block/page/database count, database schema, unsupported blocks, expected writes и результат `Publication Shape Gate`.
 4. Если целевая страница, интерактивное approval или publication shape gate отсутствуют, создать резервный файл Markdown и установить статус `partial` или `blocked` с `recommended_next_step` для получения approval или исправления export. Не позволять Оркестратору завершать воркфлоу со статусом `success` без публикации.
 5. Если целевая страница и одобрение получены, выбрать способ публикации по объему: короткий export — отдельная дочерняя страница (separate Notion child page); подробный research pack — hub page с дочерними страницами по разделам; рабочие сущности — базы данных.
+6. До approval и внешней записи выполнить Publication Completeness Gate: `notion-research-export-ru.md` должен быть собран из всех доступных research artifacts, а не из краткой выжимки. Если export существенно меньше полного source pack или не покрывает ключевые разделы (`personas`, `CJM`, competitors, ICE/RICE/backlog, roadmap/SWOT/sources), вернуть `partial/needs_revision` и регенерировать export.
 6. При наличии `prd.md` и `proto-personas.md` создать две связанные базы данных в Notion (Персоны и User Stories), связать их через Relation и наполнить User Stories интерактивными чек-листами Acceptance Criteria.
 7. Записать URL/ID созданной страницы или зафиксировать блокирующую проблему.
 
@@ -55,7 +56,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - Предпочитай remote Notion MCP/OAuth, если доступен write-capable MCP. Local MCP/API fallback допустим только с локальными credentials и без вывода token в команды, логи или artifacts.
 - Markdown публикуется как структурированные Notion blocks. Запрещено выгружать весь Markdown одним raw code block.
 - Подробный research pack запрещено публиковать одной длинной страницей: используй hub page + child pages, а для сущностей типа personas/backlog/stories — базы данных.
-- Personas, CJM/user paths, competitive matrix и ICE/RICE/backlog должны публиковаться таблицами или схемами. Если `notion-research-export-ru.md` содержит эти разделы только прозой, Notion write блокируется до исправления export.
+- Personas, CJM/user paths, competitive matrix и ICE/RICE/backlog должны публиковаться таблицами или схемами. Если `notion-research-export-ru.md` содержит эти разделы только прозой или выглядит как summary/digest при наличии полного research pack, Notion write блокируется до исправления export.
 - Не создавай микространицы: для подробного research pack целевой диапазон 6-12 child pages; короткие блоки меньше 8-10 Notion blocks или одиночные служебные секции должны оставаться внутри крупной страницы. Toggle/drawer используй выборочно: короткие блоки до 15 blocks оставляй inline; сворачивай длинные reference lists, validation details и повторяемые карточки инициатив/задач.
 - Для Notion API соблюдай лимиты: append children чанками до 100 blocks, обрабатывай `429` через `Retry-After`/backoff, фиксируй retry count.
 - Повторная публикация должна иметь idempotency strategy: existing child page/database search, source checksum/export marker или явно выбранная versioning strategy.

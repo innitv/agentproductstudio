@@ -6,7 +6,7 @@
 - Profile: standard
 - Execution mode: local
 - Current stage: none
-- Updated: 2026-06-08T04:19:54.054Z
+- Updated: 2026-06-08T06:18:44.081Z
 
 ## What To Read First
 
@@ -21,7 +21,7 @@
 
 ## Progress
 
-- Completed artifacts: 3/22
+- Completed artifacts: 2/22
 - Blocking stages: 4
 
 ## Blocking Stages
@@ -65,7 +65,7 @@
 
 | File | Status | Producer | Safe to publish |
 |---|---|---|---|
-| notion-research-export-ru.md | completed | 01-research notion-publisher | yes |
+| notion-research-export-ru.md | partial | 01-research notion-publisher | yes |
 
 ### external record
 

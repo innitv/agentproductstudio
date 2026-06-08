@@ -1,14 +1,12 @@
-# Competitive Analysis
+# Конкурентный анализ
 
-## Inputs Used
+## Использованные входные материалы
 
 - `research-summary.md`
 - `cjm-map.md`
 - Tavily/web sources: Банк России, СБП/НСПК, Data Insight, ЮKassa, T-Pay/Yandex Pay public materials, BNPL market sources
 
-## Competitor Matrix
-
-## Competitor Set
+## Набор конкурентов
 
 - СБП
 - Карты Мир / card acquiring
@@ -18,7 +16,7 @@
 - Госуслуги/ГИС ЖКХ
 - International alias-payment analogues
 
-## Comparison Matrix
+## Матрица сравнения конкурентов
 
 | Competitor | Type | Covered scenarios | Strengths | Weaknesses | Differentiation opportunity for A3 Pay |
 |---|---|---|---|---|---|
@@ -33,7 +31,7 @@
 | Госуслуги/ГИС ЖКХ | Public payment portal | Fees, ЖКХ, госуслуги | Official source, trust, public services | Narrow domain; UX fragmented from private payments | Bring public-like status/receipt UX to private services |
 | Международные аналоги: Pix, UPI, Bizum, PayNow | Faster payment/alias systems | Alias payments, QR, P2P/P2M | Phone/ID alias, ubiquity, instant payments | Local context differs; regulation and adoption path vary | Validate alias-led UX and merchant onboarding patterns |
 
-## Scenario Coverage
+## Покрытие сценариев
 
 | Scenario | СБП | Banks/Pay | PSP | BNPL | Госуслуги | A3 Pay target |
 |---|---|---|---|---|---|---|
@@ -45,9 +43,7 @@
 | Auto deal payment | weak | medium | weak | credit only | medium via docs | medium |
 | Real estate payment | weak | bank-led | weak | none | registry status only | companion only |
 
-## Strategic Takeaways
-
-## Takeaways
+## Стратегические выводы
 
 - СБП - не конкурент, а базовый rail. A3 Pay лучше строить как UX and orchestration layer.
 - Банковские Pay-сервисы сильны, но замкнуты. Дифференциация A3 Pay - нейтральность и сценарная широта.

@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
@@ -26,9 +26,15 @@ const parsed = splitResearchMarkdown(markdown);
 const publishUnits = groupResearchSections(parsed.sections);
 const hubTitle = titleArg?.trim() || parsed.title || "Пакет исследования";
 const shapeGate = validatePublicationShape(parsed.sections);
+const completenessGate = validatePublicationCompleteness(exportPath, markdown, parsed.sections);
 
 if (!skipPublicationShapeGate && !shapeGate.pass) {
   console.error(formatPublicationShapeGate(shapeGate));
+  process.exit(1);
+}
+
+if (!completenessGate.pass) {
+  console.error(formatPublicationCompletenessGate(completenessGate));
   process.exit(1);
 }
 
@@ -49,6 +55,7 @@ if (dryRun) {
     child_page_count: plan.length,
     estimated_total_blocks: plan.reduce((sum, item) => sum + item.estimated_blocks, 0),
     publication_shape_gate: shapeGate,
+    publication_completeness_gate: completenessGate,
   }, null, 2));
   process.exit(0);
 }
@@ -108,9 +115,21 @@ function splitResearchMarkdown(markdown) {
   const lead = [];
   const sections = [];
   let current = null;
+  let pendingMarkers = [];
 
   for (const line of lines) {
     if (line.startsWith("# ")) {
+      continue;
+    }
+
+    const marker = readSectionMarker(line);
+    if (marker) {
+      if (current) {
+        current.markers.push(marker);
+        current.markdown += `${line}\n`;
+      } else {
+        pendingMarkers.push(marker);
+      }
       continue;
     }
 
@@ -119,7 +138,8 @@ function splitResearchMarkdown(markdown) {
         sections.push(current);
       }
       const sectionTitle = line.replace(/^##\s+/, "").trim();
-      current = { title: sectionTitle, markdown: `# ${sectionTitle}\n\n` };
+      current = { title: sectionTitle, markdown: `# ${sectionTitle}\n\n`, markers: pendingMarkers };
+      pendingMarkers = [];
       continue;
     }
 
@@ -141,38 +161,51 @@ function splitResearchMarkdown(markdown) {
   };
 }
 
+function readSectionMarker(line) {
+  const match = line.match(/^<!--\s*notion-section:\s*([a-z0-9_-]+)\s*-->\s*$/i);
+  return match?.[1]?.toLowerCase();
+}
+
 function groupResearchSections(sections) {
   const groups = [
     {
       title: "00 Обзор, выводы и рамка исследования",
+      markers: ["overview"],
       match: /^(Статус документа|Краткий вывод|Исследовательские вопросы|Аудитория документа|Пользовательские задачи|Выводы, подтвержденные источниками|Сводка возможностей по сценариям)$/i,
     },
     {
       title: "02 Конкуренты, активы A3 и стратегия",
+      markers: ["competitors"],
       match: /^(Конкурентный контекст|Набор конкурентов|Матрица позиционирования|Активы A3|Незакрытые конкурентами разрывы|Стратегическая рекомендация)$/i,
     },
     {
       title: "03 Прото-персоны",
+      markers: ["personas"],
       match: /^(Прото-персоны|Матрица приоритета персон|Персона \d+:.*)$/i,
     },
     {
       title: "04 Синтетические интервью и вопросы для интервью",
+      markers: ["interviews"],
       match: /^(Ограничение по synthetic interviews|Ограничение по синтетическим интервью|Синтетическое интервью \d+:.*|Вопросы для реальных интервью)$/i,
     },
     {
       title: "05 CJM и сценарии",
+      markers: ["cjm"],
       match: /^(Общая модель CJM|Матрица сценариев CJM|P\d CJM:.*|Сценарий \d+:.*)$/i,
     },
     {
       title: "06 ICE/RICE бэклог и инициативы",
+      markers: ["scoring"],
       match: /^(ICE\/RICE backlog|ICE\/RICE бэклог|Детализация backlog|Детализация бэклога|P\d:.*)$/i,
     },
     {
       title: "07 Roadmap и SWOT",
+      markers: ["roadmap", "swot"],
       match: /^(Roadmap.*|SWOT|Сильные стороны|Слабые стороны|Возможности|Риски|Стратегическая позиция)$/i,
     },
     {
       title: "08 План валидации, провайдеры и источники",
+      markers: ["validation", "sources"],
       match: /^(План валидации исследования|Пользовательские интервью|Партнерские интервью|Количественная валидация|Гипотезы для проверки|Покрытие источников и провайдеров|Выводы DeepSeek\/Gemini cross-check|Источники)$/i,
     },
   ];
@@ -184,7 +217,7 @@ function groupResearchSections(sections) {
   const other = { title: "09 Дополнительные материалы", markdown: "# 09 Дополнительные материалы\n\n", sourceSections: [] };
 
   for (const section of sections) {
-    const group = groups.find((item) => item.match.test(section.title));
+    const group = groups.find((item) => sectionMatchesGroup(section, item));
     const unit = group ? unitsByTitle.get(group.title) : other;
     unit.markdown += demoteSectionMarkdown(section.markdown);
     unit.markdown += "\n";
@@ -202,9 +235,18 @@ function groupResearchSections(sections) {
   return ordered;
 }
 
+function sectionMatchesGroup(section, group) {
+  return hasAnySectionMarker(section, group.markers ?? []) || group.match.test(section.title);
+}
+
+function hasAnySectionMarker(section, markers) {
+  return (section.markers ?? []).some((marker) => markers.includes(marker));
+}
+
 function demoteSectionMarkdown(markdown) {
   return markdown
     .split(/\r?\n/)
+    .filter((line) => !readSectionMarker(line))
     .map((line) => line.startsWith("# ") ? `## ${line.slice(2)}` : line)
     .join("\n");
 }
@@ -214,6 +256,7 @@ function validatePublicationShape(sections) {
     {
       id: "personas_table",
       label: "Прото-персоны должны быть сравнительной таблицей",
+      markers: ["personas"],
       sectionMatch: /^(Прото-персоны|Персона \d+:.*)$/i,
       requiredHeaders: ["персона", "jtbd", "боль"],
       hint: "Добавь таблицу с колонками: Персона / Сегмент / Контекст / JTBD / Боль / Ценность / Evidence status.",
@@ -221,6 +264,7 @@ function validatePublicationShape(sections) {
     {
       id: "cjm_table",
       label: "CJM должен быть таблицей или схемой",
+      markers: ["cjm"],
       sectionMatch: /^(CJM и сценарии|Общая модель CJM|Матрица сценариев CJM|P\d CJM:.*|Сценарий \d+:.*)$/i,
       requiredHeaders: ["этап", "бол"],
       hint: "Добавь таблицу с колонками: Этап / Цель / Действия / Участники / Боли / Возможность.",
@@ -228,6 +272,7 @@ function validatePublicationShape(sections) {
     {
       id: "competitors_table",
       label: "Конкурентный контекст должен содержать таблицу",
+      markers: ["competitors"],
       sectionMatch: /^(Конкурентный контекст|Набор конкурентов|Матрица позиционирования)$/i,
       requiredHeaders: ["игрок"],
       hint: "Добавь таблицу конкурентов или позиционирования.",
@@ -235,6 +280,7 @@ function validatePublicationShape(sections) {
     {
       id: "scoring_table",
       label: "ICE/RICE должен содержать таблицу scoring",
+      markers: ["scoring"],
       sectionMatch: /^(ICE\/RICE backlog|ICE\/RICE бэклог|Детализация backlog|Детализация бэклога)$/i,
       requiredHeaders: ["сценарий"],
       hint: "Добавь таблицу ICE/RICE с колонками scoring.",
@@ -242,7 +288,9 @@ function validatePublicationShape(sections) {
   ];
 
   const checks = rules.map((rule) => {
-    const matchedSections = sections.filter((section) => rule.sectionMatch.test(section.title));
+    const matchedSections = sections.filter((section) =>
+      hasAnySectionMarker(section, rule.markers ?? []) || rule.sectionMatch.test(section.title)
+    );
     const tableSummaries = matchedSections.flatMap((section) => extractMarkdownTables(section.markdown).map((table) => ({
       section: section.title,
       headers: table.headers,
@@ -317,6 +365,140 @@ function formatPublicationShapeGate(shapeGate) {
   }
 
   return lines.join("\n");
+}
+
+function validatePublicationCompleteness(exportPath, markdown, sections) {
+  const runDir = dirname(exportPath);
+  const sourceFiles = [
+    "research-summary.md",
+    "competitive-analysis.md",
+    "proto-personas.md",
+    "synthetic-interviews.md",
+    "swot.md",
+    "cjm-map.md",
+    "opportunity-roadmap.md",
+  ]
+    .map((file) => {
+      const path = join(runDir, file);
+      if (!existsSync(path)) {
+        return undefined;
+      }
+
+      const content = readFileSync(path, "utf8");
+      return { file, bytes: Buffer.byteLength(content, "utf8") };
+    })
+    .filter(Boolean);
+
+  const coreSourceFiles = sourceFiles.filter((item) => [
+    "research-summary.md",
+    "competitive-analysis.md",
+    "proto-personas.md",
+    "synthetic-interviews.md",
+    "swot.md",
+  ].includes(item.file));
+
+  if (coreSourceFiles.length < 3) {
+    return {
+      pass: true,
+      status: "not_applicable",
+      reason: "Run directory does not contain enough source research artifacts to compare completeness.",
+      export_bytes: Buffer.byteLength(markdown, "utf8"),
+      source_bytes: sourceFiles.reduce((sum, item) => sum + item.bytes, 0),
+      source_files: sourceFiles,
+      checks: [],
+    };
+  }
+
+  const exportBytes = Buffer.byteLength(markdown, "utf8");
+  const sourceBytes = sourceFiles.reduce((sum, item) => sum + item.bytes, 0);
+  const exportToSourceRatio = sourceBytes > 0 ? exportBytes / sourceBytes : 1;
+  const sectionTitles = sections.map((section) => section.title);
+  const checks = [
+    {
+      id: "source_coverage_ratio",
+      label: "Export should not be a short digest when full research artifacts exist",
+      status: exportToSourceRatio >= 0.3 ? "pass" : "fail",
+      value: Number(exportToSourceRatio.toFixed(3)),
+      required: ">= 0.3",
+      hint: "Regenerate notion-research-export-ru.md from the full research pack, not only from a summary.",
+    },
+    {
+      id: "minimum_export_size",
+      label: "Detailed research export should have enough substance for a hub publication",
+      status: exportBytes >= 20000 ? "pass" : "fail",
+      value: exportBytes,
+      required: ">= 20000 bytes",
+      hint: "A hub publication below this size is likely a brief summary rather than a full research pack.",
+    },
+    {
+      id: "section_coverage",
+      label: "Export should cover core research areas",
+      status: hasCoreResearchSections(sectionTitles, sections) ? "pass" : "fail",
+      value: sectionTitles,
+      required: "personas, CJM/scenarios, competitors, ICE/RICE/backlog, roadmap/SWOT or validation/sources",
+      hint: "Include the full sections from research-summary, competitive analysis, personas, interviews, SWOT, CJM and roadmap artifacts.",
+    },
+  ];
+
+  return {
+    pass: checks.every((check) => check.status === "pass"),
+    status: checks.every((check) => check.status === "pass") ? "pass" : "fail",
+    export_bytes: exportBytes,
+    source_bytes: sourceBytes,
+    export_to_source_ratio: Number(exportToSourceRatio.toFixed(3)),
+    source_files: sourceFiles,
+    section_titles: sectionTitles,
+    checks,
+  };
+}
+
+function hasCoreResearchSections(sectionTitles, sections = []) {
+  const joined = sectionTitles.join("\n");
+  const markers = new Set(sections.flatMap((section) => section.markers ?? []));
+  if (["personas", "cjm", "competitors", "scoring"].every((marker) => markers.has(marker))
+    && (markers.has("roadmap") || markers.has("swot") || markers.has("sources") || markers.has("validation"))) {
+    return true;
+  }
+
+  const requiredPatterns = [
+    /Прото-персоны|Персона\s+\d+|Proto personas/i,
+    /CJM|Сценарий\s+\d+|Матрица сценариев/i,
+    /Конкурент|Матрица позиционирования|Competitor/i,
+    /ICE\/RICE|backlog|бэклог|Приоритетные возможности/i,
+    /Roadmap|Дорожная карта|SWOT|Источники|валидац/i,
+  ];
+
+  return requiredPatterns.every((pattern) => pattern.test(joined));
+}
+
+function formatPublicationCompletenessGate(completenessGate) {
+  const lines = [
+    "Notion publication completeness gate failed.",
+    "",
+    "Research export looks too small or too shallow compared with the source research artifacts in the same run directory.",
+    "Fix `notion-research-export-ru.md` by regenerating it from the full research pack before publication.",
+    "",
+    `Export bytes: ${completenessGate.export_bytes}`,
+    `Source bytes: ${completenessGate.source_bytes}`,
+    `Export/source ratio: ${completenessGate.export_to_source_ratio ?? "n/a"}`,
+    "",
+    "| Check | Status | Value | Required | Hint |",
+    "|---|---|---|---|---|",
+  ];
+
+  for (const check of completenessGate.checks) {
+    lines.push(`| ${check.label} | ${check.status} | ${formatCompletenessValue(check.value)} | ${check.required} | ${check.hint} |`);
+  }
+
+  return lines.join("\n");
+}
+
+function formatCompletenessValue(value) {
+  if (Array.isArray(value)) {
+    return value.join(", ").replace(/\|/g, "\\|");
+  }
+
+  return String(value).replace(/\|/g, "\\|");
 }
 
 function buildHubBlocks(parsed, childResults) {

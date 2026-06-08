@@ -38,6 +38,9 @@
 - Notion publication выполнена в текущем чате по exact target `3696473174e58006af5fd367ef89d978`.
 - Published hub: https://www.notion.so/3796473174e5813381fdd90afcd6f41d
 - Process deviation зафиксирован: Notion approval был записан без предварительного интерактивного `workflow:approval-request` или отдельного явного вопроса в чате.
+- Shallow publication deviation исправлен локально: `notion-research-export-ru.md` регенерирован как полный research pack, dry-run новой версии проходит Publication Shape Gate и Publication Completeness Gate.
+- Full Notion republication выполнена после explicit approval: https://www.notion.so/3796473174e581978293e78a19a0632c
+- Current Notion publication с человекочитаемыми заголовками выполнена после explicit approval: https://www.notion.so/3796473174e581b1bff5f189cc8c0887
 
 ## Assumptions
 
@@ -50,6 +53,7 @@
 |---|---|---|
 | DeepSeek/Gemini не выполнены | medium | Запустить cross-check перед статусом `ready`. |
 | Approval flow deviation для Notion | medium | В будущих external writes сначала запускать `workflow:approval-request` или задавать отдельный заметный вопрос в чате. |
+| Полная Notion republication | closed | Опубликован новый full hub на 9 child pages и 480 blocks. |
 | High-ticket сценарии требуют лицензий и банковских партнерств | high | Начинать с orchestration/status layer. |
 | Synthetic interviews не являются доказательством | medium | Провести 12-18 реальных интервью. |
 

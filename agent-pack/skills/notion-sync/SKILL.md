@@ -56,13 +56,17 @@ contract_schema: agent-pack/templates/skill.template.md
 
 1. Подготовь `notion-research-export-ru.md` до запроса approval.
 2. Экспорт должен быть человекочитаемым: без workflow dump, schema/frontmatter, raw JSON, machine-readable payloads, code-block копий артефактов, frontend/release/log files.
-3. Выполни Russian Publication Gate до внешней записи:
+3. Экспорт должен быть полным research pack, а не краткой выжимкой:
+   - собери `notion-research-export-ru.md` из `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`;
+   - если есть дополнительные research artifacts (`cjm-map.md`, `opportunity-roadmap.md`, source logs, validation plans), включи их смысловые разделы или явно запиши `skipped_with_reason`;
+   - перед approval/write выполни Publication Completeness Gate: export должен быть сопоставим с source artifacts по объему и покрытию. Если dry-run показывает shallow export, публикация запрещена до регенерации.
+4. Выполни Russian Publication Gate до внешней записи:
    - весь видимый пользователю текст, заголовки, table headers, section labels, summaries, statuses и descriptions — на русском;
    - английский допустим только для технических терминов без удачного русского аналога (`API`, `MCP`, `SDK`, `P0`, `RICE`, `BNPL`, `CJM`, `workflow`, `node id`, имена файлов/команд/полей);
    - испанский и другие посторонние языки запрещены;
    - export должен быть полным research pack, а не краткой выжимкой, если пользователь явно не запросил summary;
    - если gate не пройден, публикация в Notion запрещена.
-4. Собери `publication plan` до внешней записи:
+5. Собери `publication plan` до внешней записи:
    - `action`: `notion_research_publish`;
    - `target`: parent page id/url;
    - `mode`: `remote_mcp|local_mcp|notion_api|manual_import`;
@@ -72,7 +76,7 @@ contract_schema: agent-pack/templates/skill.template.md
    - примерное количество Notion blocks;
    - unsupported/converted Markdown elements;
    - external writes, которые будут выполнены.
-5. Выбери layout strategy:
+6. Выбери layout strategy:
    - `flat_child_page`: только для короткого export до 120 blocks и до 6 крупных разделов.
    - `hub_with_child_pages`: default для подробного research pack; hub содержит краткое резюме, навигацию и publication evidence, дочерние страницы содержат разделы исследования.
    - `database_index`: для рабочих сущностей, которые нужно фильтровать/сортировать: personas, user stories, backlog, opportunities, risks, sources, interview insights.
@@ -80,21 +84,21 @@ contract_schema: agent-pack/templates/skill.template.md
    - micro-page gate: для `hub_with_child_pages` цель 6-12 дочерних страниц; отдельная дочерняя страница должна содержать не меньше 8-10 Notion blocks или несколько связанных секций. Короткие служебные блоки, одиночные выводы, мини-SWOT части, краткие персоны и вопросы группируй в крупную страницу. Toggle/drawer используй выборочно: короткие блоки до 15 blocks оставляй inline, если они читаются без перегруза; сворачивай длинные reference lists, validation details и повторяемые карточки инициатив/задач.
    - CJM, personas, roadmap, ICE/RICE и конкурентные матрицы публикуй таблично или схемой. Не превращай CJM в набор длинных текстовых карточек, если есть этапы, боли, участники и opportunities: минимум нужна таблица `Этап / Цель / Действия / Участники / Боли / Возможность`.
    - Персоны публикуй как сравнительную таблицу `Персона / Сегмент / Контекст / JTBD / Боль / Ценность / Evidence status`; подробные описания по персонам можно убирать в selective toggles после таблицы.
-6. Выполни dry-run/preview: построить block/page/database plan без записи в Notion. Если converter/MCP недоступен, зафиксируй fallback как `manual_import`.
-7. В конце `01-research` используй интерактивный approval request, чтобы пользователь выбрал ответ, а не пропустил строку в чате:
+7. Выполни dry-run/preview: построить block/page/database plan без записи в Notion. Если converter/MCP недоступен, зафиксируй fallback как `manual_import`. Dry-run для hub-публикации обязан вернуть `publication_completeness_gate.pass=true` и `publication_shape_gate.pass=true`; иначе Notion write запрещен.
+8. В конце `01-research` используй интерактивный approval request, чтобы пользователь выбрал ответ, а не пропустил строку в чате:
    - предпочтительный runtime command: `yarn workflow:approval-request outputs/<project-slug>/<YYYY-MM-DD> notion_research_publish --target <notion-parent-page-id> --by human --reason "Публикация research pack в Notion"`;
    - если runtime TTY недоступен, задай отдельный заметный вопрос в чате: `Разрешить публикацию пакета исследований в Notion?` и после ответа запиши `yarn workflow:approve` или `yarn workflow:deny`;
    - approval должен быть точным по `action` и `target`.
    - общая фраза пользователя «опубликуй», «давай», «продолжай» или похожий текущий запрос не заменяет этот интерактивный шаг; сначала покажи exact target, source artifact и expected writes.
-8. Если пользователь разрешил, проверь Notion mode:
+9. Если пользователь разрешил, проверь Notion mode:
    - предпочитай remote Notion MCP/OAuth, если он доступен и имеет write tools;
    - local MCP/API fallback допускается только при локальном `NOTION_TOKEN` и доступном parent page;
    - не передавай token как bare CLI argument, не печатай token в логах, не сохраняй token в outputs.
-9. Публикуй только research pack. Для подробного research pack используй `tooling/scripts/publish-notion-research-hub.mjs <parent-page> <research-export-md> "<hub-title>"`; для коротких документов допустим `tooling/scripts/publish-notion-research-page.mjs`.
-10. Для повторной публикации используй idempotency rule: ищи existing hub/child page/export marker по title/source checksum и обновляй/создавай новую версию только по явно выбранной стратегии.
-11. Если используется Notion API, соблюдай request limits: append children чанками до 100 blocks, обрабатывай `429` через `Retry-After`/backoff, фиксируй retry count.
-12. Запиши publication URL/page id в `stage-gate-ledger.md`, `handoff-bundle.md` и, если workflow дошел до release, `release-notes.md`.
-13. Если Notion write был выполнен без интерактивного approval request или отдельного заметного вопроса в чате, не исправляй историю задним числом. Запиши `process_deviation` в `stage-gate-ledger.md`, `handoff-bundle.md` и `release-notes.md`: action, target, что было опубликовано, какой approval step пропущен, как предотвращать повторение.
+10. Публикуй только research pack. Для подробного research pack используй `tooling/scripts/publish-notion-research-hub.mjs <parent-page> <research-export-md> "<hub-title>"`; для коротких документов допустим `tooling/scripts/publish-notion-research-page.mjs`.
+11. Для повторной публикации используй idempotency rule: ищи existing hub/child page/export marker по title/source checksum и обновляй/создавай новую версию только по явно выбранной стратегии.
+12. Если используется Notion API, соблюдай request limits: append children чанками до 100 blocks, обрабатывай `429` через `Retry-After`/backoff, фиксируй retry count.
+13. Запиши publication URL/page id в `stage-gate-ledger.md`, `handoff-bundle.md` и, если workflow дошел до release, `release-notes.md`.
+14. Если Notion write был выполнен без интерактивного approval request или отдельного заметного вопроса в чате, не исправляй историю задним числом. Запиши `process_deviation` в `stage-gate-ledger.md`, `handoff-bundle.md` и `release-notes.md`: action, target, что было опубликовано, какой approval step пропущен, как предотвращать повторение.
 
 ## 4. Процедура PRD/Agile export
 
@@ -143,6 +147,7 @@ Evidence записи должна включать:
 ## 7. Validation gates
 
 - [ ] `notion-research-export-ru.md` создан до approval request.
+- [ ] Publication Completeness Gate пройден: export не является краткой выжимкой при наличии полного research pack.
 - [ ] Russian Publication Gate пройден до внешней записи.
 - [ ] Export является полным research pack, если пользователь не просил краткую выжимку.
 - [ ] Layout strategy выбран до publication approval.

@@ -1,11 +1,11 @@
-# Source Log
+# Журнал источников
 
-## Inputs Used
+## Использованные входные материалы
 
 - Tavily/web searches от `2026-06-07`
 - `research-summary.md`
 
-## Sources Reviewed
+## Проверенные источники
 
 | Source | URL | Notes |
 |---|---|---|
@@ -19,4 +19,3 @@
 | Банк России BNPL oversight | https://www.cbr.ru/press/event/?id=25803 | BNPL supervision |
 | Банк ДОМ.РФ escrow | https://domrfbank.ru/escrow | Escrow and accreditives |
 | СБП/НСПК | https://sbp.nspk.ru/ | Payment forms and UX |
-

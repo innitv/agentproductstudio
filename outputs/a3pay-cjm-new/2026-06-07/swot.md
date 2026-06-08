@@ -1,13 +1,13 @@
-# SWOT: A3 Pay
+# SWOT-анализ: A3 Pay
 
-## Inputs Used
+## Использованные входные материалы
 
 - `research-summary.md`
 - `competitive-analysis.md`
 - `cjm-map.md`
 - `opportunity-roadmap.md`
 
-## SWOT Matrix
+## SWOT-матрица
 
 | Strengths | Weaknesses |
 |---|---|
@@ -23,9 +23,9 @@
 | Регулярные платежи дают частоту и retention. | Пользователь может не захотеть еще одно приложение поверх банка. |
 | High-ticket companion can unlock partnerships with авто/недвижимостью later. | Trust/fraud incidents на phone payments могут разрушить adoption. |
 
-## Strategic Posture
+## Стратегическая позиция
 
-## Strategic Notes
+## Стратегические заметки
 
 | Horizon | SWOT-driven posture |
 |---|---|

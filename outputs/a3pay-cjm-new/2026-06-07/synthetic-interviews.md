@@ -1,18 +1,18 @@
-# Synthetic Interviews
+# Синтетические интервью
 
-## Inputs Used
+## Использованные входные материалы
 
 - `proto-personas.md`
 - `cjm-map.md`
 - `research-summary.md`
 
-## Guardrail
+## Ограничение
 
 Synthetic interviews используются только для генерации гипотез, stress test интервью-гайда и поиска validation questions. Это не evidence о реальном поведении.
 
-## Simulated Interviews
+## Смоделированные интервью
 
-## Interviews
+## Интервью
 
 | Interview | Persona | Scenario | Objection | Opportunity | Evidence status | Validation need |
 |---|---|---|---|---|---|---|
@@ -22,9 +22,9 @@ Synthetic interviews используются только для генерац
 | SI-4 | Алексей | Покупка автомобиля | "Задаток страшно переводить, пока не понял условия" | Safe deposit invoice and status checklist полезны даже без custody | synthetic | Проверить роль банка/гаранта |
 | SI-5 | Мария | Бронирование тура | "Рассрочка удобна, но я боюсь переплаты и отмены" | Payment plan selector должен показывать график, переплату, refund rules | synthetic | Проверить comprehension of payment plans |
 
-## Interview Guide Draft
+## Черновик гайда интервью
 
-## Patterns To Validate
+## Паттерны для проверки
 
 | Topic | Question | Decision unlocked |
 |---|---|---|

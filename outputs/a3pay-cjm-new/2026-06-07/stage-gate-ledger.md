@@ -51,6 +51,12 @@
 | 2026-06-07 | `tavily_search` batches | pass | Получены источники по НПС, СБП, e-commerce, BNPL, недвижимости, авто, туризму, ЖКХ. |
 | 2026-06-08 | `node tooling/scripts/publish-notion-research-hub.mjs ... --dry-run` | pass | Publication Shape Gate pass; 7 child pages planned. |
 | 2026-06-08 | `node tooling/scripts/publish-notion-research-hub.mjs ...` | pass | Published Notion hub `37964731-74e5-8133-81fd-d90afcd6f41d` with 7 child pages and 106 blocks. |
+| 2026-06-08 | `node tooling/scripts/publish-notion-research-hub.mjs ... --dry-run` | pass | Full republication candidate passed Publication Shape Gate and Publication Completeness Gate; 9 child pages planned, estimated 465 blocks. |
+| 2026-06-08 | `yarn workflow:approval-request ... notion_research_publish` | tty_unavailable | Runtime approval request requires a TTY; fallback is a separate explicit approval question in the current chat before any Notion write. |
+| 2026-06-08 | `yarn workflow:approve ... notion_research_publish` | pass | Explicit user approval recorded for target `3696473174e58006af5fd367ef89d978`. |
+| 2026-06-08 | `node tooling/scripts/publish-notion-research-hub.mjs ...` | pass | Published full Notion hub `37964731-74e5-8197-8293-e78a19a0632c` with 9 child pages and 480 blocks. |
+| 2026-06-08 | `node tooling/scripts/generate-notion-research-export.mjs ...` | pass | Regenerated export with human-readable Russian headings and invisible machine markers. |
+| 2026-06-08 | `node tooling/scripts/publish-notion-research-hub.mjs ...` | pass | Published current Notion hub `37964731-74e5-81b1-bff5-f189cc8c0887` with human-readable headings, 9 child pages and 473 blocks. |
 
 ## Publication Gate
 
@@ -58,11 +64,15 @@
 |---|---|---|
 | Russian Publication Gate | pass | `notion-research-export-ru.md` написан на русском, кроме technical terms. |
 | Publication Shape Gate | pass | Personas, CJM, competitive matrix, ICE/RICE представлены таблицами. |
+| Publication Completeness Gate | pass | Full republication candidate: 57,538 byte export vs 48,796 byte source pack; ratio 1.179; planned 9 child pages and 465 blocks. |
 | External write approval | pass | `approval-state.json`: `notion_research_publish` approved for `3696473174e58006af5fd367ef89d978`. |
 | Notion publication | published | Hub URL: https://www.notion.so/3796473174e5813381fdd90afcd6f41d |
+| Full Notion republication | superseded | Full hub URL: https://www.notion.so/3796473174e581978293e78a19a0632c |
+| Current Notion publication | published | Human-readable headings hub URL: https://www.notion.so/3796473174e581b1bff5f189cc8c0887 |
 
 ## Process Deviations
 
 | Date | Action | Target | Deviation | Impact | Remediation |
 |---|---|---|---|---|---|
 | 2026-06-08 | `notion_research_publish` | `3696473174e58006af5fd367ef89d978` | Agent treated the user's direct request to publish as approval and recorded `workflow:approve` without first running interactive `workflow:approval-request` or asking a separate explicit chat question. | Notion publication was completed, but approval flow did not match project protocol. | Project rules updated: all approval/gate questions must be interactive; future external writes require `workflow:approval-request` or a separate visible chat question before `workflow:approve`. |
+| 2026-06-08 | `notion_research_publish` | `37964731-74e5-8133-81fd-d90afcd6f41d` | Agent published a shallow `notion-research-export-ru.md` that passed Publication Shape Gate but was much smaller than the full research pack. | Notion hub looked underfilled compared with the earlier full A3 Pay CJM hub. | Added Publication Completeness Gate to project rules and `publish-notion-research-hub.mjs`: shallow exports are blocked before dry-run approval/write. |

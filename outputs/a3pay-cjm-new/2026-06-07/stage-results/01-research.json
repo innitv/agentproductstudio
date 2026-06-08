@@ -9,22 +9,7 @@
     "synthetic-interviews.md",
     "swot.md"
   ],
-  "inputs_used": [
-    "`recursive-brief.md`",
-    "`run-plan.md`",
-    "`handoff-bundle.md`",
-    "`stage-gate-ledger.md`",
-    "`C:\\Users\\mrfra\\Desktop\\A3Pay_Research_Request_Extended.md`",
-    "Tavily/web searches от `2026-06-07`",
-    "Источники: Банк России, СБП/НСПК, Data Insight, Коммерсантъ, РБК, Ведомости, отраслевые страницы банков/экосистем",
-    "`research-summary.md`",
-    "`cjm-map.md`",
-    "Tavily/web sources: Банк России, СБП/НСПК, Data Insight, ЮKassa, T-Pay/Yandex Pay public materials, BNPL market sources",
-    "`opportunity-roadmap.md`",
-    "Source-backed market facts and product hypotheses",
-    "`proto-personas.md`",
-    "`competitive-analysis.md`"
-  ],
+  "inputs_used": [],
   "warnings": [],
   "errors": [],
   "completed_at": "2026-06-07T00:00:00+05:00"

@@ -7,6 +7,22 @@
       "target": "3696473174e58006af5fd367ef89d978",
       "notes": "Пользователь в текущем чате попросил опубликовать последнее неопубликованное изменение; target reused from previous A3 Pay Notion publication.",
       "approved_at": "2026-06-08T04:09:27.020Z"
+    },
+    {
+      "action": "notion_research_publish",
+      "approved": true,
+      "approved_by": "human",
+      "target": "3696473174e58006af5fd367ef89d978",
+      "notes": "Пользователь явно разрешил публикацию полной новой версии research pack A3 Pay в текущем чате 2026-06-08.",
+      "approved_at": "2026-06-08T06:08:11.530Z"
+    },
+    {
+      "action": "notion_research_publish",
+      "approved": true,
+      "approved_by": "human",
+      "target": "3696473174e58006af5fd367ef89d978",
+      "notes": "Пользователь явно разрешил публикацию обновленной версии research pack A3 Pay с человекочитаемыми заголовками в текущем чате 2026-06-08.",
+      "approved_at": "2026-06-08T06:17:18.692Z"
     }
   ]
 }
