@@ -57,7 +57,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/artifacts/research/research-summary.template.md",
-    requiredSnippets: ["Proto Personas", "Synthetic Interviews", "Research Validation Plan", "skipped_with_reason", "Provider Coverage", "deepseek", "gemini", "Anti-AI-Slop Gate", "User Flow под CJM", "Связь возможностей с CJM", "Publication Cross-Link Gate", "Research Content Lint", "Notion Data Shape Plan", "notion_data_shape_plan"],
+    requiredSnippets: ["Proto Personas", "Synthetic Interviews", "Research Validation Plan", "skipped_with_reason", "Provider Coverage", "deepseek", "gemini", "Anti-AI-Slop Gate", "User Flow под CJM", "Связь возможностей с CJM", "Publication Cross-Link Gate", "Publication Editor Pass", "Research Content Lint", "Notion Data Shape Plan", "notion_data_shape_plan", "publication_editor_gate", "integrated_hybrid", "embedded_database_views"],
   },
   {
     file: "agent-pack/artifacts/research/proto-personas.template.md",
@@ -73,7 +73,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/quality/quality-gates.md",
-    requiredSnippets: ["прото-персоны", "synthetic interviews", "validation plan", "Provider Coverage", "Tavily", "DeepSeek", "Gemini", "Surface-Aware Output Gate", "Write -> Verify -> Fix Gate", "Anti-AI-Slop Gate", "CJM Depth Gate", "Roadmap Trace Gate", "Research Content Lint", "notion_data_shape_plan"],
+    requiredSnippets: ["прото-персоны", "synthetic interviews", "validation plan", "Provider Coverage", "Tavily", "DeepSeek", "Gemini", "Surface-Aware Output Gate", "Write -> Verify -> Fix Gate", "Anti-AI-Slop Gate", "CJM Depth Gate", "Roadmap Trace Gate", "Publication Editor Pass", "Research Content Lint", "notion_data_shape_plan", "publication_editor_gate", "integrated_hybrid", "embedded_database_views"],
   },
   {
     file: "agent-pack/agents/qa-review.agent.md",
@@ -81,7 +81,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/workflows/artifact-driven-pipeline.md",
-    requiredSnippets: ["proto_personas", "simulated_interviews", "skipped_with_reason", "evidence_status: synthetic", "Surface Output Contract", "Anti-AI-Slop Gate", "Narrative Depth Gate", "Research Content Lint", "notion_data_shape_plan"],
+    requiredSnippets: ["proto_personas", "simulated_interviews", "skipped_with_reason", "evidence_status: synthetic", "Surface Output Contract", "Anti-AI-Slop Gate", "Narrative Depth Gate", "Publication Editor Pass", "Research Content Lint", "notion_data_shape_plan", "publication_editor_gate", "integrated_hybrid", "embedded_database_views"],
   },
   {
     file: "agent-pack/workflows/deep-research.workflow.md",
@@ -101,11 +101,11 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/agents/notion-publisher.agent.md",
-    requiredSnippets: ["research-only child page publication is mandatory", "separate Notion child page", "notion-research-export-ru.md", "Publication Cross-Link Gate", "Цепочка решений", "Publication Anti-AI-Slop Gate", "Research Content Lint", "notion_data_shape_plan", "database_index_candidates", "stage-gate-ledger.md", "release-notes.md", "Surface Output Contract", "surface_output"],
+    requiredSnippets: ["research-only child page publication is mandatory", "separate Notion child page", "notion-research-export-ru.md", "Publication Cross-Link Gate", "Publication Editor Pass", "Цепочка решений", "Publication Anti-AI-Slop Gate", "Research Content Lint", "publication_editor_gate", "notion_data_shape_plan", "database_index_candidates", "integrated_hybrid", "embedded_database_views", "stage-gate-ledger.md", "release-notes.md", "Surface Output Contract", "surface_output"],
   },
   {
     file: "AGENTS.md",
-    requiredSnippets: ["публикация research в Notion обязательна", "Lazyweb Evidence Gate", "section-by-section visual spec", "шаблонный стиль", "Не заменяй требуемый источник", "Не обходи approval", "человекочитаемый research pack", "отдельную child page", "Publication Cross-Link Gate", "Карта связей исследования", "Anti-AI-Slop Gate", "Research Content Lint", "notion_data_shape_plan", "Notion research page publication record", "Surface-Aware Output Framework", "Surface Type Gate", "Write -> Verify -> Fix Gate"],
+    requiredSnippets: ["публикация research в Notion обязательна", "Lazyweb Evidence Gate", "section-by-section visual spec", "шаблонный стиль", "Не заменяй требуемый источник", "Не обходи approval", "человекочитаемый research pack", "отдельную child page", "Publication Cross-Link Gate", "Publication Editor Pass", "Карта связей исследования", "Anti-AI-Slop Gate", "Research Content Lint", "notion_data_shape_plan", "integrated_hybrid", "Combined Notion Workspace Gate", "Notion research page publication record", "Surface-Aware Output Framework", "Surface Type Gate", "Write -> Verify -> Fix Gate"],
   },
   {
     file: "agent-pack/guardrails/guardrails.policy.md",
@@ -113,7 +113,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/templates/surface-output-contract.template.md",
-    requiredSnippets: ["Surface Type", "Coverage Gate", "Evidence-To-Output Map", "Surface Quality Bar", "Write -> Verify -> Fix Plan", "Notion Data Shape Plan", "database_index"],
+    requiredSnippets: ["Surface Type", "Coverage Gate", "Evidence-To-Output Map", "Surface Quality Bar", "Write -> Verify -> Fix Plan", "Public / Internal Split", "Entity Ownership Map", "Notion Data Shape Plan", "database_index", "embedded_linked_database_view", "integrated_hybrid"],
   },
   {
     file: "agent-pack/templates/agent-output-contract.schema.md",
@@ -145,7 +145,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/artifacts/prd/notion-prd-export.template.md",
-    requiredSnippets: ["Notion Data Shape Plan", "database_index", "Idempotency key"],
+    requiredSnippets: ["Notion Data Shape Plan", "Publication Editor Pass", "database_index", "Idempotency key", "integrated_hybrid", "Target page for embedded view"],
   },
   {
     file: "agent-pack/guardrails/approval-matrix.md",
@@ -157,11 +157,11 @@ const researchEnforcementFiles = [
   },
   {
     file: "tooling/scripts/generate-notion-research-export.mjs",
-    requiredSnippets: ["buildCrossLinkControlSections", "Карта связей исследования", "Цепочка решений"],
+    requiredSnippets: ["buildCrossLinkControlSections", "Publication Editor Pass", "removeNotionInternalSections", "Карта связей исследования", "Цепочка решений"],
   },
   {
     file: "tooling/scripts/publish-notion-research-hub.mjs",
-    requiredSnippets: ["validatePublicationCrossLinks", "publication_cross_link_gate", "validatePublicationAntiSlop", "publication_anti_slop_gate", "publication_allowed", "publication_blockers", "lintResearchMarkdown", "buildNotionDataShapePlan", "notion_data_shape_plan", "database_index_candidates", "schema preview", "buildHubCrossLinkBlocks", "mentionPageRich"],
+    requiredSnippets: ["validatePublicationCrossLinks", "publication_cross_link_gate", "validatePublicationEditor", "publication_editor_gate", "validatePublicationAntiSlop", "publication_anti_slop_gate", "publication_allowed", "publication_blockers", "lintResearchMarkdown", "buildNotionDataShapePlan", "notion_data_shape_plan", "database_index_candidates", "embedded_database_views", "integrated_hybrid", "schema preview", "buildHubCrossLinkBlocks", "mentionPageRich"],
   },
   {
     file: "tooling/scripts/lint-research-content.mjs",
@@ -229,7 +229,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "README.md",
-    requiredSnippets: ["yarn research:run", "yarn reference:scan", "--profile standard", "--profile reference", "FIRECRAWL_API_KEY"],
+    requiredSnippets: ["Что сейчас является source of truth", "Surface и Anti-Slop правила", "Outputs lifecycle", "workflow.manifest.ts", "yarn workflow:sync", "yarn workflow:list", "yarn workflow:inspect", "yarn workflow:outputs", "yarn research:run", "yarn reference:scan", "--profile standard", "--profile reference", "FIRECRAWL_API_KEY", "Publication Editor Pass", "publication_editor_gate.pass=true", "Publication Completeness Gate", "Publication Shape Gate", "Publication Cross-Link Gate", "Research Content Lint", "integrated_hybrid", "entity_ownership_map", "DeepSeek/Gemini cross-check", "notion:publish-research-hub"],
   },
   {
     file: "runtime/typescript/env.ts",

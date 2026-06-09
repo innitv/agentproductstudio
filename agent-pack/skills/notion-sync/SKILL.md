@@ -70,7 +70,7 @@ contract_schema: agent-pack/templates/skill.template.md
    - `action`: `notion_research_publish`;
    - `target`: parent page id/url;
    - `mode`: `remote_mcp|local_mcp|notion_api|manual_import`;
-   - `layout_strategy`: `flat_child_page|hub_with_child_pages|database_index|hybrid`;
+   - `layout_strategy`: `flat_child_page|hub_with_child_pages|database_index|integrated_hybrid`;
    - title дочерней страницы;
    - source artifacts и checksum локального export;
    - примерное количество Notion blocks;
@@ -80,11 +80,18 @@ contract_schema: agent-pack/templates/skill.template.md
    - `flat_child_page`: только для короткого export до 120 blocks и до 6 крупных разделов.
    - `hub_with_child_pages`: default для подробного research pack; hub содержит краткое резюме, навигацию и publication evidence, дочерние страницы содержат разделы исследования.
    - `database_index`: для рабочих сущностей, которые нужно фильтровать/сортировать: personas, user stories, backlog, opportunities, risks, sources, interview insights.
-   - `hybrid`: hub + дочерние страницы + базы данных для сущностей.
+   - `integrated_hybrid`: hub + дочерние страницы + базы данных для сущностей, где каждая база дополнительно встроена linked database view в релевантную child page. Это обязательная форма, если в одной публикации есть и narrative pages, и рабочие базы.
    - micro-page gate: для `hub_with_child_pages` цель 6-12 дочерних страниц; отдельная дочерняя страница должна содержать не меньше 8-10 Notion blocks или несколько связанных секций. Короткие служебные блоки, одиночные выводы, мини-SWOT части, краткие персоны и вопросы группируй в крупную страницу. Toggle/drawer используй выборочно: короткие блоки до 15 blocks оставляй inline, если они читаются без перегруза; сворачивай длинные reference lists, validation details и повторяемые карточки инициатив/задач.
    - CJM, personas, roadmap, ICE/RICE и конкурентные матрицы публикуй таблично или схемой. Не превращай CJM в набор длинных текстовых карточек, если есть этапы, боли, участники и opportunities: минимум нужна таблица `Этап / Цель / Действия / Участники / Боли / Возможность`.
    - Персоны публикуй как сравнительную таблицу `Персона / Сегмент / Контекст / JTBD / Боль / Ценность / Evidence status`; подробные описания по персонам можно убирать в selective toggles после таблицы.
-7. Выполни dry-run/preview: построить block/page/database plan без записи в Notion. Если converter/MCP недоступен, зафиксируй fallback как `manual_import`. Dry-run для hub-публикации обязан вернуть `publication_completeness_gate.pass=true` и `publication_shape_gate.pass=true`; иначе Notion write запрещен.
+   - Для `integrated_hybrid` заранее спланируй `embedded_database_views`: personas -> страница персон, CJM frictions -> CJM/user-flow, opportunities/backlog -> roadmap/ICE/RICE, requirements/user stories -> PRD/requirements, validation claims/sources -> validation/source page. После записи проверь fetch/metadata, что linked views действительно встроены на страницы.
+7. Выполни Publication Editor Pass до dry-run/write:
+   - public export не содержит `Artifact Metadata`, `Inputs Used`, `Surface Output Contract`, provider/debug policy, dry-run gates, `Publication Shape Gate`, `Research Content Lint`, `Notion Data Shape Plan`;
+   - overview содержит решения, навигацию и next actions, а не повтор всех таблиц;
+   - каждая сущность имеет одного владельца (`entity_ownership_map`): owner page/database/view;
+   - повторные таблицы сущностей удалены или заменены ссылкой на owner page/view;
+   - publication trace остается в `notion-publication-result.md`, `stage-gate-ledger.md`, `release-notes.md`.
+8. Выполни dry-run/preview: построить block/page/database plan без записи в Notion. Если converter/MCP недоступен, зафиксируй fallback как `manual_import`. Dry-run для hub-публикации обязан вернуть `publication_editor_gate.pass=true`, `publication_completeness_gate.pass=true` и `publication_shape_gate.pass=true`; иначе Notion write запрещен.
 8. В конце `01-research` используй интерактивный approval request, чтобы пользователь выбрал ответ, а не пропустил строку в чате:
    - предпочтительный runtime command: `yarn workflow:approval-request outputs/<project-slug>/<YYYY-MM-DD> notion_research_publish --target <notion-parent-page-id> --by human --reason "Публикация research pack в Notion"`;
    - если runtime TTY недоступен, задай отдельный заметный вопрос в чате: `Разрешить публикацию пакета исследований в Notion?` и после ответа запиши `yarn workflow:approve` или `yarn workflow:deny`;
@@ -135,9 +142,11 @@ Evidence записи должна включать:
 
 - `publication plan` summary;
 - dry-run result;
+- publication editor gate: public/private split, internal sections removed, duplicate sections removed, entity ownership map;
 - approval action и exact target;
 - Notion mode: `remote_mcp|local_mcp|notion_api|manual_import`;
-- layout strategy: `flat_child_page|hub_with_child_pages|database_index|hybrid`;
+- layout strategy: `flat_child_page|hub_with_child_pages|database_index|integrated_hybrid`;
+- embedded linked database views для `integrated_hybrid`: target child page, source database/data source, view name, visible properties, filters/sorts и verification status;
 - created/updated page ids/urls;
 - hub id, child page ids, database ids, block count, chunk count, retry count;
 - database ids и relation property names для Agile Board;
@@ -151,7 +160,11 @@ Evidence записи должна включать:
 - [ ] Russian Publication Gate пройден до внешней записи.
 - [ ] Export является полным research pack, если пользователь не просил краткую выжимку.
 - [ ] Layout strategy выбран до publication approval.
+- [ ] Publication Editor Pass пройден: public export не содержит internal ledger/debug sections и duplicate control sections.
+- [ ] `entity_ownership_map` определяет владельца для personas, CJM, opportunities/backlog, requirements/user stories, validation claims и sources.
 - [ ] Подробный research pack опубликован как hub + child pages, а не одной длинной страницей.
+- [ ] Если созданы базы и child pages, выбран `integrated_hybrid`: linked database views встроены в релевантные страницы, а не оставлены отдельно.
+- [ ] Для `integrated_hybrid` fetch/metadata verification подтвердил inline linked database views на целевых child pages.
 - [ ] Publication plan и dry-run/preview созданы до внешней записи.
 - [ ] Approval получен через `workflow:approval-request` или отдельный заметный вопрос в чате, если TTY недоступен; общий command/request пользователя не засчитан как approval.
 - [ ] Approval содержит exact target.

@@ -62,6 +62,30 @@
       "target": "notion_parent:3696473174e58006af5fd367ef89d978",
       "notes": "Публикация новой актуальной версии A3 Pay research/PRD под тем же parent, рядом с текущим hub",
       "approved_at": "2026-06-09T06:07:22.869Z"
+    },
+    {
+      "action": "notion_prd_export",
+      "approved": true,
+      "approved_by": "human",
+      "target": "notion_hub:37a6473174e581e18cf5e6466d61f3fe",
+      "notes": "Пользователь в текущем чате попросил: опубликуй PRD в последнее исследование",
+      "approved_at": "2026-06-09T06:27:35.376Z"
+    },
+    {
+      "action": "notion_agile_export",
+      "approved": true,
+      "approved_by": "human",
+      "target": "notion_hub:37a6473174e581e18cf5e6466d61f3fe",
+      "notes": "Пользователь в текущем чате после data-shape анализа написал: Делай; создать database layer в последнем A3 Pay research hub",
+      "approved_at": "2026-06-09T06:45:56.246Z"
+    },
+    {
+      "action": "notion_agile_export",
+      "approved": true,
+      "approved_by": "human",
+      "target": "notion_hub:37a6473174e581e18cf5e6466d61f3fe",
+      "notes": "Пользователь попросил комбинировать Notion export: встроить linked database views в соответствующие child pages, чтобы hub ощущался цельным рабочим артефактом",
+      "approved_at": "2026-06-09T06:54:10.423Z"
     }
   ]
 }

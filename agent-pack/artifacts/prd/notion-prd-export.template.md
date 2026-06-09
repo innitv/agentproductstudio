@@ -49,14 +49,24 @@
 
 ## Notion Data Shape Plan
 
-| Entity / section | Recommended Notion shape | Why | Schema preview / properties | Idempotency key |
-|---|---|---|---|---|
-| PRD narrative | `child_page` |  |  |  |
-| Requirements | `database_index` / `notion_table_block` |  |  |  |
-| MoSCoW priorities | `database_index` / `notion_table_block` |  |  |  |
-| Acceptance Criteria | `to_do` blocks / `database_index` |  |  |  |
-| User Stories | `database_index` |  |  |  |
-| Personas | `database_index` |  |  |  |
+### Publication Editor Pass
+
+| Check | Status | Notes |
+|---|---|---|
+| Public PRD export excludes internal sections | pass / needs_revision | Do not publish `Inputs Used`, `Artifact Metadata`, `Surface Output Contract`, internal audit/debug sections. |
+| Requirements/user stories have one owner | pass / needs_revision | Full requirements and stories live in PRD page/database views, not repeated across research pages. |
+| PRD overview is narrative, not duplicated research pack | pass / needs_revision | Link to research owners instead of copying full personas/CJM/backlog tables. |
+
+| Entity / section | Recommended Notion shape | Target page for embedded view | Why | Schema preview / properties | Idempotency key |
+|---|---|---|---|---|---|
+| PRD narrative | `child_page` |  |  |  |  |
+| Requirements | `database_index` / `notion_table_block` | PRD/requirements page |  |  |  |
+| MoSCoW priorities | `database_index` / `notion_table_block` | PRD/requirements page |  |  |  |
+| Acceptance Criteria | `to_do` blocks / `database_index` | PRD/requirements page |  |  |  |
+| User Stories | `database_index` | PRD/user stories page |  |  |  |
+| Personas | `database_index` | personas page |  |  |  |
+
+If PRD export creates databases inside a Notion hub, use `integrated_hybrid`: keep databases as working indexes and embed linked database views into the PRD/personas/user-stories child pages. Detached databases without embedded views are `partial` until a linked-view pass is verified.
 
 ## Page Structure
 

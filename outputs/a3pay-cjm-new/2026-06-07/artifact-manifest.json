@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-09T06:22:47.084Z",
+  "generated_at": "2026-06-09T11:38:13.212Z",
   "run_id": "a3pay-cjm-new-2026-06-07",
   "workflow_profile": "standard",
   "artifacts": [
@@ -39,9 +39,9 @@
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "partial",
-      "size_bytes": 8266,
-      "updated_at": "2026-06-09T06:14:12.364Z",
-      "checksum_sha256": "b97c1cc76b06894eaf01754aacf452f002cd4feef94eb8fd929ba0c435157ddd"
+      "size_bytes": 10101,
+      "updated_at": "2026-06-09T06:56:56.629Z",
+      "checksum_sha256": "8cdd2b20e27943421c82ab0e0e9c6a58462e6936806ab4ce577abcaf920f5792"
     },
     {
       "artifact_name": "stage_gate_ledger",
@@ -60,9 +60,9 @@
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "partial",
-      "size_bytes": 10381,
-      "updated_at": "2026-06-09T06:14:12.422Z",
-      "checksum_sha256": "b7eaf14c41c8f3ec0a1702638a38c143acfc60ac26fa7f44687e4b32b2bb850a"
+      "size_bytes": 13499,
+      "updated_at": "2026-06-09T11:38:05.760Z",
+      "checksum_sha256": "fe6a4fd32bae6221284a8765a0e71c698afcdb43c867441a61f8e70b1e6ba4c1"
     },
     {
       "artifact_name": "recursive_brief",
@@ -408,9 +408,28 @@
       "safe_to_publish": false,
       "lifecycle": "partial",
       "schema": "agent-pack/schemas/release-notes.schema.json",
-      "size_bytes": 12679,
-      "updated_at": "2026-06-09T06:14:12.464Z",
-      "checksum_sha256": "64e0139df916c7a4b1889dcff26c838d0130fb93e2cea7238a393347775c4f11"
+      "size_bytes": 16712,
+      "updated_at": "2026-06-09T11:38:05.713Z",
+      "checksum_sha256": "64ea7dcb90b3503dc7886e18e540f795fa1e8c49f5ac71640077724303888c3c"
+    },
+    {
+      "artifact_name": "notion_prd_export",
+      "file": "notion-prd-export.md",
+      "artifact_type": "export",
+      "stage_id": "optional-notion-prd-export",
+      "stage_title": "Notion PRD Export",
+      "producer_stage": "optional-notion-prd-export",
+      "producer_agent": "notion-publisher",
+      "consumers": [],
+      "status": "completed",
+      "exists": true,
+      "human_readable": true,
+      "safe_to_publish": true,
+      "lifecycle": "active",
+      "schema": "agent-pack/schemas/notion-prd-export.schema.json",
+      "size_bytes": 25896,
+      "updated_at": "2026-06-09T06:27:15.782Z",
+      "checksum_sha256": "a7620e1ac750250b5489dea0f73e056cbd5b9c485ac34fe371047d5203c9db60"
     },
     {
       "artifact_name": "notion_research_export_ru",
@@ -426,9 +445,9 @@
       "human_readable": true,
       "safe_to_publish": true,
       "lifecycle": "active",
-      "size_bytes": 121866,
-      "updated_at": "2026-06-09T06:22:12.177Z",
-      "checksum_sha256": "a4620ac23ec548b1cd6f1176825016036c88ad86206a93355ed22eea14935ded"
+      "size_bytes": 104839,
+      "updated_at": "2026-06-09T11:36:34.394Z",
+      "checksum_sha256": "3a82891779fd660affaacfcec8607855e16cc79d43aa4318caa41a73dd503c9b"
     },
     {
       "artifact_name": "approval_state",
@@ -444,9 +463,9 @@
       "human_readable": false,
       "safe_to_publish": false,
       "lifecycle": "active",
-      "size_bytes": 3041,
-      "updated_at": "2026-06-09T06:07:22.871Z",
-      "checksum_sha256": "f085b68c99a595564665c26680dc85e7700ec973fb8b3f64ad30d10017d0f28e"
+      "size_bytes": 4326,
+      "updated_at": "2026-06-09T06:54:10.425Z",
+      "checksum_sha256": "846f487a04c16d11af89b933221c16afabb5f022b1285387c82425e35e8936b9"
     },
     {
       "artifact_name": "notion_publication_result",
@@ -462,9 +481,9 @@
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "active",
-      "size_bytes": 12415,
-      "updated_at": "2026-06-09T06:14:12.321Z",
-      "checksum_sha256": "990bfc2fcf94d6a16a70b53c0a81c4d5b886f17aa8f6699175c60935885ca0f7"
+      "size_bytes": 18595,
+      "updated_at": "2026-06-09T11:38:05.666Z",
+      "checksum_sha256": "20b2ee75c13adbe49d8d0fd28cae7794bab928a8327e8a2c03cc3adf350d3051"
     }
   ]
 }

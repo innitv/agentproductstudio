@@ -73,6 +73,18 @@
 | 2026-06-09 | `node tooling/scripts/publish-notion-research-hub.mjs ... --dry-run` | pass | Anti-slop republication dry-run allowed; 9 child pages, 605 estimated blocks, no publication blockers. |
 | 2026-06-09 | `node tooling/scripts/publish-notion-research-hub.mjs ...` | pass | Published updated anti-slop hub `37a64731-74e5-81e1-8cf5-e6466d61f3fe` with 9 child pages and 624 blocks. |
 | 2026-06-09 | Notion MCP `fetch` verification | pass | Verified updated hub title, parent, child page links, `Карта связей исследования` and `Цепочка решений`. |
+| 2026-06-09 | `yarn workflow:approve ... notion_prd_export` | pass | Explicit user request recorded for target `notion_hub:37a6473174e581e18cf5e6466d61f3fe`. |
+| 2026-06-09 | `node tooling/scripts/publish-notion-research-page.mjs ...` | pass | Published PRD child page `37a64731-74e5-81b6-81c3-ce6d25e3cced` under latest research hub; 43 blocks. |
+| 2026-06-09 | Notion MCP `fetch` PRD verification | pass | Verified page title `10 PRD для MVP`, parent hub and structured Russian table blocks. |
+| 2026-06-09 | Notion MCP `update_page` hub navigation | pass | Added `10 PRD для MVP` to hub navigation and updated child page count to 10. |
+| 2026-06-09 | `yarn workflow:approve ... notion_agile_export` | pass | Approval recorded for database layer target `notion_hub:37a6473174e581e18cf5e6466d61f3fe`. |
+| 2026-06-09 | Notion MCP create_database/create_pages | pass_with_limitations | Created 6 databases and 38 rows for personas, CJM frictions, opportunities, requirements, validation claims and sources. Relations not added in this pass. |
+| 2026-06-09 | Notion MCP `fetch` database layer verification | pass | Hub fetch confirms database blocks and `Рабочие базы исследования` section. Row counts are based on successful create responses because query tool was unavailable. |
+| 2026-06-09 | Notion MCP `create_view` integrated hybrid pass | pass | Created 6 linked database views inside relevant child pages: personas, CJM, opportunities, PRD requirements, validation claims and sources. |
+| 2026-06-09 | Notion MCP `fetch` linked view verification | pass | Fetch confirmed inline database blocks on personas, CJM, opportunities, PRD and validation/source pages. |
+| 2026-06-09 | `node tooling/scripts/generate-notion-research-export.mjs ...` | pass | Regenerated local `notion-research-export-ru.md` from source rules after Publication Editor Pass changes; internal ledger/debug sections removed from public export. |
+| 2026-06-09 | `node tooling/scripts/publish-notion-research-hub.mjs ... --dry-run` | pass | Synced export dry-run allowed: `publication_allowed=true`, `layout_strategy=integrated_hybrid`, Publication Shape/Completeness/Editor gates pass. No external Notion write performed. |
+| 2026-06-09 | `yarn workflow:sync outputs\a3pay-cjm-new\2026-06-07` | pass | Run manifest/index/state synced after source-rule and output updates; run remains `partial` because downstream product stages/provider cross-check remain open. |
 
 ## Publication Gate
 
@@ -86,6 +98,10 @@
 | Full Notion republication | superseded | Full hub URL: https://www.notion.so/3796473174e581978293e78a19a0632c |
 | Current Notion publication | superseded | Human-readable headings hub URL: https://www.notion.so/3796473174e581b1bff5f189cc8c0887 |
 | Current anti-slop Notion publication | published | Updated hub URL: https://app.notion.com/p/37a6473174e581e18cf5e6466d61f3fe |
+| PRD Notion publication | published | PRD child page URL: https://app.notion.com/p/37a6473174e581b681c3ce6d25e3cced |
+| Notion database layer | published | 6 databases under latest hub: personas, CJM frictions, opportunities, requirements, validation claims, sources. |
+| Notion integrated hybrid layer | published | Linked database views embedded into relevant child pages so the hub works as one research workspace, not separate pages plus detached databases. |
+| Local synced publication export | dry_run_pass | `notion-research-export-ru.md` regenerated from updated source rules; dry-run passes `Publication Editor Pass`; no external write. |
 | Figma write approval | pass | `approval-state.json`: `figma_write` approved for `https://www.figma.com/design/O1EK1ODspMvmJA7emTNnYd`. |
 | Figma visualization | completed | File URL: https://www.figma.com/design/O1EK1ODspMvmJA7emTNnYd; page `A3 Pay Research Board v2`; 19 frames. |
 | Research output links | completed | Local artifacts updated; Notion hub external update not performed. |

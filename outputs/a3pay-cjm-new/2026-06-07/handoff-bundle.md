@@ -28,6 +28,8 @@
 - `notion-research-export-ru.md`
 - `notion-publication-plan.md`
 - `notion-publication-result.md`
+- `notion-prd-export.md`
+- `notion-database-layer-result.md`
 - `qa-report.md`
 - `release-notes.md`
 - `research-output-improvement-review.md`
@@ -50,6 +52,9 @@
 - Research pack обновлен под новые Anti-AI-Slop правила: добавлены ключевые кейсы, сквозной user flow под CJM, цепочка отбора возможностей и конкретные проверки вместо абстрактных продуктовых формулировок.
 - `prd.md` создан как отдельный PRD stage artifact, а не часть research: требования связаны с CJM/research, MoSCoW, user stories, acceptance criteria, analytics и PRD-To-IA/Design handoff. Статус `partial`, потому что legal/rails/provider/custdev gaps остаются открытыми.
 - После approval `разрешаю публикацию` опубликован новый актуальный Notion research hub после Anti-AI-Slop pass: https://app.notion.com/p/37a6473174e581e18cf5e6466d61f3fe. Предыдущий hub `3796473174e581b1bff5f189cc8c0887` оставлен как старая версия; PRD отдельно в Notion не публиковался.
+- После запроса пользователя `опубликуй PRD в последнее исследование` создан `notion-prd-export.md` и опубликована дочерняя страница PRD в последнем research hub: https://app.notion.com/p/37a6473174e581b681c3ce6d25e3cced. Approval записан как `notion_prd_export` для target `notion_hub:37a6473174e581e18cf5e6466d61f3fe`.
+- После data-shape анализа и команды `Делай` опубликован hybrid database layer в последнем Notion hub: 6 баз и 38 стартовых rows для personas, CJM frictions, opportunities, requirements, validation claims и sources. Результат записан в `notion-database-layer-result.md`.
+- После запроса пользователя о цельном рабочем Notion-артефакте выполнен integrated hybrid pass: database indexes встроены как linked database views в релевантные child pages. Теперь `03 Прото-персоны`, `05 CJM и сценарии`, `06 ICE/RICE бэклог и инициативы`, `10 PRD для MVP` и `08 План валидации, провайдеры и источники` совмещают narrative/context и живую рабочую таблицу.
 
 ## Assumptions
 
@@ -68,6 +73,8 @@
 | Figma-визуализация не заменяет provider cross-check | low | Использовать canvas как стратегический review artifact; для статуса `ready` нужен cross-check или waiver. |
 | Остальные дочерние страницы Notion не переписывались | low | Hub и overview уже связаны; глубокие child-page cross-links можно добавить отдельным pass. |
 | PRD основан на partial research | medium | Не переводить PRD в `ready` до DeepSeek/Gemini cross-check или waiver, legal/rails review и пользовательских тестов. |
+| Notion database relations не добавлены | low | Добавить relation properties отдельным pass, если базы начнут использоваться как операционный backlog. |
+| Linked database views зависят от Notion view permissions | low | Fetch verification прошел; при смене прав hub проверить child pages и database source access. |
 
 ## Open Questions
 

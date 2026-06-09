@@ -14,6 +14,20 @@
 
 Правило языка документации: человекочитаемые описания ведутся на русском языке. Английский допустим для имён файлов, команд, переменных, API-терминов и обязательных contract section keys вроде `## Inputs Used`, если они нужны валидатору или схемам.
 
+## Что сейчас является source of truth
+
+| Слой | Где смотреть | Зачем нужен |
+| --- | --- | --- |
+| Корневые правила | `AGENTS.md` | Операционный контракт Codex: тип задачи, approval, gates, language policy, Notion/Figma правила. |
+| Маршрут workflow | `agent-pack/workflows/artifact-driven-pipeline.md` | Полный product pipeline, stage dependencies, publication gates и Definition of Done. |
+| Специалисты | `agent-pack/agents/*.agent.md` | Роли, входы, guardrails и output contract каждого агента. |
+| Шаблоны артефактов | `agent-pack/artifacts/**`, `agent-pack/templates/**` | Что именно должны создавать агенты. |
+| Quality gates | `agent-pack/quality/quality-gates.md` | Проверки качества, Anti-AI-Slop, Surface Output и публикационные условия. |
+| Runtime manifest | `runtime/typescript/workflow.manifest.ts` | Stage ids, artifacts, profiles и route mapping для исполняемого слоя. |
+| Run outputs | `outputs/<project-slug>/<YYYY-MM-DD>/` | Единственный source of truth конкретного запуска: state, manifest, artifacts, evidence, external records. |
+
+`outputs/products/` остается legacy/archive-зоной. `outputs/registry.json` можно использовать как навигационный индекс, но не как нормативный источник правил.
+
 ## Целевая продуктовая схема
 
 Для создания продуктовых лендингов и прототипов используй manager-style orchestration:
@@ -35,7 +49,7 @@
 - `reference-driven workflow`: пользователь дал URL/screenshot/«как этот сайт»; обязателен reference scan, visual spec и visual reference review.
 - `quick draft`: допустим только по явному запросу пользователя; результат помечается `partial`/`draft`.
 - `limited engineering task`: узкая правка в коде/документации; можно использовать task-scoped ExecPlan вместо полного workflow.
-- `external write`: Notion, Figma, deploy, git write без текущего запроса и model-provider calls требуют exact approval.
+- `external write`: Notion, Figma, deploy, изменение секретов, удаление данных и git write без текущего явного запроса требуют exact approval. Model-provider calls требуют approval, кроме обязательных DeepSeek/Gemini cross-check на `01-research`, которые запускаются автоматически как часть multi-source research pipeline при наличии ключей.
 - `cleanup/sorting`: работа с outputs/temp/products/archive или грязным деревом выполняется отдельно от feature work.
 
 Первый рабочий цикл:
@@ -52,6 +66,14 @@ classify request
 ```
 
 Done означает: нужные артефакты созданы или обновлены, `inputs_used` зафиксированы, проверки выполнены или blocker записан, внешние действия имеют approval record, а финальный ответ перечисляет измененные файлы, validation и остаточные риски.
+
+## Surface и Anti-Slop правила
+
+Для любого результата, который пользователь будет читать, смотреть или использовать как рабочую поверхность, сначала определяется surface type: `research_report`, `notion_wiki`, `figma_board`, `product_ui`, `dashboard_console`, `landing`, `prototype`, `frontend`, `presentation` или `handoff`.
+
+Перед созданием такого результата нужен Surface Output Contract: цель, аудитория, scope, must-cover sections, evidence-to-output map, quality bar и verification plan. После записи действует Write -> Verify -> Fix Gate: нужно проверить реальное состояние результата через build/test/screenshot/metadata/fetch или зафиксировать deviation.
+
+Для research, CJM, PRD, Notion/Figma и стратегических артефактов действует Anti-AI-Slop Gate: выводы должны быть привязаны к конкретному пользователю, сценарию, трению, решению и способу проверки. Нельзя отдавать только тезисную выжимку там, где нужна проработка; roadmap и ICE/RICE должны ссылаться на CJM friction и validation method.
 
 ## Ключевые понятия
 
@@ -190,37 +212,25 @@ agent-pack/schemas/
   test-bench-result.schema.json
   qa-report.schema.json
   release-notes.schema.json
-runtime/
+runtime/typescript/
   README.md
-  typescript/
-    README.md
-    agents.registry.ts
-    agents.sdk.ts
-    deepseek-research.ts
-    env.ts
-    firecrawl.ts
-    gemini-research.ts
-    guardrails.ts
-    hooks.ts
-    multi-source-research.ts
-    reference-scan.ts
-    research.config.ts
-    research-stage-runner.ts
-    route.config.ts
-    run-landing-workflow.ts
-    run-local-workflow.ts
-    run-workflow-engine.ts
-    schemas.ts
-    tavily-research.ts
-    tools.ts
-    tracing.ts
-    validate-workflow-run.ts
-    visual-diff.ts
-    visual-reference-review.ts
-    visual-section-diff.ts
-    workflow-engine.ts
-    workflow-stages.ts
-    workflow-state.ts
+  workflow.manifest.ts
+  workflow-stages.ts
+  route.config.ts
+  workflow-engine.ts
+  workflow-state.ts
+  workflow-cli.ts
+  sync-run-state.ts
+  validate-workflow-run.ts
+  doctor.ts
+  research-stage-runner.ts
+  multi-source-research.ts
+  reference-scan.ts
+  visual-diff.ts
+  visual-section-diff.ts
+  visual-reference-review.ts
+  executors/
+  agent-output/
 apps/
   frontend/
     index.html
@@ -253,7 +263,12 @@ integrations/observability/
   trace-review-checklist.md
 outputs/
   README.md
-runs/
+tooling/scripts/
+  generate-notion-research-export.mjs
+  publish-notion-research-hub.mjs
+  publish-notion-research-page.mjs
+  lint-research-content.mjs
+  validate-config.mjs
 integrations/mcp/
   mcp-architecture.md
   research-providers.md
@@ -285,6 +300,19 @@ README.md
 Route tools и зависимости артефактов описаны в `runtime/typescript/route.config.ts` и `runtime/typescript/tools.ts`.
 
 Опциональные инструменты внешней публикации, например `publish_prd_to_notion`, являются route tools с обязательным подтверждением. Они не заменяют локальные артефакты и должны иметь локальный Markdown fallback.
+
+Deep research по умолчанию multi-source: Tavily дает source-backed evidence, DeepSeek и Gemini используются для contradiction review, cross-check и claims-to-validate. Для стадии `01-research` эти DeepSeek/Gemini cross-check запускаются автоматически при наличии ключей и не являются отдельным provider opt-in; любые другие model-provider calls остаются approval-gated.
+
+Notion-публикация не является raw dump локальных файлов. Для подробного research pack перед внешней записью обязательны:
+
+- `notion-research-export-ru.md` как человекочитаемый public export без `Artifact Metadata`, `Inputs Used`, `Surface Output Contract`, provider/debug policy, dry-run gates, schema/frontmatter и code-block копий артефактов.
+- `Publication Completeness Gate`: export собран из полного research pack, а не из краткой выжимки.
+- `Publication Shape Gate`: personas, CJM/user paths, competitive matrix и ICE/RICE/backlog представлены таблицами или схемами.
+- `Publication Editor Pass`: public/private split, отсутствие internal ledger/debug sections, отсутствие повторных full-table копий сущностей, `entity_ownership_map` и `publication_editor_gate.pass=true`.
+- `Publication Cross-Link Gate`: hub содержит `Карта связей исследования` и `Цепочка решений`, а ссылки на personas, CJM, roadmap, validation и sources ведут на реальные child pages/mentions.
+- `Research Content Lint`: `yarn research:lint outputs/<project-slug>/<YYYY-MM-DD>` или точечно по export.
+
+Layout strategy выбирается по форме работы: короткий export можно публиковать как `flat_child_page`; подробный research pack — как `hub_with_child_pages`; рабочие сущности для фильтрации/сортировки/обновления — как `database_index`. Если в одной публикации есть и narrative child pages, и базы, обязательна форма `integrated_hybrid`: каждая база встраивается linked database view в релевантную child page, а не остается отдельным detached database рядом с отчетом.
 
 Адаптивная конфигурация исследований хранится в `runtime/typescript/research.config.ts` и `integrations/mcp/research-providers.md`. Research providers взаимозаменяемы; prompt и source policy решают, использовать ли локальные файлы, пользовательские источники, web search, browser scan, официальную документацию или deep research MCP.
 
@@ -326,7 +354,7 @@ Lifecycle hooks находятся в:
 5. Для каждой задачи используй маршрут из `agent-pack/workflows/artifact-driven-pipeline.md` и контракт `agent-pack/templates/agent-output-contract.schema.md`.
 6. Для ревью используй правила из `AGENTS.md`, `agent-pack/quality/quality-gates.md` и `/review` в Codex.
 7. Для вопросов по Codex, MCP и связанным интеграциям используй официальные источники и проектные MCP-инструкции.
-8. Для будущей исполняемой реализации используй каркас `runtime/typescript/`.
+8. Для исполняемого слоя используй `runtime/typescript/`: workflow engine, research/reference adapters, validation, sync и approval records.
 9. Для проверки качества workflow используй `agent-pack/quality/quality-gates.md` и `yarn workflow:validate`.
 
 Краткий справочник команд: `COMMANDS.md`.
@@ -364,13 +392,21 @@ yarn landing:run "<цель workflow>"
 yarn workflow:run-local "<цель workflow>"
 yarn workflow:start "<цель workflow>"
 yarn workflow:start "<цель workflow>" --mode agentic
+yarn workflow:list
+yarn workflow:inspect outputs/<project-slug>/<YYYY-MM-DD>
+yarn workflow:outputs outputs/<project-slug>/<YYYY-MM-DD>
+yarn workflow:skills
 yarn workflow:agentic-stages
 yarn workflow:agentic-preflight outputs/<project-slug>/<YYYY-MM-DD> --strict
 yarn workflow:agentic-approval-commands outputs/<project-slug>/<YYYY-MM-DD> --by human --missing-only
 yarn workflow:agentic-readiness outputs/<project-slug>/<YYYY-MM-DD> --strict
+yarn workflow:approval-request outputs/<project-slug>/<YYYY-MM-DD> notion_research_publish --target <notion-parent-page-id> --by human --reason "Публикация research pack в Notion"
 yarn workflow:approve outputs/<project-slug>/<YYYY-MM-DD> notion_research_publish --target <notion-parent-page-id> --by human
 yarn workflow:approvals outputs/<project-slug>/<YYYY-MM-DD>
 yarn workflow:deny outputs/<project-slug>/<YYYY-MM-DD> notion_research_publish --target <notion-parent-page-id> --by human
+yarn workflow:sync outputs/<project-slug>/<YYYY-MM-DD>
+yarn workflow:cleanup-temp
+yarn workflow:archive outputs/<project-slug>/<YYYY-MM-DD>
 yarn workflow:test-agentic
 yarn workflow:resume outputs/<project-slug>/<YYYY-MM-DD>
 yarn workflow:status outputs/<project-slug>/<YYYY-MM-DD>
@@ -379,6 +415,10 @@ yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through 01-research
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
 yarn workflow:doctor
+yarn research:lint outputs/<project-slug>/<YYYY-MM-DD>
+yarn notion:check
+yarn notion:publish-research-hub <notion-parent-page-id> <research-export-md> "<hub title>" --dry-run
+yarn notion:publish-research-hub <notion-parent-page-id> <research-export-md> "<hub title>"
 ```
 
 Валидация артефактов с учётом схем:
@@ -391,7 +431,7 @@ yarn workflow:doctor
 Режим исполнения:
 
 - `local` — режим по умолчанию для `workflow:start`. Он сохраняет текущий детерминированный каркас: исполняемая research stage плюс локальная генерация downstream-артефактов.
-- `agentic` — approval-gated staged rollout для отдельных specialist stages. Перед `workflow:resume` проверяй `workflow:agentic-preflight ... --strict`; model provider calls требуют `model_provider_call` approval с target вида `openai_agents_sdk:<owner>:<stage-id>`.
+- `agentic` — approval-gated staged rollout для отдельных specialist stages. Перед `workflow:resume` проверяй `workflow:agentic-preflight ... --strict`; model provider calls требуют `model_provider_call` approval с target вида `openai_agents_sdk:<owner>:<stage-id>`, кроме обязательных DeepSeek/Gemini cross-check на `01-research`, которые считаются частью research pipeline.
 - Внешние записи вроде Notion, Figma или деплоя должны проходить через `yarn workflow:approve`; runtime сохраняет записи в `approval-state.json`, а отсутствующее подтверждение фиксируется как partial/blocked вместо тихой публикации.
 - Approval matching строгий по `target`: targetless approval не покрывает targeted request, а targeted approval не покрывает targetless request.
 - `AGENTIC_ENABLED_STAGES` валидируется по известным stage id; несуществующие значения игнорируются и показываются в CLI output.
@@ -409,21 +449,39 @@ schema_payload:
 
 Ключи для опциональных внешних providers хранятся только в локальном `.env`, созданном по `.env.example`. Не сохраняй реальные значения `TAVILY_API_KEY`, `DEEPSEEK_API_KEY`, `FIRECRAWL_API_KEY`, `NOTION_TOKEN` или repository tokens в конфиги, outputs, traces или документацию.
 
+## Outputs lifecycle
+
+Новые и активные запуски живут в `outputs/<project-slug>/<YYYY-MM-DD>/`. Внутри run directory должны синхронизироваться:
+
+- state: `run-state.json`, `run-meta.json`;
+- manifest: `artifact-manifest.json`, `run-index.md`;
+- handoff/ledger: `handoff-bundle.md`, `stage-gate-ledger.md`;
+- product artifacts: stage Markdown files;
+- evidence: QA, screenshots, validation and dry-run records;
+- external records: Notion/Figma/deploy/publication records;
+- export: человекочитаемые пакеты вроде `notion-research-export-ru.md`.
+
+После ручных правок run artifacts запускай `yarn workflow:sync outputs/<project-slug>/<YYYY-MM-DD>`. Для навигации используй `yarn workflow:list`, для диагностики `yarn workflow:inspect`, для человекочитаемого объяснения `yarn workflow:outputs`.
+
+`outputs/temp/` используется для smoke/test/dry-run артефактов. Архивные переносы выполняются через `yarn workflow:archive`; `outputs/products/` не является source of truth для новых workflow.
+
 Текущий статус:
 
-- `runtime/typescript/` содержит executable research adapters, visual-reference tooling and local workflow engine.
+- `runtime/typescript/` содержит executable research adapters, visual-reference tooling, workflow sync, approval CLI and local workflow engine.
 - `runtime/typescript/agents.sdk.ts` хранит технический слой регистрации orchestrator/specialists для runtime-инспекции.
-- `runtime/typescript/workflow-stages.ts` описывает обязательные stage gates и артефакты каждого шага.
+- `runtime/typescript/workflow.manifest.ts` является единым machine-readable manifest для stage ids, artifact names, route steps, profiles и bundle composition; `workflow-stages.ts` и `route.config.ts` остаются compatibility facades.
 - `runtime/typescript/validate-workflow-run.ts` проверяет, что run-папка содержит все обязательные артефакты и ключевые секции.
 - `runtime/typescript/doctor.ts` разделяет ошибки целостности проекта и предупреждения по optional provider keys; local workflow не считается сломанным из-за отсутствия provider env keys.
 - `runtime/typescript/route.config.ts` использует standard route без visual reference review; reference route добавляет `visualReferenceReview` только для задач с референсом.
-- `runtime/typescript/workflow-engine.ts` и `workflow-state.ts` дают persisted standard workflow: `run-state.json`, `stage-results/`, `start/resume/status/run-stage`.
+- `runtime/typescript/workflow-engine.ts`, `workflow-cli.ts`, `workflow-state.ts` и `sync-run-state.ts` дают persisted workflow: `start/resume/status/list/inspect/outputs/run-stage/archive/cleanup-temp/approval/sync`.
 - `runtime/typescript/workflow-stage-executors.ts` выбирает research/local/agentic executor для stage и блокирует agentic execution без ключа, rollout enablement, exact approval target или обязательного artifact output.
 - `runtime/typescript/approval-gate.ts` проверяет локальные approval records перед внешними write-действиями и agentic model-provider calls.
 - `runtime/typescript/firecrawl.ts` подключает Firecrawl SDK как opt-in scrape/interact provider.
 - `runtime/typescript/reference-scan.ts` собирает reference pack: Firecrawl markdown/json и Playwright desktop/mobile full-page screenshots в `reports/visual-review/<slug>/`.
 - `runtime/typescript/visual-diff.ts`, `visual-section-diff.ts` и `visual-reference-review.ts` создают pixel/section evidence и `visual-reference-review.md` для reference-driven QA.
 - `runtime/typescript/research-stage-runner.ts` запускает Tavily + DeepSeek + Gemini research provider flow и пишет обязательные research artifacts в `outputs/<project>/<date>/`.
+- `tooling/scripts/generate-notion-research-export.mjs` собирает curated public export из полного research pack и вычищает internal ledger/debug sections через `Publication Editor Pass`.
+- `tooling/scripts/publish-notion-research-hub.mjs` выполняет dry-run/publish подробного Notion hub, проверяет `publication_shape_gate`, `publication_completeness_gate`, `publication_editor_gate`, cross-links, content lint и `notion_data_shape_plan`.
 - `design/figma/a3-design-system/` хранит долгоживущую карту Figma design-system tokens/components; workflow outputs должны ссылаться на неё через `Inputs Used`, а не дублировать как run output.
 - `tooling/scripts/validate-config.mjs` проверяет обязательные файлы и secret-like values без внешней сети.
 - React, Vite, Tailwind CSS и Framer Motion подключены как frontend stack в `apps/frontend/`.

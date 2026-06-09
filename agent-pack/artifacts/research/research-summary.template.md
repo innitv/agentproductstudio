@@ -238,21 +238,42 @@ Required before Notion/Figma/external publication.
 
 ## Notion Data Shape Plan
 
-Required before detailed Notion hub publication. Use this to decide whether data belongs in child pages, table blocks or database indexes.
+Required before detailed Notion hub publication. Use this to decide whether data belongs in child pages, table blocks or database indexes. If both child pages and database indexes are used, choose `integrated_hybrid` and plan embedded linked database views.
 
-| Entity / section | Recommended Notion shape | Why | Schema preview / key properties |
+### Publication Editor Pass
+
+| Check | Status | Notes |
+|---|---|---|
+| Public export excludes internal ledger/debug sections | pass / needs_revision | Remove `Artifact Metadata`, `Inputs Used`, `Surface Output Contract`, provider/debug policy, dry-run/lint/data-shape gates from public Notion pages. |
+| Overview is decision/navigation layer only | pass / needs_revision | Keep 5-7 decisions and links; do not repeat full personas/CJM/backlog/source tables. |
+| Duplicate control sections removed | pass / needs_revision | `Карта связей исследования` and `Цепочка решений` appear once. |
+| Entity ownership map exists | pass / needs_revision | Each entity has one owner page/database/view. |
+
+| Entity | Owner page / database / view | Allowed summary elsewhere | Duplicate policy |
 |---|---|---|---|
-| Overview / narrative | `hub_page` / `child_page` |  |  |
-| Personas | `database_index` / `notion_table_block` / `child_page` |  |  |
-| CJM frictions | `database_index` / `notion_table_block` / `child_page` |  |  |
-| Opportunities / ICE-RICE | `database_index` / `notion_table_block` / `child_page` |  |  |
-| Validation claims | `database_index` / `notion_table_block` / `child_page` |  |  |
-| Sources | `database_index` / `toggle` / `child_page` |  |  |
+| Personas |  | one-line segment summary / link | no repeated full table |
+| CJM frictions |  | top frictions / link | no repeated stage tables outside CJM owner |
+| Opportunities / ICE-RICE |  | top priorities / link | no repeated ICE and RICE tables outside backlog owner |
+| Validation claims |  | risk summary / link | no repeated claims table |
+| Sources |  | source status / link | no repeated full source table |
+
+| Entity / section | Recommended Notion shape | Target page for embedded view | Why | Schema preview / key properties |
+|---|---|---|---|---|
+| Overview / narrative | `hub_page` / `child_page` |  |  |  |
+| Personas | `database_index` / `notion_table_block` / `child_page` | страница персон |  |  |
+| CJM frictions | `database_index` / `notion_table_block` / `child_page` | страница CJM/user flow |  |  |
+| Opportunities / ICE-RICE | `database_index` / `notion_table_block` / `child_page` | страница roadmap/ICE/RICE |  |  |
+| Validation claims | `database_index` / `notion_table_block` / `child_page` | страница validation plan |  |  |
+| Sources | `database_index` / `toggle` / `child_page` | страница sources/evidence |  |  |
 
 | Dry-run field | Required value |
 |---|---|
-| `notion_data_shape_plan.selected_layout` |  |
+| `notion_data_shape_plan.selected_layout` | `hub_with_child_pages` / `integrated_hybrid` |
+| `publication_editor_gate.pass` | true before Notion write |
+| `publication_editor_gate.entity_ownership_map` | personas / cjm_frictions / opportunities / validation_claims / sources owners |
+| `publication_editor_gate.dedupe_actions` | removed/skipped/kept_with_rationale |
 | `notion_data_shape_plan.database_index_candidates` | personas / cjm_frictions / opportunities / validation_claims / sources as applicable |
+| `notion_data_shape_plan.embedded_database_views` | target child page + source database/data source + view name + visible properties |
 | `notion_data_shape_plan.idempotency_strategy` | hub page, child pages and database rows |
 | `notion_data_shape_plan.api_limits` | append chunk size, request payload limits and rate limit handling |
 
@@ -289,6 +310,8 @@ Required before detailed Notion hub publication. Use this to decide whether data
 - [ ] Research-To-Design Handoff exists or has `skipped_with_reason`.
 - [ ] Candidate Quality / Write Gate is recorded before overwriting existing research artifacts.
 - [ ] Publication Shape Gate passes before Notion approval/publication.
+- [ ] Publication Editor Pass passes before Notion approval/publication.
 - [ ] Publication Cross-Link Gate passes before Notion approval/publication.
 - [ ] Research Content Lint is run or recorded as blocked before external publication.
 - [ ] Notion Data Shape Plan exists for detailed hub publication.
+- [ ] If database indexes and child pages coexist, `integrated_hybrid` is planned with embedded linked database views.
