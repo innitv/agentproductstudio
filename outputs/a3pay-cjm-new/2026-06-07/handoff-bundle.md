@@ -7,8 +7,8 @@
 | Project slug | `a3pay-cjm-new` |
 | Date | `2026-06-07` |
 | Goal | Новый полный research A3 Pay с нуля |
-| Current stage | `01-research` complete as `partial` |
-| Next required artifact | Provider cross-check or explicit waiver |
+| Current stage | `02-prd` complete as `partial` |
+| Next required artifact | `ia-brief.md` after provider/legal/rails waiver or explicit continuation with partial status |
 
 ## Goal
 
@@ -31,6 +31,7 @@
 - `qa-report.md`
 - `release-notes.md`
 - `research-output-improvement-review.md`
+- `prd.md`
 
 ## Decisions
 
@@ -46,11 +47,14 @@
 - Lazyweb MCP был проверен для визуальных референсов: `initialize` прошел, `tools/list` вернул `MCP_RATE_LIMITED`; прямые Lazyweb screenshots не встроены в Figma v2 и это зафиксировано как `partial`.
 - Выполнен quality pass по связности research output: добавлены Markdown-ссылки между локальными артефактами, `Карта связей исследования`, `Decision trail` и review-документ с рекомендациями.
 - После explicit approval выполнен Notion cross-link pass для текущего hub `3796473174e581b1bff5f189cc8c0887`: обновлены hub и страница `00 Обзор, выводы и рамка исследования`.
+- Research pack обновлен под новые Anti-AI-Slop правила: добавлены ключевые кейсы, сквозной user flow под CJM, цепочка отбора возможностей и конкретные проверки вместо абстрактных продуктовых формулировок.
+- `prd.md` создан как отдельный PRD stage artifact, а не часть research: требования связаны с CJM/research, MoSCoW, user stories, acceptance criteria, analytics и PRD-To-IA/Design handoff. Статус `partial`, потому что legal/rails/provider/custdev gaps остаются открытыми.
+- После approval `разрешаю публикацию` опубликован новый актуальный Notion research hub после Anti-AI-Slop pass: https://app.notion.com/p/37a6473174e581e18cf5e6466d61f3fe. Предыдущий hub `3796473174e581b1bff5f189cc8c0887` оставлен как старая версия; PRD отдельно в Notion не публиковался.
 
 ## Assumptions
 
-- A3 Pay может выступать не только payment method, но и orchestration layer: выбор rails, invoice, reminders, split, reconciliation, status tracking.
-- Phone number в A3 Pay трактуется как user-facing alias, а не обязательно как единственный платежный rail.
+- A3 Pay может выступать не только как способ оплаты, но и как продуктовый сценарий вокруг платежа: счет, выбор способа, чек, статус, возврат и повтор.
+- Phone number в A3 Pay трактуется как user-facing alias, а не обязательно как единственный платежный способ.
 
 ## Risks
 
@@ -58,16 +62,27 @@
 |---|---|---|
 | DeepSeek/Gemini не выполнены | medium | Запустить cross-check перед статусом `ready`. |
 | Approval flow deviation для Notion | medium | В будущих external writes сначала запускать `workflow:approval-request` или задавать отдельный заметный вопрос в чате. |
-| Полная Notion republication | closed | Опубликован новый full hub на 9 child pages и 480 blocks. |
-| High-ticket сценарии требуют лицензий и банковских партнерств | high | Начинать с orchestration/status layer. |
+| Полная Notion republication | closed | Опубликован новый full hub на 9 child pages и 480 blocks; затем опубликована актуальная anti-slop версия на 9 child pages и 624 blocks. |
+| High-ticket сценарии требуют лицензий и банковских партнерств | high | Начинать с понятного статуса и передачи в банк-партнер, не с хранения денег в A3 Pay. |
 | Synthetic interviews не являются доказательством | medium | Провести 12-18 реальных интервью. |
 | Figma-визуализация не заменяет provider cross-check | low | Использовать canvas как стратегический review artifact; для статуса `ready` нужен cross-check или waiver. |
 | Остальные дочерние страницы Notion не переписывались | low | Hub и overview уже связаны; глубокие child-page cross-links можно добавить отдельным pass. |
+| PRD основан на partial research | medium | Не переводить PRD в `ready` до DeepSeek/Gemini cross-check или waiver, legal/rails review и пользовательских тестов. |
 
 ## Open Questions
 
 - Какие фактические rails доступны A3 Pay: СБП, карты, банковские счета, BNPL, кредиты, loyalty?
 
+## PRD Handoff Summary
+
+| Поле | Значение |
+|---|---|
+| Primary screen | Карточка платежного счета: получатель, назначение, сумма, срок, условия, выбор способа, CTA оплаты. |
+| Primary action | Проверить счет и выбрать способ оплаты. |
+| MVP Must | `Phone invoice`, `Merchant profile by phone`, `Bills hub`, `Payment choice`, `Receipt/refund vault`, state coverage, privacy-safe analytics. |
+| Design constraints | Нельзя обещать гарантию сделки; нужно показывать проверенность получателя, условия возврата, чек, статус и ответственного участника. |
+| Readiness | Downstream IA/design можно начинать как `partial`; production scope требует legal/rails/custdev gates. |
+
 ## Next Required Artifact
 
-DeepSeek/Gemini cross-check result или явный waiver, если run нужно перевести из `partial` в `ready`.
+`ia-brief.md` на базе [prd.md](prd.md), если пользователь продолжает pipeline с `partial` статусом; либо DeepSeek/Gemini cross-check result, legal/rails review и явный waiver, если run нужно переводить ближе к `ready`.

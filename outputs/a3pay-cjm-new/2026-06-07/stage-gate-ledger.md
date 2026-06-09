@@ -28,7 +28,7 @@
 |---|---|---|---|---|
 | 00-intake | orchestrator | `run-plan.md`, `handoff-bundle.md`, `recursive-brief.md` | completed | Новый запуск с нуля; старые outputs не использованы как основа. |
 | 01-research | research | `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md` | partial | Tavily/web source-backed pass; DeepSeek/Gemini cross-check needs_validation. |
-| 02-prd | prd | `prd.md` | skipped | Пользователь запросил research, не PRD. |
+| 02-prd | prd | `prd.md` | partial | `prd.md` создан из очищенного research pack; требования traceable, но статус не `ready` из-за DeepSeek/Gemini, legal/rails и custdev gaps. |
 | 03-ia | ia | `ia-brief.md` | skipped | Вне scope текущего research turn. |
 | 04-design | design | `design-brief.md` | skipped | Вне scope текущего research turn. |
 | 05-copy | copywriting | `copy-deck.md` | skipped | Вне scope текущего research turn. |
@@ -65,7 +65,14 @@
 | 2026-06-08 | Research output cross-link pass | pass | Added local Markdown links, `Карта связей исследования`, `Decision trail`, and `research-output-improvement-review.md`. |
 | 2026-06-08 | `yarn workflow:approve ... notion_research_publish` | pass | Explicit user approval recorded for target `notion_hub:3796473174e581b1bff5f189cc8c0887`. |
 | 2026-06-08 | Notion MCP `update_page` cross-link pass | pass | Updated hub and `00 Обзор` with cross-link map and decision trail. |
+| 2026-06-09 | `yarn workflow:doctor` | pass | Optional provider keys warning remains non-blocking for local PRD work. |
+| 2026-06-09 | `yarn research:lint outputs\a3pay-cjm-new\2026-06-07` | pass | Updated research pack passes Anti-AI-Slop executable lint across summary, CJM, roadmap and Notion export. |
+| 2026-06-09 | PRD creation | partial | `prd.md` created with Decision Input Audit, evidence-to-requirement map, MoSCoW, user stories, requirements, acceptance criteria, analytics and IA/design handoff. |
 | 2026-06-08 | Notion MCP `fetch` verification | pass | Hub and overview include new cross-link sections and page links. |
+| 2026-06-09 | `node tooling/scripts/generate-notion-research-export.mjs ...` | pass | Regenerated `notion-research-export-ru.md` from updated research artifacts; export size 124,570 bytes. |
+| 2026-06-09 | `node tooling/scripts/publish-notion-research-hub.mjs ... --dry-run` | pass | Anti-slop republication dry-run allowed; 9 child pages, 605 estimated blocks, no publication blockers. |
+| 2026-06-09 | `node tooling/scripts/publish-notion-research-hub.mjs ...` | pass | Published updated anti-slop hub `37a64731-74e5-81e1-8cf5-e6466d61f3fe` with 9 child pages and 624 blocks. |
+| 2026-06-09 | Notion MCP `fetch` verification | pass | Verified updated hub title, parent, child page links, `Карта связей исследования` and `Цепочка решений`. |
 
 ## Publication Gate
 
@@ -77,7 +84,8 @@
 | External write approval | pass | `approval-state.json`: `notion_research_publish` approved for `3696473174e58006af5fd367ef89d978`. |
 | Notion publication | published | Hub URL: https://www.notion.so/3796473174e5813381fdd90afcd6f41d |
 | Full Notion republication | superseded | Full hub URL: https://www.notion.so/3796473174e581978293e78a19a0632c |
-| Current Notion publication | published | Human-readable headings hub URL: https://www.notion.so/3796473174e581b1bff5f189cc8c0887 |
+| Current Notion publication | superseded | Human-readable headings hub URL: https://www.notion.so/3796473174e581b1bff5f189cc8c0887 |
+| Current anti-slop Notion publication | published | Updated hub URL: https://app.notion.com/p/37a6473174e581e18cf5e6466d61f3fe |
 | Figma write approval | pass | `approval-state.json`: `figma_write` approved for `https://www.figma.com/design/O1EK1ODspMvmJA7emTNnYd`. |
 | Figma visualization | completed | File URL: https://www.figma.com/design/O1EK1ODspMvmJA7emTNnYd; page `A3 Pay Research Board v2`; 19 frames. |
 | Research output links | completed | Local artifacts updated; Notion hub external update not performed. |

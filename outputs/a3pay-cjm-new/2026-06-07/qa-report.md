@@ -25,7 +25,7 @@ Research artifacts cite `inputs_used` and source URLs. DeepSeek/Gemini cross-che
 
 ## PRD Fit
 
-PRD was not requested in this turn; research handoff can feed PRD later.
+`prd.md` создан после обновления research pack под Anti-AI-Slop Gate. PRD пригоден как `partial` handoff для IA/design: в нем есть Decision Input Audit, Evidence-To-Requirement Map, MoSCoW, user stories, requirements, acceptance criteria, analytics и PRD-To-IA/Design handoff. Статус не `ready`, потому что DeepSeek/Gemini cross-check, legal/rails review и реальные интервью остаются открытыми.
 
 ## Accessibility
 
@@ -51,6 +51,7 @@ External write completed with exact target approval; old outputs not used as res
 | CJM | `cjm-map.md` | pass |
 | ICE/RICE | `opportunity-roadmap.md` | pass |
 | Notion publication | `notion-publication-result.md` | pass |
+| PRD | `prd.md` | partial |
 
 ## Severity Matrix
 
@@ -90,3 +91,4 @@ External write completed with exact target approval; old outputs not used as res
 | Provider coverage incomplete | medium | Run DeepSeek and Gemini cross-check before `ready`. |
 | No real user interviews | medium | Conduct validation interviews per `proto-personas.md`. |
 | Legal/payment role unknown | high | Define whether A3 Pay is PSP, agent, information service, or bank-partner product. |
+| PRD readiness | medium | Keep PRD `partial` until provider cross-check, legal/rails review and prototype tests are complete or explicitly waived. |

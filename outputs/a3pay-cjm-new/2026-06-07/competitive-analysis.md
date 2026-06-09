@@ -4,48 +4,48 @@
 
 - [research-summary.md](research-summary.md)
 - [cjm-map.md](cjm-map.md)
-- Tavily/web sources: Банк России, СБП/НСПК, Data Insight, ЮKassa, T-Pay/Yandex Pay public materials, BNPL market sources
+- Tavily/web sources: Банк России, СБП/НСПК, Data Insight, ЮKassa, публичные материалы T-Pay/Yandex Pay, источники по рынку BNPL
 
 ## Набор конкурентов
 
 - СБП
-- Карты Мир / card acquiring
+- Карты Мир / карточный эквайринг
 - SberPay, T-Pay, Alfa Pay, Yandex Pay
-- ЮKassa and PSPs
-- BNPL providers
+- ЮKassa и PSP
+- BNPL-провайдеры
 - Госуслуги/ГИС ЖКХ
-- International alias-payment analogues
+- Международные аналоги платежей по идентификатору
 
 ## Матрица сравнения конкурентов
 
-| Competitor | Type | Covered scenarios | Strengths | Weaknesses | Differentiation opportunity for A3 Pay |
+| Конкурент | Тип | Покрытые сценарии | Сильные стороны | Слабые места | Возможность для A3 Pay |
 |---|---|---|---|---|---|
-| СБП | National payment rails | P2P, C2B, QR, NFC, payment link, linked account, ЖКХ | Массовость, низкая стоимость для merchant, доверие ЦБ/НСПК, 226 банков | UX зависит от банка; limited scenario orchestration; merchant/user status layer слабый | A3 Pay поверх СБП: phone invoice, status, reminders, receipts, refunds |
-| Карты Мир / card acquiring | Card network and acquiring | Retail, e-commerce, subscriptions, travel | Привычность, POS coverage, chargeback/refund rails | Merchant fees, card data, settlement delay, card lifecycle | Rail fallback and routing by context |
-| SberPay | Bank/ecosystem Pay | Sber clients, e-commerce, offline QR/NFC | Сильная клиентская база, loyalty, ecosystem | Lock-in, конкуренция с ЦБ по QR, не neutral | Cross-bank merchant-neutral phone payment |
-| T-Pay / T-Bank | Bank Pay + ecosystem | Online/offline pay, travel, BNPL via Долями | UX, cashback, travel ecosystem, BNPL | Focus on own bank/ecosystem | Multi-bank and multi-rail orchestration |
-| Yandex Pay / Сплит | Pay + BNPL | E-commerce, travel, services | Checkout UX, embedded BNPL, Яндекс ecosystem | Ecosystem boundaries, regulatory pressure on BNPL | A3 Pay as neutral selector across rails |
-| ЮKassa | Payment aggregator | Merchant checkout, cards, SБП, Pay-сервисы, BNPL | Большая merchant base, APIs, payment methods | Merchant-first, not user identity/product across scenarios | User-owned receipt/status and phone alias |
-| CloudPayments/Robokassa/PayMaster | PSP/acquiring | Online merchants | APIs, ready integrations | Commodity checkout, limited user journey | Scenario-specific payment intelligence |
-| Долями/Сплит/Подели/Плати частями | BNPL | E-commerce, travel, high AOV retail | Affordability, AOV lift | Regulation, limits, credit-risk perception | Present BNPL as one choice in payment plan |
-| Госуслуги/ГИС ЖКХ | Public payment portal | Fees, ЖКХ, госуслуги | Official source, trust, public services | Narrow domain; UX fragmented from private payments | Bring public-like status/receipt UX to private services |
-| Международные аналоги: Pix, UPI, Bizum, PayNow | Faster payment/alias systems | Alias payments, QR, P2P/P2M | Phone/ID alias, ubiquity, instant payments | Local context differs; regulation and adoption path vary | Validate alias-led UX and merchant onboarding patterns |
+| СБП | Национальная платежная инфраструктура | P2P, C2B, QR, NFC, платежная ссылка, привязанный счет, ЖКХ | Массовость, низкая стоимость для продавца, доверие ЦБ/НСПК, 226 банков | Опыт зависит от банка; слабее видны получатель, назначение, чек, возврат и повтор платежа | A3 Pay может добавить счет по телефону, статус, напоминания, чеки и возвраты поверх привычного способа оплаты |
+| Карты Мир / карточный эквайринг | Карточная сеть и эквайринг | Ритейл, e-commerce, подписки, путешествия | Привычность, покрытие POS, chargeback/refund механики | Комиссии продавца, ввод карты, задержка зачисления, срок действия карты | Использовать как резервный способ оплаты, но не строить ценность только вокруг карты |
+| SberPay | Банковский/экосистемный Pay-сервис | Клиенты Сбера, e-commerce, офлайн QR/NFC | Сильная клиентская база, бонусы, экосистема | Закрытость внутри банка, конкуренция с ЦБ по QR, слабая нейтральность | Нейтральный платеж по телефону между банками, продавцами и покупателями |
+| T-Pay / T-Bank | Банковский Pay-сервис и экосистема | Онлайн/офлайн оплата, travel, BNPL через Долями | Удобный UX, кэшбэк, travel-экосистема, BNPL | Фокус на собственном банке и экосистеме | Сценарий, где пользователь видит несколько банковских и партнерских способов оплаты в одном объяснимом выборе |
+| Yandex Pay / Сплит | Pay-сервис + BNPL | E-commerce, travel, услуги | Удобный checkout, встроенный BNPL, экосистема Яндекса | Границы экосистемы, регуляторное давление на BNPL | Нейтральный выбор способа оплаты с понятным возвратом и чеком |
+| ЮKassa | Платежный агрегатор | Checkout продавца, карты, СБП, Pay-сервисы, BNPL | Большая база продавцов, API, много способов оплаты | Фокус на продавце, а не на памяти пользователя между сценариями | Пользовательская история чеков, статусов и платежей по телефону |
+| CloudPayments/Robokassa/PayMaster | PSP/эквайринг | Онлайн-продавцы | API, готовые интеграции | Типовой checkout, ограниченный пользовательский путь после списания | Платежный сценарий под конкретную ситуацию: услуга, счет, возврат, повтор |
+| Долями/Сплит/Подели/Плати частями | BNPL | E-commerce, travel, высокий чек | Доступность покупки, рост среднего чека | Регулирование, лимиты, риск неверного понимания долга | Показывать BNPL как один вариант в плане оплаты с полной суммой и графиком |
+| Госуслуги/ГИС ЖКХ | Публичный платежный портал | Пошлины, ЖКХ, госуслуги | Официальный источник, доверие, государственные услуги | Узкий домен; опыт отделен от частных платежей | Перенести понятность статуса и квитанции в частные услуги и малую коммерцию |
+| Международные аналоги: Pix, UPI, Bizum, PayNow | Быстрые платежи по идентификатору | Платежи по телефону/ID, QR, P2P/P2M | Привычный идентификатор, массовость, мгновенность | Локальный контекст, регулирование и путь adoption отличаются | Проверить, какие паттерны платежа по телефону и подключения продавца применимы в России |
 
 ## Покрытие сценариев
 
-| Scenario | СБП | Banks/Pay | PSP | BNPL | Госуслуги | A3 Pay target |
+| Сценарий | СБП | Банки/Pay | PSP | BNPL | Госуслуги | Целевое покрытие A3 Pay |
 |---|---|---|---|---|---|---|
-| P2P/phone transfer | strong | strong | weak | none | weak | medium |
-| Merchant phone invoice | medium | medium | medium | weak | none | strong |
-| ЖКХ recurring | medium | strong | weak | none | strong | strong |
+| P2P/перевод по телефону | strong | strong | weak | none | weak | medium |
+| Счет продавца по телефону | medium | medium | medium | weak | none | strong |
+| Регулярные ЖКХ/счета | medium | strong | weak | none | strong | strong |
 | E-commerce checkout | growing | strong | strong | strong | none | strong |
-| Travel high AOV | medium | strong | medium | strong | none | medium |
-| Auto deal payment | weak | medium | weak | credit only | medium via docs | medium |
-| Real estate payment | weak | bank-led | weak | none | registry status only | companion only |
+| Travel с высоким чеком | medium | strong | medium | strong | none | medium |
+| Оплата сделки с авто | weak | medium | weak | только кредит | medium через документы | medium |
+| Оплата недвижимости | weak | через банк | weak | none | только статус реестра | только статус и передача партнеру |
 
 ## Стратегические выводы
 
-- СБП - не конкурент, а базовый rail. A3 Pay лучше строить как UX and orchestration layer.
+- СБП - не конкурент, а базовая платежная инфраструктура. A3 Pay лучше строить как понятный слой сценария вокруг СБП: пользователь видит получателя, назначение платежа, условия возврата, чек, статус и следующий шаг, а проверять это нужно в прототипе оплаты услуги и регулярного счета.
 - Банковские Pay-сервисы сильны, но замкнуты. Дифференциация A3 Pay - нейтральность и сценарная широта.
-- PSP закрывают merchant checkout, но не создают user-owned payment memory across scenarios.
-- BNPL полезен как embedded option, но не должен быть ядром из-за регулирования и ограничения high-ticket применения.
+- PSP закрывают checkout продавца, но не создают пользовательскую память платежей между сценариями.
+- BNPL полезен как встроенный вариант оплаты, но не должен быть ядром из-за регулирования и ограничений в сценариях высокого чека.

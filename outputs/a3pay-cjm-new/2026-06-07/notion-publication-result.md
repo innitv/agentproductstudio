@@ -124,3 +124,43 @@
 | 07 Roadmap и SWOT | `37964731-74e5-810f-8166-f28046c78969` | 26 | SWOT-анализ |
 | 08 План валидации, провайдеры и источники | `37964731-74e5-81bf-801f-ec9cbba6e45f` | 18 | Источники и журнал доказательств |
 | 09 Дополнительные материалы | `37964731-74e5-81de-b8db-ec6eee7e1a5b` | 16 | Статус публикационного пакета, Использованные входные артефакты |
+
+## Anti-Slop Republication 2026-06-09
+
+После explicit approval пользователя опубликована новая актуальная версия research hub после Anti-AI-Slop pass. Старая страница `3796473174e581b1bff5f189cc8c0887` не удалялась и остается предыдущей версией; новый hub создан рядом под тем же parent page.
+
+| Field | Value |
+|---|---|
+| Status | published |
+| Target parent page | `3696473174e58006af5fd367ef89d978` |
+| Previous hub | `3796473174e581b1bff5f189cc8c0887` |
+| Hub title | A3 Pay: исследование после anti-slop pass, 2026-06-09 |
+| Hub page id | `37a64731-74e5-81e1-8cf5-e6466d61f3fe` |
+| Hub URL | https://app.notion.com/p/37a6473174e581e18cf5e6466d61f3fe |
+| Child pages | 9 |
+| Published blocks | 624 |
+| Source artifact | `notion-research-export-ru.md` |
+| Export size | 124,570 bytes |
+| Approval | Пользователь написал «разрешаю публикацию»; approval записан для `notion_hub:3796473174e581b1bff5f189cc8c0887` и `notion_parent:3696473174e58006af5fd367ef89d978`. |
+| PRD publication | not_published; `prd.md` остается локальным артефактом до отдельного `notion_prd_export` approval. |
+
+| Gate | Status | Evidence |
+|---|---|---|
+| Research Content Lint | pass | `yarn research:lint outputs\a3pay-cjm-new\2026-06-07`. |
+| Publication Shape Gate | pass | Dry-run: 9 child pages, 605 estimated blocks, tables for personas/CJM/competitors/ICE/RICE. |
+| Publication Completeness Gate | pass | Export/source ratio 1.139+ after regeneration from full research pack. |
+| Publication Cross-Link Gate | pass | Hub contains `Карта связей исследования` and `Цепочка решений` with Notion page mentions. |
+| Notion write | completed | Script created hub `37a64731-74e5-81e1-8cf5-e6466d61f3fe` and 9 child pages. |
+| Notion fetch verification | pass | MCP fetch confirmed hub title, parent, child pages, cross-link map and decision chain. |
+
+| Page | Page id | Blocks | Source sections |
+|---|---|---:|---|
+| 00 Обзор, выводы и рамка исследования | `37a64731-74e5-8177-8245-eb276e579cb4` | 196 | Карта связей исследования, Цепочка решений, Сводка исследования |
+| 02 Конкуренты, активы A3 и стратегия | `37a64731-74e5-81ea-84f6-d2774c72723f` | 51 | Матрица позиционирования, Конкурентный анализ |
+| 03 Прото-персоны | `37a64731-74e5-8154-9b85-dabc75758dd2` | 32 | Прото-персоны |
+| 04 Синтетические интервью и вопросы для интервью | `37a64731-74e5-8139-a4c3-f538f4e8fe8e` | 24 | Синтетические интервью |
+| 05 CJM и сценарии | `37a64731-74e5-81d0-b078-f111191cf360` | 161 | Сценарий 1, Сценарий 2, CJM и карта сценариев |
+| 06 ICE/RICE бэклог и инициативы | `37a64731-74e5-81cd-b33c-e88e1431e905` | 81 | ICE/RICE бэклог, Возможности, приоритизация ICE/RICE и дорожная карта |
+| 07 Roadmap и SWOT | `37a64731-74e5-8134-9839-f6ec67678ab2` | 26 | SWOT-анализ |
+| 08 План валидации, провайдеры и источники | `37a64731-74e5-8180-87d6-ce1e7f6f05b8` | 18 | Источники и журнал доказательств |
+| 09 Дополнительные материалы | `37a64731-74e5-8198-af49-ead081013beb` | 16 | Статус публикационного пакета, Использованные входные артефакты |

@@ -44,10 +44,6 @@ const exportMarkdown = [
   "| Источник | `outputs/a3pay-cjm-new/2026-06-07` |",
   "| Ограничение | DeepSeek/Gemini cross-check не выполнен; выводы остаются `partial/needs_validation` там, где это указано в источниках. |",
   "",
-  "## Использованные входные артефакты",
-  "",
-  ...requiredFiles.map((file) => `- \`${file}\``),
-  "",
   ...buildCrossLinkControlSections(),
   "",
   ...buildPublicationControlSections(),
@@ -74,7 +70,43 @@ function normalizeMarkdown(markdown) {
     .replace(/^#\s+.+\n+/, "")
     .trim();
 
-  return removeEmptyHeadings(normalized);
+  return removeEmptyHeadings(removeNotionInternalSections(normalized));
+}
+
+function removeNotionInternalSections(markdown) {
+  const internalHeadings = new Set([
+    "Inputs Used",
+    "Использованные входные материалы",
+    "Использованные входные артефакты",
+  ]);
+
+  const lines = markdown.split("\n");
+  const result = [];
+  let skippingLevel = null;
+
+  for (const line of lines) {
+    const heading = line.match(/^(#{1,6})\s+(.+?)\s*$/);
+
+    if (heading) {
+      const level = heading[1].length;
+      const title = heading[2].trim();
+
+      if (skippingLevel !== null && level <= skippingLevel) {
+        skippingLevel = null;
+      }
+
+      if (skippingLevel === null && internalHeadings.has(title)) {
+        skippingLevel = level;
+        continue;
+      }
+    }
+
+    if (skippingLevel === null) {
+      result.push(line);
+    }
+  }
+
+  return result.join("\n").trim();
 }
 
 function removeEmptyHeadings(markdown) {

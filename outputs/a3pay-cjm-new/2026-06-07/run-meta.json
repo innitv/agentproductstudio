@@ -3,7 +3,7 @@
   "run_date": "2026-06-07",
   "run_id": "a3pay-cjm-new-2026-06-07",
   "created_at": "2026-06-07T00:00:00+05:00",
-  "updated_at": "2026-06-08T18:17:19.658Z",
+  "updated_at": "2026-06-09T06:22:47.071Z",
   "workflow_profile": "standard",
   "execution_mode": "local",
   "status": "partial",
@@ -11,5 +11,5 @@
   "output_dir": "C:\\Project\\product-agent-studio\\outputs\\a3pay-cjm-new\\2026-06-07",
   "has_reference": false,
   "notion_publication": "partial",
-  "last_validated_at": "2026-06-07T08:24:10.895Z"
+  "last_validated_at": "2026-06-09T06:15:39.696Z"
 }

@@ -46,6 +46,22 @@
       "approved_by": "human",
       "target": "https://www.figma.com/design/O1EK1ODspMvmJA7emTNnYd",
       "approved_at": "2026-06-08T09:48:33.834Z"
+    },
+    {
+      "action": "notion_research_publish",
+      "approved": true,
+      "approved_by": "human",
+      "target": "notion_hub:3796473174e581b1bff5f189cc8c0887",
+      "notes": "Пользователь разрешил публикацию обновленной версии research/PRD в текущий Notion hub",
+      "approved_at": "2026-06-09T06:06:56.121Z"
+    },
+    {
+      "action": "notion_research_publish",
+      "approved": true,
+      "approved_by": "human",
+      "target": "notion_parent:3696473174e58006af5fd367ef89d978",
+      "notes": "Публикация новой актуальной версии A3 Pay research/PRD под тем же parent, рядом с текущим hub",
+      "approved_at": "2026-06-09T06:07:22.869Z"
     }
   ]
 }
