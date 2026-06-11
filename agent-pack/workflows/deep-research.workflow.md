@@ -10,8 +10,6 @@
 mode: deep_research
 prefer:
   - tavily
-  - deepseek
-  - gemini
   - user_sources
   - official_sources
   - competitor_sites
@@ -31,9 +29,9 @@ fallback: needs_validation
 
 ## Multi-Source Default
 
-Для полного `deep_research` используются все default providers: `tavily`, `deepseek` и `gemini`.
-Одиночный provider не считается успешным research gate: если один из них недоступен, упал или не вернул источники, stage получает статус `partial`, а причина фиксируется в `research-summary.md`, `handoff-bundle.md` и `stage-gate-ledger.md`.
-`deepseek` и `gemini` используются обязательно как API cross-check/strategy providers для поиска противоречий, рисков и claims-to-validate. Их выводы не заменяют source-backed evidence из Tavily/источников, но отсутствие DeepSeek/Gemini блокирует полный статус `success`.
+Для полного `deep_research` source of truth — `tavily` или другой source-backed/primary provider. Одиночный LLM-provider не считается успешным research gate, но одиночный source-backed provider может быть достаточен, если coverage, citations, source quality pass и Research Content Lint проходят.
+
+`deepseek` и `gemini` не входят в default-run. Используй их только при явном opt-in как optional/advisory API cross-check/strategy providers для поиска противоречий, рисков и claims-to-validate. Их выводы не заменяют source-backed evidence из Tavily/источников, не увеличивают `sources_count` и не блокируют полный статус `success`, если они недоступны, упали или вернули шум. В таком случае фиксируй `advisory_failed`/`skipped_with_reason` в `research-summary.md`, `handoff-bundle.md` и `stage-gate-ledger.md`.
 ## Обязательные выходы
 
 - `research-summary.md`
@@ -47,7 +45,7 @@ fallback: needs_validation
 1. Выполнить artifact context inventory: прочитать текущий run ledger, включая `run-plan.md`, `recursive-brief.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, прошлые research/export/CJM artifacts, `stage-results/*.json` и пользовательские local artifacts, если они уже лежат в run directory.
 2. На основе всего artifact context создать research plan: questions, assumptions, decision needs, source classes, search dimensions и expected handoff для PRD/IA/design.
 3. Сформировать targeted search queries по market/category, competitors/alternatives, user scenarios/JTBD, trust/compliance, pricing/business model и design implications. Query не должен терять ограничения и выводы, уже зафиксированные в run artifacts.
-4. Запустить multi-source research по policy: Tavily + DeepSeek + Gemini по умолчанию.
+4. Запустить source-backed research по policy: Tavily/primary sources сначала; DeepSeek/Gemini только как advisory checks при явном opt-in.
 5. Выполнить source quality pass: authority, freshness, directness, independence, specificity и relevance to decision. Noisy scrape не использовать как самостоятельный finding.
 6. Запустить gap loop: если не хватает источников по конкурентам, primary facts, user evidence или design implications, выполнить дополнительный поиск или пометить `needs_validation`.
 7. Сверить findings между providers и пометить противоречия как `claims_to_validate`.
@@ -72,7 +70,7 @@ Research считается COMPLETE только когда:
 - research plan существует;
 - source quality pass существует;
 - requested/used/unavailable/failures по providers записаны;
-- Tavily, DeepSeek и Gemini вернули usable results для `success`; иначе статус остается `partial`;
+- Tavily или другой source-backed/primary provider вернул usable results для `success`; DeepSeek/Gemini failures не блокируют `success`, но должны быть записаны как advisory status;
 - contradiction review существует, а unresolved conflicts записаны в claims-to-validate;
 - validation plan существует;
 - research-to-design handoff существует или содержит `skipped_with_reason`;

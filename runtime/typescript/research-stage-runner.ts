@@ -4,7 +4,7 @@ import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { artifactFiles } from "./workflow-stages";
 import { runMultiSourceResearch, type MultiSourceResearchResult } from "./multi-source-research";
-import { researchProviders, type ResearchProvider } from "./research.config";
+import { advisoryResearchProviders, researchProviders, type ResearchProvider } from "./research.config";
 import { validateWorkflowRun } from "./validate-workflow-run";
 
 interface ResearchStageRunOptions {
@@ -310,6 +310,7 @@ function buildResearchSummaryPayload(result: MultiSourceResearchResult, artifact
   const status = result.validation.status === "pass" ? "ready" : "partial";
   const retrievedAt = new Date().toISOString();
   const used = new Set(result.providersUsed);
+  const advisoryProviders = new Set<ResearchProvider>(advisoryResearchProviders);
   const sourcesByProvider = new Map<ResearchProvider, number>();
   const synthesis = buildDomainSynthesis(result, artifactContext);
 
@@ -345,16 +346,22 @@ function buildResearchSummaryPayload(result: MultiSourceResearchResult, artifact
     ...result.failures.map((failure) => ({
       provider: failure.provider,
       error: failure.error,
-      impact: "Research stage cannot be marked ready if this is a required default provider.",
+      impact: advisoryProviders.has(failure.provider)
+        ? "Advisory cross-check failed; source-backed readiness may still pass if Tavily/primary evidence is usable."
+        : "Research stage cannot be marked ready if required source-backed provider coverage is missing.",
       follow_up: result.fallbacks.find((fallback) => fallback.from === failure.provider)
         ? `Fallback was applied; keep downstream claims marked needs validation until source-backed coverage is restored.`
+        : advisoryProviders.has(failure.provider)
+        ? `Optionally rerun ${failure.provider}; do not use its synthesis as source-backed evidence.`
         : `Configure or rerun ${failure.provider}; keep downstream claims marked needs validation until resolved.`,
     })),
     ...result.unavailableProviders.map((provider) => ({
       provider,
       error: "Provider requested by source policy but not configured or executable in local runtime.",
-      impact: provider === researchProviders.tavily || provider === researchProviders.deepseek
-        ? "Required default deep research coverage is incomplete."
+      impact: provider === researchProviders.tavily
+        ? "Required source-backed deep research coverage is incomplete."
+        : advisoryProviders.has(provider)
+        ? "Optional advisory coverage is incomplete and non-blocking for readiness."
         : "Optional source coverage is incomplete.",
       follow_up: `Configure ${provider} or record an approved fallback before claiming success.`,
     })),
@@ -762,15 +769,15 @@ function firstSentence(text: string, fallback: string): string {
 
 function buildContradictionReview(result: MultiSourceResearchResult, paymentDomain: boolean): DomainSynthesis["contradiction_review"] {
   const providerSet = new Set(result.providersUsed);
-  const coverage = providerSet.has("tavily") && providerSet.has("deepseek") && providerSet.has("gemini")
-    ? "Все default providers вернули результат."
-    : "Покрытие provider-ов неполное.";
+  const coverage = providerSet.has("tavily")
+    ? "Source-backed слой вернул результат; advisory DeepSeek/Gemini используются только как non-blocking checks."
+    : "Source-backed слой неполный: Tavily/primary evidence не вернул usable result.";
 
   return [
     {
       topic: "Факты против synthesis",
       agreement: coverage,
-      disagreement: "DeepSeek/Gemini помогают найти риски, но не являются доказательством из источников.",
+      disagreement: "DeepSeek/Gemini помогают найти риски, но не являются доказательством из источников и не блокируют readiness при сбое.",
       decision: "Рыночные цифры и конкурентные claims переносить downstream только с источником или `needs_validation`.",
     },
     {
@@ -878,7 +885,9 @@ function renderResearchSummary(result: MultiSourceResearchResult, payload: Resea
     "",
     "## Source Policy",
     "",
-    "- Allowed sources: Tavily, DeepSeek, Gemini, Firecrawl/browser fallback when configured.",
+    "- Default source-backed provider: Tavily or another primary/source-backed source.",
+    "- Optional advisory providers: DeepSeek/Gemini only when explicitly enabled.",
+    "- Allowed fallbacks: user sources, official sources, web search, Firecrawl/browser when configured and permitted.",
     "- Denied sources: external write actions without approval.",
     "- Citation requirement: required for market and competitor claims.",
     "- External write: denied unless approval exists.",
@@ -1022,8 +1031,8 @@ function renderResearchSummary(result: MultiSourceResearchResult, payload: Resea
     "",
     "## Readiness Checklist",
     "",
-    `- [${payload.status === "ready" ? "x" : " "}] Tavily, DeepSeek and Gemini coverage is sufficient for ready status.`,
-    "- [x] DeepSeek and Gemini outputs are marked as cross-check/synthesis and not source-backed evidence.",
+    `- [${payload.status === "ready" ? "x" : " "}] Source-backed coverage is sufficient for ready status.`,
+    "- [x] DeepSeek/Gemini outputs, if explicitly enabled, are marked as advisory synthesis and not source-backed evidence.",
     "- [x] Proto personas and synthetic interviews are marked as validation inputs, not facts.",
     "",
   ].join("\n");
@@ -1188,16 +1197,16 @@ function renderSwot(result: MultiSourceResearchResult, synthesis: DomainSynthesi
     `| Strength | ${cell(synthesis.positioning)} | Provider coverage and source-backed findings | medium | Use this as PRD/IA/design framing |`,
     `| Weakness | Сильнейший сценарий пока требует validation: ${cell(topScenario?.name ?? "primary scenario")} | Evidence status: ${topScenario?.evidence_status ?? "needs validation"} | medium | Keep claims scoped until user/partner validation |`,
     `| Opportunity | ${cell(p0Initiatives.join("; ") || "P0 opportunity requires discovery")} | Opportunity score and scenario synthesis | medium | Start roadmap from highest repeatability and trust leverage |`,
-    "| Threat | Unsourced market claims can leak into PRD or copy | DeepSeek/Gemini guardrail and validation plan | high | Block success until claims are validated |",
+    "| Threat | Unsourced market claims can leak into PRD or copy | Source-backed evidence gate and validation plan | high | Block success until claims are validated |",
     "",
     "## Strategic Notes",
     "",
-    "- Treat Tavily as source-backed evidence provider, and DeepSeek/Gemini as contradiction, check and strategic synthesis providers.",
+    "- Treat Tavily/primary sources as source-backed evidence. Use DeepSeek/Gemini only as opt-in advisory checks, never as facts.",
     `- Дизайн должен сохранить роль продукта: ${synthesis.design_handoff.trust_requirements[0] ?? "понятное доказательство и статус"}.`,
     "",
     "## Strategic Decisions",
     "",
-    "- Downstream PRD should inherit `partial` if default provider coverage is incomplete.",
+    "- Downstream PRD should inherit `partial` only when source-backed evidence is incomplete or legal/custdev gates are unresolved; advisory DeepSeek/Gemini failures are logged as non-blocking checks.",
     "",
     "## Risks",
     "",
@@ -1205,7 +1214,7 @@ function renderSwot(result: MultiSourceResearchResult, synthesis: DomainSynthesi
     "",
     "## Readiness Checklist",
     "",
-    `- [${result.validation.status === "pass" ? "x" : " "}] Default multi-source research coverage passed.`,
+    `- [${result.validation.status === "pass" ? "x" : " "}] Default source-backed research coverage passed.`,
     "",
   ].join("\n");
 }
@@ -1263,7 +1272,7 @@ function scoreResearchArtifact(content: string, query: string, fileName: string)
     "No source-backed finding returned",
   ].filter((marker) => content.includes(marker)).length;
   const hasPayload = content.includes("artifact-json") || content.includes("schema_payload");
-  const hasProviderCoverage = content.includes("tavily") && content.includes("deepseek") && content.includes("gemini");
+  const hasProviderCoverage = content.includes("tavily") || content.includes("source-backed") || content.includes("source backed");
   const hasValidationLanguage = lower.includes("needs validation")
     || lower.includes("требует валидации")
     || lower.includes("validation");

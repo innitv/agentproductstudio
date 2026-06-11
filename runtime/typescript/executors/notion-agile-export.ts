@@ -13,7 +13,7 @@ export async function maybeRunNotionAgileExport(
   const config = await detectNotionConfig(outputDir);
 
   if (!config.token || !config.pageId) {
-    warnings.push("Automatic Notion Agile Board export skipped: NOTION_TOKEN or parent page ID is not configured in .env or environment.");
+    warnings.push("Notion Agile Board export plan skipped: NOTION_TOKEN or parent page ID is not configured in .env or environment.");
     return { warnings, approvalMissing: false };
   }
 
@@ -50,7 +50,7 @@ export async function maybeRunNotionAgileExport(
     warnings.push(`Notion Agile Board export completed with approval for ${config.pageId}.`);
   } catch (publishError) {
     const msg = publishError instanceof Error ? publishError.message : String(publishError);
-    warnings.push(`Automatic Notion Agile Board export failed: ${msg}`);
+    warnings.push(`Notion Agile Board export failed after approval gate: ${msg}`);
   }
 
   return { warnings, approvalMissing: false };

@@ -19,12 +19,12 @@ const providerCoverage = `## Provider Coverage
 | Provider | Requested | Used | Sources count | Validation state | Notes |
 |---|---:|---:|---:|---|---|
 | Tavily MCP | yes | yes | 8 | pass | Source-backed evidence provider; повторный validation pass выполнен 2026-06-05. |
-| DeepSeek | yes | yes | 0 | pass | Cross-check provider; использован для contradiction review, не является source-backed evidence. |
-| Gemini | yes | yes | 0 | pass | Strategic synthesis provider; использован для second synthesis review, не является source-backed evidence. |
+| DeepSeek | yes | yes | 0 | pass | Advisory contradiction review; не является source-backed evidence. |
+| Gemini | yes | yes | 0 | pass | Advisory strategy review; не является source-backed evidence. |
 
 ## Provider Cross-Check Notes
 
-- DeepSeek/Gemini подтвердили необходимость позиционировать A3 Pay не как самостоятельный кошелек, а как слой оркестрации сервисных, регулярных и phone-led платежей.
+- DeepSeek/Gemini advisory review подсветил гипотезу позиционирования A3 Pay не как самостоятельного кошелька, а как сценария вокруг сервисных, регулярных и phone-led платежей; это не источник факта и требует проверки на source-backed evidence и интервью.
 - Модельные провайдеры не добавляют новых source-backed фактов; все рыночные и количественные claims остаются привязанными к Tavily/публичным источникам.
 - Claims по BNPL, недвижимости, автоимпорту и travel остаются валидационными гипотезами до интервью и партнерского discovery.
 
@@ -41,8 +41,8 @@ const schemaPayload = {
   ],
   provider_coverage: [
     { provider: "tavily", requested: true, used: true, sources_count: 8, validation_state: "pass", notes: "Source-backed evidence provider." },
-    { provider: "deepseek", requested: true, used: true, sources_count: 0, validation_state: "pass", notes: "Cross-check provider; not source-backed evidence." },
-    { provider: "gemini", requested: true, used: true, sources_count: 0, validation_state: "pass", notes: "Strategic synthesis provider; not source-backed evidence." },
+    { provider: "deepseek", requested: true, used: true, sources_count: 0, validation_state: "pass", notes: "Advisory contradiction review; not source-backed evidence." },
+    { provider: "gemini", requested: true, used: true, sources_count: 0, validation_state: "pass", notes: "Advisory strategy review; not source-backed evidence." },
   ],
   provider_failures: [],
   research_questions: [
@@ -98,7 +98,7 @@ const schemaPayload = {
   findings: [
     {
       finding: "A3 Pay сильнее выглядит как слой оркестрации сервисных, регулярных и phone-led платежей, а не как самостоятельный кошелек.",
-      evidence: "Tavily/public sources plus DeepSeek/Gemini cross-check.",
+      evidence: "Tavily/public source-backed sources plus non-blocking DeepSeek/Gemini advisory check.",
       confidence: "medium",
     },
   ],
@@ -139,8 +139,8 @@ ${JSON.stringify(schemaPayload, null, 2)}
 |---|---|
 | Status | ready |
 | Research mode | deep_research |
-| Evidence level | mixed: source-backed + model cross-check |
-| Readiness score | ready after Tavily/DeepSeek/Gemini validation pass |
+| Evidence level | source-backed with advisory model review |
+| Readiness score | ready after Tavily/source-backed validation pass; DeepSeek/Gemini advisory does not drive readiness |
 
 ## Inputs Used
 
@@ -189,13 +189,14 @@ const competitiveAnalysis = `# Competitive Analysis
 | Field | Value |
 |---|---|
 | Status | ready |
-| Inputs Used | research-summary.md, notion-research-export-ru.md, Tavily/DeepSeek/Gemini validation pass |
+| Inputs Used | research-summary.md, notion-research-export-ru.md, Tavily/source-backed validation pass, DeepSeek/Gemini advisory notes |
 
 ## Inputs Used
 
 - research-summary.md
 - notion-research-export-ru.md
-- Tavily/DeepSeek/Gemini validation pass
+- Tavily/source-backed validation pass
+- DeepSeek/Gemini advisory notes
 
 ## Competitor Set
 

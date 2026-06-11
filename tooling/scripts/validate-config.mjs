@@ -109,7 +109,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/guardrails/guardrails.policy.md",
-    requiredSnippets: ["Не подменяй required provider", "documented failure", "Assumptions не могут заменять Findings", "Surface Output Contract", "evidence-to-output map", "Anti-AI-Slop Gate", "Тезисная выжимка не заменяет проработку"],
+    requiredSnippets: ["Не подменяй required source-backed provider", "documented failure", "Assumptions не могут заменять Findings", "Surface Output Contract", "evidence-to-output map", "Anti-AI-Slop Gate", "Тезисная выжимка не заменяет проработку"],
   },
   {
     file: "agent-pack/templates/surface-output-contract.template.md",
@@ -149,7 +149,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/guardrails/approval-matrix.md",
-    requiredSnippets: ["External research API call", "Required provider unavailable"],
+    requiredSnippets: ["External research API call", "Required source-backed provider unavailable"],
   },
   {
     file: "tooling/scripts/publish-notion-research-page.mjs",
@@ -229,7 +229,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "README.md",
-    requiredSnippets: ["Что сейчас является source of truth", "Surface и Anti-Slop правила", "Outputs lifecycle", "workflow.manifest.ts", "yarn workflow:sync", "yarn workflow:list", "yarn workflow:inspect", "yarn workflow:outputs", "yarn research:run", "yarn reference:scan", "--profile standard", "--profile reference", "FIRECRAWL_API_KEY", "Publication Editor Pass", "publication_editor_gate.pass=true", "Publication Completeness Gate", "Publication Shape Gate", "Publication Cross-Link Gate", "Research Content Lint", "integrated_hybrid", "entity_ownership_map", "DeepSeek/Gemini cross-check", "notion:publish-research-hub"],
+    requiredSnippets: ["Что сейчас является source of truth", "Surface и Anti-Slop правила", "Outputs lifecycle", "workflow.manifest.ts", "yarn workflow:sync", "yarn workflow:list", "yarn workflow:inspect", "yarn workflow:outputs", "yarn research:run", "yarn reference:scan", "--profile standard", "--profile reference", "FIRECRAWL_API_KEY", "Publication Editor Pass", "publication_editor_gate.pass=true", "Publication Completeness Gate", "Publication Shape Gate", "Publication Cross-Link Gate", "Research Content Lint", "integrated_hybrid", "entity_ownership_map", "DeepSeek/Gemini advisory", "notion:publish-research-hub"],
   },
   {
     file: "runtime/typescript/env.ts",
@@ -374,8 +374,12 @@ if (existsSync(envExamplePath)) {
       errors.push(`.env.example: missing multi-source research env snippet: ${snippet}`);
     }
   }
-  if (!envExample.includes("RESEARCH_PROVIDER_ORDER=tavily,deepseek") && !envExample.includes("RESEARCH_PROVIDER_ORDER=tavily,deepseek,gemini")) {
-    errors.push(`.env.example: missing multi-source research env snippet: RESEARCH_PROVIDER_ORDER=tavily,deepseek`);
+  if (!envExample.includes("RESEARCH_PROVIDER_ORDER=tavily")) {
+    errors.push(`.env.example: missing source-backed default research env snippet: RESEARCH_PROVIDER_ORDER=tavily`);
+  }
+
+  if (!envExample.includes("Optional opt-in advisory check")) {
+    errors.push(`.env.example: missing DeepSeek/Gemini opt-in advisory comment`);
   }
 }
 

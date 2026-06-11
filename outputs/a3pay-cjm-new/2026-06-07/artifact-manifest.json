@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-09T11:38:13.212Z",
+  "generated_at": "2026-06-10T06:26:14.328Z",
   "run_id": "a3pay-cjm-new-2026-06-07",
   "workflow_profile": "standard",
   "artifacts": [
@@ -17,9 +17,9 @@
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "partial",
-      "size_bytes": 4546,
-      "updated_at": "2026-06-08T04:11:55.907Z",
-      "checksum_sha256": "cd64bfb3a407300154612393abd268bbb33d3fa987bd6c3afd26117e494aabb6"
+      "size_bytes": 5081,
+      "updated_at": "2026-06-09T17:24:49.030Z",
+      "checksum_sha256": "ff8e81e16343d0cc782ded76ba174684e5621f894f64f50c8746dc7c08b7b65a"
     },
     {
       "artifact_name": "handoff_bundle",
@@ -39,9 +39,9 @@
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "partial",
-      "size_bytes": 10101,
-      "updated_at": "2026-06-09T06:56:56.629Z",
-      "checksum_sha256": "8cdd2b20e27943421c82ab0e0e9c6a58462e6936806ab4ce577abcaf920f5792"
+      "size_bytes": 3107,
+      "updated_at": "2026-06-10T06:18:05.542Z",
+      "checksum_sha256": "02f5d8b0e7ab12e94a9e2c8c245a99d4b4950e2cc5352180516b0d4ee5c995f1"
     },
     {
       "artifact_name": "stage_gate_ledger",
@@ -60,9 +60,9 @@
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "partial",
-      "size_bytes": 13499,
-      "updated_at": "2026-06-09T11:38:05.760Z",
-      "checksum_sha256": "fe6a4fd32bae6221284a8765a0e71c698afcdb43c867441a61f8e70b1e6ba4c1"
+      "size_bytes": 18609,
+      "updated_at": "2026-06-09T18:00:00.560Z",
+      "checksum_sha256": "605a61455f786004b6e852a4f852d2e22a6b01c53eaa9c5fe219d1ac6aa2c8aa"
     },
     {
       "artifact_name": "recursive_brief",
@@ -84,9 +84,9 @@
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "partial",
-      "size_bytes": 7373,
-      "updated_at": "2026-06-07T08:25:28.560Z",
-      "checksum_sha256": "decab9e5818f1fa8214f705b8f2ca38ef26991fda07cec23da2585feb5c42942"
+      "size_bytes": 7711,
+      "updated_at": "2026-06-09T17:30:49.705Z",
+      "checksum_sha256": "28e48e95168d527ac70858900bbb8fb1631c4e01abb5411f5944e708cf69d8ce"
     },
     {
       "artifact_name": "research_summary",
@@ -111,9 +111,9 @@
       "safe_to_publish": true,
       "lifecycle": "active",
       "schema": "agent-pack/schemas/research-summary.schema.json",
-      "size_bytes": 39055,
-      "updated_at": "2026-06-09T06:10:28.799Z",
-      "checksum_sha256": "5d420d1850f678d3792d633ca42404b65fd0a72036b74d22c48263b06751c67f"
+      "size_bytes": 39636,
+      "updated_at": "2026-06-09T17:35:12.257Z",
+      "checksum_sha256": "6d0647221ef1a82a8e8f278f90e11aa612126075949ce5c748bc173423f9c931"
     },
     {
       "artifact_name": "competitive_analysis",
@@ -132,7 +132,7 @@
       "safe_to_publish": true,
       "lifecycle": "active",
       "size_bytes": 7996,
-      "updated_at": "2026-06-09T06:10:28.845Z",
+      "updated_at": "2026-06-09T12:01:46.415Z",
       "checksum_sha256": "d7d20a08a71210d7c5c1651baeedb616f6d277a3cad95378422dbdea8ed780ba"
     },
     {
@@ -152,7 +152,7 @@
       "safe_to_publish": true,
       "lifecycle": "active",
       "size_bytes": 4445,
-      "updated_at": "2026-06-09T06:11:20.566Z",
+      "updated_at": "2026-06-09T12:01:46.415Z",
       "checksum_sha256": "2adf3400bf3f5cb0f3f0365a14320dbd74df2b5b9d347234717d7866da49c307"
     },
     {
@@ -172,7 +172,7 @@
       "safe_to_publish": true,
       "lifecycle": "active",
       "size_bytes": 4084,
-      "updated_at": "2026-06-09T06:10:28.883Z",
+      "updated_at": "2026-06-09T12:01:46.417Z",
       "checksum_sha256": "7816578489854dcb87dbbc02b6988d513635b58d335833860e2025f040a8c1c6"
     },
     {
@@ -191,9 +191,9 @@
       "human_readable": true,
       "safe_to_publish": true,
       "lifecycle": "active",
-      "size_bytes": 3799,
-      "updated_at": "2026-06-09T06:12:08.164Z",
-      "checksum_sha256": "0ea028081034a44004db5f4a7ad1c6f4d7fc3561a0cf183eb7ec24fd249a4554"
+      "size_bytes": 3861,
+      "updated_at": "2026-06-09T17:34:32.099Z",
+      "checksum_sha256": "4ee19fc20d2683ab22d03f2141a92e25a422855778ffa1a7fcb6ab6cb0679e41"
     },
     {
       "artifact_name": "prd",
@@ -220,9 +220,9 @@
       "safe_to_publish": true,
       "lifecycle": "active",
       "schema": "agent-pack/schemas/prd.schema.json",
-      "size_bytes": 37467,
-      "updated_at": "2026-06-09T06:00:39.428Z",
-      "checksum_sha256": "cd544be75413eec0e13d2cc33099738a91f3728109509943bbc1e358cdb2de29"
+      "size_bytes": 37835,
+      "updated_at": "2026-06-09T17:34:32.144Z",
+      "checksum_sha256": "ddedc50d30c601a2f69ddb3077077810a8c2352ada995653fc593c1a9f4eb92f"
     },
     {
       "artifact_name": "ia_brief",
@@ -240,12 +240,15 @@
         "10-test-bench",
         "11-qa"
       ],
-      "status": "missing",
-      "exists": false,
+      "status": "completed",
+      "exists": true,
       "human_readable": true,
       "safe_to_publish": true,
-      "lifecycle": "draft",
-      "schema": "agent-pack/schemas/ia-brief.schema.json"
+      "lifecycle": "active",
+      "schema": "agent-pack/schemas/ia-brief.schema.json",
+      "size_bytes": 16712,
+      "updated_at": "2026-06-10T06:21:24.126Z",
+      "checksum_sha256": "4c8b5ccb870760bb4c74260c40a70955c7e81cf724de30abca07dba6d60f5f9f"
     },
     {
       "artifact_name": "design_brief",
@@ -263,12 +266,15 @@
         "09-visual-reference",
         "11-qa"
       ],
-      "status": "missing",
-      "exists": false,
+      "status": "completed",
+      "exists": true,
       "human_readable": true,
       "safe_to_publish": true,
-      "lifecycle": "draft",
-      "schema": "agent-pack/schemas/design-brief.schema.json"
+      "lifecycle": "active",
+      "schema": "agent-pack/schemas/design-brief.schema.json",
+      "size_bytes": 7179,
+      "updated_at": "2026-06-10T06:21:39.119Z",
+      "checksum_sha256": "9ad2eaf839d40e7ee2c06df8674954493f9853928f59999e13da5927c49b4712"
     },
     {
       "artifact_name": "copy_deck",
@@ -284,12 +290,15 @@
         "08-frontend",
         "11-qa"
       ],
-      "status": "missing",
-      "exists": false,
+      "status": "completed",
+      "exists": true,
       "human_readable": true,
       "safe_to_publish": true,
-      "lifecycle": "draft",
-      "schema": "agent-pack/schemas/copy-deck.schema.json"
+      "lifecycle": "active",
+      "schema": "agent-pack/schemas/copy-deck.schema.json",
+      "size_bytes": 12379,
+      "updated_at": "2026-06-10T06:21:54.770Z",
+      "checksum_sha256": "88dacfbb50025052e9698327ab773aea68440f2280d081279e239752056a3b96"
     },
     {
       "artifact_name": "screens",
@@ -305,12 +314,15 @@
         "09-visual-reference",
         "11-qa"
       ],
-      "status": "missing",
-      "exists": false,
+      "status": "completed",
+      "exists": true,
       "human_readable": true,
       "safe_to_publish": true,
-      "lifecycle": "draft",
-      "schema": "agent-pack/schemas/screens.schema.json"
+      "lifecycle": "active",
+      "schema": "agent-pack/schemas/screens.schema.json",
+      "size_bytes": 17056,
+      "updated_at": "2026-06-10T06:22:08.763Z",
+      "checksum_sha256": "62c09652a51e35e8db6d01e037ebdfecc4ff613fa25ac9ddb3196ef6f3d80f37"
     },
     {
       "artifact_name": "prototype_report",
@@ -389,9 +401,9 @@
       "safe_to_publish": false,
       "lifecycle": "partial",
       "schema": "agent-pack/schemas/qa-report.schema.json",
-      "size_bytes": 3809,
-      "updated_at": "2026-06-09T06:02:40.248Z",
-      "checksum_sha256": "968a37e16f8ca37ce68eb544948a3737bf0ce610fe89302db17a46448444b8e3"
+      "size_bytes": 3963,
+      "updated_at": "2026-06-09T17:30:10.743Z",
+      "checksum_sha256": "1dce2b2a4c6559c6fea45ac64bed3a9b4e890d20894cbb9bd134d622f996a910"
     },
     {
       "artifact_name": "release_notes",
@@ -408,9 +420,9 @@
       "safe_to_publish": false,
       "lifecycle": "partial",
       "schema": "agent-pack/schemas/release-notes.schema.json",
-      "size_bytes": 16712,
-      "updated_at": "2026-06-09T11:38:05.713Z",
-      "checksum_sha256": "64ea7dcb90b3503dc7886e18e540f795fa1e8c49f5ac71640077724303888c3c"
+      "size_bytes": 21126,
+      "updated_at": "2026-06-09T18:00:12.880Z",
+      "checksum_sha256": "e055e14d365817d6f7d4d5eb9eedfc9095664482195cf95236f8bed3683603f3"
     },
     {
       "artifact_name": "notion_prd_export",
@@ -427,9 +439,9 @@
       "safe_to_publish": true,
       "lifecycle": "active",
       "schema": "agent-pack/schemas/notion-prd-export.schema.json",
-      "size_bytes": 25896,
-      "updated_at": "2026-06-09T06:27:15.782Z",
-      "checksum_sha256": "a7620e1ac750250b5489dea0f73e056cbd5b9c485ac34fe371047d5203c9db60"
+      "size_bytes": 30844,
+      "updated_at": "2026-06-09T17:58:43.839Z",
+      "checksum_sha256": "9dce844efa84949abfdfe9e8b7f4a101744462bc5ac96f2ff24a35dc3adce312"
     },
     {
       "artifact_name": "notion_research_export_ru",
@@ -445,9 +457,9 @@
       "human_readable": true,
       "safe_to_publish": true,
       "lifecycle": "active",
-      "size_bytes": 104839,
-      "updated_at": "2026-06-09T11:36:34.394Z",
-      "checksum_sha256": "3a82891779fd660affaacfcec8607855e16cc79d43aa4318caa41a73dd503c9b"
+      "size_bytes": 105452,
+      "updated_at": "2026-06-09T17:36:56.335Z",
+      "checksum_sha256": "3fc29d1360a3e060d1e705346c4d4afa29f263a9c349a409edbf469b47dd4d20"
     },
     {
       "artifact_name": "approval_state",
@@ -463,9 +475,9 @@
       "human_readable": false,
       "safe_to_publish": false,
       "lifecycle": "active",
-      "size_bytes": 4326,
-      "updated_at": "2026-06-09T06:54:10.425Z",
-      "checksum_sha256": "846f487a04c16d11af89b933221c16afabb5f022b1285387c82425e35e8936b9"
+      "size_bytes": 6104,
+      "updated_at": "2026-06-10T06:17:30.354Z",
+      "checksum_sha256": "e86f86035f312ada25885431257f26eb4d0170cad4c667a0b253da5c1ca1c286"
     },
     {
       "artifact_name": "notion_publication_result",
@@ -481,9 +493,9 @@
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "active",
-      "size_bytes": 18595,
-      "updated_at": "2026-06-09T11:38:05.666Z",
-      "checksum_sha256": "20b2ee75c13adbe49d8d0fd28cae7794bab928a8327e8a2c03cc3adf350d3051"
+      "size_bytes": 26232,
+      "updated_at": "2026-06-09T17:59:49.921Z",
+      "checksum_sha256": "ccc4d0c7dcffedc84af4c827af06dcb1e90cc2a6e240262455d66c9de4db468f"
     }
   ]
 }

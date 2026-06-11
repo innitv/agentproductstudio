@@ -1,0 +1,18 @@
+{
+  "stage_id": "06-screens",
+  "title": "Screens",
+  "status": "completed",
+  "artifacts_created": [
+    "screens.md"
+  ],
+  "inputs_used": [
+    "[prd.md](prd.md)",
+    "[ia-brief.md](ia-brief.md)",
+    "[design-brief.md](design-brief.md)",
+    "[copy-deck.md](copy-deck.md)",
+    "[design/figma/a3-design-system/token-map.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/token-map.md)"
+  ],
+  "warnings": [],
+  "errors": [],
+  "completed_at": "2026-06-10T06:26:14.312Z"
+}

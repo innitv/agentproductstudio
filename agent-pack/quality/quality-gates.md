@@ -38,12 +38,12 @@
 - `inputs_used` в research artifacts отражает реальные входные файлы и provider outputs, а не только `recursive-brief.md`.
 - Research questions существуют.
 - Research Plan покрывает market/category, competitors/alternatives, user scenarios/JTBD, trust/compliance и design implications.
-- Для `deep_research` есть Provider Coverage по `tavily`, `deepseek` и `gemini`.
-- Для `deep_research` статус `ready/success` допустим только если Tavily вернул usable sources, а DeepSeek и Gemini вернули usable cross-check/check/strategy results; иначе `partial` и `needs_validation`.
-- DeepSeek и Gemini обязательны для research checks/cross-check, но их выводы отмечены как synthesis/strategy и не используются как source-backed evidence без внешнего источника.
+- Для `deep_research` есть Provider Coverage по source-backed provider (`tavily`/primary source) и, если явно включены, advisory providers (`deepseek`, `gemini`).
+- Для `deep_research` статус `ready/success` допустим, если Tavily или другой source-backed/primary provider вернул usable sources, а source quality pass и Research Content Lint проходят. DeepSeek/Gemini failures не блокируют `ready`, если записаны как `advisory_failed`/`skipped`.
+- DeepSeek и Gemini являются advisory checks/cross-check, их выводы отмечены как synthesis/strategy и не используются как source-backed evidence без внешнего источника.
 - Provider failures, unavailable providers и empty-source cases записаны в research summary, handoff и ledger.
 - Source Quality Pass выполнен: noisy snippets, stale/indirect sources и model synthesis не используются как source-backed facts.
-- Contradiction Review выполнен: расхождения между Tavily/source-backed evidence, DeepSeek и Gemini перенесены в claims-to-validate.
+- Contradiction Review выполнен: расхождения между Tavily/source-backed evidence и advisory outputs DeepSeek/Gemini, если они доступны, перенесены в claims-to-validate.
 - `research-summary.md` содержит schema payload или `artifact-json`, чтобы downstream/runtime мог проверять provider coverage и readiness.
 - Audience и JTBD существуют.
 - Есть минимум 2 proto personas или `skipped_with_reason`.

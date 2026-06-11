@@ -47,7 +47,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 1. Проверить существование обязательных артефактов.
 2. Убедиться, что `recursive-brief.md` содержит этапы расширения (expansion), углубления (deepening), консолидации (consolidation), допущения (assumptions) и открытые вопросы.
 3. Проверить, что политика источников разрешает выбранный режим исследования (research mode).
-4. Для глубоких исследований (`deep_research`) проверить, что политика источников включает работу с несколькими провайдерами (multi-source): `tavily`, `deepseek` и `gemini`.
+4. Для глубоких исследований (`deep_research`) проверить, что политика источников включает source-backed provider (`tavily`/primary sources). `deepseek` и `gemini` не входят в default-run и добавляются только при явном opt-in как advisory checks.
 5. Если один из провайдеров по умолчанию недоступен или выдал ошибку, продолжать работу со статусом `partial` (частичный успех), обязательно фиксировать сбой провайдера и помечать рыночные утверждения тегом `needs validation` (требует валидации).
 
 ## Internal Pipeline (Внутренний процесс)
@@ -57,10 +57,10 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 3. Разложить тему на измерения поиска: рынок/категория, конкуренты/альтернативы, пользовательские сценарии, trust/compliance, UX/patterns, pricing/business model, риски и дизайн-последствия. Для UI-heavy задач добавить `lazyweb_evidence_need`: какие screen types, competitors, flows или UI patterns должны быть получены через Lazyweb на design stage.
 4. Сформировать targeted search queries по каждому измерению. Если запрос слишком широкий, разбить его на подзапросы и не начинать synthesis до получения минимального evidence coverage. Query должен учитывать ограничения и решения, уже зафиксированные в run artifacts.
 5. Определить политику источников и классы доказательств: официальные/подтвержденные (official/source-backed), конкуренты (competitor), сообщества/отзывы (community/review), внутренние (internal), гипотезы (hypothesis), синтетические (synthetic).
-6. Запустить исследование по нескольким источникам: `tavily` + `deepseek` + `gemini` по умолчанию, затем использовать разрешенные резервные провайдеры (`user_sources`, `openai_docs`, `web_search`, `browser`) по мере необходимости.
+6. Запустить source-backed research: `tavily`/primary/user sources сначала, затем разрешенные резервные провайдеры (`user_sources`, `openai_docs`, `web_search`, `browser`) по мере необходимости. `deepseek` и `gemini` запускать только как advisory checks для contradiction review/claims-to-validate, не как источник фактов.
 7. Оценить качество источников до synthesis: authority, freshness, directness, independence, specificity и contradiction risk. Низкокачественные сниппеты, scraped noise, неполные таблицы и маркетинговые claims без первичного источника не повышают confidence.
 8. Запустить gap loop: если не хватает конкурентов, primary sources, user evidence, pricing facts или дизайн-паттернов, выполнить дополнительный поиск или зафиксировать `needs_validation`; запрещено закрывать gap синтетическим выводом.
-9. Сверить результаты между провайдерами: совпадающие утверждения получают более высокий уровень доверия (confidence). Провести фазу **Contradiction Review (Анализ противоречий)**: сопоставить выводы Tavily, DeepSeek и Gemini, явно зафиксировав любые конфликтующие факты, цифры или конкурентные различия в специальном обязательном подразделе `## Contradiction Review` внутри файла `research-summary.md`. Все такие противоречия должны быть перенесены в раздел `claims_to_validate` со статусом `needs validation`.
+9. Сверить source-backed evidence с advisory checks: совпадение с DeepSeek/Gemini может подсветить направление проверки, но не повышает confidence без источника. Провести фазу **Contradiction Review (Анализ противоречий)**: сопоставить Tavily/primary sources с advisory outputs, явно зафиксировав конфликтующие факты, цифры или конкурентные различия в `## Contradiction Review` внутри `research-summary.md`. Все такие противоречия перенести в `claims_to_validate` со статусом `needs validation`.
 10. Собрать источники и зафиксировать URL-адреса источников или локальные пути к файлам, имя провайдера, дату получения (`retrieved_at`), тип источника, уровень доверия и применимость к продуктовым решениям.
 11. Синтезировать сегменты аудитории, CJM/user paths и сценарии Jobs To Be Done (JTBD), не смешивая реальные evidence, model synthesis и assumptions.
 11a. Выполнить **Anti-AI-Slop Gate** для research artifacts: проверить не только отдельные слова, а весь текст на абстрактность, взаимозаменяемость и отсутствие причинно-следственной логики. Абстрактные паттерные формулировки (`orchestration`, `rails`, `wedge`, `trust layer`, `seamless`, `unlock`, `flywheel`, `layer`, `companion`) являются индикаторами риска, но не исчерпывают gate. Любой вывод без наблюдаемого поведения, доменной детали, механизма влияния и способа проверки должен быть переписан.
@@ -89,7 +89,8 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 Правила:
 
-- DeepSeek/Gemini никогда не увеличивают `sources_count`; они повышают качество проверки, но не являются source-backed evidence.
+- DeepSeek/Gemini на стадии `01-research` являются opt-in advisory checks: не входят в default-run, не являются обязательным условием `ready`, а отдельный approval/provider opt-in не нужен только если пользователь или source policy уже явно включили их для advisory scope.
+- DeepSeek/Gemini никогда не увеличивают `sources_count`; они помогают искать риски и claims-to-validate, но не являются source-backed evidence.
 - Если provider вернул noisy scrape или обрывок таблицы, не включай его как самостоятельный finding без нормализации и проверки.
 - Для каждого `high`/`medium` finding должен быть `used_for`: какое решение он разблокирует для PRD, IA, дизайна, copy или test bench.
 - Если два источника противоречат друг другу, confidence понижается до `low` или `needs_validation`, пока не найден первичный источник.
@@ -122,8 +123,8 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - Чтение локальных артефактов
 - Веб-поиск/браузер, если это разрешено политикой источников
 - Поиск через Tavily, если это разрешено политикой источников
-- Использование DeepSeek API для кросс-проверки и синтеза, если это разрешено политикой источников
-- Использование Gemini API для стратегического анализа, если это разрешено политикой источников
+- Использование DeepSeek API только как advisory-кросс-проверки и contradiction review, если это разрешено политикой источников
+- Использование Gemini API только как advisory-стратегической проверки, если это разрешено политикой источников
 - Официальная документация
 - Анализ сайтов конкурентов
 - Lazyweb MCP/skills для UI-evidence, если source policy разрешает внешний MCP и пользовательские приватные данные не отправляются без отдельного approval
@@ -139,9 +140,9 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 ## Guardrails (Ограничения и правила)
 
 - Каждое важное рыночное или маркетинговое утверждение должно иметь источник (source) или метку `needs validation`.
-- Для глубоких исследований (`deep_research`) успешный статус требует получения результатов минимум от трех провайдеров: `tavily`, `deepseek` и `gemini`; в противном случае устанавливается статус `partial`.
-- Использование DeepSeek и Gemini обязательно для проведения перекрестных проверок и стратегического анализа, но их собственные рассуждения не считаются подтвержденными источниками (source-backed evidence) сами по себе. Их выводы используются для поиска противоречий, рисков, гипотез и формирования `claims_to_validate`.
-- **Правило Contradiction Review:** При интеграции результатов поиска от Tavily, DeepSeek и Gemini агент обязан составить таблицу перекрёстного анализа противоречий. Любые расхождения в данных, конкурентных заявлениях или условиях должны быть явно задокументированы в подразделе `## Contradiction Review` файла `research-summary.md` и помечены как `needs_validation`. Запрещено молча игнорировать или сглаживать расхождения между провайдерами.
+- Для глубоких исследований (`deep_research`) успешный статус требует usable source-backed evidence: `tavily`, primary/user sources или другой проверяемый источник. DeepSeek/Gemini failures не блокируют `ready`, если source-backed coverage, source quality pass, claims-to-validate и Research Content Lint проходят.
+- Использование DeepSeek и Gemini допустимо для перекрестных проверок и стратегического анализа, но их собственные рассуждения не считаются подтвержденными источниками (source-backed evidence). Их выводы используются только для поиска противоречий, рисков, гипотез и формирования `claims_to_validate`.
+- **Правило Contradiction Review:** При интеграции результатов поиска агент обязан составить таблицу перекрёстного анализа противоречий между source-backed evidence и advisory outputs. Любые расхождения в данных, конкурентных заявлениях или условиях должны быть явно задокументированы в подразделе `## Contradiction Review` файла `research-summary.md` и помечены как `needs_validation`. Запрещено молча игнорировать или сглаживать расхождения.
 - **Lazyweb как UI-evidence, не market source:** Lazyweb references считаются evidence для visual patterns, screen composition, flows и interaction examples. Они не заменяют source-backed market facts, pricing claims, legal/compliance facts или реальные пользовательские интервью.
 - **Anti-AI-Slop Gate:** Research artifacts не должны подменять объяснение наборами паттерных слов или универсальными фразами. Проверяй весь текст по slop-сигналам: утверждение можно вставить в любой продукт; нет конкретного пользователя/ситуации; нет механизма влияния; нет ограничения или trade-off; метрика не выражена как действие; строки таблицы повторяют один шаблон; roadmap не объясняет порядок. Минимальная приемка: `кто платит/покупает -> что пытается сделать -> где сомневается -> что делает продукт -> почему это должно сработать -> как проверяем`.
 - **CJM Depth Gate:** CJM не считается готовой, если содержит только stage table. Для каждого основного сценария нужны ключевые кейсы, user flow, вопрос пользователя, боль, решение продукта, метрика и связь с roadmap.
@@ -151,8 +152,8 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - Если runner или provider tool перегенерировал артефакты слишком шаблонно и ухудшил доменную детализацию, агент обязан восстановить детальный human-readable pack и сохранить provider coverage как validation evidence.
 - Если publication export превращает personas, CJM/user paths, competitive matrix или ICE/RICE в длинные текстовые карточки вместо таблиц/схем, агент обязан исправить export до запроса Notion approval.
 - Если publication export содержит рабочие сущности, которые нужно фильтровать, сортировать, обновлять или связывать (`personas`, `CJM frictions`, `opportunities`, `validation claims`, `sources`), агент обязан подготовить `notion_data_shape_plan` с `database_index_candidates`, schema preview и `embedded_database_views`: target child page, view name, visible properties и rationale. Для подробного Notion workspace preferred layout = `integrated_hybrid`, а не отдельные базы рядом со страницами.
-- Запрещено заменять обязательный поиск по внешним источникам (Tavily/DeepSeek/Gemini) простым браузерным сканированием (browser scan) или синтетической генерацией. Браузер/пользовательские источники могут использоваться как резерв (fallback) только с пометкой `needs_validation`.
-- Если Tavily/DeepSeek/Gemini требуют подтверждения на внешний API-вызов, агент исследований должен запросить approval через Оркестратор. Без подтверждения этап остается в статусе `partial`/`blocked`.
+- Запрещено заменять обязательный поиск по source-backed внешним источникам простым браузерным сканированием (browser scan) или синтетической генерацией. Браузер/пользовательские источники могут использоваться как резерв (fallback) только с пометкой `needs_validation`, если не дают проверяемых источников.
+- DeepSeek/Gemini advisory rule: для стадии `01-research` не запускать эти провайдеры по умолчанию; использовать их только при явном opt-in. Если opt-in есть, отдельный approval не нужен для advisory scope; если ключ, endpoint, model или provider недоступны, фиксировать `advisory_failed`/`skipped_with_reason` в `source-log.md`, `research-summary.md`, `stage-gate-ledger.md` и `handoff-bundle.md`, но не понижать readiness только из-за этого. Для внешних provider calls вне advisory cross-check действует общий approval gate.
 - Каждая протоперсона должна содержать явный статус доказательства (`Evidence status`).
 - Каждое синтетическое интервью в артефактах должно содержать обязательную пометку `Evidence status: synthetic`.
 - Синтетические интервью допускаются только для проверки гипотез, краевых сценариев или формирования вопросов для тестирования, но не как доказательство факта.
@@ -168,7 +169,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 Агент возвращает результат по контракту `agent-pack/templates/agent-output-contract.schema.md`. Если используется fenced-блок, допустимы `agent-output-yaml` или `agent-output-json`. Полные Markdown-тексты артефактов передаются в `outputs.research_summary`, `outputs.competitive_analysis`, `outputs.proto_personas`, `outputs.synthetic_interviews` и `outputs.swot`. Для `status: success` все пять ключей обязательны и каждый должен содержать полный Markdown соответствующего файла, а не краткие метаданные.
 
-Если для `tavily`, `deepseek`, `gemini` или другого внешнего provider отсутствует ключ, разрешение источников или human approval, агент не ставит `success`: он возвращает `partial` или `blocked`, фиксирует провайдера и причину в `risks`, `open_questions` и соответствующем Markdown-артефакте.
+Если для `tavily` или другого source-backed provider отсутствует ключ, endpoint, разрешение источников или provider call завершается ошибкой, агент не ставит `success`: он возвращает `partial` или `blocked`, фиксирует провайдера и причину в `risks`, `open_questions` и соответствующем Markdown-артефакте. Если `deepseek`/`gemini` недоступны или шумят в advisory mode, агент фиксирует failure/skipped reason, но может вернуть `success`, если source-backed evidence и quality gates пройдены.
 
 ```yaml
 agent_name: research
@@ -190,7 +191,7 @@ recommended_next_step:
 
 - Отсутствует бриф (`recursive-brief.md`): статус `blocked`.
 - Отсутствуют источники: статус `partial` с пометкой `needs validation`.
-- Сбой Tavily/DeepSeek/Gemini в режиме `deep_research`: статус `partial` с фиксацией ошибки провайдера в handoff и ledger.
+- Сбой Tavily или другого source-backed provider в режиме `deep_research`: статус `partial` с фиксацией ошибки провайдера в handoff и ledger. Сбой DeepSeek/Gemini в advisory mode фиксируется как `advisory_failed`/`skipped_with_reason`, но не блокирует `success` сам по себе.
 - Обязательный провайдер пропущен по решению агента (Required provider skipped): статус `blocked` до исправления или явного изменения границ проекта пользователем.
 - Нет реальных исследований пользователей: протоперсоны должны оставаться в статусе `proto` (гипотетические).
 - Обнаружено использование синтетических данных как реальных фактов: статус `blocked` до исправления.

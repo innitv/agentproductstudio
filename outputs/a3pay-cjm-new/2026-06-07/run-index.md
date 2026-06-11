@@ -4,24 +4,24 @@
 - Goal: Полный новый research workflow A3 Pay с нуля: платежная экосистема России, CJM, конкуренты, ICE/RICE, roadmap 12-24 месяца.
 - Status: partial
 - Profile: standard
-- Execution mode: local
+- Execution mode: agentic
 - Current stage: none
-- Updated: 2026-06-09T11:38:13.199Z
+- Updated: 2026-06-10T06:26:14.312Z
 
 ## What To Read First
 
 - `recursive-brief.md` (recursive_brief, partial)
 - `research-summary.md` (research_summary, completed)
 - `prd.md` (prd, completed)
+- `ia-brief.md` (ia_brief, completed)
+- `design-brief.md` (design_brief, completed)
+- `screens.md` (screens, completed)
+- `copy-deck.md` (copy_deck, completed)
 - `qa-report.md` (qa_report, partial)
-- `release-notes.md` (release_notes, partial)
-- `run-plan.md` (run_plan, partial)
-- `handoff-bundle.md` (handoff_bundle, partial)
-- `stage-gate-ledger.md` (stage_gate_ledger, partial)
 
 ## Progress
 
-- Completed artifacts: 10/23
+- Completed artifacts: 14/23
 - Blocking stages: 3
 
 ## Blocking Stages
@@ -46,10 +46,10 @@
 | synthetic-interviews.md | completed | 01-research research | yes |
 | swot.md | completed | 01-research research | yes |
 | prd.md | completed | 02-prd prd | yes |
-| ia-brief.md | missing | 03-ia ia | yes |
-| design-brief.md | missing | 04-design design | yes |
-| copy-deck.md | missing | 05-copy copywriting | yes |
-| screens.md | missing | 06-screens design-generator | yes |
+| ia-brief.md | completed | 03-ia ia | yes |
+| design-brief.md | completed | 04-design design | yes |
+| copy-deck.md | completed | 05-copy copywriting | yes |
+| screens.md | completed | 06-screens design-generator | yes |
 | prototype-report.md | missing | 07-prototype prototype | yes |
 | frontend-result.md | missing | 08-frontend frontend | no |
 

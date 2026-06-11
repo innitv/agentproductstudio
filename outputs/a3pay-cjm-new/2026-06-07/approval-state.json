@@ -86,6 +86,59 @@
       "target": "notion_hub:37a6473174e581e18cf5e6466d61f3fe",
       "notes": "Пользователь попросил комбинировать Notion export: встроить linked database views в соответствующие child pages, чтобы hub ощущался цельным рабочим артефактом",
       "approved_at": "2026-06-09T06:54:10.423Z"
+    },
+    {
+      "action": "notion_research_publish",
+      "approved": true,
+      "approved_by": "human",
+      "target": "3696473174e58006af5fd367ef89d978",
+      "approved_at": "2026-06-09T17:38:16.860Z"
+    },
+    {
+      "action": "notion_agile_export",
+      "approved": true,
+      "approved_by": "human",
+      "target": "notion_hub:37a6473174e581efa178ebd2bdaa422b",
+      "approved_at": "2026-06-09T17:39:24.597Z"
+    },
+    {
+      "action": "notion_prd_export",
+      "approved": true,
+      "approved_by": "human",
+      "target": "notion_hub:37a6473174e581efa178ebd2bdaa422b",
+      "approved_at": "2026-06-09T17:54:30.236Z"
+    },
+    {
+      "action": "model_provider_call",
+      "approved": true,
+      "approved_by": "human",
+      "target": "openai_agents_sdk:ia:03-ia",
+      "notes": "Одобрено для agentic 03-ia ia stage",
+      "approved_at": "2026-06-10T06:17:19.693Z"
+    },
+    {
+      "action": "model_provider_call",
+      "approved": true,
+      "approved_by": "human",
+      "target": "openai_agents_sdk:design:04-design",
+      "notes": "Одобрено для agentic 04-design design stage",
+      "approved_at": "2026-06-10T06:17:22.976Z"
+    },
+    {
+      "action": "model_provider_call",
+      "approved": true,
+      "approved_by": "human",
+      "target": "openai_agents_sdk:copywriting:05-copy",
+      "notes": "Одобрено для agentic 05-copy copywriting stage",
+      "approved_at": "2026-06-10T06:17:26.347Z"
+    },
+    {
+      "action": "model_provider_call",
+      "approved": true,
+      "approved_by": "human",
+      "target": "openai_agents_sdk:design-generator:06-screens",
+      "notes": "Одобрено для agentic 06-screens design-generator stage",
+      "approved_at": "2026-06-10T06:17:30.353Z"
     }
   ]
 }

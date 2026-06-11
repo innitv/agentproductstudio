@@ -56,7 +56,7 @@
 
 | Risk | Status | Notes |
 |---|---|---|
-| DeepSeek/Gemini cross-check | open | Research run остается `partial` до provider cross-check или waiver. |
+| DeepSeek/Gemini advisory check | logged | Historical legacy auto-run был выполнен по прежнему правилу; DeepSeek прошёл, Gemini вернул `503 Service Unavailable`. По текущим правилам DeepSeek/Gemini не входят в default-run; research run остается `partial` из-за legal/rails и custdev gaps, а не до Gemini retry. |
 | Повторная публикация | versioned copy | Скрипт создал новый hub под parent page; idempotent update existing hub не выполнялся. |
 
 ## Full Republication Published
@@ -260,3 +260,110 @@
 | Publication Editor Pass | pass | Public export очищен от internal ledger/debug sections; `entity_ownership_map` построен для personas, CJM frictions, opportunities, validation claims и sources. |
 | Research Content Lint | pass | `yarn research:lint outputs\a3pay-cjm-new\2026-06-07\notion-research-export-ru.md`. |
 | Notion dry-run | pass | `publication_allowed=true`, blockers пустые, `layout_strategy=integrated_hybrid`. |
+
+## New Rules Publication 2026-06-09
+
+После approval пользователя `разрешаю публикацию` опубликована последняя исправленная research-версия по новым правилам. Эта версия создана под тем же parent page как новый hub; предыдущие Notion-публикации не удалялись.
+
+| Field | Value |
+|---|---|
+| Status | published |
+| Action | `notion_research_publish` |
+| Target parent page | `3696473174e58006af5fd367ef89d978` |
+| Hub title | A3 Pay: исследование платежных сценариев России - версия по новым правилам |
+| Hub page id | `37a64731-74e5-81ef-a178-ebd2bdaa422b` |
+| Hub URL | https://app.notion.com/p/37a6473174e581efa178ebd2bdaa422b |
+| Source artifact | `notion-research-export-ru.md` |
+| Child pages | 8 |
+| Published blocks | 471 |
+| Layout strategy | `integrated_hybrid` |
+
+| Gate | Status | Evidence |
+|---|---|---|
+| Approval record | pass | `workflow:approve ... notion_research_publish --target 3696473174e58006af5fd367ef89d978`. |
+| Research Content Lint | pass | `yarn research:lint outputs\a3pay-cjm-new\2026-06-07`. |
+| Public export lint | pass | `yarn research:lint outputs\a3pay-cjm-new\2026-06-07\notion-research-export-ru.md`. |
+| Notion dry-run | pass | `publication_allowed=true`, blockers empty, `layout_strategy=integrated_hybrid`. |
+| External write | completed | Hub and 8 child pages created. |
+| Notion fetch verification | pass | MCP fetch confirmed hub title, parent, child pages, Russian navigation and `08 План валидации и источники`. |
+
+| Page | Page id |
+|---|---|
+| `00 Обзор, выводы и рамка исследования` | `37a64731-74e5-8178-8c55-f5408646adc7` |
+| `02 Конкуренты, активы A3 и стратегия` | `37a64731-74e5-818c-b719-f317b0112333` |
+| `03 Прото-персоны` | `37a64731-74e5-81a2-9ca0-c219b42aeb55` |
+| `04 Синтетические интервью и вопросы для интервью` | `37a64731-74e5-8148-84ca-ffed71d6655a` |
+| `05 CJM и сценарии` | `37a64731-74e5-81ea-8e9c-dfa90e2e3208` |
+| `06 ICE/RICE бэклог и инициативы` | `37a64731-74e5-81b6-83a8-f85890b203fe` |
+| `07 Roadmap и SWOT` | `37a64731-74e5-8124-8208-cb0df1ddf383` |
+| `08 План валидации и источники` | `37a64731-74e5-81c3-8553-e7654b586c57` |
+
+## New Rules Integrated Hybrid Database Layer 2026-06-09
+
+После публикации нового hub выполнен research-only database pass, чтобы рабочие базы были встроены в смысловые страницы, а не жили отдельно от narrative.
+
+| Field | Value |
+|---|---|
+| Status | published |
+| Action | `notion_agile_export` |
+| Target hub | `37a64731-74e5-81ef-a178-ebd2bdaa422b` |
+| Approval | `notion_agile_export` approved for `notion_hub:37a6473174e581efa178ebd2bdaa422b` |
+| Created databases | 5 |
+| Created rows | 27 |
+| Embedded linked views | 5 |
+| Verification | Notion fetch confirmed inline database blocks on personas, CJM, opportunities and validation/source child pages. |
+
+| Database | URL | Data source | Rows |
+|---|---|---|---:|
+| A3 Pay Personas - new rules | https://app.notion.com/p/be0c2a67a0ee4ba79228d88434dc1d49 | `collection://98ae66ee-82f2-40ce-8221-142891cd89d3` | 4 |
+| A3 Pay CJM Frictions - new rules | https://app.notion.com/p/1f37477446b04499a36bdaf224d76221 | `collection://28ebf2a2-5eef-4653-985f-846c9f525be2` | 5 |
+| A3 Pay Opportunities - new rules | https://app.notion.com/p/92505c076681446da13573f3a0047e0b | `collection://491a4629-9c54-4eda-8acb-0295f2b7b456` | 7 |
+| A3 Pay Validation Claims - new rules | https://app.notion.com/p/512347001be3476993bd83902daa1fae | `collection://555d104f-b503-4ff9-bda4-d8c607f7bb63` | 5 |
+| A3 Pay Sources - new rules | https://app.notion.com/p/6a7d441dbab74202964e804e02c25463 | `collection://c8ca0456-e9b5-431f-abed-e9cbc7cc875f` | 6 |
+
+| Child page | Linked database view | View id | Data source |
+|---|---|---|---|
+| `03 Прото-персоны` | Рабочая база персон | `view://37a64731-74e5-8198-85c8-000c07b69f67` | `collection://98ae66ee-82f2-40ce-8221-142891cd89d3` |
+| `05 CJM и сценарии` | Рабочая база CJM-трений | `view://37a64731-74e5-8196-b451-000c2b7bac0f` | `collection://28ebf2a2-5eef-4653-985f-846c9f525be2` |
+| `06 ICE/RICE бэклог и инициативы` | Рабочий backlog возможностей | `view://37a64731-74e5-81bf-9d8a-000cdddac936` | `collection://491a4629-9c54-4eda-8acb-0295f2b7b456` |
+| `08 План валидации и источники` | Рабочая база гипотез для проверки | `view://37a64731-74e5-8111-8ea5-000cda434914` | `collection://555d104f-b503-4ff9-bda4-d8c607f7bb63` |
+| `08 План валидации и источники` | Рабочая база источников | `view://37a64731-74e5-81f0-ab66-000c3cc14e5a` | `collection://c8ca0456-e9b5-431f-abed-e9cbc7cc875f` |
+
+## New Rules PRD Publication 2026-06-09
+
+По запросу пользователя `закинь prd` PRD добавлен в последний опубликованный research hub по новым правилам.
+
+| Field | Value |
+|---|---|
+| Status | published |
+| Action | `notion_prd_export` |
+| Target hub | `37a64731-74e5-81ef-a178-ebd2bdaa422b` |
+| PRD page title | `10 PRD для MVP` |
+| PRD page id | `37a64731-74e5-817e-9542-ed85a6dcdcc5` |
+| PRD page URL | https://app.notion.com/p/37a6473174e5817e9542ed85a6dcdcc5 |
+| Source artifact | `notion-prd-export.md` |
+| Published blocks | 43 |
+| Hub navigation | updated; child page count changed from 8 to 9 |
+
+| Gate | Status | Evidence |
+|---|---|---|
+| Approval record | pass | `workflow:approve ... notion_prd_export --target notion_hub:37a6473174e581efa178ebd2bdaa422b`. |
+| Notion write | completed | `publish-notion-research-page.mjs` created PRD child page under new rules hub. |
+| Notion fetch verification | pass | MCP fetch confirmed page title, parent hub, Russian PRD content and target hub id in export table. |
+| Hub navigation update | pass | Hub now lists `10 PRD для MVP` and publication evidence says 9 child pages. |
+| PRD export lint | pass | `yarn research:lint outputs\a3pay-cjm-new\2026-06-07\notion-prd-export.md` passes after adding `CJM-связка PRD`, key cases and сквозной user flow. |
+
+## New Rules PRD Requirements Database 2026-06-09
+
+Чтобы PRD был частью цельного workspace, а не только текстовой страницей, создана база требований и встроена linked view в страницу PRD.
+
+| Field | Value |
+|---|---|
+| Status | published |
+| Database | A3 Pay Requirements - new rules |
+| Database URL | https://app.notion.com/p/6a688cd26de549e3a5e643ebcc5fc3df |
+| Data source | `collection://f45e31a7-545c-4d53-910e-6be840a0f73a` |
+| Rows | 14 |
+| Embedded view | `view://37a64731-74e5-8198-92c8-000cf76f1d65` |
+| Verification | Notion fetch confirmed inline database block on PRD page. |
+| CJM block | published | Notion PRD page includes `CJM-связка PRD`, key cases and сквозной user flow under CJM. |

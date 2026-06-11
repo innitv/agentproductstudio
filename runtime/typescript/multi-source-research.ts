@@ -2,7 +2,9 @@ import { runDeepSeekResearch, type DeepSeekResearchResult } from "./deepseek-res
 import { loadLocalEnv } from "./env";
 import { runGeminiResearch, type GeminiResearchResult } from "./gemini-research";
 import {
+  advisoryResearchProviders,
   defaultMultiSourceResearchProviders,
+  requiredSourceBackedResearchProviders,
   researchModes,
   researchProviders,
   resolveSourcePolicy,
@@ -116,6 +118,7 @@ export async function runMultiSourceResearch(input: MultiSourceResearchInput): P
 
   const fallbacks = await applyProviderFallbacks({
     input,
+    providersRequested,
     results,
     failures,
   });
@@ -129,13 +132,14 @@ export async function runMultiSourceResearch(input: MultiSourceResearchInput): P
     fallbacks,
     results,
     sources: collectSources(results),
-    validation: validateMultiSourceCoverage(input.mode, results, unavailableProviders, failures, fallbacks),
+    validation: validateMultiSourceCoverage(input.mode, providersRequested, results, unavailableProviders, failures, fallbacks),
     unknowns: buildUnknowns(providersRequested, unavailableProviders, failures, fallbacks, results.length),
   };
 }
 
 async function applyProviderFallbacks(args: {
   input: MultiSourceResearchInput;
+  providersRequested: ResearchProvider[];
   results: MultiSourceResearchResult["results"];
   failures: ProviderFailure[];
 }): Promise<ProviderFallback[]> {
@@ -146,12 +150,16 @@ async function applyProviderFallbacks(args: {
     return fallbacks;
   }
 
+  if (!args.providersRequested.includes(researchProviders.deepseek)) {
+    return fallbacks;
+  }
+
   const fallback: ProviderFallback = {
     from: researchProviders.tavily,
     to: researchProviders.deepseek,
     reason: "tavily_limit",
     status: "unavailable",
-    notes: "Tavily reached a rate/daily limit. DeepSeek may continue synthesis, but it is not source-backed evidence.",
+    notes: "Tavily reached a rate/daily limit. Explicitly requested DeepSeek may continue synthesis, but it is not source-backed evidence.",
   };
 
   if (args.results.some((result) => result.provider === researchProviders.deepseek)) {
@@ -244,6 +252,7 @@ function isProviderConfigured(provider: ResearchProvider): boolean {
 
 function validateMultiSourceCoverage(
   mode: ResearchMode | undefined,
+  providersRequested: ResearchProvider[],
   results: MultiSourceResearchResult["results"],
   unavailableProviders: ResearchProvider[],
   failures: ProviderFailure[],
@@ -258,9 +267,9 @@ function validateMultiSourceCoverage(
     return { status: "pass", checks };
   }
 
-  for (const provider of defaultMultiSourceResearchProviders) {
+  for (const provider of requiredSourceBackedResearchProviders) {
     if (used.has(provider)) {
-      checks.push(`${provider}: returned results.`);
+      checks.push(`${provider}: returned source-backed results.`);
       continue;
     }
 
@@ -277,11 +286,32 @@ function validateMultiSourceCoverage(
     checks.push(`${provider}: did not return results.`);
   }
 
+  const requestedAdvisoryProviders = advisoryResearchProviders.filter((provider) => providersRequested.includes(provider));
+
+  for (const provider of requestedAdvisoryProviders) {
+    if (used.has(provider)) {
+      checks.push(`${provider}: advisory cross-check returned results; not source-backed evidence.`);
+      continue;
+    }
+
+    if (unavailableProviders.includes(provider)) {
+      checks.push(`${provider}: advisory cross-check unavailable; non-blocking for ready status.`);
+      continue;
+    }
+
+    if (failures.some((failure) => failure.provider === provider)) {
+      checks.push(`${provider}: advisory cross-check failed; non-blocking for ready status.`);
+      continue;
+    }
+
+    checks.push(`${provider}: advisory cross-check did not return results; non-blocking for ready status.`);
+  }
+
   for (const fallback of fallbacks) {
     checks.push(`${fallback.from}: fallback to ${fallback.to} ${fallback.status} (${fallback.reason}).`);
   }
 
-  const status = defaultMultiSourceResearchProviders.every((provider) => used.has(provider))
+  const status = requiredSourceBackedResearchProviders.every((provider) => used.has(provider))
     ? "pass"
     : "needs_validation";
 

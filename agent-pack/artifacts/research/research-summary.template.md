@@ -49,14 +49,14 @@ Research stage must read the current run ledger before provider synthesis. Inclu
 
 ## Provider Coverage
 
-Required for `deep_research`: `tavily` must return usable sources, `deepseek` must return usable cross-check/check results, and `gemini` must return usable strategic cross-check results for `ready`.
-If either default provider is unavailable, failed or empty, set Status to `partial` and record `needs_validation`.
+Required for `deep_research`: `tavily` or another source-backed/primary provider must return usable sources for `ready`.
+DeepSeek/Gemini are opt-in advisory checks only: do not run them by default. If explicitly enabled, record requested/used/unavailable/failed status, but do not make the artifact `partial` solely because they failed, timed out, returned noisy synthesis or were unavailable.
 
 | Provider | Requested | Used | Sources count | Validation state | Notes |
 |---|---:|---:|---:|---|---|
 | tavily | yes / no | yes / no |  | pass / needs_validation / failed |  |
-| deepseek | yes / no | yes / no | 0 | pass / needs_validation / failed | required cross-check; not source-backed evidence |
-| gemini | yes / no | yes / no | 0 | pass / needs_validation / failed | required strategy cross-check; not source-backed evidence |
+| deepseek | yes / no | yes / no | 0 | pass / advisory_failed / skipped | advisory cross-check; not source-backed evidence |
+| gemini | yes / no | yes / no | 0 | pass / advisory_failed / skipped | advisory strategy check; not source-backed evidence |
 
 ## Provider Failures
 
@@ -289,10 +289,10 @@ Required before detailed Notion hub publication. Use this to decide whether data
 - [ ] Provider Coverage records requested, used, unavailable/failed providers.
 - [ ] Research Plan covers market/category, competitors, user scenarios, trust/compliance and design implications.
 - [ ] Source Quality Pass separates primary/source-backed facts from noisy snippets and model synthesis.
-- [ ] Tavily returned usable sources or Status is `partial`.
-- [ ] DeepSeek returned usable cross-check/check output or Status is `partial`.
+- [ ] Tavily or another source-backed/primary provider returned usable sources or Status is `partial`.
+- [ ] DeepSeek returned usable advisory output or its failure/skipped reason is recorded as non-blocking.
 - [ ] DeepSeek output is marked as cross-check/synthesis and not treated as evidence.
-- [ ] Gemini returned usable strategic cross-check output or Status is `partial`.
+- [ ] Gemini returned usable advisory output or its failure/skipped reason is recorded as non-blocking.
 - [ ] Gemini output is marked as cross-check/synthesis and not treated as evidence.
 - [ ] Contradiction Review exists and unresolved conflicts are marked `needs_validation`.
 - [ ] Audience segments are defined.

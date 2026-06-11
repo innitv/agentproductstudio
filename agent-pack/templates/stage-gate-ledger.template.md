@@ -19,7 +19,7 @@
 - external writes имеют явную approval-запись в `approval-state.json`; если последняя matching-запись является denial, действие считается заблокированным;
 - `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard` не возвращает ошибок для пакета стандартного профиля (standard profile) без визуального референса;
 - `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference` не возвращает ошибок для пакета профиля референса (reference profile) с визуальным референсом;
-- в случае настройки интеграции с Notion на стадии релиза выполнен автоматический экспорт Agile-доски (базы Персон и связанных с ними через Relation Пользовательских историй с чек-листами критериев приемки Acceptance Criteria).
+- в случае настройки интеграции с Notion на стадии релиза подготовлен Agile export plan/dry-run, а внешняя запись Agile-доски выполнена только при наличии exact approval `notion_agile_export` для целевой страницы/базы.
 
 ## Статус этапов (Stage Status)
 

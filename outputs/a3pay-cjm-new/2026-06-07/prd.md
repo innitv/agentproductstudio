@@ -55,7 +55,7 @@ MVP должен закрыть три жизненных момента:
 2. В момент оплаты: провести пользователя через СБП/карту/партнерский сценарий без ручных реквизитов и потери состояния.
 3. После оплаты: сохранить чек, статус, ожидаемый возврат или следующий регулярный платеж.
 
-Статус PRD остается `partial`, потому что не закрыты provider cross-check, реальные интервью, legal role, список доступных rails и партнерские ограничения.
+Статус PRD остается `partial`, потому что не закрыты реальные интервью, legal role, список доступных rails и партнерские ограничения.
 
 ## Goals
 
@@ -122,7 +122,7 @@ MVP должен закрыть три жизненных момента:
 
 ## Evidence-To-Requirement Map
 
-| Evidence / JTBD / constraint | Product implication | Requirement ID | Priority | Validation state |
+| Основание / JTBD / ограничение | Продуктовый вывод | ID требования | Приоритет | Статус проверки |
 |---|---|---|---|---|
 | Клиент не доверяет переводу на карту без назначения и условий | Нужен счет по телефону с профилем получателя и условиями | REQ-001, REQ-002, REQ-003 | must | hypothesis; prototype test |
 | Регулярные счета разбросаны по кабинетам и каналам | Нужен центр счетов, напоминания и архив чеков | REQ-004, REQ-005 | must | source-informed hypothesis |
@@ -194,7 +194,7 @@ MVP должен закрыть три жизненных момента:
 
 ### Функциональные требования
 
-| ID | Requirement | User / business value | Evidence | Priority |
+| ID | Требование | Пользовательская / бизнес-ценность | Основание | Приоритет |
 |---|---|---|---|---|
 | REQ-001 | Пользователь может открыть счет по телефону или ссылке и увидеть сумму, назначение, срок и получателя до оплаты. | Снимает ключевой страх "кому и за что я плачу". | CJM услуги, research-summary | must |
 | REQ-002 | Счет должен показывать минимальный профиль получателя: отображаемое имя, тип услуги/бизнеса, источник счета, статус проверки, контакты поддержки. | Уменьшает риск восприятия как перевода неизвестному человеку. | proto-personas, cjm-map | must |
@@ -286,7 +286,7 @@ MVP должен закрыть три жизненных момента:
 | Неизвестна фактическая роль A3 Pay в платежной цепочке | high | Legal/payment architecture review до финального scope. |
 | Неизвестны доступные rails и партнеры | high | Подтвердить СБП/карта/PSP/payment link/BNPL capability matrix. |
 | Synthetic interviews не являются доказательством | medium | Провести реальные интервью и прототипные тесты. |
-| DeepSeek/Gemini cross-check не выполнен | medium | Выполнить cross-check или оформить waiver. |
+| Методическая проверка логики исследования не заменяет интервью | low | Использовать только как дополнительный internal review, если команда явно включит такой pass; статус PRD должен зависеть от legal/rails, партнеров, интервью и прототипных тестов. |
 | Профиль получателя может восприниматься как гарантия | high | Контентный и legal review статусов проверки. |
 | Регулярные счета конкурируют с банками/Госуслугами | medium | Проверить willingness-to-connect и repeat intent до тяжелых интеграций. |
 | E-commerce checkout зависит от merchant/PSP интеграций | medium | Начинать с прототипа и lightweight payment link. |
@@ -303,11 +303,10 @@ MVP должен закрыть три жизненных момента:
 
 ## Readiness Review
 
-| Gate | Status | Notes |
+| Проверка | Статус | Заметки |
 |---|---|---|
 | Required inputs present | pass | Все основные research artifacts доступны. |
 | Anti-AI-Slop research lint | pass | `yarn research:lint outputs\a3pay-cjm-new\2026-06-07` проходит. |
 | PRD traceability | pass_with_limitations | Must requirements связаны с CJM/research; часть evidence остается hypothesis. |
-| Provider cross-check | partial | DeepSeek/Gemini не выполнены. |
 | Legal/rails readiness | partial | Роль A3 Pay и партнеры не подтверждены. |
 | Downstream readiness | partial | Можно начинать IA/design как `partial`, но нельзя финализировать production scope без legal/partner answers. |

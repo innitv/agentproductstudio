@@ -74,3 +74,18 @@
 2. PEP-03, PEP-04, PEP-05: потом tooling, чтобы будущие exports реально менялись.
 3. PEP-07: локальная проверка на A3 Pay через dry-run/lint без внешней публикации.
 
+## Статус синхронизации
+
+Обновлено: 2026-06-09.
+
+| ID | Статус | Что синхронизировано |
+|---|---|---|
+| PEP-01 | done | `AGENTS.md`, `artifact-driven-pipeline.md`, `notion-publisher.agent.md`, `notion-sync/SKILL.md`, `quality-gates.md` требуют `Publication Editor Pass`, public/private split, dedupe и ownership до Notion write. |
+| PEP-02 | done | `surface-output-contract.template.md`, research и PRD templates содержат public/internal split, entity ownership и `integrated_hybrid` правила. |
+| PEP-03 | done | `generate-notion-research-export.mjs` и related publication flow очищают public export от internal ledger/control sections. |
+| PEP-04 | done | `publish-notion-research-hub.mjs` проверяет `publication_editor_gate`, duplicate/control sections и publication blockers на dry-run. |
+| PEP-05 | done | Dry-run shape plan содержит `notion_data_shape_plan`, `database_index_candidates`, `embedded_database_views` и `integrated_hybrid`. |
+| PEP-06 | done | `validate-config.mjs` закрепляет Publication Editor Pass, integrated hybrid и anti-slop snippets как config invariants. |
+| PEP-07 | done | A3 Pay run проходит local dry-run/lint/sync; внешняя Notion write не выполнялась в этом sync pass. |
+
+Дополнительная синхронизация 2026-06-09: DeepSeek/Gemini удалены из default research run и оставлены только как explicit opt-in advisory checks. Это не меняет Publication Editor Pass напрямую, но защищает будущие Notion exports от слабого provider synthesis как источника фактов.

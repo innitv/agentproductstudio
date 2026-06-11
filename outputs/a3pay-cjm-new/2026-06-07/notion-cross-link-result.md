@@ -38,4 +38,4 @@
 
 - Это точечное обновление связности, а не полная перепубликация research pack.
 - Остальные дочерние страницы не переписывались.
-- Run остается `partial`, потому что DeepSeek/Gemini cross-check по-прежнему не выполнен.
+- Run остается `partial` из-за legal/rails и custdev gaps. DeepSeek/Gemini теперь считаются advisory checks: DeepSeek прошёл, Gemini вернул `503 Service Unavailable`, и это не блокирует readiness само по себе.

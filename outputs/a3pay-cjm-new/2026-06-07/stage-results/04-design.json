@@ -1,0 +1,16 @@
+{
+  "stage_id": "04-design",
+  "title": "Design Brief",
+  "status": "completed",
+  "artifacts_created": [
+    "design-brief.md"
+  ],
+  "inputs_used": [
+    "[prd.md](prd.md)",
+    "[ia-brief.md](ia-brief.md)",
+    "[research-summary.md](research-summary.md)"
+  ],
+  "warnings": [],
+  "errors": [],
+  "completed_at": "2026-06-10T06:26:14.312Z"
+}

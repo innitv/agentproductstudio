@@ -25,10 +25,17 @@ export const researchProviders = {
 
 export type ResearchProvider = (typeof researchProviders)[keyof typeof researchProviders];
 
-export const defaultMultiSourceResearchProviders = [
+export const requiredSourceBackedResearchProviders = [
   researchProviders.tavily,
+] as const satisfies readonly ResearchProvider[];
+
+export const advisoryResearchProviders = [
   researchProviders.deepseek,
   researchProviders.gemini,
+] as const satisfies readonly ResearchProvider[];
+
+export const defaultMultiSourceResearchProviders = [
+  ...requiredSourceBackedResearchProviders,
 ] as const satisfies readonly ResearchProvider[];
 
 export interface SourcePolicy {

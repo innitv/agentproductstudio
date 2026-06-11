@@ -49,7 +49,7 @@
 - `reference-driven workflow`: пользователь дал URL/screenshot/«как этот сайт»; обязателен reference scan, visual spec и visual reference review.
 - `quick draft`: допустим только по явному запросу пользователя; результат помечается `partial`/`draft`.
 - `limited engineering task`: узкая правка в коде/документации; можно использовать task-scoped ExecPlan вместо полного workflow.
-- `external write`: Notion, Figma, deploy, изменение секретов, удаление данных и git write без текущего явного запроса требуют exact approval. Model-provider calls требуют approval, кроме обязательных DeepSeek/Gemini cross-check на `01-research`, которые запускаются автоматически как часть multi-source research pipeline при наличии ключей.
+- `external write`: Notion, Figma, deploy, изменение секретов, удаление данных и git write без текущего явного запроса требуют exact approval. Model-provider calls требуют approval, кроме явно включенных non-blocking DeepSeek/Gemini advisory checks на `01-research`.
 - `cleanup/sorting`: работа с outputs/temp/products/archive или грязным деревом выполняется отдельно от feature work.
 
 Первый рабочий цикл:
@@ -301,7 +301,7 @@ Route tools и зависимости артефактов описаны в `ru
 
 Опциональные инструменты внешней публикации, например `publish_prd_to_notion`, являются route tools с обязательным подтверждением. Они не заменяют локальные артефакты и должны иметь локальный Markdown fallback.
 
-Deep research по умолчанию multi-source: Tavily дает source-backed evidence, DeepSeek и Gemini используются для contradiction review, cross-check и claims-to-validate. Для стадии `01-research` эти DeepSeek/Gemini cross-check запускаются автоматически при наличии ключей и не являются отдельным provider opt-in; любые другие model-provider calls остаются approval-gated.
+Deep research по умолчанию evidence-first: Tavily/primary sources дают source-backed evidence и определяют research readiness. DeepSeek и Gemini не входят в default-run и используются только при явном opt-in как advisory layer для contradiction review, cross-check и claims-to-validate; они не добавляют `sources_count`, не пишут факты в research pack и не блокируют `ready`, если падают, шумят или дают нерелевантный synthesis. Для стадии `01-research` такие advisory checks не являются отдельным provider approval сверх явного opt-in; любые другие model-provider calls остаются approval-gated.
 
 Notion-публикация не является raw dump локальных файлов. Для подробного research pack перед внешней записью обязательны:
 
@@ -431,7 +431,7 @@ yarn notion:publish-research-hub <notion-parent-page-id> <research-export-md> "<
 Режим исполнения:
 
 - `local` — режим по умолчанию для `workflow:start`. Он сохраняет текущий детерминированный каркас: исполняемая research stage плюс локальная генерация downstream-артефактов.
-- `agentic` — approval-gated staged rollout для отдельных specialist stages. Перед `workflow:resume` проверяй `workflow:agentic-preflight ... --strict`; model provider calls требуют `model_provider_call` approval с target вида `openai_agents_sdk:<owner>:<stage-id>`, кроме обязательных DeepSeek/Gemini cross-check на `01-research`, которые считаются частью research pipeline.
+- `agentic` — approval-gated staged rollout для отдельных specialist stages. Перед `workflow:resume` проверяй `workflow:agentic-preflight ... --strict`; model provider calls требуют `model_provider_call` approval с target вида `openai_agents_sdk:<owner>:<stage-id>`, кроме явно включенных non-blocking DeepSeek/Gemini advisory checks на `01-research`, которые считаются вспомогательной проверкой research pipeline.
 - Внешние записи вроде Notion, Figma или деплоя должны проходить через `yarn workflow:approve`; runtime сохраняет записи в `approval-state.json`, а отсутствующее подтверждение фиксируется как partial/blocked вместо тихой публикации.
 - Approval matching строгий по `target`: targetless approval не покрывает targeted request, а targeted approval не покрывает targetless request.
 - `AGENTIC_ENABLED_STAGES` валидируется по известным stage id; несуществующие значения игнорируются и показываются в CLI output.
@@ -479,7 +479,7 @@ schema_payload:
 - `runtime/typescript/firecrawl.ts` подключает Firecrawl SDK как opt-in scrape/interact provider.
 - `runtime/typescript/reference-scan.ts` собирает reference pack: Firecrawl markdown/json и Playwright desktop/mobile full-page screenshots в `reports/visual-review/<slug>/`.
 - `runtime/typescript/visual-diff.ts`, `visual-section-diff.ts` и `visual-reference-review.ts` создают pixel/section evidence и `visual-reference-review.md` для reference-driven QA.
-- `runtime/typescript/research-stage-runner.ts` запускает Tavily + DeepSeek + Gemini research provider flow и пишет обязательные research artifacts в `outputs/<project>/<date>/`.
+- `runtime/typescript/research-stage-runner.ts` запускает Tavily/source-backed research flow; DeepSeek/Gemini доступны только как явно включенные non-blocking advisory checks, а обязательные research artifacts пишутся в `outputs/<project>/<date>/`.
 - `tooling/scripts/generate-notion-research-export.mjs` собирает curated public export из полного research pack и вычищает internal ledger/debug sections через `Publication Editor Pass`.
 - `tooling/scripts/publish-notion-research-hub.mjs` выполняет dry-run/publish подробного Notion hub, проверяет `publication_shape_gate`, `publication_completeness_gate`, `publication_editor_gate`, cross-links, content lint и `notion_data_shape_plan`.
 - `design/figma/a3-design-system/` хранит долгоживущую карту Figma design-system tokens/components; workflow outputs должны ссылаться на неё через `Inputs Used`, а не дублировать как run output.

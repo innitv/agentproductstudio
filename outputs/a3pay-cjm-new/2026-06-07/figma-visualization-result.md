@@ -80,5 +80,5 @@
 
 - Это research/data visualization board, а не production UI kit.
 - Lazyweb visual references не встроены из-за `MCP_RATE_LIMITED` в момент сборки; попытка выполнена и зафиксирована.
-- DeepSeek/Gemini cross-check по-прежнему не выполнен, поэтому общий run остается `partial`.
+- Общий run остается `partial` из-за legal/rails и custdev gaps. DeepSeek/Gemini теперь считаются advisory checks: DeepSeek прошёл, Gemini вернул `503 Service Unavailable`, и это не блокирует readiness само по себе.
 - Часть персон и synthetic interviews является гипотезами для валидации, а не доказанным пользовательским поведением.

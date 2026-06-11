@@ -26,13 +26,13 @@
 | 01-research | Source-backed research pack | partial |
 | Notion export | Подготовить публикационный пакет | prepared |
 | External publication | Опубликовать research hub в Notion | completed |
-| Provider cross-check | DeepSeek/Gemini validation | needs_validation |
+| Advisory provider check | DeepSeek/Gemini contradiction review | logged |
 
 ## Ограничения
 
 - Не использовать старые A3Pay outputs как основу.
 - Не выполнять внешнюю публикацию без exact approval.
-- Не маркировать research as `ready`, пока DeepSeek/Gemini cross-check не выполнен или явно не waived.
+- Не маркировать research as `ready`, пока source-backed evidence, legal/rails и custdev gaps не имеют явного pass/deviation record. DeepSeek/Gemini не входят в default-run; при явном opt-in они работают только как advisory checks и сами по себе не блокируют readiness.
 
 ## Inputs Used
 
@@ -62,7 +62,7 @@
 | deepseek | yes | no | needs_validation: нет подтвержденного локального provider call в текущей сессии |
 | gemini | yes | no | needs_validation: optional provider keys предупреждены `workflow:doctor` |
 
-Так как `deepseek` и `gemini` не были подтверждены как выполненные cross-check providers, research stage помечен `partial`, даже при полноценной source-backed базе.
+Research stage остается `partial` из-за legal/rails и custdev gaps. DeepSeek/Gemini не являются source-backed evidence: их failure или шум фиксируется как advisory note, но не делает stage `partial` при полноценной source-backed базе.
 
 ## Deliverables
 
@@ -86,4 +86,4 @@
 
 | Blocker | Impact | Resolution |
 |---|---|---|
-| DeepSeek/Gemini cross-check не выполнены | Research cannot be marked `ready` by project rule | Запустить provider calls после настройки/approval или принять `partial`. |
+| Gemini advisory failure после legacy auto-run | Research keeps advisory caveat; readiness depends on source-backed/legal/custdev gates | В этом historical pass DeepSeek/Gemini были запущены без approval; DeepSeek прошёл, Gemini вернул `503 Service Unavailable`. По текущим правилам DeepSeek/Gemini не входят в default-run и запускаются только при explicit opt-in. |

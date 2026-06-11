@@ -62,3 +62,56 @@
 - Relations between databases were not added in this pass. The recommended working chain is recorded on the hub: `Persona -> CJM friction -> Opportunity -> Requirement -> Acceptance signal -> Validation claim -> Source`.
 - Requirements database title property was renamed from `ID` to `Requirement ID`, because the Notion connector rejected row creation for a title property named `ID`.
 - `notion_query_data_sources` was unavailable in the current connector runtime (`Tool notion-query-data-sources not found`), so row verification is based on successful create responses and fetch verification of hub/child pages.
+
+## New Rules Hub Database Layer 2026-06-09
+
+После публикации нового research hub `A3 Pay: исследование платежных сценариев России - версия по новым правилам` создан отдельный research-only database layer. В этом hub PRD не публиковался, поэтому requirements database намеренно не создавалась.
+
+| Field | Value |
+|---|---|
+| Status | published |
+| Action | `notion_agile_export` |
+| Target hub | `37a64731-74e5-81ef-a178-ebd2bdaa422b` |
+| Target hub URL | https://app.notion.com/p/37a6473174e581efa178ebd2bdaa422b |
+| Approval | `notion_agile_export` approved for `notion_hub:37a6473174e581efa178ebd2bdaa422b` |
+| Layout strategy | `integrated_hybrid`: research child pages + embedded database views |
+| Created databases | 5 |
+| Created rows | 27 |
+| Embedded linked views | 5 |
+| Verification | Notion fetch confirmed linked database blocks inside relevant child pages. |
+
+## New Rules Created Databases
+
+| Database | Database URL | Data source | Rows | Purpose |
+|---|---|---|---:|---|
+| A3 Pay Personas - new rules | https://app.notion.com/p/be0c2a67a0ee4ba79228d88434dc1d49 | `collection://98ae66ee-82f2-40ce-8221-142891cd89d3` | 4 | Сегменты, ситуации, боли и evidence status. |
+| A3 Pay CJM Frictions - new rules | https://app.notion.com/p/1f37477446b04499a36bdaf224d76221 | `collection://28ebf2a2-5eef-4653-985f-846c9f525be2` | 5 | Трения по CJM, сценарии, метрики и приоритеты. |
+| A3 Pay Opportunities - new rules | https://app.notion.com/p/92505c076681446da13573f3a0047e0b | `collection://491a4629-9c54-4eda-8acb-0295f2b7b456` | 7 | Возможности, ICE/RICE и метод проверки. |
+| A3 Pay Validation Claims - new rules | https://app.notion.com/p/512347001be3476993bd83902daa1fae | `collection://555d104f-b503-4ff9-bda4-d8c607f7bb63` | 5 | Гипотезы, проверка и решение, которое разблокируется. |
+| A3 Pay Sources - new rules | https://app.notion.com/p/6a7d441dbab74202964e804e02c25463 | `collection://c8ca0456-e9b5-431f-abed-e9cbc7cc875f` | 6 | Источники, URL, тип и качество доказательства. |
+
+## New Rules Integrated Linked Views
+
+| Child page | Embedded view | View id | Data source | Verification |
+|---|---|---|---|---|
+| `03 Прото-персоны` | Рабочая база персон | `view://37a64731-74e5-8198-85c8-000c07b69f67` | `collection://98ae66ee-82f2-40ce-8221-142891cd89d3` | Notion fetch confirms inline database block on page. |
+| `05 CJM и сценарии` | Рабочая база CJM-трений | `view://37a64731-74e5-8196-b451-000c2b7bac0f` | `collection://28ebf2a2-5eef-4653-985f-846c9f525be2` | Notion fetch confirms inline database block on page. |
+| `06 ICE/RICE бэклог и инициативы` | Рабочий backlog возможностей | `view://37a64731-74e5-81bf-9d8a-000cdddac936` | `collection://491a4629-9c54-4eda-8acb-0295f2b7b456` | Notion fetch confirms inline database block on page. |
+| `08 План валидации и источники` | Рабочая база гипотез для проверки | `view://37a64731-74e5-8111-8ea5-000cda434914` | `collection://555d104f-b503-4ff9-bda4-d8c607f7bb63` | Notion fetch confirms inline database block on page. |
+| `08 План валидации и источники` | Рабочая база источников | `view://37a64731-74e5-81f0-ab66-000c3cc14e5a` | `collection://c8ca0456-e9b5-431f-abed-e9cbc7cc875f` | Notion fetch confirms inline database block on page. |
+
+## New Rules PRD Requirements Layer 2026-06-09
+
+После добавления PRD в новый hub создана отдельная база требований и встроена в страницу PRD как linked database view.
+
+| Field | Value |
+|---|---|
+| Status | published |
+| Target PRD page | `37a64731-74e5-817e-9542-ed85a6dcdcc5` |
+| Database | A3 Pay Requirements - new rules |
+| Database URL | https://app.notion.com/p/6a688cd26de549e3a5e643ebcc5fc3df |
+| Data source | `collection://f45e31a7-545c-4d53-910e-6be840a0f73a` |
+| Rows | 14 |
+| Linked view | Рабочая база требований |
+| View id | `view://37a64731-74e5-8198-92c8-000cf76f1d65` |
+| Verification | Notion fetch confirms inline database block on `10 PRD для MVP`. |

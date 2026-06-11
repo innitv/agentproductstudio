@@ -2,11 +2,11 @@
   "run_id": "a3pay-cjm-new-2026-06-07",
   "goal": "Полный новый research workflow A3 Pay с нуля: платежная экосистема России, CJM, конкуренты, ICE/RICE, roadmap 12-24 месяца.",
   "profile": "standard",
-  "execution_mode": "local",
+  "execution_mode": "agentic",
   "status": "partial",
   "output_dir": "C:\\Project\\product-agent-studio\\outputs\\a3pay-cjm-new\\2026-06-07",
   "created_at": "2026-06-07T00:00:00+05:00",
-  "updated_at": "2026-06-09T11:38:13.199Z",
+  "updated_at": "2026-06-10T06:26:14.312Z",
   "stages": {
     "00-intake": {
       "id": "00-intake",
@@ -36,7 +36,7 @@
       "updated_at": "2026-06-09T06:15:39.696Z",
       "notes": [
         "Tavily/web source-backed research completed.",
-        "DeepSeek/Gemini cross-check not executed; status remains partial."
+        "Historical DeepSeek/Gemini legacy advisory run was attempted under the previous rule; DeepSeek passed, Gemini returned 503 Service Unavailable. Current rules keep DeepSeek/Gemini out of default-run; status remains partial because legal/rails and custdev gaps are open."
       ]
     },
     "02-prd": {
@@ -55,34 +55,43 @@
     "03-ia": {
       "id": "03-ia",
       "title": "Information Architecture",
-      "status": "pending",
-      "attempts": 0,
-      "artifacts": [],
-      "updated_at": "2026-06-07T08:24:10.895Z"
+      "status": "completed",
+      "attempts": 1,
+      "artifacts": [
+        "ia-brief.md"
+      ],
+      "updated_at": "2026-06-10T06:26:14.312Z",
+      "error": "401 Incorrect API key provided: sk-proj-********************************************************************************************************************************************************0H8A. You can find your API key at https://platform.openai.com/account/api-keys."
     },
     "04-design": {
       "id": "04-design",
       "title": "Design Brief",
-      "status": "pending",
-      "attempts": 0,
-      "artifacts": [],
-      "updated_at": "2026-06-07T08:24:10.895Z"
+      "status": "completed",
+      "attempts": 1,
+      "artifacts": [
+        "design-brief.md"
+      ],
+      "updated_at": "2026-06-10T06:26:14.312Z"
     },
     "05-copy": {
       "id": "05-copy",
       "title": "Copy Deck",
-      "status": "pending",
-      "attempts": 0,
-      "artifacts": [],
-      "updated_at": "2026-06-07T08:24:10.895Z"
+      "status": "completed",
+      "attempts": 1,
+      "artifacts": [
+        "copy-deck.md"
+      ],
+      "updated_at": "2026-06-10T06:26:14.312Z"
     },
     "06-screens": {
       "id": "06-screens",
       "title": "Screens",
-      "status": "pending",
-      "attempts": 0,
-      "artifacts": [],
-      "updated_at": "2026-06-07T08:24:10.895Z"
+      "status": "completed",
+      "attempts": 1,
+      "artifacts": [
+        "screens.md"
+      ],
+      "updated_at": "2026-06-10T06:26:14.312Z"
     },
     "07-prototype": {
       "id": "07-prototype",
