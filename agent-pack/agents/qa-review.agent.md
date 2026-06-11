@@ -65,6 +65,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 3. Убедиться, что реестры `stage-gate-ledger.md` и `handoff-bundle.md` были корректно обновлены, а skipped/partial stages имеют причины.
 4. Провести аудит полноты и достоверности исследований (Research Integrity / Research integrity).
 4a. Выполнить **Surface-Aware Output Audit**: для каждой пользовательской поверхности проверить Surface Output Contract, coverage gate, evidence-to-output map, verification evidence и deviations. Неполный Figma board, screen spec, Notion hub или frontend без coverage rationale является blocker/high finding.
+4b. Выполнить **Visual Evidence Grounding Audit**: для каждой визуальной/интерактивной поверхности проверить `visual_evidence_plan`, `visual_reference_cards`, Visual Evidence-To-Screen/Implementation Map, skipped layers, waiver/deviation и screenshot/visual review evidence. UI Kit/design system без real-world references не считается достаточным доказательством.
 5. Выполнить **Traceability Audit**: проверить цепочку `research/JTBD -> PRD requirement -> IA node -> design/screen -> copy -> prototype -> frontend/test signal`. Разрыв цепочки для `must` scope является blocker или high severity finding.
 6. Проверить соответствие реализации требованиям PRD и покрытие приоритетов MoSCoW.
 7. Проверить согласованность архитектуры (IA), экранов и прототипа, включая entry points, state map, navigation behavior, semantic hierarchy и completion step.
@@ -133,6 +134,7 @@ QA-агент обязан проверить:
 - Статус внешних публикаций/записей должен строго соответствовать матрице одобрений (Approval Matrix).
 - QA не может считаться passed, если нет Evidence Matrix, Severity Matrix и явного списка skipped/unavailable checks.
 - QA не может считаться passed, если созданная пользовательская поверхность не имеет Surface Output Contract или verification evidence.
+- QA не может считаться passed для визуальной/интерактивной поверхности, если отсутствует Visual Evidence Grounding или explicit waiver/deviation.
 - 100% pass без negative/edge path проверки требует Devil's Advocate note; иначе статус не выше `pass_with_known_limitations`.
 - Accessibility-рекомендации должны ссылаться на authoritative source или быть помечены `experience_based`.
 

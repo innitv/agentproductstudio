@@ -21,6 +21,16 @@
 - Surface Quality Bar: для каждой поверхности указаны критерии визуального/структурного качества: hierarchy, density, navigation, states, responsive, accessibility, references, Russian Publication Gate и data visualization fit, если применимо.
 - Write -> Verify -> Fix Gate: после записи или реализации есть metadata/screenshot/browser/build/test/QA evidence; если evidence нет, статус не выше `partial`/`blocked`.
 
+## Universal Gate: Visual Evidence Grounding
+
+- Для любой визуальной или интерактивной поверхности (`figma_board`, `product_ui`, `dashboard_console`, `landing`, `prototype`, `frontend`, `presentation`, visual `handoff`) до генерации есть `visual_evidence_plan`.
+- `visual_evidence_plan` покрывает минимум четыре слоя: same-domain references, adjacent high-quality references, interaction/state references и design-system grounding. Пропуск слоя требует `skipped_with_reason` и downstream risk.
+- UI Kit/design system/tokens/components не считаются достаточным visual evidence сами по себе. Они отвечают за consistency и implementation reuse, но не заменяют реальные product screenshots, live captures, user-provided references или benchmark examples.
+- Для каждого примененного референса есть `visual_reference_card`: source, surface/screen/state, observed pattern, what to borrow, what to avoid, applicability, IP/trade-dress risk и output unit.
+- Evidence-To-Output Map содержит не только research/JTBD, но и visual evidence: `visual reference -> visual decision -> frame/screen/component -> screenshot/visual review signal`.
+- `ready/success` запрещен, если layout, density, visual hierarchy, state patterns или responsive behavior основаны только на generic template, UI Kit или предпочтениях модели без реального visual evidence. Допустимы только `partial/blocked` или explicit waiver/deviation.
+- QA проверяет, что после генерации есть screenshot/object inventory/browser evidence и side-by-side review с выбранными visual references или зафиксированная причина невозможности сравнения.
+
 ## Universal Gate: Anti-AI-Slop Gate
 
 - Видимый пользователю артефакт не должен звучать как набор абстрактных AI-клише. Gate оценивает весь текст, а не только наличие отдельных слов. Слова `orchestration`, `rails`, `wedge`, `trust layer`, `seamless`, `unlock`, `flywheel`, `layer`, `companion`, `playbook` являются индикаторами риска, но не полным списком.
@@ -89,6 +99,7 @@
 - IA содержит Accessibility & Semantics: H1/H2/H3, landmarks, form labels/errors и focus order.
 - IA-To-Design Handoff содержит section order, navigation model, primary flow tree, state requirements, content objects, semantic structure, mobile behavior и design open questions.
 - Design содержит responsive и accessibility notes.
+- Design содержит Visual Evidence Grounding: `visual_evidence_plan`, same-domain/adjacent/state references или `skipped_with_reason`, `visual_reference_cards`, applicability notes и IP/trade-dress risks.
 - Если есть visual reference, `reference-analysis.md` содержит section-by-section visual spec, а `design-brief.md` и `screens.md` явно используют этот spec.
 - Для reference-driven или high-visual-risk задач рекомендуется `STYLE_GUIDE.md`; если он пропущен, `handoff-bundle.md` содержит `skipped_with_reason`.
 - Если создан `STYLE_GUIDE.md`, он содержит два слоя: presentation/render и UI structure, а также явные tokens, composition metrics, allowed/disallowed patterns и anti-patterns.
@@ -110,11 +121,12 @@
 - Screens согласованы с PRD, IA, design и copy.
 - Screens содержат Input Readiness Pass по PRD, IA, design, copy и reference/style inputs; пропуски фиксируются как `partial`/`blocked`.
 - Screens содержат Surface Output Contract для screen surface: expected screens/sections/states, evidence-to-screen map, coverage gate и verification plan.
+- Screens содержат Visual Evidence-To-Screen Map: какие real-world screenshots/live captures/user references/design-system examples повлияли на layout, density, hierarchy, states и responsive behavior каждого ключевого screen/component.
 - Screens содержат Design-System Grounding: reused tokens/components/styles и gaps для новых компонентов.
 - Screens содержат Screen Traceability: `research/JTBD -> PRD requirement -> IA node -> copy source -> prototype/test signal`.
 - Screens содержат component inventory, state inventory, responsive constraints и accessibility notes.
 - Screens содержат Figma Readiness: variables/styles, component sets/variants, Auto Layout critical areas, canvas strategy и screenshot verification plan.
-- Screens не могут быть `ready`, если layout или section order основаны на generic/default шаблоне вместо `design-brief.md`, `STYLE_GUIDE.md` или reference scan.
+- Screens не могут быть `ready`, если layout или section order основаны на generic/default шаблоне, UI Kit или design-system defaults вместо `design-brief.md`, `STYLE_GUIDE.md`, reference scan или Visual Evidence Grounding.
 - Prototype содержит start screen, transition map и completion step.
 - Prototype содержит Input Readiness Pass: PRD, IA, design, screens и copy дали достаточно данных для интерактивной спецификации; пропуски фиксируются как `partial`/`blocked`, а не додумываются.
 - Prototype содержит Flow Goal: user, goal, success outcome и primary action.

@@ -43,6 +43,12 @@
 | Evidence / Source | Interpretation | File / Component / View | Verification Signal |
 |---|---|---|---|
 
+### Visual Evidence-To-Implementation Map
+
+| Visual Reference | Borrowed Pattern | File / Component / View | Applied / Rejected / Deferred | Verification Signal |
+|---|---|---|---|---|
+| `<screenshot/live capture/user reference/design-system example>` | layout / density / hierarchy / state / responsive behavior |  |  | desktop/mobile screenshot / Playwright / visual review |
+
 ## Accessibility Notes
 
 ## Responsive Notes

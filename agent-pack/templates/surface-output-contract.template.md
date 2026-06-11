@@ -64,17 +64,44 @@
 
 Правило: evidence должен быть не просто прочитан, а связан с конкретным решением и местом в output.
 
-## 5. Surface Quality Bar
+## 5. Visual Evidence Grounding
+
+Заполняется для любой визуальной или интерактивной поверхности: `figma_board`, `product_ui`, `dashboard_console`, `landing`, `prototype`, `frontend`, `presentation` и visual `handoff`.
+
+### Visual Evidence Plan
+
+| Layer | Target references | Source / tool | Status | Skipped reason / risk |
+|---|---|---|---|---|
+| Same-domain references | Прямые конкуренты, аналоги, реальные продукты той же категории | user refs / web / Lazyweb / screenshot library / benchmark dataset | `planned|collected|skipped` |  |
+| Adjacent high-quality references | Смежные продукты с сильной UX-подачей, близкой плотностью или похожим уровнем доверия | web / Lazyweb / library | `planned|collected|skipped` |  |
+| Interaction/state references | Реальные loading/empty/error/success/disabled/permission/status/refund/etc. состояния похожего сценария | screenshots / screen recording / docs / live capture | `planned|collected|skipped` |  |
+| Design-system grounding | UI Kit, variables, tokens, components, local libraries | Figma / codebase / docs | `planned|collected|skipped` |  |
+
+Правило: UI Kit/design system не заменяет real-world visual evidence. Если real-world evidence недоступен, статус поверхности не выше `partial`, кроме explicit waiver/deviation.
+
+### Visual Reference Cards
+
+| Reference | Surface / screen / state | Observed pattern | What to borrow | What to avoid | Applicability | IP / trade-dress risk | Output location |
+|---|---|---|---|---|---|---|---|
+| `<source/url/path>` |  |  |  |  | `high|medium|low` | `low|medium|high` |  |
+
+### Visual Evidence-To-Output Map
+
+| Visual evidence | Visual decision | Output unit | Verification signal |
+|---|---|---|---|
+| `<screenshot/live capture/reference>` | layout / density / hierarchy / state / responsive behavior | `<frame/screen/component/slide>` | screenshot / object inventory / browser capture / visual diff / manual review |
+
+## 6. Surface Quality Bar
 
 | Surface | Required checks |
 |---|---|
-| `figma_board` | структура canvas, фреймы/секции, readable hierarchy, native/editable layers, Russian Publication Gate, screenshot smoke, object inventory |
-| `product_ui` / `frontend` | primary workflow, navigation, responsive, a11y, loading/empty/error/disabled states, browser screenshots, implementation evidence |
-| `dashboard_console` | decision hierarchy, chart-to-question fit, metric definitions, no chartjunk, data quality labels, scan time under 5 seconds for primary KPI |
-| `landing` | first viewport product signal, offer clarity, trust proof, CTA flow, responsive screenshots, no generic template |
-| `prototype` | transition map, task path, state coverage, clickable/interaction notes |
+| `figma_board` | структура canvas, фреймы/секции, readable hierarchy, native/editable layers, Visual Evidence Grounding, Russian Publication Gate, screenshot smoke, object inventory |
+| `product_ui` / `frontend` | primary workflow, navigation, Visual Evidence Grounding, responsive, a11y, loading/empty/error/disabled states, browser screenshots, implementation evidence |
+| `dashboard_console` | decision hierarchy, chart-to-question fit, metric definitions, no chartjunk, data quality labels, real dashboard references for density/states, scan time under 5 seconds for primary KPI |
+| `landing` | first viewport product signal, offer clarity, trust proof, CTA flow, real landing/product references, responsive screenshots, no generic template |
+| `prototype` | transition map, task path, state coverage, clickable/interaction notes, real flow/state references |
 | `notion_wiki` / `research_report` | publication completeness, structured tables/schemes, cross-links, navigation, source/evidence status, `notion_data_shape_plan` for page/table/database choice, `integrated_hybrid` linked views when pages and databases coexist |
-| `presentation` | narrative arc, slide hierarchy, no overloaded slides, source notes for claims |
+| `presentation` | narrative arc, slide hierarchy, visual references for comparable deck/surface style when design-critical, no overloaded slides, source notes for claims |
 
 ### Notion Data Shape Plan
 
@@ -100,7 +127,7 @@
 
 Правило: если linked view не встроен в подходящую страницу или fetch/metadata verification не подтверждает inline database block, Notion surface получает `partial` до исправления.
 
-## 6. Write -> Verify -> Fix Plan
+## 7. Write -> Verify -> Fix Plan
 
 | Step | Required evidence | Status |
 |---|---|---|
@@ -109,7 +136,7 @@
 | Verify | API metadata/object inventory/screenshot/build/test evidence | `pending` |
 | Fix | Gaps corrected or recorded as deviation | `pending` |
 
-## 7. Deviations
+## 8. Deviations
 
 | Deviation | Reason | Approval / waiver | Downstream impact |
 |---|---|---|---|

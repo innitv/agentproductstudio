@@ -73,11 +73,11 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/quality/quality-gates.md",
-    requiredSnippets: ["прото-персоны", "synthetic interviews", "validation plan", "Provider Coverage", "Tavily", "DeepSeek", "Gemini", "Surface-Aware Output Gate", "Write -> Verify -> Fix Gate", "Anti-AI-Slop Gate", "CJM Depth Gate", "Roadmap Trace Gate", "Publication Editor Pass", "Research Content Lint", "notion_data_shape_plan", "publication_editor_gate", "integrated_hybrid", "embedded_database_views"],
+    requiredSnippets: ["прото-персоны", "synthetic interviews", "validation plan", "Provider Coverage", "Tavily", "DeepSeek", "Gemini", "Surface-Aware Output Gate", "Visual Evidence Grounding", "visual_reference_card", "Write -> Verify -> Fix Gate", "Anti-AI-Slop Gate", "CJM Depth Gate", "Roadmap Trace Gate", "Publication Editor Pass", "Research Content Lint", "notion_data_shape_plan", "publication_editor_gate", "integrated_hybrid", "embedded_database_views"],
   },
   {
     file: "agent-pack/agents/qa-review.agent.md",
-    requiredSnippets: ["Research integrity", "proto-personas", "synthetic interviews", "synthetic-as-fact", "Surface-Aware Output Audit", "Surface Output Contract"],
+    requiredSnippets: ["Research integrity", "proto-personas", "synthetic interviews", "synthetic-as-fact", "Surface-Aware Output Audit", "Visual Evidence Grounding Audit", "Surface Output Contract"],
   },
   {
     file: "agent-pack/workflows/artifact-driven-pipeline.md",
@@ -93,11 +93,11 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/agents/design.agent.md",
-    requiredSnippets: ["Visual Reference Rule", "Lazyweb Evidence Rule", "lazyweb_evidence", "section-by-section visual spec", "frontend stage is blocked", "Surface Output Contract Pass", "surface_output"],
+    requiredSnippets: ["Visual Reference Rule", "Lazyweb Evidence Rule", "Universal Visual Evidence Rule", "visual_evidence_plan", "visual_reference_card", "lazyweb_evidence", "section-by-section visual spec", "frontend stage is blocked", "Surface Output Contract Pass", "surface_output"],
   },
   {
     file: "agent-pack/agents/frontend.agent.md",
-    requiredSnippets: ["Visual Reference Rule", "Lazyweb Implementation Check", "lazyweb_evidence", "section-by-section structural mapping", "generic landing template", "Surface Output Contract Pass", "Surface Output Summary", "surface_output"],
+    requiredSnippets: ["Visual Reference Rule", "Lazyweb Implementation Check", "Visual Evidence Implementation Check", "visual_evidence_plan", "visual_reference_cards", "lazyweb_evidence", "section-by-section structural mapping", "generic landing template", "Surface Output Contract Pass", "Surface Output Summary", "surface_output"],
   },
   {
     file: "agent-pack/agents/notion-publisher.agent.md",
@@ -105,7 +105,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "AGENTS.md",
-    requiredSnippets: ["публикация research в Notion обязательна", "Lazyweb Evidence Gate", "section-by-section visual spec", "шаблонный стиль", "Не заменяй требуемый источник", "Не обходи approval", "человекочитаемый research pack", "отдельную child page", "Publication Cross-Link Gate", "Publication Editor Pass", "Карта связей исследования", "Anti-AI-Slop Gate", "Research Content Lint", "notion_data_shape_plan", "integrated_hybrid", "Combined Notion Workspace Gate", "Notion research page publication record", "Surface-Aware Output Framework", "Surface Type Gate", "Write -> Verify -> Fix Gate"],
+    requiredSnippets: ["публикация research в Notion обязательна", "Universal Visual Evidence Grounding", "visual_evidence_plan", "visual_reference_card", "Lazyweb Evidence Gate", "section-by-section visual spec", "шаблонный стиль", "Не заменяй требуемый источник", "Не обходи approval", "человекочитаемый research pack", "отдельную child page", "Publication Cross-Link Gate", "Publication Editor Pass", "Карта связей исследования", "Anti-AI-Slop Gate", "Research Content Lint", "notion_data_shape_plan", "integrated_hybrid", "Combined Notion Workspace Gate", "Notion research page publication record", "Surface-Aware Output Framework", "Surface Type Gate", "Write -> Verify -> Fix Gate"],
   },
   {
     file: "agent-pack/guardrails/guardrails.policy.md",
@@ -113,7 +113,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/templates/surface-output-contract.template.md",
-    requiredSnippets: ["Surface Type", "Coverage Gate", "Evidence-To-Output Map", "Surface Quality Bar", "Write -> Verify -> Fix Plan", "Public / Internal Split", "Entity Ownership Map", "Notion Data Shape Plan", "database_index", "embedded_linked_database_view", "integrated_hybrid"],
+    requiredSnippets: ["Surface Type", "Coverage Gate", "Evidence-To-Output Map", "Visual Evidence Grounding", "Visual Reference Cards", "Surface Quality Bar", "Write -> Verify -> Fix Plan", "Public / Internal Split", "Entity Ownership Map", "Notion Data Shape Plan", "database_index", "embedded_linked_database_view", "integrated_hybrid"],
   },
   {
     file: "agent-pack/templates/agent-output-contract.schema.md",
@@ -125,7 +125,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/artifacts/design/screens.template.md",
-    requiredSnippets: ["Surface Output Contract", "Coverage Gate", "Evidence-To-Output Map"],
+    requiredSnippets: ["Surface Output Contract", "Coverage Gate", "Evidence-To-Output Map", "Visual Evidence-To-Screen Map"],
   },
   {
     file: "agent-pack/artifacts/design/figma-handoff-bundle.template.md",
@@ -133,7 +133,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/artifacts/frontend/frontend-result.template.md",
-    requiredSnippets: ["Surface Output Summary", "Upstream Coverage", "Evidence-To-Implementation Map"],
+    requiredSnippets: ["Surface Output Summary", "Upstream Coverage", "Evidence-To-Implementation Map", "Visual Evidence-To-Implementation Map"],
   },
   {
     file: "agent-pack/artifacts/qa/qa-report.template.md",

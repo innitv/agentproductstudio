@@ -27,6 +27,7 @@
 | `design-brief.md` | visual direction, components, responsive/accessibility notes |  |  |
 | `copy-deck.md` | CTA labels, section copy, microcopy, claims-to-validate |  |  |
 | `STYLE_GUIDE.md` / reference | style rules, allowed/disallowed patterns |  |  |
+| Visual Evidence Grounding | same-domain/adjacent/state references, visual_reference_cards |  |  |
 
 ## Design-System Grounding
 
@@ -56,6 +57,12 @@
 
 | Evidence / Source | Interpretation | Screen / Frame / Component | Verification Signal |
 |---|---|---|---|
+
+### Visual Evidence-To-Screen Map
+
+| Visual Reference | Borrowed Pattern | Screen / Frame / Component | Applied / Rejected / Deferred | Verification Signal |
+|---|---|---|---|---|
+| `<screenshot/live capture/user reference/design-system example>` | layout / density / hierarchy / state / responsive behavior |  |  | screenshot / object inventory / browser capture / visual review |
 
 ## Screen List
 

@@ -49,6 +49,8 @@
 
 Если этап создает пользовательскую поверхность (`figma_board`, `product_ui`, `dashboard_console`, `landing`, `prototype`, `frontend`, `notion_wiki`, `research_report`, `presentation` или `handoff`), до генерации результата должен быть создан или встроен **Surface Output Contract** по `agent-pack/templates/surface-output-contract.template.md`. Контракт фиксирует surface type, scope, coverage, evidence-to-output map, quality bar и verification plan.
 
+Если этап создает визуальную или интерактивную поверхность (`figma_board`, `product_ui`, `dashboard_console`, `landing`, `prototype`, `frontend`, `presentation` или visual `handoff`), до генерации результата должен быть создан **Visual Evidence Grounding**. Он фиксирует real-world visual references независимо от продукта: same-domain examples, adjacent high-quality examples, interaction/state examples и design-system grounding. UI Kit/design system не считается достаточным доказательством сам по себе. Если real-world visual evidence недоступен, stage получает `partial/blocked`, кроме explicit waiver/deviation.
+
 Невыполнение любого из пунктов переводит этап в статус `blocked` (заблокирован); следующий этап не может быть начат.
 
 ## Рабочий режим
@@ -135,6 +137,7 @@ NOT_STARTED -> IN_PROGRESS -> GENERATED -> VALIDATED -> HANDED_OFF -> COMPLETE
 - нерешенные вопросы (unresolved questions);
 - следующий требуемый артефакт (next required artifact).
 - surface output contract summary, если stage создал пользовательскую поверхность: surface type, must-cover sections, coverage gaps, evidence-to-output decisions, verification evidence.
+- visual evidence grounding summary, если stage создал визуальную/интерактивную поверхность: какие real-world references использованы, какие слои пропущены, какие visual decisions применены к output units и какой screenshot/visual review нужен downstream.
 
 После ручной правки артефактов в run directory оркестратор запускает `yarn workflow:sync outputs/<project-slug>/<YYYY-MM-DD>`, если команда доступна. Если синхронизация невозможна, причина фиксируется в `handoff-bundle.md` и `stage-gate-ledger.md`.
 
@@ -185,7 +188,7 @@ NOT_STARTED -> IN_PROGRESS -> GENERATED -> VALIDATED -> HANDED_OFF -> COMPLETE
 
 ## Опциональный слой декомпозиции стиля и дизайн-итераций (Design Enhancement Layer)
 
-Для задач с высоким визуальным риском, референсами, Figma handoff или запросом на дизайн-систему Оркестратор может включить дополнительный слой артефактов. Эти файлы не являются обязательными для каждого standard workflow, но если они созданы, downstream stages обязаны читать их как inputs:
+Для любой визуальной/интерактивной поверхности действует обязательный Visual Evidence Grounding: `visual_evidence_plan`, `visual_reference_cards` и `visual evidence -> output unit` mapping должны быть встроены в `design-brief.md`, `screens.md`, `figma-handoff-bundle.md`, `frontend-result.md` или соответствующий surface artifact. Для задач с высоким визуальным риском, референсами, Figma handoff или запросом на дизайн-систему Оркестратор может включить дополнительный слой артефактов. Эти файлы не являются обязательными для каждого standard workflow, но если они созданы, downstream stages обязаны читать их как inputs:
 
 - `STYLE_GUIDE.md`: системная декомпозиция стиля. Разделяет слой подачи/рендера (свет, глубина, материал, фон, грейд) и слой структуры UI (сетка, компоненты, типографика, цвет, иерархия). Должен содержать явные токены, композиционные метрики, allowed/disallowed patterns и anti-patterns.
 - `design-generator-prompt.md`: prompt package для генерации или ручного проектирования 2-3 экранов, основанный на `STYLE_GUIDE.md`, PRD, IA и copy. Запрещено подменять продукт третьей придуманной идеей.
