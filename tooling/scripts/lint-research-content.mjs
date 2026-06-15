@@ -4,6 +4,7 @@ import { pathToFileURL } from "node:url";
 
 const DEFAULT_RESEARCH_FILES = [
   "research-summary.md",
+  "scenario-user-flows.md",
   "competitive-analysis.md",
   "proto-personas.md",
   "synthetic-interviews.md",
@@ -32,15 +33,15 @@ const GENERIC_CLAIM_PATTERNS = [
 
 const MECHANISM_MARKERS = /через|за счет|за счёт|потому|так как|в момент|когда|если|чтобы|поэтому|измер|провер|метрик|событи|канал|документ|чек|счет|счёт|статус|возврат|подтвержд|валидац/iu;
 const DOMAIN_MARKERS = /пользователь|клиент|продав|мастер|банк|счет|счёт|платеж|платёж|чек|возврат|предоплат|задаток|эскроу|аккредитив|жкх|сбп|bnpl|документ|квитанц|сделк|услуг|интервью|метрик|источник|cjm|персона|канал|регулятор/iu;
-const STRUCTURAL_DEPTH_MARKERS = /кто|ситуаци|трени|решени|почему сработает|как проверяем|цепочка решений|подробные кейсы|ключевые кейсы|user flow под cjm|сквозной user flow|связь возможностей с cjm/iu;
+const STRUCTURAL_DEPTH_MARKERS = /кто|ситуаци|трени|решени|почему сработает|как проверяем|цепочка решений|подробные кейсы|ключевые кейсы|user flow под cjm|сквозной user flow|пользовательские флоу|реальные пользовательские флоу|связь возможностей с cjm/iu;
 
 export function lintResearchMarkdown(markdown, options = {}) {
   const sourceName = options.sourceName ?? "markdown";
   const normalized = markdown.toLowerCase();
   const lines = markdown.split(/\r?\n/);
   const sections = extractHeadings(markdown);
-  const strictSummary = options.strictSummary ?? /research-summary|notion|export|combined|cjm-map|opportunity-roadmap/iu.test(sourceName);
-  const strictCjm = options.strictCjm ?? /research-summary|notion|export|combined|cjm-map/iu.test(sourceName);
+  const strictSummary = options.strictSummary ?? /research-summary|scenario-user-flows|notion|export|combined|cjm-map|opportunity-roadmap/iu.test(sourceName);
+  const strictCjm = options.strictCjm ?? /research-summary|scenario-user-flows|notion|export|combined|cjm-map/iu.test(sourceName);
   const strictRoadmap = options.strictRoadmap ?? /research-summary|notion|export|combined|opportunity-roadmap/iu.test(sourceName);
   const checks = [
     checkNoShallowSummary(markdown, normalized, sections, { strictSummary }),
@@ -146,7 +147,7 @@ export function resolveMarkdownTargets(targets) {
 
 function checkNoShallowSummary(markdown, normalized, sections, options = {}) {
   const hasRequiredChain = /кто\s*[-→>]+|кто\s+.*ситуаци|ситуаци.*трени|трени.*решени|решени.*почему|почему.*как проверяем|цепочка решений/iu.test(markdown);
-  const hasScenarioDepth = /подробные кейсы|ключевые кейсы|user flow под cjm|сквозной user flow|связь возможностей с cjm|жизненная ситуация|что происходит в жизни/iu.test(markdown);
+  const hasScenarioDepth = /подробные кейсы|ключевые кейсы|user flow под cjm|сквозной user flow|пользовательские флоу|реальные пользовательские флоу|связь возможностей с cjm|жизненная ситуация|что происходит в жизни/iu.test(markdown);
   const hasMostlyBullets = countBulletLines(markdown) > countParagraphLines(markdown) * 1.8;
   const isResearchLike = options.strictSummary && /research|исследован|cjm|персон|конкурент|swot|roadmap|бэклог|backlog/iu.test(markdown);
   const passes = !isResearchLike || (hasRequiredChain && hasScenarioDepth && !hasMostlyBullets);

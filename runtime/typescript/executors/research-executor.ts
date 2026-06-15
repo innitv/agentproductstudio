@@ -25,6 +25,7 @@ export async function executeResearchStage(context: WorkflowStageExecutorContext
 function researchArtifacts(): string[] {
   return [
     artifactFiles.research_summary,
+    artifactFiles.scenario_user_flows,
     artifactFiles.competitive_analysis,
     artifactFiles.proto_personas,
     artifactFiles.synthetic_interviews,

@@ -233,9 +233,19 @@ function groupResearchSections(sections) {
       match: /^(Статус документа|Краткий вывод|Исследовательские вопросы|Аудитория документа|Пользовательские задачи|Выводы, подтвержденные источниками|Сводка возможностей по сценариям)$/i,
     },
     {
-      title: "02 Конкуренты, активы A3 и стратегия",
+      title: "02 Конкурентный анализ и стратегия",
       markers: ["competitors"],
-      match: /^(Конкурентный контекст|Набор конкурентов|Матрица позиционирования|Активы A3|Незакрытые конкурентами разрывы|Стратегическая рекомендация)$/i,
+      match: /^(Конкурентный контекст|Набор конкурентов|Матрица позиционирования|Активы продукта|Незакрытые конкурентами разрывы|Стратегическая рекомендация)$/i,
+    },
+    {
+      title: "02A Матрица сценариев и путь ценности",
+      markers: ["scenario_matrix", "payment_matrix"],
+      match: /^(Матрица способов оплаты|Событийные триггеры платежей|Роли внутри компании недвижимости|Расширенная матрица платежных контуров.*|Полная карта пути денег.*|Короткая таксономия для продукта)$/i,
+    },
+    {
+      title: "02B Пользовательские флоу исследования",
+      markers: ["scenario_flows", "payment_flows"],
+      match: /^(Зачем нужен этот слой|Индекс флоу и покрытие (?:сценариев|способов оплаты)|Реальные пользовательские флоу|F\\d+\\..*|Сквозная карта состояний (?:продукта|для продукта)|Проверка флоу|Что теперь должно измениться.*)$/i,
     },
     {
       title: "03 Прото-персоны",
@@ -767,21 +777,19 @@ function selectLayoutStrategy({ estimatedTotalBlocks, sectionCount, childPageCou
 
 function validatePublicationCompleteness(exportPath, markdown, sections) {
   const runDir = dirname(exportPath);
-  const sourceFiles = [
-    "research-summary.md",
-    "competitive-analysis.md",
-    "proto-personas.md",
-    "synthetic-interviews.md",
-    "swot.md",
-    "cjm-map.md",
-    "opportunity-roadmap.md",
-  ]
+  const sourceFiles = resolveCompletenessSourceFiles(runDir, [
+    ["research-summary.md"],
+    ["scenario-matrix.md", "payment-method-matrix.md"],
+    ["scenario-user-flows.md", "payment-user-flows.md"],
+    ["competitive-analysis.md"],
+    ["proto-personas.md"],
+    ["synthetic-interviews.md"],
+    ["swot.md"],
+    ["cjm-map.md"],
+    ["opportunity-roadmap.md"],
+  ])
     .map((file) => {
       const path = join(runDir, file);
-      if (!existsSync(path)) {
-        return undefined;
-      }
-
       const content = readFileSync(path, "utf8");
       return { file, bytes: Buffer.byteLength(content, "utf8") };
     })
@@ -789,6 +797,9 @@ function validatePublicationCompleteness(exportPath, markdown, sections) {
 
   const coreSourceFiles = sourceFiles.filter((item) => [
     "research-summary.md",
+    "scenario-user-flows.md",
+    "payment-method-matrix.md",
+    "payment-user-flows.md",
     "competitive-analysis.md",
     "proto-personas.md",
     "synthetic-interviews.md",
@@ -848,6 +859,12 @@ function validatePublicationCompleteness(exportPath, markdown, sections) {
     section_titles: sectionTitles,
     checks,
   };
+}
+
+function resolveCompletenessSourceFiles(runDir, slots) {
+  return slots
+    .map((slot) => slot.find((file) => existsSync(join(runDir, file))))
+    .filter(Boolean);
 }
 
 function hasCoreResearchSections(sectionTitles, sections = []) {
@@ -1050,7 +1067,7 @@ function buildHubCrossLinkBlocks(childResults) {
 
   const rows = [
     [
-      textRich("Почему A3 Pay должен помогать с доверием, назначением, чеком, статусом и возвратом, а не быть еще одной кнопкой оплаты"),
+      textRich("Почему платежный продукт в недвижимости должен объяснять статус денег, условия раскрытия и возврата, а не быть еще одной кнопкой оплаты"),
       richJoin([mentionPageRich(overview), textRich(" и "), mentionPageRich(competitors)]),
     ],
     [

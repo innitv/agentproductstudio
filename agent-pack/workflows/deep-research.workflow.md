@@ -35,6 +35,7 @@ fallback: needs_validation
 ## Обязательные выходы
 
 - `research-summary.md`
+- `scenario-user-flows.md`
 - `competitive-analysis.md`
 - `proto-personas.md`
 - `synthetic-interviews.md`
@@ -51,19 +52,21 @@ fallback: needs_validation
 7. Сверить findings между providers и пометить противоречия как `claims_to_validate`.
 8. Собрать sources по policy с provider name, `retrieved_at`, confidence, source type и `used_for`.
 9. Сформировать artifact-driven synthesis: audience, JTBD, CJM/user paths, opportunity scoring, roadmap и research-to-design handoff на основе artifact context + provider output.
-10. Создать `proto_personas` со статусом evidence.
-11. Создать `synthetic_interviews` со статусом evidence: `synthetic`.
-12. Создать список конкурентов и альтернатив.
-13. Создать SWOT с evidence/status.
-14. Создать validation plan и claims-to-validate.
-15. Перед записью выполнить candidate quality/write gate: обязательные секции, доменная конкретика, русскоязычность публикационных секций, provider coverage, source-backed facts, claims-to-validate и отсутствие generic placeholders. Слабый candidate не должен молча затирать более полный artifact.
-16. Обновить handoff и ledger, включая список реально использованных входных файлов и результат write gate.
+10. Создать `scenario-user-flows.md`: отдельную человекочитаемую страницу, где выводы, матрицы и CJM разложены на реальные пользовательские флоу. Для каждого P0/P1 сценария нужны: персона/роль, ситуация, шаги, действие, внешний участник/контур, статус, документ или доказательство, исключение, продуктовый ответ и способ проверки. Если тема не про платежи, адаптируй поле `где находятся деньги` в `где находится ценность / документ / статус / решение`.
+11. Создать `proto_personas` со статусом evidence.
+12. Создать `synthetic_interviews` со статусом evidence: `synthetic`.
+13. Создать список конкурентов и альтернатив.
+14. Создать SWOT с evidence/status.
+15. Создать validation plan и claims-to-validate.
+16. Перед записью выполнить candidate quality/write gate: обязательные секции, доменная конкретика, русскоязычность публикационных секций, provider coverage, source-backed facts, claims-to-validate и отсутствие generic placeholders. Слабый candidate не должен молча затирать более полный artifact.
+17. Обновить handoff и ledger, включая список реально использованных входных файлов и результат write gate.
 
 ## Обязательная валидация
 
 Research считается COMPLETE только когда:
 
 - все обязательные artifacts существуют;
+- `scenario-user-flows.md` существует и содержит индекс флоу, подробные P0/P1 флоу, сквозную карту статусов и проверку флоу;
 - artifact context inventory выполнен по текущей run directory;
 - `inputs_used` отражает реальные run artifacts, которые были прочитаны, а не только `recursive-brief.md`;
 - evidence log существует;

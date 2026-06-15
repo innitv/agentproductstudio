@@ -35,7 +35,7 @@ try {
   };
 
   const result = await runMultiSourceResearch({
-    query: "A3 Pay fallback research",
+    query: "payment product fallback research",
     geography: "Russia",
     language: "ru",
   });
@@ -57,7 +57,7 @@ try {
 
     if (url.includes("api.tavily.com")) {
       return Response.json({
-        answer: "A3 Pay source-backed summary.",
+        answer: "Payment product source-backed summary.",
         response_time: 0.1,
         results: [
           {
@@ -83,7 +83,7 @@ try {
   };
 
   const advisoryFailureResult = await runMultiSourceResearch({
-    query: "A3 Pay advisory failure research",
+    query: "payment product advisory failure research",
     geography: "Russia",
     language: "ru",
   });

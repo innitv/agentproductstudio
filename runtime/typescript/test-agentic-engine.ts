@@ -220,6 +220,7 @@ async function writeBaseArtifacts(outputDir: string, profile: "standard" | "refe
       "",
       "- `recursive-brief.md`",
       "- `research-summary.md`",
+      "- `scenario-user-flows.md`",
       "- `competitive-analysis.md`",
       "- `proto-personas.md`",
       "- `synthetic-interviews.md`",
@@ -279,6 +280,7 @@ async function writeBaseArtifacts(outputDir: string, profile: "standard" | "refe
       "",
     ].join("\n"),
     "research-summary.md": renderMinimalResearchSummary(),
+    "scenario-user-flows.md": renderScenarioUserFlows(),
     "competitive-analysis.md": renderResearchSibling("Competitive Analysis", ["## Competitor Set", "## Comparison Matrix", "## Takeaways"]),
     "proto-personas.md": renderResearchSibling("Proto Personas", ["## Proto Personas", "## Decision Context", "## Validation Plan"]),
     "synthetic-interviews.md": renderResearchSibling("Synthetic Interviews", ["## Guardrail", "## Simulated Interviews", "## Patterns To Validate"]),
@@ -333,6 +335,44 @@ function renderMinimalResearchSummary(): string {
   ].join("\n");
 }
 
+function renderScenarioUserFlows(): string {
+  return [
+    "# Scenario User Flows",
+    "",
+    "## Inputs Used",
+    "",
+    "- `research-summary.md`",
+    "",
+    "## Индекс флоу и покрытие сценариев",
+    "",
+    "| ID | Scenario | Priority | Status |",
+    "|---|---|---|---|",
+    "| F01 | Проверить agentic resume flow | P0 | covered |",
+    "",
+    "## Реальные пользовательские флоу",
+    "",
+    "### F01: Проверить agentic resume flow",
+    "",
+    "| Step | User action | System response | State | Validation signal |",
+    "|---|---|---|---|---|",
+    "| 1 | Оркестратор возобновляет run | Runtime читает approvals | ready | stage completed |",
+    "| 2 | PRD и IA создаются из mock output | Артефакты записаны в run directory | completed | workflow validation |",
+    "",
+    "## Сквозная карта состояний продукта",
+    "",
+    "| State | Trigger | Owner | Next state |",
+    "|---|---|---|---|",
+    "| pending | resume | workflow-engine | completed / blocked |",
+    "",
+    "## Проверка флоу",
+    "",
+    "| Flow | Check | Expected result |",
+    "|---|---|---|",
+    "| F01 | `workflow:test-agentic-engine` | PRD/IA completed, design blocked by rollout |",
+    "",
+  ].join("\n");
+}
+
 function renderResearchSibling(title: string, sections: string[]): string {
   return [
     `# ${title}`,
@@ -359,6 +399,7 @@ function renderMockPrdAgentOutput(): string {
     "",
     "- `recursive-brief.md`",
     "- `research-summary.md`",
+    "- `scenario-user-flows.md`",
     "",
     "## Problem",
     "",
@@ -390,7 +431,7 @@ function renderMockPrdAgentOutput(): string {
     "",
   ].join("\n");
 
-  return renderAgentOutput("prd", "prd", prdContent, ["recursive-brief.md", "research-summary.md"], "Передать PRD на IA stage.");
+  return renderAgentOutput("prd", "prd", prdContent, ["recursive-brief.md", "research-summary.md", "scenario-user-flows.md"], "Передать PRD на IA stage.");
 }
 
 function renderMockIaAgentOutput(): string {
@@ -401,6 +442,7 @@ function renderMockIaAgentOutput(): string {
     "",
     "- `prd.md`",
     "- `research-summary.md`",
+    "- `scenario-user-flows.md`",
     "",
     "## Primary Screen",
     "",
@@ -423,7 +465,7 @@ function renderMockIaAgentOutput(): string {
     "",
   ].join("\n");
 
-  return renderAgentOutput("ia", "ia_brief", iaContent, ["prd.md", "research-summary.md"], "Передать IA на design stage.");
+  return renderAgentOutput("ia", "ia_brief", iaContent, ["prd.md", "research-summary.md", "scenario-user-flows.md"], "Передать IA на design stage.");
 }
 
 function renderAgentOutput(agentName: string, artifactName: string, artifactContent: string, inputs: string[], nextStep: string): string {

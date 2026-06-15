@@ -5,6 +5,7 @@ owner_stage_ids:
 required_inputs:
   - recursive_brief
   - research_summary
+  - scenario_user_flows
   - competitive_analysis
   - proto_personas
   - synthetic_interviews
@@ -27,6 +28,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 - `recursive-brief.md` (цели клиента, OKR, технические рамки)
 - `research-summary.md` (исследования рынка, боли ЦА)
+- `scenario-user-flows.md` (реальные P0/P1 сценарии, шаги, статусы, исключения и проверки)
 - `competitive-analysis.md` (сравнительная таблица фич, SWOT конкурентов)
 - `proto-personas.md` (профайлы пользователей)
 - `synthetic-interviews.md` (синтетические интервью для генерации гипотез)
@@ -35,7 +37,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Internal Pipeline
 
-1. **Диагностика готовности исследований**: Проверить прохождение этапа Research и наличие всех необходимых входных артефактов. Отдельно проверить `research-plan`, `source quality pass`, `contradiction review`, `claims_to_validate` и `research-to-design handoff`, если они есть.
+1. **Диагностика готовности исследований**: Проверить прохождение этапа Research и наличие всех необходимых входных артефактов, включая `scenario-user-flows.md`. Отдельно проверить `research-plan`, `source quality pass`, `contradiction review`, `claims_to_validate` и `research-to-design handoff`, если они есть.
 2. **Decision Input Audit**: Составить таблицу, какие продуктовые решения можно принимать на основании источников, какие остаются гипотезами, какие заблокированы до валидации.
 3. **Evidence-To-Requirement Mapping**: До написания требований сопоставить ключевые findings/JTBD/риски с будущими requirements. Нельзя создавать `must` requirement без явного evidence, business criticality или пользовательского ограничения.
 4. **Формирование Executive Summary**: Написать краткое резюме продукта для стейкхолдеров (цель, суть предложения, ключевая ценность).
@@ -44,11 +46,11 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
    - Разработать 3 ключевых **OKR** (Objectives and Key Results) с измеримыми показателями успеха.
 6. **Анализ целевой аудитории**: Импортировать сегменты пользователей и сопоставить их с JTBD (Jobs To Be Done), decision moments и trust requirements.
 7. **Описание конкурентного ландшафта**: Сделать краткую сводку конкурентного окружения на основе `competitive-analysis.md`, не превращая competitor parity в обязательный scope без пользовательской ценности.
-8. **Детализация рамок MVP (Scope)**: Распределить фичи по приоритетам с помощью MoSCoW (Must, Should, Could, Won't). `Must` должен покрывать главный user journey end-to-end, а не список желаемых экранов. Согласно **Правилу интерактивных опросов** для согласования приоритетов требований проактивно применять интерактивный выбор, если такой инструмент доступен в текущей среде.
+8. **Детализация рамок MVP (Scope)**: Распределить фичи по приоритетам с помощью MoSCoW (Must, Should, Could, Won't). `Must` должен покрывать главный user journey end-to-end из `scenario-user-flows.md`, а не список желаемых экранов. Согласно **Правилу интерактивных опросов** для согласования приоритетов требований проактивно применять интерактивный выбор, если такой инструмент доступен в текущей среде.
 9. **Story Map и User Stories**: Сгруппировать пользовательские истории по journey steps / epics и написать ключевые истории в формате *"Как [пользователь], я хочу [действие], чтобы [ценность]"*.
 10. **Описание функциональных требований**: Сформировать детальную таблицу функциональных требований с уникальными ID (REQ-001, REQ-002...), привязав каждое требование к user story, evidence, priority и acceptance criteria.
 11. **Описание нефункциональных требований (NFR)**: Зафиксировать требования к производительности, безопасности, доступности, адаптивности, аналитике, контентным ограничениям и UX-state coverage.
-12. **Traceability Pass**: Проверить, что для каждого `must/should` есть trace chain: `research finding/JTBD -> user story -> requirement -> acceptance criterion -> analytics/test signal`.
+12. **Traceability Pass**: Проверить, что для каждого `must/should` есть trace chain: `research finding/JTBD/scenario flow -> user story -> requirement -> acceptance criterion -> analytics/test signal`.
 13. **Определение критериев приемки (Acceptance Criteria)**: Написать четкие, тестируемые критерии успешной реализации фич для QA-команды. Критерии должны покрывать happy path, key edge cases, empty/error/loading states и privacy/PII ограничения.
 14. **Проектирование аналитики**: Разработать спецификацию событий веб-аналитики (без сбора PII), связав каждое событие с целью, требованием и success signal.
 15. **PRD-To-IA/Design Handoff**: Подготовить блок передачи: primary screen, primary action, journey steps, UX constraints, trust/proof requirements, required states, content risks и design-open questions.

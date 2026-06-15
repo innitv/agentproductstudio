@@ -43,6 +43,7 @@ Task ExecPlan не заменяет `run-plan.md` полного workflow. SOP �
 ## Required Research Files
 
 - `research-summary.md`
+- `scenario-user-flows.md`
 - `competitive-analysis.md`
 - `proto-personas.md`
 - `synthetic-interviews.md`
@@ -56,6 +57,7 @@ Task ExecPlan не заменяет `run-plan.md` полного workflow. SOP �
 - `design-generator-prompt.md` -> `agent-pack/artifacts/design/design-generator-prompt.template.md`
 - `design-loop-report.md` -> `agent-pack/artifacts/design/design-loop-report.template.md`
 - `figma-handoff-bundle.md` -> `agent-pack/artifacts/design/figma-handoff-bundle.template.md`
+- `visual-reference-review.md` -> `agent-pack/artifacts/design/visual-reference-review.template.md` для reference/Figma/frontend source-pair evidence
 - `storybook-result.md` -> `agent-pack/artifacts/frontend/storybook-result.template.md`
 
 ## Language

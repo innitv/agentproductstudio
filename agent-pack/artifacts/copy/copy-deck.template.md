@@ -12,6 +12,7 @@
 - `recursive-brief.md`
 - `prd.md`
 - `research-summary.md`
+- `scenario-user-flows.md`
 - `competitive-analysis.md`
 - `proto-personas.md`
 - `design-brief.md`
@@ -19,9 +20,15 @@
 
 ## Message Source Map
 
-| Source insight / requirement | Audience / JTBD | Copy block | Evidence status | Next action |
+| Source insight / requirement / scenario step | Audience / JTBD | Copy block | Evidence status | Next action |
 |---|---|---|---|---|
 |  |  | Hero / Section / FAQ / Microcopy | source-backed / hypothesis / needs_validation |  |
+
+## Scenario Copy Map
+
+| Scenario flow | User question / objection | Required copy | Surface / state | Validation signal |
+|---|---|---|---|---|
+|  |  |  |  |  |
 
 ## Voice & Terminology
 

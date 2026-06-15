@@ -35,6 +35,7 @@ export interface HandoffBundle {
   assumptions: string[];
   recursive_brief?: unknown;
   research_summary?: unknown;
+  scenario_user_flows?: unknown;
   prd?: unknown;
   notion_prd_export?: unknown;
   ia_brief?: unknown;

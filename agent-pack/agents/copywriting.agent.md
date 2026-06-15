@@ -7,6 +7,7 @@ required_inputs:
   - prd
   - design_brief
   - research_summary
+  - scenario_user_flows
   - competitive_analysis
   - proto_personas
   - handoff_bundle
@@ -29,6 +30,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - `recursive-brief.md` (цели клиента, OKR, ограничения)
 - `prd.md` (проблема, рамки MVP, функциональные требования)
 - `research-summary.md` (боли целевой аудитории, языковые паттерны)
+- `scenario-user-flows.md` (вопросы пользователя, возражения, CTA moments, статусы и microcopy needs)
 - `competitive-analysis.md` (дифференциация конкурентов, UX-паттерны)
 - `proto-personas.md` (профайлы покупателей/пользователей)
 - `design-brief.md` (визуальный Tone of Voice, сетка секций, расположение компонентов)
@@ -36,8 +38,8 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Internal Pipeline
 
-1. **Input Readiness Audit**: Проверить, что `prd.md`, `design-brief.md`, `research-summary.md`, `competitive-analysis.md`, `proto-personas.md` и `handoff-bundle.md` доступны, а `prd.md` содержит primary action, claims/risk notes и PRD-To-IA/Design handoff. Если ключевой CTA или value proposition не подтверждены upstream, вернуть `partial`.
-2. **Message Source Map**: Сопоставить research findings, JTBD, objections, trust requirements, PRD requirements и design sections с будущими copy blocks. Каждая важная секция должна иметь purpose, audience, evidence status и next action.
+1. **Input Readiness Audit**: Проверить, что `prd.md`, `design-brief.md`, `research-summary.md`, `scenario-user-flows.md`, `competitive-analysis.md`, `proto-personas.md` и `handoff-bundle.md` доступны, а `prd.md` содержит primary action, claims/risk notes и PRD-To-IA/Design handoff. Если ключевой CTA или value proposition не подтверждены upstream, вернуть `partial`.
+2. **Message Source Map**: Сопоставить research findings, JTBD, сценарные шаги из `scenario-user-flows.md`, objections, trust requirements, PRD requirements и design sections с будущими copy blocks. Каждая важная секция должна иметь purpose, audience, evidence status и next action.
 3. **Сбор словаря и триггеров**: Проанализировать исследования и PRD для формирования словаря целевой аудитории (боли, профессиональная терминология, типичные возражения, триггеры доверия). Отдельно собрать `terms_to_use`, `terms_to_avoid`, `customer_language`, `expert_terms`, `trust_terms`.
 4. **Настройка Tone of Voice (ToV)**: Установить правила текста, ориентированные на измеримую пользу и бизнес-результаты (ROI, ценность, измеримые метрики успеха, профессиональный, но доступный тон, без пустых обещаний). Добавить voice rules: clarity, specificity, proof-first, no hype, no fake intimacy, no fake testimonials.
 5. **Messaging Architecture**: Сформировать messaging ladder: problem framing -> outcome -> mechanism -> proof -> action. Для каждого уровня указать, какие claims допустимы, какие нужно смягчить, а какие нельзя использовать.

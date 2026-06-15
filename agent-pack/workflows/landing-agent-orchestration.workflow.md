@@ -47,7 +47,7 @@
 | Этап | Агент | Обязательные артефакты |
 |---|---|---|
 | 00-intake | orchestrator | `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, `recursive-brief.md` |
-| 01-research | research | `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md` |
+| 01-research | research | `research-summary.md`, `scenario-user-flows.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md` |
 | 02-prd | prd | `prd.md` |
 | 03-ia | ia | `ia-brief.md` |
 | 04-design | design | `design-brief.md`; плюс `reference-analysis.md` только для профиля референса |

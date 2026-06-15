@@ -14,6 +14,7 @@ owner_stage_ids:
   - 12-release
 required_inputs:
   - research_summary
+  - scenario_user_flows
   - competitive_analysis
   - proto_personas
   - synthetic_interviews
@@ -42,6 +43,7 @@ contract_schema: agent-pack/templates/skill.template.md
 
 Для research publication:
 - `research-summary.md`
+- `scenario-user-flows.md`
 - `competitive-analysis.md`
 - `proto-personas.md`
 - `synthetic-interviews.md`
@@ -57,7 +59,7 @@ contract_schema: agent-pack/templates/skill.template.md
 1. Подготовь `notion-research-export-ru.md` до запроса approval.
 2. Экспорт должен быть человекочитаемым: без workflow dump, schema/frontmatter, raw JSON, machine-readable payloads, code-block копий артефактов, frontend/release/log files.
 3. Экспорт должен быть полным research pack, а не краткой выжимкой:
-   - собери `notion-research-export-ru.md` из `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`;
+   - собери `notion-research-export-ru.md` из `research-summary.md`, `scenario-user-flows.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`;
    - если есть дополнительные research artifacts (`cjm-map.md`, `opportunity-roadmap.md`, source logs, validation plans), включи их смысловые разделы или явно запиши `skipped_with_reason`;
    - перед approval/write выполни Publication Completeness Gate: export должен быть сопоставим с source artifacts по объему и покрытию. Если dry-run показывает shallow export, публикация запрещена до регенерации.
 4. Выполни Russian Publication Gate до внешней записи:

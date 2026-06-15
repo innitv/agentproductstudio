@@ -10,19 +10,24 @@ if (!runDirArg) {
 
 const runDir = resolve(process.cwd(), runDirArg);
 const outputPath = resolve(process.cwd(), outputArg || join(runDir, "notion-research-export-ru.md"));
+const runMeta = readJsonIfExists(join(runDir, "run-meta.json"));
 
-const requiredFiles = [
-  "research-summary.md",
-  "competitive-analysis.md",
-  "cjm-map.md",
-  "opportunity-roadmap.md",
-  "proto-personas.md",
-  "synthetic-interviews.md",
-  "swot.md",
-  "source-log.md",
+const sourceFileSlots = [
+  { required: true, files: ["research-summary.md"] },
+  { required: false, files: ["scenario-matrix.md", "payment-method-matrix.md"] },
+  { required: true, files: ["scenario-user-flows.md", "payment-user-flows.md"] },
+  { required: true, files: ["competitive-analysis.md"] },
+  { required: false, files: ["cjm-map.md"] },
+  { required: false, files: ["opportunity-roadmap.md"] },
+  { required: true, files: ["proto-personas.md"] },
+  { required: true, files: ["synthetic-interviews.md"] },
+  { required: true, files: ["swot.md"] },
+  { required: false, files: ["source-log.md"] },
 ];
-
-const missing = requiredFiles.filter((file) => !existsSync(join(runDir, file)));
+const requiredFiles = resolveSourceFiles(runDir, sourceFileSlots);
+const missing = sourceFileSlots
+  .filter((slot) => slot.required && !slot.files.some((file) => existsSync(join(runDir, file))))
+  .map((slot) => slot.files.join(" or "));
 if (missing.length > 0) {
   console.error(`Missing source research artifacts: ${missing.join(", ")}`);
   process.exit(1);
@@ -36,7 +41,7 @@ const sections = requiredFiles.map((file) => ({
 }));
 
 const exportMarkdown = [
-  "# Исследование платежных сценариев России для A3 Pay",
+  `# ${inferExportTitle(runMeta)}`,
   "",
   ...buildCrossLinkControlSections(),
   "",
@@ -225,6 +230,10 @@ function humanHeading(title) {
 function titleForFile(file) {
   return {
     "research-summary.md": "Сводка исследования",
+    "scenario-matrix.md": "Матрица сценариев и путь ценности",
+    "payment-method-matrix.md": "Матрица способов оплаты и путь денег",
+    "scenario-user-flows.md": "Пользовательские флоу исследования",
+    "payment-user-flows.md": "Пользовательские флоу способов оплаты",
     "competitive-analysis.md": "Конкурентный анализ",
     "cjm-map.md": "CJM и карта сценариев",
     "opportunity-roadmap.md": "Возможности, приоритизация ICE/RICE и дорожная карта",
@@ -238,6 +247,10 @@ function titleForFile(file) {
 function markerForFile(file) {
   const marker = {
     "research-summary.md": "overview",
+    "scenario-matrix.md": "scenario_matrix",
+    "payment-method-matrix.md": "payment_matrix",
+    "scenario-user-flows.md": "scenario_flows",
+    "payment-user-flows.md": "payment_flows",
     "competitive-analysis.md": "competitors",
     "cjm-map.md": "cjm",
     "opportunity-roadmap.md": "scoring",
@@ -250,6 +263,12 @@ function markerForFile(file) {
   return marker ? `<!-- notion-section: ${marker} -->` : "";
 }
 
+function resolveSourceFiles(sourceDir, slots) {
+  return slots
+    .map((slot) => slot.files.find((file) => existsSync(join(sourceDir, file))))
+    .filter(Boolean);
+}
+
 function buildCrossLinkControlSections() {
   return [
     "## Карта связей исследования",
@@ -257,21 +276,69 @@ function buildCrossLinkControlSections() {
     "",
     "| Если читатель хочет понять... | Куда перейти |",
     "|---|---|",
-    "| Почему A3 Pay должен помогать с доверием, назначением, чеком, статусом и возвратом, а не быть еще одной кнопкой оплаты | Раздел \"Сводка исследования\" -> \"Ключевые выводы\" и \"Наблюдения\"; раздел \"Конкурентный анализ\" -> \"Стратегические выводы\" |",
-    "| Какие сценарии дают лучший стартовый рынок | Раздел \"CJM и сценарии\"; раздел \"ICE/RICE бэклог и инициативы\" |",
-    "| Для кого это важно и какие боли проверять | Раздел \"Прото-персоны\"; раздел \"Синтетические интервью и вопросы для интервью\" |",
-    "| Почему приоритеты идут именно в таком порядке | Раздел \"ICE/RICE бэклог и инициативы\" -> \"Матрица RICE\" и \"Дорожная карта на 12-24 месяца\" |",
-    "| Какие риски мешают статусу `ready` | Раздел \"Roadmap и SWOT\"; раздел \"План валидации и источники\" |",
+    "| Какой главный вывод исследования и какие решения из него следуют | Раздел \"Сводка исследования\"; раздел \"Конкурентный анализ\" |",
+    "| Какие пользовательские сценарии и боли важнее всего | Раздел \"CJM и сценарии\"; раздел \"ICE/RICE бэклог и инициативы\" |",
+    "| Для кого это важно и какие допущения нужно проверить | Раздел \"Прото-персоны\"; раздел \"Синтетические интервью и вопросы для интервью\" |",
+    "| Почему приоритеты идут именно в таком порядке | Раздел \"ICE/RICE бэклог и инициативы\"; раздел \"Roadmap и SWOT\" |",
+    "| Какие риски, неизвестные и источники ограничивают выводы | Раздел \"Roadmap и SWOT\"; раздел \"План валидации и источники\" |",
     "",
     "## Цепочка решений",
     "<!-- notion-section: overview -->",
     "",
     "| Доказательство | Интерпретация | Продуктовое решение | Где раскрыто подробнее |",
     "|---|---|---|---|",
-    "| Безналичные платежи и СБП стали массовыми, но опыт распределен между банками, QR, PSP и порталами. | Конкурировать отдельным способом оплаты рискованно; ценность выше там, где пользователь теряет контекст и доверие. | Связать получателя, назначение, способ оплаты, чек и статус в одном понятном сценарии. | \"Рыночные факты\", \"Конкурентный анализ\" |",
-    "| Малый бизнес и услуги уже используют переводы/QR, но клиенту не хватает счета, назначения, чека и статуса. | Это частый сценарий без тяжелой юридической нагрузки крупной сделки. | Запускать счет по телефону, профиль получателя, чек и сценарий возврата. | \"CJM и сценарии\", \"ICE/RICE бэклог и инициативы\" |",
-    "| Регулярные счета дают частоту, но конкурируют с банками, Госуслугами и ГИС ЖКХ. | Центр счетов ценен только если дает память счетов, напоминания и историю лучше банковского кабинета. | Проверить готовность подключать счета и возвращаться каждый месяц до тяжелой интеграции. | \"План валидации\", \"CJM 1: ЖКХ и регулярные счета\" |",
-    "| Крупные сделки имеют высокий эффект, но завязаны на документы, банки, эскроу/аккредитив и правовую роль. | Это не стартовое ядро продукта. | Делать помощник статуса и передачу в банк-партнер после проверки юридической и партнерской готовности. | \"Roadmap и SWOT\", \"Дорожная карта на 12-24 месяца\" |",
+    "| Source-backed факты показывают реальные ограничения рынка и поведения пользователей. | Выводы должны опираться на наблюдаемое событие, участника, документ или канал. | Продуктовые решения формулируются через конкретный сценарий и проверку. | \"Сводка исследования\", \"Источники и журнал доказательств\" |",
+    "| CJM показывает, где пользователь или операционная роль теряет понимание следующего шага. | Приоритет получает не самая громкая идея, а трение с понятным механизмом влияния. | Бэклог связывается с этапом CJM, метрикой и способом валидации. | \"CJM и сценарии\", \"ICE/RICE бэклог и инициативы\" |",
+    "| Прото-персоны и интервью-гайд отделяют факты от гипотез. | Сегменты нельзя считать подтвержденными без интервью, логов или первичных данных. | Следующий этап должен проверять самые рискованные допущения. | \"Прото-персоны\", \"Синтетические интервью\" |",
+    "| SWOT и источники фиксируют ограничения открытых данных. | Research не должен превращаться в уверенную стратегию без проверки спорных мест. | Риски и unknowns остаются в validation plan до подтверждения. | \"Roadmap и SWOT\", \"План валидации и источники\" |",
     "",
   ];
+}
+
+function readJsonIfExists(path) {
+  if (!existsSync(path)) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(readFileSync(path, "utf8"));
+  } catch {
+    return {};
+  }
+}
+
+function inferExportTitle(meta) {
+  const explicitTitle = firstNonEmptyString(
+    meta?.notion_title,
+    meta?.research_title,
+    meta?.title,
+  );
+  if (explicitTitle) {
+    return explicitTitle;
+  }
+
+  const sourceRequest = firstNonEmptyString(meta?.source_request, meta?.goal, meta?.project_slug);
+  if (!sourceRequest) {
+    return "Исследовательский пакет";
+  }
+
+  const cleaned = sourceRequest
+    .replace(/^Глубокое исследование:\s*/iu, "")
+    .replace(/^Исследование:\s*/iu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return `Исследование: ${truncateTitle(cleaned)}`;
+}
+
+function firstNonEmptyString(...values) {
+  return values.find((value) => typeof value === "string" && value.trim())?.trim();
+}
+
+function truncateTitle(value, limit = 110) {
+  if (value.length <= limit) {
+    return value;
+  }
+
+  const clipped = value.slice(0, limit).replace(/\s+\S*$/u, "").trim();
+  return `${clipped}...`;
 }

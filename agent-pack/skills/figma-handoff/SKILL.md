@@ -34,6 +34,7 @@ contract_schema: agent-pack/templates/skill.template.md
 
 1. Прочитай `STYLE_GUIDE.md`, `design-brief.md`, `screens.md` и при наличии `design-loop-report.md`.
 2. Подготовь primitive variables, semantic aliases, text styles, paint/effect styles, components и screen list.
+2a. Подготовь `Source Pair Plan`: какие пары обязательны для этой поверхности (`reference_to_figma`, `figma_to_frontend`, `reference_to_frontend`, `spec_to_frontend_behavior`) и какое evidence будет нужно после Figma write/frontend implementation.
 3. Определи canvas strategy:
    - отдельные frames на странице, если это полноценная дизайн-доска;
    - target frame, если пользователь явно просит вписать результат в конкретное место;
@@ -65,5 +66,6 @@ contract_schema: agent-pack/templates/skill.template.md
 - созданные frame names и node IDs, если доступны;
 - использованные libraries/components или причину `none_found`;
 - результат `get_screenshot` или другую визуальную проверку;
+- status/evidence для `reference_to_figma` и план проверки `figma_to_frontend`;
 - Russian Publication Gate status;
 - известные visual gaps и следующий gate для human visual review.

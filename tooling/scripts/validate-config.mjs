@@ -22,6 +22,7 @@ const requiredFiles = [
   "runtime/typescript/reference-scan.ts",
   "runtime/typescript/research-stage-runner.ts",
   "tooling/scripts/lint-research-content.mjs",
+  "agent-pack/workflows/stage-handoff-contract.md",
   "agent-pack/templates/agent-output-contract.schema.md",
   "agent-pack/templates/surface-output-contract.template.md",
   "agent-pack/guardrails/guardrails.policy.md",
@@ -57,7 +58,11 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/artifacts/research/research-summary.template.md",
-    requiredSnippets: ["Proto Personas", "Synthetic Interviews", "Research Validation Plan", "skipped_with_reason", "Provider Coverage", "deepseek", "gemini", "Anti-AI-Slop Gate", "User Flow под CJM", "Связь возможностей с CJM", "Publication Cross-Link Gate", "Publication Editor Pass", "Research Content Lint", "Notion Data Shape Plan", "notion_data_shape_plan", "publication_editor_gate", "integrated_hybrid", "embedded_database_views"],
+    requiredSnippets: ["Proto Personas", "Synthetic Interviews", "Research Validation Plan", "skipped_with_reason", "Provider Coverage", "deepseek", "gemini", "Anti-AI-Slop Gate", "User Flow под CJM", "Scenario User Flows Handoff", "scenario-user-flows.md", "Связь возможностей с CJM", "Publication Cross-Link Gate", "Publication Editor Pass", "Research Content Lint", "Notion Data Shape Plan", "notion_data_shape_plan", "publication_editor_gate", "integrated_hybrid", "embedded_database_views"],
+  },
+  {
+    file: "agent-pack/artifacts/research/scenario-user-flows.template.md",
+    requiredSnippets: ["Индекс флоу и покрытие сценариев", "Реальные пользовательские флоу", "Сквозная карта состояний продукта", "Проверка флоу", "персона, ситуация, шаги, статус, исключение, доказательство"],
   },
   {
     file: "agent-pack/artifacts/research/proto-personas.template.md",
@@ -81,11 +86,15 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/workflows/artifact-driven-pipeline.md",
-    requiredSnippets: ["proto_personas", "simulated_interviews", "skipped_with_reason", "evidence_status: synthetic", "Surface Output Contract", "Anti-AI-Slop Gate", "Narrative Depth Gate", "Publication Editor Pass", "Research Content Lint", "notion_data_shape_plan", "publication_editor_gate", "integrated_hybrid", "embedded_database_views"],
+    requiredSnippets: ["stage-handoff-contract.md", "proto_personas", "simulated_interviews", "skipped_with_reason", "evidence_status: synthetic", "Surface Output Contract", "Anti-AI-Slop Gate", "Narrative Depth Gate", "Publication Editor Pass", "Research Content Lint", "notion_data_shape_plan", "publication_editor_gate", "integrated_hybrid", "embedded_database_views"],
+  },
+  {
+    file: "agent-pack/workflows/stage-handoff-contract.md",
+    requiredSnippets: ["Владелец", "Получает", "Создает", "scenario-user-flows.md", "Кто получает дальше", "required_inputs", "routeTools", "Notion/Figma/deploy/git write"],
   },
   {
     file: "agent-pack/workflows/deep-research.workflow.md",
-    requiredSnippets: ["tavily", "deepseek", "gemini", "Multi-Source Default", "needs_validation"],
+    requiredSnippets: ["tavily", "deepseek", "gemini", "Multi-Source Default", "needs_validation", "scenario-user-flows.md"],
   },
   {
     file: "agent-pack/workflows/artifact-driven-pipeline.md",
@@ -157,15 +166,15 @@ const researchEnforcementFiles = [
   },
   {
     file: "tooling/scripts/generate-notion-research-export.mjs",
-    requiredSnippets: ["buildCrossLinkControlSections", "Publication Editor Pass", "removeNotionInternalSections", "Карта связей исследования", "Цепочка решений"],
+    requiredSnippets: ["buildCrossLinkControlSections", "Publication Editor Pass", "removeNotionInternalSections", "scenario-user-flows.md", "scenario_flows", "Карта связей исследования", "Цепочка решений"],
   },
   {
     file: "tooling/scripts/publish-notion-research-hub.mjs",
-    requiredSnippets: ["validatePublicationCrossLinks", "publication_cross_link_gate", "validatePublicationEditor", "publication_editor_gate", "validatePublicationAntiSlop", "publication_anti_slop_gate", "publication_allowed", "publication_blockers", "lintResearchMarkdown", "buildNotionDataShapePlan", "notion_data_shape_plan", "database_index_candidates", "embedded_database_views", "integrated_hybrid", "schema preview", "buildHubCrossLinkBlocks", "mentionPageRich"],
+    requiredSnippets: ["validatePublicationCrossLinks", "publication_cross_link_gate", "validatePublicationEditor", "publication_editor_gate", "validatePublicationAntiSlop", "publication_anti_slop_gate", "publication_allowed", "publication_blockers", "scenario_flows", "lintResearchMarkdown", "buildNotionDataShapePlan", "notion_data_shape_plan", "database_index_candidates", "embedded_database_views", "integrated_hybrid", "schema preview", "buildHubCrossLinkBlocks", "mentionPageRich"],
   },
   {
     file: "tooling/scripts/lint-research-content.mjs",
-    requiredSnippets: ["lintResearchMarkdown", "no_shallow_summary", "cjm_depth_required", "roadmap_trace_required", "generic_claim_detector", "portable_sentence_detector", "repetitive_table_rows"],
+    requiredSnippets: ["lintResearchMarkdown", "scenario-user-flows.md", "no_shallow_summary", "cjm_depth_required", "roadmap_trace_required", "generic_claim_detector", "portable_sentence_detector", "repetitive_table_rows"],
   },
   {
     file: "package.json",
@@ -189,7 +198,11 @@ const researchEnforcementFiles = [
   },
   {
     file: "runtime/typescript/workflow.manifest.ts",
-    requiredSnippets: ["WorkflowProfile", "routeStepToStageId", "getWorkflowStagesForProfile", "getRequiredArtifactsForStage", "profile: \"reference\""],
+    requiredSnippets: ["WorkflowProfile", "scenarioUserFlows", "scenario_user_flows", "routeStepToStageId", "getWorkflowStagesForProfile", "getRequiredArtifactsForStage", "profile: \"reference\""],
+  },
+  {
+    file: "runtime/typescript/agent-metadata.ts",
+    requiredSnippets: ["routeArtifactInputs", "metadata required_inputs is missing route input", "knownArtifacts.has(input)"],
   },
   {
     file: "runtime/typescript/workflow-stages.ts",

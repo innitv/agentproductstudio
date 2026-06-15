@@ -115,6 +115,16 @@ export function validateAgentMetadata(root = process.cwd()): string[] {
         errors.push(`${file}: metadata required_outputs is missing route output '${artifact}'.`);
       }
     }
+
+    const routeArtifactInputs = Object.values(routeTools)
+      .filter((route) => route.agent === expectedAgentName)
+      .flatMap((route) => route.inputs)
+      .filter((input) => knownArtifacts.has(input));
+    for (const artifact of routeArtifactInputs) {
+      if (!metadata.required_inputs.includes(artifact)) {
+        errors.push(`${file}: metadata required_inputs is missing route input '${artifact}'.`);
+      }
+    }
   }
 
   return errors;

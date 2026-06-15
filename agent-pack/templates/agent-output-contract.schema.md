@@ -65,6 +65,7 @@ summary: PRD сформирован по исследованию и брифу.
 inputs_used:
   - recursive-brief.md
   - research-summary.md
+  - scenario-user-flows.md
 skills_used: []
 outputs:
   prd: |
@@ -74,6 +75,7 @@ outputs:
 
     - `recursive-brief.md`
     - `research-summary.md`
+    - `scenario-user-flows.md`
 
     ## Problem
 
@@ -89,10 +91,17 @@ surface_output:
     - input: research-summary.md
       output_location: "Problem / Evidence to requirement map"
       status: covered
+    - input: scenario-user-flows.md
+      output_location: "Story map / Acceptance criteria"
+      status: covered
   evidence_to_output_map:
     - evidence_source: research-summary.md
       decision: "P0 требования сформированы из source-backed findings"
       output_location: "Requirements"
+      status: applied
+    - evidence_source: scenario-user-flows.md
+      decision: "P0 путь пользователя перенесен в requirements и acceptance criteria"
+      output_location: "Story Map"
       status: applied
   verification:
     - check: schema_readiness

@@ -115,6 +115,11 @@ export async function generateVisualReferenceReview(options: VisualReviewOptions
     screenshots,
     hasRequiredEvidence,
   });
+  const sourcePairs = buildSourcePairs({
+    hasRequiredEvidence,
+    diffResult,
+    sectionDiffResult,
+  });
   const artifactPayload = {
     status,
     inputs_used: [
@@ -127,6 +132,7 @@ export async function generateVisualReferenceReview(options: VisualReviewOptions
     ],
     reference_url: scanResult.url ?? "unknown",
     local_url: options.localUrl ?? "not provided",
+    source_pairs: sourcePairs,
     visual_diff_result_path: diffResult ? toDisplayPath(join(reportDir, visualDiffResultFileName)) : "",
     visual_section_diff_result_path: sectionDiffResult ? toDisplayPath(join(reportDir, visualSectionDiffResultFileName)) : "",
     screenshots: screenshots.map((item) => ({
@@ -180,6 +186,15 @@ export async function generateVisualReferenceReview(options: VisualReviewOptions
     `- Firecrawl status: ${scanResult.firecrawl?.status ?? "unknown"}`,
     `- Playwright status: ${scanResult.playwright?.status ?? "unknown"}`,
     "",
+    "## Source Pair Matrix",
+    "",
+    "| Pair | Required | Evidence | Status | Notes |",
+    "|---|---|---|---|---|",
+    ...sourcePairs.map(
+      (item) =>
+        `| \`${item.pair}\` | ${item.required ? "yes" : "no"} | ${escapeTable(item.evidence.join("; "))} | ${item.status} | ${escapeTable(item.notes)} |`,
+    ),
+    "",
     "## Screenshot Set",
     "",
     "| Screenshot | Path | Viewport | Capture type | Dimensions |",
@@ -207,11 +222,11 @@ export async function generateVisualReferenceReview(options: VisualReviewOptions
     "",
     "## Full-Site Comparison",
     "",
-    "| Area | Reference pattern | Local result | Status |",
-    "|---|---|---|---|",
+    "| Area | Reference pattern | Figma result | Frontend result | Status |",
+    "|---|---|---|---|---|",
     ...comparisonAreas.map(
       (item) =>
-        `| ${item.area} | ${escapeTable(item.referencePattern)} | ${escapeTable(item.localResult)} | ${item.status} |`,
+        `| ${item.area} | ${escapeTable(item.referencePattern)} | not provided | ${escapeTable(item.localResult)} | ${item.status} |`,
     ),
     "",
     "## Gaps Found",
@@ -236,6 +251,62 @@ export async function generateVisualReferenceReview(options: VisualReviewOptions
 
   await writeFile(outputPath, markdown, "utf8");
   return outputPath;
+}
+
+function buildSourcePairs(options: {
+  hasRequiredEvidence: boolean;
+  diffResult?: VisualDiffResultFile;
+  sectionDiffResult?: VisualSectionDiffResultFile;
+}): Array<{
+  pair: "reference_to_figma" | "figma_to_frontend" | "reference_to_frontend" | "spec_to_frontend_behavior";
+  required: boolean;
+  evidence: string[];
+  status: "passed" | "passed_with_notes" | "accepted_difference" | "blocked" | "not_applicable";
+  notes: string;
+}> {
+  const visualDiffStatus = options.diffResult?.status;
+  const sectionDiffStatus = options.sectionDiffResult?.status;
+  const referenceToFrontendStatus = options.hasRequiredEvidence
+    ? sectionDiffStatus !== "passed"
+      ? "passed_with_notes"
+      : "passed"
+    : "blocked";
+
+  return [
+    {
+      pair: "reference_to_figma",
+      required: false,
+      evidence: ["Figma node IDs/screenshot not provided to this CLI review."],
+      status: "not_applicable",
+      notes: "Required when a Figma canvas is created or updated for the same visual surface.",
+    },
+    {
+      pair: "figma_to_frontend",
+      required: false,
+      evidence: ["Figma screenshot-to-frontend comparison not provided to this CLI review."],
+      status: "not_applicable",
+      notes: "Required when frontend implementation is based on Figma handoff or screen frames.",
+    },
+    {
+      pair: "reference_to_frontend",
+      required: true,
+      evidence: [
+        `${visualDiffResultFileName}: ${visualDiffStatus ?? "missing"}`,
+        `${visualSectionDiffResultFileName}: ${sectionDiffStatus ?? "missing"}`,
+      ],
+      status: referenceToFrontendStatus,
+      notes: options.hasRequiredEvidence
+        ? "Reference/local screenshot pairs and visual diff evidence are available."
+        : "Reference/local screenshot pairs or visual diff evidence are missing.",
+    },
+    {
+      pair: "spec_to_frontend_behavior",
+      required: false,
+      evidence: ["Behavior traces are not produced by this visual review generator."],
+      status: "not_applicable",
+      notes: "Required when prototype state inventory or interactive controls are part of the surface.",
+    },
+  ];
 }
 
 async function readReferenceScanResult(reportDir: string): Promise<ReferenceScanResultFile> {

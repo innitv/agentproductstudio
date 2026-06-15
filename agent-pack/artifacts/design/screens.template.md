@@ -64,6 +64,15 @@
 |---|---|---|---|---|
 | `<screenshot/live capture/user reference/design-system example>` | layout / density / hierarchy / state / responsive behavior |  |  | screenshot / object inventory / browser capture / visual review |
 
+### Source Pair Plan
+
+| Pair | Required | Expected Evidence | Downstream Owner |
+|---|---|---|---|
+| `reference_to_figma` | yes / no | reference screenshots/cards; Figma node IDs; Figma screenshot/object inventory | design-generator / figma-handoff |
+| `figma_to_frontend` | yes / no | Figma frame screenshots; component/state inventory; frontend component/locator map | frontend / qa-review |
+| `reference_to_frontend` | yes / no | paired screenshots; `visual-diff-result.json`; section diff | frontend / qa-review |
+| `spec_to_frontend_behavior` | yes / no | prototype states; Playwright/manual flow evidence | prototype / frontend / qa-review |
+
 ## Screen List
 
 | Screen | Purpose | Entry Point | Completion Action | PRD Requirement | IA Node | Status |

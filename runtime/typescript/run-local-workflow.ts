@@ -292,7 +292,7 @@ function renderPrd(context: Awaited<ReturnType<typeof buildContext>>): string {
 function renderIa(context: Awaited<ReturnType<typeof buildContext>>): string {
   const payload = {
     status: context.status,
-    inputs_used: ["prd.md", "research-summary.md", "proto-personas.md"],
+    inputs_used: ["prd.md", "research-summary.md", "scenario-user-flows.md", "proto-personas.md"],
     primary_screen: "Landing page",
     primary_action: "Оставить заявку",
     completion_step: "Показать состояние успешной отправки или инструкцию следующего шага",
@@ -338,7 +338,7 @@ function renderIa(context: Awaited<ReturnType<typeof buildContext>>): string {
 function renderDesign(context: Awaited<ReturnType<typeof buildContext>>): string {
   const payload = {
     status: context.status,
-    inputs_used: ["prd.md", "ia-brief.md", "research-summary.md"],
+    inputs_used: ["prd.md", "ia-brief.md", "research-summary.md", "scenario-user-flows.md"],
     visual_direction: "Сдержанный продуктовый лендинг: ясная иерархия, плотные секции, заметный CTA, без декоративного шума.",
     sections: [{ name: "Hero" }, { name: "Value" }, { name: "FAQ" }, { name: "Lead form" }],
     components: ["Header", "CTA button", "Value cards", "FAQ item", "Lead form", "Footer"],
@@ -383,7 +383,7 @@ function renderDesign(context: Awaited<ReturnType<typeof buildContext>>): string
 function renderCopy(context: Awaited<ReturnType<typeof buildContext>>): string {
   const payload = {
     status: context.status,
-    inputs_used: ["prd.md", "research-summary.md", "competitive-analysis.md", "proto-personas.md", "design-brief.md"],
+    inputs_used: ["prd.md", "research-summary.md", "scenario-user-flows.md", "competitive-analysis.md", "proto-personas.md", "design-brief.md"],
     hero: {
       eyebrow: "Продуктовый лендинг",
       h1: context.productName,
@@ -797,7 +797,7 @@ function renderVisualReferenceReview(context: Awaited<ReturnType<typeof buildCon
 function renderTestBench(context: Awaited<ReturnType<typeof buildContext>>): string {
   const payload = {
     status: context.status,
-    inputs_used: ["recursive-brief.md", "research-summary.md", "prd.md", "ia-brief.md", "prototype-report.md", "frontend-result.md"],
+    inputs_used: ["recursive-brief.md", "research-summary.md", "scenario-user-flows.md", "prd.md", "ia-brief.md", "prototype-report.md", "frontend-result.md"],
     main_funnel: [{ step: "hero_view" }, { step: "hero_cta_click" }, { step: "lead_form_submit" }],
     analytics_spec: [{ event: "hero_cta_click", pii_risk: "none" }, { event: "lead_form_submit", pii_risk: "low" }],
     pii_risk: "low",
@@ -829,7 +829,7 @@ function renderQa(context: Awaited<ReturnType<typeof buildContext>>): string {
   const qaStatus = context.status === "ready" ? "pass_with_known_limitations" : "blocked";
   const payload = {
     status: qaStatus,
-    inputs_used: ["recursive-brief.md", "research-summary.md", "prd.md", "ia-brief.md", "design-brief.md", "screens.md", "copy-deck.md", "prototype-report.md", "frontend-result.md", "test-bench-result.md"],
+    inputs_used: ["recursive-brief.md", "research-summary.md", "scenario-user-flows.md", "prd.md", "ia-brief.md", "design-brief.md", "screens.md", "copy-deck.md", "prototype-report.md", "frontend-result.md", "test-bench-result.md"],
     qa_scope: ["product_pipeline", "frontend", "release"],
     evidence_plan: [
       { audit_area: "Product pipeline", planned_check: "Confirm generated artifacts exist and share the same lead funnel", evidence_source: "generated markdown artifacts", status: context.status === "ready" ? "pass" : "blocked" },
@@ -1135,7 +1135,7 @@ function indent(value: string, spaces: number): string {
 }
 
 function researchInputs(): string[] {
-  return ["recursive-brief.md", "research-summary.md", "competitive-analysis.md", "proto-personas.md", "synthetic-interviews.md", "swot.md"];
+  return ["recursive-brief.md", "research-summary.md", "scenario-user-flows.md", "competitive-analysis.md", "proto-personas.md", "synthetic-interviews.md", "swot.md"];
 }
 
 function createProductName(goal: string): string {
@@ -1231,6 +1231,36 @@ async function writeResearchFallback(outputDir: string, goal: string): Promise<v
   ].join("\n");
 
   await writeFile(join(outputDir, artifactFiles.research_summary), fallback, "utf8");
+  await writeFile(join(outputDir, artifactFiles.scenario_user_flows), [
+    "# Пользовательские флоу исследования",
+    "",
+    "## Inputs Used",
+    "",
+    "- `research-summary.md`",
+    "",
+    "## Индекс флоу и покрытие сценариев",
+    "",
+    "| Флоу | Пользовательская ситуация | События внутри флоу | Основные артефакты | Статус доказательств |",
+    "|---|---|---|---|---|",
+    "| F01 | Research stage skipped | needs research | research-summary.md | skipped_with_reason |",
+    "",
+    "## Реальные пользовательские флоу",
+    "",
+    "skipped_with_reason: research stage was skipped. Run `yarn research:run` before claiming scenario coverage.",
+    "",
+    "## Сквозная карта состояний продукта",
+    "",
+    "| Статус | Когда показывать | Какие флоу покрывает | Нельзя подменять чем |",
+    "|---|---|---|---|",
+    "| skipped_with_reason | research stage was skipped | none | ready coverage |",
+    "",
+    "## Проверка флоу",
+    "",
+    "| Проверка | Как понять, что флоу готов |",
+    "|---|---|",
+    "| Research rerun | `scenario-user-flows.md` contains real P0/P1 flows |",
+    "",
+  ].join("\n"), "utf8");
 }
 
 async function main(): Promise<void> {

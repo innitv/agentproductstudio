@@ -28,6 +28,7 @@
 - UI Kit/design system/tokens/components не считаются достаточным visual evidence сами по себе. Они отвечают за consistency и implementation reuse, но не заменяют реальные product screenshots, live captures, user-provided references или benchmark examples.
 - Для каждого примененного референса есть `visual_reference_card`: source, surface/screen/state, observed pattern, what to borrow, what to avoid, applicability, IP/trade-dress risk и output unit.
 - Evidence-To-Output Map содержит не только research/JTBD, но и visual evidence: `visual reference -> visual decision -> frame/screen/component -> screenshot/visual review signal`.
+- Для Figma/frontend/reference задач определена Source Pair Matrix: `reference_to_figma`, `figma_to_frontend`, `reference_to_frontend`, `spec_to_frontend_behavior`. Каждая обязательная пара имеет required yes/no, evidence, status и notes.
 - `ready/success` запрещен, если layout, density, visual hierarchy, state patterns или responsive behavior основаны только на generic template, UI Kit или предпочтениях модели без реального visual evidence. Допустимы только `partial/blocked` или explicit waiver/deviation.
 - QA проверяет, что после генерации есть screenshot/object inventory/browser evidence и side-by-side review с выбранными visual references или зафиксированная причина невозможности сравнения.
 
@@ -41,6 +42,7 @@
 - Если пользователь просит "проработать", "подробно", "не выжимку", `success` запрещен без подробных кейсов, user flow и связи с CJM.
 - QA помечает результат `needs_revision`, если ключевые решения объяснены только тезисами и не связаны с пользовательским поведением, метриками или проверкой гипотез.
 - Для research pack и Notion export дополнительно запускается исполняемый `Research Content Lint`: `yarn research:lint outputs/<project-slug>/<YYYY-MM-DD>` или `yarn research:lint <research-export-md>`. Lint реализует Rules 1-6 и блокирует external write при `status=fail`.
+- Для любого deep research обязателен отдельный `scenario-user-flows.md`: research считается неполным, если ключевые выводы не разложены в реальные флоу с участником, ситуацией, шагами, статусами, исключениями, доказательствами и проверкой.
 
 ## Gate 1: целостность исследования
 
@@ -107,6 +109,7 @@
 - Если запрошен Figma handoff, `figma-handoff-bundle.md` создан после `screens.md` и содержит canvas strategy, variables/styles/components/screens, Auto Layout rules, approval state и target.
 - Если создается Figma board или Figma-ready handoff, Surface Output Contract содержит список expected frames/sections/entities, карту данных к фреймам и критерии screenshot verification. Неполная доска без coverage rationale блокирует `ready`.
 - Если Figma write выполнен, bundle содержит node/frame evidence, screenshot verification и известные visual gaps.
+- Если Figma write выполнен в reference-driven или high-visual-risk задаче, `figma-handoff-bundle.md` содержит Source Pair Plan и evidence/status для `reference_to_figma` либо blocker/deviation. Frontend handoff содержит план `figma_to_frontend`.
 - Copy содержит hero, CTA, sections, FAQ, SEO и claims to validate.
 - Copy содержит Message Source Map: важные секции связаны с research/JTBD/PRD/design inputs и evidence status.
 - Copy содержит Voice & Terminology: tone rules, terms to use/avoid, customer language и trust language.
@@ -145,12 +148,14 @@
 - Базовые responsive и accessibility требования реализованы.
 - Motion/interaction gate: нет `transition: all`, UI-анимации имеют явную цель и обычно короче 300ms, hover-анимации gated через fine pointer media query, transform-based motion имеет `prefers-reduced-motion`, интерактивные элементы имеют focus/active/disabled/loading/error states.
 - Если есть `figma-handoff-bundle.md`, frontend либо реализует эквиваленты variables/component states/Auto Layout rules, либо фиксирует deviations в `frontend-result.md`.
+- Frontend содержит Source Pair Implementation Matrix: обязательные пары `figma_to_frontend`, `reference_to_frontend` и `spec_to_frontend_behavior` имеют evidence/status/deviation. Без этого frontend status не выше `partial` для визуально значимой поверхности.
 - Если есть `storybook-result.md`, он содержит связь Figma component -> frontend component -> Story и проверку states.
 - Доступные build/typecheck/test commands выполнены или blockers задокументированы.
 - Если был visual reference: сняты full-page desktop/mobile screenshots референса и реализации.
 - Если был visual reference: для каждой видимой секции сняты пары скриншотов с одинаковыми именами секций: `reference-desktop-section-<name>.png` + `local-desktop-section-<name>.png`, `reference-mobile-section-<name>.png` + `local-mobile-section-<name>.png`. Без полных пар gate = `blocked`.
-- Если был visual reference: выполнен `yarn reference:diff <reference-report-dir> <local-report-dir> [output-dir]`, создан `visual-diff-result.json`, а результат зафиксирован в `visual-reference-review.md`. Без pixel diff gate = `blocked`.
-- Если был visual reference: создан `visual-reference-review.md`, зафиксированы concrete gaps и corrections по всем секциям, компонентам и стилям.
+- Если был visual reference: выполнен `yarn reference:diff <reference-report-dir> <local-report-dir> [output-dir]`, создан `visual-diff-result.json`, а результат зафиксирован в `visual-reference-review.md`. `reference:diff` должен сравнивать full-page и доступные section pairs `reference-*`/`local-*`. Без diff gate = `blocked`.
+- Если был visual reference: при доступных URL обеих сторон выполнен `yarn reference:section-diff <reference-url> <local-url> [output-dir] [--sections sections.json]` или записан `skipped_with_reason`.
+- Если был visual reference: создан `visual-reference-review.md`, зафиксированы Source Pair Matrix, concrete gaps и corrections по всем секциям, компонентам и стилям.
 - Если был visual reference: финальная реализация сверена по section-by-section mapping; generic/default landing style без соответствия референсу блокирует gate.
 
 ## Gate 6: test bench, QA и релиз
@@ -166,6 +171,7 @@
 - QA содержит Devil's Advocate / False Positive Pass, если все основные проверки получили `pass`.
 - QA проверяет full-page visual reference screenshot review, если пользователь давал reference URL/site.
 - Для reference-driven workflow QA не принимает desktop-only visual review: нужны desktop/mobile пары секций, `visual-diff-result.json` и `visual-reference-review.md`.
+- QA проверяет Source Pair Matrix: Figma write без metadata/object inventory + screenshot evidence, frontend без Figma/reference/browser evidence или интерактивный UI без behavior checks блокируют pass по соответствующей паре.
 - Accessibility-выводы в QA должны иметь authoritative source/evidence или явную пометку `experience_based`.
 - Release notes включают changed files, validation и rollback notes.
 - Release notes содержат Surface Output Summary: какие поверхности изменены, какой scope был заявлен, какая verification evidence есть, какие deviations остались.

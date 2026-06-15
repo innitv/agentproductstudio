@@ -768,6 +768,7 @@ function isHumanReadableArtifact(artifactName: string, file: string): boolean {
 function isSafeToPublishArtifact(artifactName: string): boolean {
   const safeArtifacts: readonly string[] = [
     artifactNames.researchSummary,
+    artifactNames.scenarioUserFlows,
     artifactNames.competitiveAnalysis,
     artifactNames.protoPersonas,
     artifactNames.syntheticInterviews,
@@ -818,6 +819,7 @@ function firstReadableFiles(artifacts: ArtifactManifestEntry[]): ArtifactManifes
     "run_index",
     artifactNames.recursiveBrief,
     artifactNames.researchSummary,
+    artifactNames.scenarioUserFlows,
     artifactNames.prd,
     artifactNames.iaBrief,
     artifactNames.styleGuide,

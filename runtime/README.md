@@ -27,4 +27,10 @@
 - handoff используется только по правилам `agent-pack/workflows/landing-agent-orchestration.workflow.md`;
 - outputs валидируются по схемам из `agent-pack/schemas/`;
 - рискованные действия проходят approval matrix;
-- tracing настроен по `integrations/observability/tracing.policy.md`.
+- tracing настроен по `integrations/observability/tracing.policy.md`;
+- reference-driven проверки используют единый visual toolchain:
+  - `reference-scan.ts` собирает Firecrawl/Playwright reference evidence;
+  - `visual-diff.ts` автоматически сопоставляет `reference-*` и `local-*` PNG pairs, включая section screenshots;
+  - `visual-section-diff.ts` сравнивает URL-to-URL секции с универсальными default selectors или `--sections sections.json`;
+  - `visual-reference-review.ts` генерирует `visual-reference-review.md` с `Source Pair Matrix`;
+- Figma/frontend visual QA должен различать пары `reference_to_figma`, `figma_to_frontend`, `reference_to_frontend` и `spec_to_frontend_behavior`.

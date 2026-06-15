@@ -9,6 +9,7 @@ required_inputs:
   - stage_gate_ledger
 required_outputs:
   - research_summary
+  - scenario_user_flows
   - competitive_analysis
   - proto_personas
   - synthetic_interviews
@@ -24,7 +25,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Purpose (Предназначение)
 
-Создает базу глубоких исследований (deep research base) для принятия решений по продукту (product), информационной архитектуре (IA), дизайну (design), копирайту (copy), интерактивному прототипу (prototype) и тест-бенчу (test bench). Агент не должен выдавать поверхностные заметки: он отвечает за выявление подтвержденных фактов на основе источников, определение Jobs To Be Done (JTBD), профайлы протоперсон (proto-personas), симулированные интервью (simulated_interviews, synthetic interviews), конкурентный анализ (competitive analysis), SWOT, план валидации и определение неизвестных (unknowns).
+Создает базу глубоких исследований (deep research base) для принятия решений по продукту (product), информационной архитектуре (IA), дизайну (design), копирайту (copy), интерактивному прототипу (prototype) и тест-бенчу (test bench). Агент не должен выдавать поверхностные заметки: он отвечает за выявление подтвержденных фактов на основе источников, определение Jobs To Be Done (JTBD), отдельную страницу пользовательских флоу (`scenario-user-flows.md`), профайлы протоперсон (proto-personas), симулированные интервью (simulated_interviews, synthetic interviews), конкурентный анализ (competitive analysis), SWOT, план валидации и определение неизвестных (unknowns).
 
 ## Inputs (Входные данные)
 
@@ -65,16 +66,17 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 11. Синтезировать сегменты аудитории, CJM/user paths и сценарии Jobs To Be Done (JTBD), не смешивая реальные evidence, model synthesis и assumptions.
 11a. Выполнить **Anti-AI-Slop Gate** для research artifacts: проверить не только отдельные слова, а весь текст на абстрактность, взаимозаменяемость и отсутствие причинно-следственной логики. Абстрактные паттерные формулировки (`orchestration`, `rails`, `wedge`, `trust layer`, `seamless`, `unlock`, `flywheel`, `layer`, `companion`) являются индикаторами риска, но не исчерпывают gate. Любой вывод без наблюдаемого поведения, доменной детали, механизма влияния и способа проверки должен быть переписан.
 11b. Для каждого ключевого сценария добавить не только краткий вывод, но и подробные кейсы: персона, ситуация, вопрос пользователя, действие, трение, решение продукта, метрика и проверка гипотезы.
-12. Создать профайлы протоперсон (`proto-personas`) на основе JTBD, болей, желаемых результатов и контекста принятия решений.
-13. Создать симулированные интервью (`synthetic-interviews`) исключительно как материал для генерации гипотез.
-14. Сформировать пул конкурентов, альтернатив и матрицу сравнения; если прямые конкуренты не найдены, явно описать substitute/alternative workflows.
-15. Создать SWOT-анализ с указанием доказательств и статуса по каждому пункту.
-16. Сформировать список утверждений для валидации (`claims-to-validate`) и план валидации.
-17. Подготовить research-to-design handoff: какие выводы влияют на IA, CJM, visual hierarchy, trust patterns, accessibility, proof blocks, forms/controls и copy claims. Если Lazyweb доступен и source policy разрешает внешний MCP, добавить список запросов для `lazyweb-design-research`/`lazyweb-quick-references`; если недоступен, зафиксировать `skipped_with_reason=lazyweb_unavailable`.
-18. Перед финальной записью выполнить candidate quality/write gate: проверка обязательных секций, доменной конкретики, русскоязычности публикационных секций, provider coverage, source-backed facts и отсутствия generic placeholders.
-19. Если research stage готовит `notion-research-export-ru.md`, выполнить publication self-check по тем же gates, что использует Notion Publisher: `Publication Shape Gate`, `Publication Editor Pass`, `Publication Cross-Link Gate`, `Publication Anti-AI-Slop Gate`, `Research Content Lint` и `Notion Data Shape Plan`. Personas, CJM/user paths, competitive matrix и ICE/RICE должны быть таблицами или схемами; hub должен содержать `Карта связей исследования` и `Цепочка решений`; public export не должен содержать internal ledger/debug sections; export должен иметь `notion_data_shape_plan` для child pages/table blocks/database candidates и `embedded_database_views`, если выбран `integrated_hybrid`. Если gate не проходит, export остается `partial`/`needs_revision` до исправления.
-19a. Выполнить **Narrative Depth Gate**: export не может быть только executive summary или тезисной выжимкой. Обязательны подробные жизненные кейсы, user flow под CJM и связь `CJM friction -> initiative -> validation method` для P0/P1 инициатив.
-20. Обновить `handoff-bundle.md` и `stage-gate-ledger.md`.
+12. Создать `scenario-user-flows.md`: отдельную страницу пользовательских флоу для любого исследования. Обязательная структура: `Индекс флоу и покрытие сценариев`, `Реальные пользовательские флоу`, `Сквозная карта состояний продукта`, `Проверка флоу`. Для каждого P0/P1 флоу раскрыть: персона/роль, ситуация, trigger, шаги, где находится ценность/деньги/документ/статус, внешний участник, документ/доказательство, исключение, продуктовый ответ, метрика проверки.
+13. Создать профайлы протоперсон (`proto-personas`) на основе JTBD, болей, желаемых результатов и контекста принятия решений.
+14. Создать симулированные интервью (`synthetic-interviews`) исключительно как материал для генерации гипотез.
+15. Сформировать пул конкурентов, альтернатив и матрицу сравнения; если прямые конкуренты не найдены, явно описать substitute/alternative workflows.
+16. Создать SWOT-анализ с указанием доказательств и статуса по каждому пункту.
+17. Сформировать список утверждений для валидации (`claims-to-validate`) и план валидации.
+18. Подготовить research-to-design handoff: какие выводы влияют на IA, CJM, visual hierarchy, trust patterns, accessibility, proof blocks, forms/controls и copy claims. Если Lazyweb доступен и source policy разрешает внешний MCP, добавить список запросов для `lazyweb-design-research`/`lazyweb-quick-references`; если недоступен, зафиксировать `skipped_with_reason=lazyweb_unavailable`.
+19. Перед финальной записью выполнить candidate quality/write gate: проверка обязательных секций, доменной конкретики, русскоязычности публикационных секций, provider coverage, source-backed facts и отсутствия generic placeholders.
+20. Если research stage готовит `notion-research-export-ru.md`, выполнить publication self-check по тем же gates, что использует Notion Publisher: `Publication Shape Gate`, `Publication Editor Pass`, `Publication Cross-Link Gate`, `Publication Anti-AI-Slop Gate`, `Research Content Lint` и `Notion Data Shape Plan`. Personas, CJM/user paths, scenario user flows, competitive matrix и ICE/RICE должны быть таблицами или схемами; hub должен содержать `Карта связей исследования` и `Цепочка решений`; public export не должен содержать internal ledger/debug sections; export должен иметь `notion_data_shape_plan` для child pages/table blocks/database candidates и `embedded_database_views`, если выбран `integrated_hybrid`. Если gate не проходит, export остается `partial`/`needs_revision` до исправления.
+20a. Выполнить **Narrative Depth Gate**: export не может быть только executive summary или тезисной выжимкой. Обязательны подробные жизненные кейсы, user flow под CJM, отдельная страница `scenario-user-flows.md` и связь `CJM friction -> initiative -> validation method` для P0/P1 инициатив.
+21. Обновить `handoff-bundle.md` и `stage-gate-ledger.md`.
 
 ## Evidence Quality Model (Модель качества доказательств)
 
@@ -111,6 +113,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 ## Required Outputs (Обязательные результаты)
 
 - `research-summary.md`
+- `scenario-user-flows.md`
 - `competitive-analysis.md`
 - `proto-personas.md`
 - `synthetic-interviews.md`
@@ -167,7 +170,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Output Contract (Контракт вывода)
 
-Агент возвращает результат по контракту `agent-pack/templates/agent-output-contract.schema.md`. Если используется fenced-блок, допустимы `agent-output-yaml` или `agent-output-json`. Полные Markdown-тексты артефактов передаются в `outputs.research_summary`, `outputs.competitive_analysis`, `outputs.proto_personas`, `outputs.synthetic_interviews` и `outputs.swot`. Для `status: success` все пять ключей обязательны и каждый должен содержать полный Markdown соответствующего файла, а не краткие метаданные.
+Агент возвращает результат по контракту `agent-pack/templates/agent-output-contract.schema.md`. Если используется fenced-блок, допустимы `agent-output-yaml` или `agent-output-json`. Полные Markdown-тексты артефактов передаются в `outputs.research_summary`, `outputs.scenario_user_flows`, `outputs.competitive_analysis`, `outputs.proto_personas`, `outputs.synthetic_interviews` и `outputs.swot`. Для `status: success` все шесть ключей обязательны и каждый должен содержать полный Markdown соответствующего файла, а не краткие метаданные.
 
 Если для `tavily` или другого source-backed provider отсутствует ключ, endpoint, разрешение источников или provider call завершается ошибкой, агент не ставит `success`: он возвращает `partial` или `blocked`, фиксирует провайдера и причину в `risks`, `open_questions` и соответствующем Markdown-артефакте. Если `deepseek`/`gemini` недоступны или шумят в advisory mode, агент фиксирует failure/skipped reason, но может вернуть `success`, если source-backed evidence и quality gates пройдены.
 
@@ -177,6 +180,7 @@ status: success|partial|blocked
 inputs_used:
 outputs:
   research_summary:
+  scenario_user_flows:
   competitive_analysis:
   proto_personas:
   synthetic_interviews:

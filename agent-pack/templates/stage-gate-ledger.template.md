@@ -26,7 +26,7 @@
 | Этап | Владелец | Обязательные артефакты | Статус | Заметки ворот качества |
 |---|---|---|---|---|
 | 00-intake | orchestrator | `run-plan.md`, `handoff-bundle.md`, `recursive-brief.md` | pending |  |
-| 01-research | research | `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md` | pending |  |
+| 01-research | research | `research-summary.md`, `scenario-user-flows.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md` | pending |  |
 | 02-prd | prd | `prd.md` | pending |  |
 | 03-ia | ia | `ia-brief.md` | pending |  |
 | 04-design | design | `design-brief.md` | pending |  |

@@ -6,6 +6,7 @@ required_inputs:
   - recursive_brief
   - prd
   - research_summary
+  - scenario_user_flows
   - competitive_analysis
   - proto_personas
   - handoff_bundle
@@ -26,6 +27,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 - `prd.md` (рамки MVP, боли пользователей, цели конверсии)
 - `research-summary.md` (проблемы целевой аудитории, языковые паттерны)
+- `scenario-user-flows.md` (реальные сценарии, decision points, статусы, исключения и проверки)
 - `competitive-analysis.md` (UX-паттерны конкурентов, стандартные структуры)
 - `proto-personas.md` (контекст пользовательского пути)
 - `recursive-brief.md` (требования клиента, технические ограничения)
@@ -33,13 +35,13 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Internal Pipeline
 
-1. **Input Readiness Audit**: Проверить, что `prd.md` содержит primary action, critical user path, requirements, acceptance criteria и PRD-To-IA/Design handoff. Проверить, что research содержит JTBD, personas, trust requirements и claims/risks. Если primary action или user path отсутствует, вернуть `partial`.
+1. **Input Readiness Audit**: Проверить, что `prd.md` содержит primary action, critical user path, requirements, acceptance criteria и PRD-To-IA/Design handoff. Проверить, что research содержит JTBD, personas, trust requirements, claims/risks и отдельный `scenario-user-flows.md`. Если primary action или user path отсутствует, вернуть `partial`.
 2. **User / Context / Content Inventory**: Зафиксировать, кто пользователь, в каком контексте он приходит, какие вопросы пытается решить, какой контент нужен до действия, во время действия и после завершения.
 3. **Определение ключевого действия**: Идентифицировать основного пользователя, его главный JTBD, главный экран, целевое действие и completion step для завершения сценария.
 4. **Entry Points & Intent Map**: Описать основные точки входа: прямой визит, поиск, референс/реклама, внутренний переход, повторный визит. Для каждой точки указать мотивацию, первый вопрос пользователя и нужный первый блок.
 5. **Проектирование карты сайта и секций**: Разработать логическую sitemap (иерархию страниц/модулей) и распределить возражения, функции, trust/proof и CTA по конкретным блокам экрана. Не проектировать навигацию вокруг внутренних команд или пожеланий владельца продукта.
 6. **Content Model & Taxonomy**: Определить reusable content objects: страницы, секции, карточки, статусы, proof blocks, FAQ, forms, filters/tabs, empty states. Указать trigger words, labels, short/long title needs и relationship между объектами.
-7. **Разработка пользовательских сценариев (User Flow)**: Описать пошаговый путь пользователя от входа на платформу до совершения целевого действия, включая альтернативные ветки. Для сложных сценариев использовать flow tree: `User action -> System response -> UI state -> Next decision`.
+7. **Разработка пользовательских сценариев (User Flow)**: Перенести P0/P1 сценарии из `scenario-user-flows.md` в IA-структуру: entry point, шаг пользователя, системный ответ, UI state, next decision, exception path и completion step. Для сложных сценариев использовать flow tree: `User action -> System response -> UI state -> Next decision`.
 8. **Decision & Friction Map**: Зафиксировать моменты, где пользователь сомневается, сравнивает, вводит данные, доверяет, отказывается или просит помощь. Для каждого момента указать нужный контент, proof, state или microcopy.
 9. **State Map**: Описать обязательные состояния: default, hover/focus, loading, empty, error, validation, success, disabled, mobile collapsed. Эти состояния должны быть переданы в design/screens/prototype.
 10. **Матрица приоритета контента**: Установить точный порядок визуального и смыслового приоритета информационных блоков. Primary content должен быть выше supporting content; secondary navigation допустима только при реальной необходимости.

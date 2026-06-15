@@ -49,6 +49,15 @@
 |---|---|---|---|---|
 | `<screenshot/live capture/user reference/design-system example>` | layout / density / hierarchy / state / responsive behavior |  |  | desktop/mobile screenshot / Playwright / visual review |
 
+### Source Pair Implementation Matrix
+
+| Pair | Required | Frontend Evidence | Status | Deviation / Notes |
+|---|---|---|---|---|
+| `reference_to_figma` | yes / no |  | not_applicable / pass / partial / blocked |  |
+| `figma_to_frontend` | yes / no | Figma screenshot/node IDs -> file/component/view mapping | not_applicable / pass / partial / blocked |  |
+| `reference_to_frontend` | yes / no | paired screenshots; `visual-diff-result.json`; section diff | not_applicable / pass / partial / blocked |  |
+| `spec_to_frontend_behavior` | yes / no | Playwright/manual flow evidence; state inventory | not_applicable / pass / partial / blocked |  |
+
 ## Accessibility Notes
 
 ## Responsive Notes

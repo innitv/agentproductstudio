@@ -65,6 +65,11 @@ withAgentDocFixture((root) => {
 });
 
 withAgentDocFixture((root) => {
+  overwriteAgent(root, "prd.agent.md", (content) => content.replace("  - scenario_user_flows\n", ""));
+  assertMetadataError(validateAgentMetadata(root), /metadata required_inputs is missing route input 'scenario_user_flows'/);
+});
+
+withAgentDocFixture((root) => {
   overwriteAgent(root, "frontend.agent.md", (content) => content.replace("  - landing-builder", "  - unknown-skill"));
   assertMetadataError(validateAgentMetadata(root), /skills contains unknown skill 'unknown-skill'/);
 });

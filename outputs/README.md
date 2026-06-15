@@ -34,9 +34,11 @@ outputs/
 2. **Runtime source of truth:** Workflow-агент и команды `workflow:*` по умолчанию работают с `outputs/<project-slug>/<YYYY-MM-DD>/`. Содержимое прошлых run folders используется только как диагностический контекст конкретного запуска, а не как источник правил workflow.
 3. **Run ledger:** каждый полноценный run содержит `run-index.md`, `run-state.json`, `run-meta.json` и `artifact-manifest.json`. `run-index.md` — первый файл для человека; `artifact-manifest.json` — machine-readable ledger артефактов.
 4. **Artifact types:** manifest классифицирует файлы как `state`, `manifest`, `product_artifact`, `evidence`, `external_record` или `export`.
-5. **Inspection:** для списка runs используй `yarn workflow:list`; для технической диагностики одного run — `yarn workflow:inspect outputs/<project-slug>/<YYYY-MM-DD>`; для человекочитаемого объяснения outputs — `yarn workflow:outputs outputs/<project-slug>/<YYYY-MM-DD>`.
-6. **Очистка (`yarn outputs:cleanup`):** Для наведения порядка в корне `outputs/` используйте команду `yarn outputs:cleanup`. Она оставляет зарегистрированные активные продукты в runtime-пути `outputs/<project-slug>/` и переносит только незарегистрированные папки/файлы в `outputs/temp/`.
-7. **Legacy/archive:** `outputs/products/` хранит старые или вручную перенесенные результаты и не является путем по умолчанию для новых запусков.
-8. **Безопасность:** Категорически запрещено сохранять секреты, пароли или токены доступа в отчетах.
-9. **Достоверность:** Все утверждения (claims) без явных внешних источников обязаны помечаться статусом `needs validation`.
-10. **Согласованность:** Каждый отчет `prototype-report` обязан содержать transition map и конкретный completion step.
+5. **Visual evidence:** для reference/Figma/frontend задач run должен хранить реальные evidence-файлы: paired screenshots, `visual-diff-result.json`, `visual-section-diff-result.json` при наличии, Figma screenshot/node evidence, `visual-reference-review.md` с Source Pair Matrix.
+6. **Inspection:** для списка runs используй `yarn workflow:list`; для технической диагностики одного run — `yarn workflow:inspect outputs/<project-slug>/<YYYY-MM-DD>`; для человекочитаемого объяснения outputs — `yarn workflow:outputs outputs/<project-slug>/<YYYY-MM-DD>`.
+7. **Sync:** после ручной правки run artifacts запускай `yarn workflow:sync outputs/<project-slug>/<YYYY-MM-DD>`, чтобы `run-state.json`, `artifact-manifest.json`, `run-index.md` и stage results не расходились с Markdown-артефактами.
+8. **Очистка (`yarn outputs:cleanup`):** Для наведения порядка в корне `outputs/` используйте команду `yarn outputs:cleanup`. Она оставляет зарегистрированные активные продукты в runtime-пути `outputs/<project-slug>/` и переносит только незарегистрированные папки/файлы в `outputs/temp/`.
+9. **Legacy/archive:** `outputs/products/` хранит старые или вручную перенесенные результаты и не является путем по умолчанию для новых запусков.
+10. **Безопасность:** Категорически запрещено сохранять секреты, пароли или токены доступа в отчетах.
+11. **Достоверность:** Все утверждения (claims) без явных внешних источников обязаны помечаться статусом `needs validation`.
+12. **Согласованность:** Каждый отчет `prototype-report` обязан содержать transition map и конкретный completion step.

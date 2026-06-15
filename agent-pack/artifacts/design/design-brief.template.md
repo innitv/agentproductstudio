@@ -12,6 +12,7 @@
 - `prd.md`
 - `ia-brief.md`
 - `research-summary.md`
+- `scenario-user-flows.md`
 - `copy-deck.md`, if available
 
 ## Visual Direction
@@ -43,8 +44,14 @@
 
 ## User Journey
 
-| Step | User intent | UI response | Risk |
+| Step from `scenario-user-flows.md` | User intent | UI response | Required state/proof | Risk |
+|---|---|---|---|---|
+
+## Scenario-To-Screen Decisions
+
+| Scenario flow | Design decision | Output section/component | Evidence / validation signal |
 |---|---|---|---|
+|  |  |  |  |
 
 ## Sections
 

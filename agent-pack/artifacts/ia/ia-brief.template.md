@@ -12,6 +12,7 @@
 - `recursive-brief.md`
 - `prd.md`
 - `research-summary.md`
+- `scenario-user-flows.md`
 - `competitive-analysis.md`
 - `proto-personas.md`
 - `handoff-bundle.md`
@@ -22,6 +23,7 @@
 |---|---|---|---|
 | `prd.md` | primary action, critical user path, acceptance criteria | ready / partial / blocked |  |
 | `research-summary.md` | JTBD, trust requirements, claims/risks | ready / partial / blocked |  |
+| `scenario-user-flows.md` | P0/P1 flows, statuses, exceptions, validation signals | ready / partial / blocked |  |
 | `proto-personas.md` | user context and motivations | ready / partial / blocked |  |
 
 ## User / Context / Content Inventory
@@ -63,6 +65,12 @@
 ## Primary User Flow
 
 1. 
+
+## Scenario Flow Mapping
+
+| Scenario flow | Entry point | User action | System response | UI state | Exception path | Completion / validation signal |
+|---|---|---|---|---|---|---|
+|  |  |  |  |  |  |  |
 
 ## Primary Flow Tree
 

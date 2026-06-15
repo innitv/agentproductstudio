@@ -3,7 +3,7 @@ import { join, resolve, basename } from "node:path";
 
 const stageToArtifacts = {
   "00-intake": ["run-plan.md", "handoff-bundle.md", "stage-gate-ledger.md", "recursive-brief.md"],
-  "01-research": ["research-summary.md", "competitive-analysis.md", "proto-personas.md", "synthetic-interviews.md", "swot.md"],
+  "01-research": ["research-summary.md", "scenario-user-flows.md", "competitive-analysis.md", "proto-personas.md", "synthetic-interviews.md", "swot.md"],
   "02-prd": ["prd.md"],
   "03-ia": ["ia-brief.md"],
   "04-design": ["design-brief.md"],

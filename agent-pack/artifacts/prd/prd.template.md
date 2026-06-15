@@ -11,6 +11,7 @@
 
 - `recursive-brief.md`
 - `research-summary.md`
+- `scenario-user-flows.md`
 - `competitive-analysis.md`
 - `proto-personas.md`
 - `synthetic-interviews.md`
@@ -79,7 +80,7 @@
 
 ## Evidence-To-Requirement Map
 
-| Evidence / JTBD / constraint | Product implication | Requirement ID | Priority | Validation state |
+| Evidence / JTBD / scenario flow / constraint | Product implication | Requirement ID | Priority | Validation state |
 |---|---|---|---|---|
 |  |  | REQ-001 | must / should / could / wont | source-backed / needs_validation |
 
@@ -101,9 +102,9 @@
 
 ### Story Map
 
-| Journey step | User story IDs | Requirement IDs | Primary state / screen |
-|---|---|---|---|
-|  |  |  |  |
+| Journey step from `scenario-user-flows.md` | User story IDs | Requirement IDs | Primary state / screen | Test signal |
+|---|---|---|---|---|
+|  |  |  |  |  |
 
 1.  **Пользовательская история 1:**
     *   *Как* [роль],

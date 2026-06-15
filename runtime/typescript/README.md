@@ -6,7 +6,7 @@
 
 ## Основные файлы
 
-- `workflow.manifest.ts` — единый source of truth для stage ids, route steps, владельцев, артефактов, профилей и route→stage mapping.
+- `workflow.manifest.ts` — единый source of truth для stage ids, route steps, владельцев, артефактов, профилей и route→stage mapping; человекочитаемая матрица этого контракта живет в `agent-pack/workflows/stage-handoff-contract.md`.
 - `workflow-stages.ts`, `route.config.ts` — compatibility facades для существующих imports.
 - `workflow-state.ts` — persisted `run-state.json` и `stage-results/*.json`.
 - `output-metadata.ts` — `run-meta.json`, `artifact-manifest.json`, `run-index.md` и listing индекса запусков в `outputs`.
@@ -19,12 +19,12 @@
 - `agentic-rollout.ts`, `agentic-approval-targets.ts` — staged rollout agentic stages и стабильные approval targets для model provider calls.
 - `run-local-workflow.ts` — deterministic local artifact generator.
 - `run-landing-workflow.ts` — scaffold workflow-папки.
-- `research-stage-runner.ts` — artifact-driven research stage runner для `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`; перед provider calls собирает контекст из всех доступных файлов run directory (`.md`, `.json`, `.yaml`, `.yml`, `.txt`), использует его для synthesis/rendering и фиксирует реальные `inputs_used`.
+- `research-stage-runner.ts` — artifact-driven research stage runner для `research-summary.md`, `scenario-user-flows.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`; перед provider calls собирает контекст из всех доступных файлов run directory (`.md`, `.json`, `.yaml`, `.yml`, `.txt`), использует его для synthesis/rendering и фиксирует реальные `inputs_used`.
 - `reference-scan.ts`, `visual-diff.ts`, `visual-section-diff.ts`, `visual-reference-review.ts` — visual reference и screenshot QA.
 - `approval-gate.ts` — локальный helper approval records для внешних записей.
 - `doctor.ts` — диагностика структуры проекта, шаблонов и optional provider keys.
 - `context-truncator.ts` — State Truncation Gate для поздних стадий.
-- `agent-metadata.ts` — парсинг и semantic validation YAML frontmatter в `agent-pack/agents/*.agent.md`.
+- `agent-metadata.ts` — парсинг и semantic validation YAML frontmatter в `agent-pack/agents/*.agent.md`, включая сверку artifact inputs/outputs с `routeTools`.
 - `agents.registry.ts`, `agents.sdk.ts`, `route.config.ts` — регистрация агентов и маршрутов для инспекции/совместимости.
 
 ## Runtime Contract
@@ -40,7 +40,7 @@
 - Research runner обязан использовать весь текущий run ledger как вход: `run-plan.md`, `recursive-brief.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, прошлые research/export/CJM artifacts и `stage-results/*.json`, если они есть. Provider output дополняет этот контекст, но не заменяет его.
 - Research rendering проходит candidate quality/write gate: слабый или generic candidate не должен молча затирать более полный artifact; решение о записи фиксируется в handoff и ledger.
 - Agentic specialist output должен содержать structured envelope и Markdown для обязательного artifact в `outputs.<artifact_name>` или `outputs.<file_name>`; иначе stage понижается до `partial`.
-- Agent instruction frontmatter валидируется как machine-readable contract; перед передачей в Agents SDK frontmatter удаляется из prompt body.
+- Agent instruction frontmatter валидируется как machine-readable contract; artifact inputs/outputs должны совпадать с `routeTools` и stage contract, а перед передачей в Agents SDK frontmatter удаляется из prompt body.
 - Sensitive inputs/outputs не сохраняются в traces для production-like запусков.
 
 ## Команды

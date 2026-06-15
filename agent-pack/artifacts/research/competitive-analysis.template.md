@@ -20,8 +20,8 @@
 | Конкуренты описаны через реальные сценарии пользователя, а не только категории рынка | pass / needs_revision |  |
 | Дифференциация не звучит как универсальная фраза, которую можно применить к любому fintech/productivity/SaaS продукту | pass / needs_revision |  |
 | Сильные и слабые стороны конкурентов раскрыты через конкретный момент пользовательского пути | pass / needs_revision |  |
-| Обещания A3 Pay объясняют механизм, а не только желаемый эффект | pass / needs_revision |  |
-| Дифференциация A3 Pay связана с конкретной болью CJM | pass / needs_revision |  |
+| Обещания продукта объясняют механизм, а не только желаемый эффект | pass / needs_revision |  |
+| Дифференциация продукта связана с конкретной болью CJM | pass / needs_revision |  |
 
 ## Competitor Set
 | Name | Type | Source URL | Last Verified | Evidence Status |
@@ -33,7 +33,7 @@
 
 ## CJM-Based Positioning
 
-| CJM scenario | User friction | Strong existing alternatives | Gap left open | A3 Pay role | Evidence status |
+| CJM scenario | User friction | Strong existing alternatives | Gap left open | Product role | Evidence status |
 |---|---|---|---|---|---|
 
 ## Strategic Risks
@@ -43,7 +43,7 @@
 
 ## Differentiation Opportunities
 
-| Opportunity | User situation | Competitor gap | A3 Pay decision | Validation method |
+| Opportunity | User situation | Competitor gap | Product decision | Validation method |
 |---|---|---|---|---|
 
 ## Readiness Checklist

@@ -50,6 +50,15 @@
 | Evidence / Source | Frame / Component | Visual Treatment | Verification Signal |
 |---|---|---|---|
 
+### Source Pair Plan
+
+| Pair | Required | Planned Evidence | Gate |
+|---|---|---|---|
+| `reference_to_figma` | yes / no | reference screenshots/cards; Figma node IDs; Figma screenshot/object inventory |  |
+| `figma_to_frontend` | yes / no | Figma frame screenshots; component/state inventory; frontend locator/component map |  |
+| `reference_to_frontend` | yes / no | paired screenshots; `visual-diff-result.json`; section diff |  |
+| `spec_to_frontend_behavior` | yes / no | prototype states; interaction checks; traces/screenshots |  |
+
 ## Foundation
 
 ### Primitive Variables

@@ -185,6 +185,7 @@ export async function runResearchStage(options: ResearchStageRunOptions): Promis
 
   const writeDecisions: ResearchArtifactWriteDecision[] = [];
   writeDecisions.push(await writeResearchArtifact(outputDir, artifactFiles.research_summary, renderResearchSummary(multiSource, payload), query));
+  writeDecisions.push(await writeResearchArtifact(outputDir, artifactFiles.scenario_user_flows, renderScenarioUserFlows(payload), query));
   writeDecisions.push(await writeResearchArtifact(outputDir, artifactFiles.competitive_analysis, renderCompetitiveAnalysis(multiSource, payload.domain_synthesis), query));
   writeDecisions.push(await writeResearchArtifact(outputDir, artifactFiles.proto_personas, renderProtoPersonas(payload), query));
   writeDecisions.push(await writeResearchArtifact(outputDir, artifactFiles.synthetic_interviews, renderSyntheticInterviews(payload), query));
@@ -449,7 +450,7 @@ function buildDomainSynthesis(result: MultiSourceResearchResult, artifactContext
     ...result.results.flatMap((item) => item.findings.map((finding) => finding.finding)),
     ...result.results.map((item) => "summary" in item ? item.summary : ""),
   ].join("\n").toLowerCase();
-  const paymentDomain = /a3pay|a3 pay|сбп|плат[её]ж|payment|checkout|bnpl|жкх|недвиж|авто|travel|путешеств|подпис|номер[ау] телефона/.test(evidenceText);
+  const paymentDomain = /сбп|плат[её]ж|payment|checkout|bnpl|жкх|недвиж|авто|travel|путешеств|подпис|номер[ау] телефона/.test(evidenceText);
   const scenarios = paymentDomain ? buildPaymentScenarios(evidenceText, result.sources.length > 0) : buildGenericScenarios(result, evidenceText);
   const opportunities = buildOpportunities(scenarios);
   const sourceBackedFacts = result.results
@@ -464,7 +465,7 @@ function buildDomainSynthesis(result: MultiSourceResearchResult, artifactContext
   return {
     theme: inferTheme(paymentDomain, artifactContext),
     positioning: paymentDomain
-      ? "A3 Pay как слой оркестрации платежных обязательств, статусов и способов оплаты, а не отдельный кошелек"
+      ? "Платежный продукт как слой статусов, обязательств, способов оплаты и подтверждающих документов, а не отдельная кнопка оплаты"
       : inferGenericPositioning(artifactContext),
     primary_paths: scenarios.slice(0, 4).map((scenario) => `${scenario.name}: ${scenario.user_goal}`),
     scenarios,
@@ -475,7 +476,7 @@ function buildDomainSynthesis(result: MultiSourceResearchResult, artifactContext
         "Проверенный получатель и понятное назначение платежа.",
         "Статус: банк списал, поставщик принял, требуется действие.",
         "Явное управление подписками, лимитами и повторными списаниями.",
-        "Отдельная маркировка сценариев, где A3 Pay не заменяет банк/реестр/нотариуса.",
+        "Отдельная маркировка сценариев, где продукт не заменяет банк, реестр, нотариуса или другой обязательный внешний контур.",
       ],
       decision_moments: [
         "Пользователь понимает, что именно нужно оплатить.",
@@ -1095,6 +1096,82 @@ function renderCompetitiveAnalysis(result: MultiSourceResearchResult, synthesis:
   ].join("\n");
 }
 
+function renderScenarioUserFlows(payload: ResearchSummaryPayload): string {
+  const scenarios = payload.domain_synthesis.scenarios.length
+    ? payload.domain_synthesis.scenarios
+    : [{
+        name: "Основной сценарий требует уточнения",
+        user_goal: "Понять путь пользователя от триггера до результата",
+        friction: "Недостаточно source-backed данных по действиям и барьерам",
+        product_role: "Собрать доказательства и показать следующий шаг",
+        priority: "P1" as const,
+        evidence_status: "needs validation" as const,
+      }];
+
+  const rows = scenarios.slice(0, 12);
+
+  return [
+    "# Пользовательские флоу исследования",
+    "",
+    "## Artifact Metadata",
+    "",
+    `Status: ${payload.status}`,
+    "",
+    "## Inputs Used",
+    "",
+    "- `research-summary.md`",
+    "- `competitive-analysis.md`",
+    "- source-backed research synthesis",
+    "",
+    "## Зачем нужен этот слой",
+    "",
+    "Этот артефакт переводит выводы исследования в реальные пользовательские маршруты. Пользователь не взаимодействует с абстрактной матрицей возможностей: он приходит в конкретную ситуацию, задает вопрос, делает действие, сталкивается с барьером и ждет понятного статуса. Для каждого ключевого сценария нужно показать участника, ситуацию, событие, действие, промежуточный статус, исключение, документ или доказательство и способ проверки.",
+    "",
+    "## Индекс флоу и покрытие сценариев",
+    "",
+    "| Флоу | Пользовательская ситуация | События внутри флоу | Основные артефакты | Статус доказательств |",
+    "|---|---|---|---|---|",
+    ...rows.map((item, index) => `| F${String(index + 1).padStart(2, "0")} ${cell(item.name)} | ${cell(item.user_goal)} | Триггер -> действие -> барьер -> статус -> результат | research-summary.md, competitive-analysis.md | ${item.evidence_status} |`),
+    "",
+    "## Реальные пользовательские флоу",
+    "",
+    ...rows.flatMap((item, index) => [
+      `### F${String(index + 1).padStart(2, "0")}. ${item.name}`,
+      "",
+      `Ситуация: ${item.user_goal}. Главный барьер: ${item.friction}. Роль продукта: ${item.product_role}.`,
+      "",
+      "| Шаг | Что делает пользователь | Что происходит в системе или бизнесе | Статус для пользователя | Риск / исключение | Что должен объяснить продукт |",
+      "|---|---|---|---|---|---|",
+      `| 1 | Попадает в сценарий после триггера | Система должна распознать контекст и сегмент | сценарий начат | пользователь не понимает, куда идти | назвать цель сценария человеческим языком |`,
+      `| 2 | Сравнивает условия или варианты | Продукт показывает ограничения, участников и цену решения | условия понятны | скрытое условие всплывает поздно | раскрыть ограничения до основного действия |`,
+      `| 3 | Делает ключевое действие | Возникает подтверждаемое событие: заявка, платеж, бронь, документ, запрос или согласование | действие принято | пользователь путает принято с завершено | разделить статус действия и финальный результат |`,
+      `| 4 | Ждет внешнего подтверждения | Проверяется источник, партнер, документ, модерация, банк, оператор или другой внешний участник | ожидается условие | задержка выглядит как ошибка | показать, кто держит следующий шаг и что можно сделать |`,
+      `| 5 | Получает результат или отказ | Сценарий закрывается, уходит на возврат, повтор или ручную поддержку | завершено или нужен следующий шаг | нет понятного финала | показать результат, доказательство, документ и следующий шаг |`,
+      "",
+    ]),
+    "## Сквозная карта состояний продукта",
+    "",
+    "| Статус | Когда показывать | Что нельзя подменять этим статусом | Какие сценарии покрывает |",
+    "|---|---|---|---|",
+    "| сценарий начат | пользователь выбрал путь, но еще не сделал ключевое действие | успех или подтверждение | все F-сценарии |",
+    "| действие принято | заявка, платеж, запрос, бронь или документ отправлены | финальный результат | все F-сценарии |",
+    "| ожидается внешнее условие | нужен ответ банка, партнера, оператора, документа, модерации или пользователя | ошибка без причины | сценарии с несколькими участниками |",
+    "| требуется исправление | не хватает документа, условия, денег, подтверждения или согласия | отказ навсегда | сценарии с проверками и исключениями |",
+    "| результат подтвержден | пользователь получил обещанный результат и доказательство | закрывающие документы | сценарии с юридическим, финансовым или сервисным итогом |",
+    "| возврат, отмена или ручная поддержка | сценарий сорвался, спорный или требует оператора | обычное завершение | исключения всех F-сценариев |",
+    "",
+    "## Проверка флоу",
+    "",
+    "| Проверка | Как понять, что флоу готов |",
+    "|---|---|",
+    "| Пользователь может пересказать путь | Он объясняет, что происходит до действия, во время ожидания, после результата и при исключении |",
+    "| Статусы не смешиваются | Принято, ожидается, подтверждено, отменено и возвращено не называются одним словом |",
+    "| Есть доказательство результата | Для каждого финала указан документ, событие, источник статуса, чек, ссылка, акт или другой проверяемый след |",
+    "| Есть метрика | Для каждого P0/P1 флоу задано наблюдаемое действие: завершение, возврат, исправление, обращение в поддержку, повторная попытка |",
+    "",
+  ].join("\n");
+}
+
 function renderProtoPersonas(payload: ResearchSummaryPayload): string {
   return [
     "# Proto Personas",
@@ -1325,6 +1402,10 @@ function requiredSectionsForResearchFile(fileName: string): string[] {
     return ["## Inputs Used", "## Provider Coverage", "## Research Questions", "## Findings", "## Claims To Validate", "## Sources"];
   }
 
+  if (fileName === artifactFiles.scenario_user_flows) {
+    return ["## Inputs Used", "## Индекс флоу и покрытие сценариев", "## Реальные пользовательские флоу", "## Сквозная карта состояний продукта", "## Проверка флоу"];
+  }
+
   if (fileName === artifactFiles.competitive_analysis) {
     return ["## Inputs Used", "## Competitor Set", "## Comparison Matrix", "## Takeaways", "## Readiness Checklist"];
   }
@@ -1355,7 +1436,7 @@ async function appendResearchHandoff(
     "## Research Stage Update",
     "",
     `- Status: ${status}`,
-    "- Completed artifacts: `research-summary.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`",
+    "- Completed artifacts: `research-summary.md`, `scenario-user-flows.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`",
     `- Providers used: ${result.providersUsed.join(", ") || "none"}`,
     `- Validation state: ${result.validation.status}`,
     `- Гейт записи артефактов: ${decisions.map((item) => `${item.file}=${item.action}`).join(", ")}`,

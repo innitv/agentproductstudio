@@ -91,12 +91,25 @@
 |---|---|---|---|
 | `<screenshot/live capture/reference>` | layout / density / hierarchy / state / responsive behavior | `<frame/screen/component/slide>` | screenshot / object inventory / browser capture / visual diff / manual review |
 
+### Source Pair Matrix
+
+Заполняется, если визуальная поверхность проходит через Figma, frontend, reference screenshots или интерактивный prototype.
+
+| Pair | Required | Evidence | Status | Notes |
+|---|---|---|---|---|
+| `reference_to_figma` | yes / no | reference screenshots/cards; Figma node IDs; Figma screenshot/object inventory | `passed|passed_with_notes|accepted_difference|blocked|not_applicable` |  |
+| `figma_to_frontend` | yes / no | Figma screenshots/node IDs; frontend screenshots; DOM/locator/component map | `passed|passed_with_notes|accepted_difference|blocked|not_applicable` |  |
+| `reference_to_frontend` | yes / no | paired screenshots; `visual-diff-result.json`; section diff | `passed|passed_with_notes|accepted_difference|blocked|not_applicable` |  |
+| `spec_to_frontend_behavior` | yes / no | prototype states; Playwright/manual interactions; traces/screenshots | `passed|passed_with_notes|accepted_difference|blocked|not_applicable` |  |
+
+Правило: pixel diff не заменяет metadata/object inventory, DOM/locator/component mapping или behavior checks.
+
 ## 6. Surface Quality Bar
 
 | Surface | Required checks |
 |---|---|
-| `figma_board` | структура canvas, фреймы/секции, readable hierarchy, native/editable layers, Visual Evidence Grounding, Russian Publication Gate, screenshot smoke, object inventory |
-| `product_ui` / `frontend` | primary workflow, navigation, Visual Evidence Grounding, responsive, a11y, loading/empty/error/disabled states, browser screenshots, implementation evidence |
+| `figma_board` | структура canvas, фреймы/секции, readable hierarchy, native/editable layers, Visual Evidence Grounding, Source Pair Matrix, Russian Publication Gate, screenshot smoke, object inventory |
+| `product_ui` / `frontend` | primary workflow, navigation, Visual Evidence Grounding, Source Pair Matrix, responsive, a11y, loading/empty/error/disabled states, browser screenshots, implementation evidence |
 | `dashboard_console` | decision hierarchy, chart-to-question fit, metric definitions, no chartjunk, data quality labels, real dashboard references for density/states, scan time under 5 seconds for primary KPI |
 | `landing` | first viewport product signal, offer clarity, trust proof, CTA flow, real landing/product references, responsive screenshots, no generic template |
 | `prototype` | transition map, task path, state coverage, clickable/interaction notes, real flow/state references |

@@ -53,6 +53,7 @@ interface TavilySearchResponse {
 
 const DEFAULT_ENDPOINT = "https://api.tavily.com/search";
 const MAX_TAVILY_QUERY_LENGTH = 380;
+const DEFAULT_TAVILY_TIMEOUT_MS = 180_000;
 
 export async function runTavilyResearch(input: TavilyResearchInput): Promise<TavilyResearchResult> {
   loadLocalEnv();
@@ -99,12 +100,14 @@ async function searchTavily(args: {
   includeRawContent: boolean | "markdown" | "text";
 }): Promise<TavilySearchResponse> {
   const endpoint = process.env.TAVILY_API_ENDPOINT || DEFAULT_ENDPOINT;
+  const timeoutMs = resolveTavilyTimeoutMs();
   const response = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${args.apiKey}`,
       "Content-Type": "application/json",
     },
+    signal: AbortSignal.timeout(timeoutMs),
     body: JSON.stringify({
       query: args.query,
       topic: "general",
@@ -124,6 +127,22 @@ async function searchTavily(args: {
   }
 
   return response.json() as Promise<TavilySearchResponse>;
+}
+
+function resolveTavilyTimeoutMs(): number {
+  const raw = process.env.TAVILY_TIMEOUT_MS;
+
+  if (!raw) {
+    return DEFAULT_TAVILY_TIMEOUT_MS;
+  }
+
+  const value = Number(raw);
+
+  if (!Number.isFinite(value) || value <= 0) {
+    throw new Error("TAVILY_TIMEOUT_MS must be a positive number of milliseconds.");
+  }
+
+  return value;
 }
 
 function truncateErrorDetails(value: string): string {

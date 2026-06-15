@@ -5,7 +5,11 @@ required_inputs:
   - prd
   - recursive_brief
   - research_summary
+  - scenario_user_flows
+  - competitive_analysis
   - proto_personas
+  - synthetic_interviews
+  - swot
   - stage_gate_ledger
   - release_notes
   - notion_target
@@ -32,19 +36,23 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - `prd.md`
 - `recursive-brief.md`
 - `research-summary.md`
+- `scenario-user-flows.md`
+- `competitive-analysis.md`
 - `proto-personas.md`
+- `synthetic-interviews.md`
+- `swot.md`
 - Целевая родительская страница Notion или ранее настроенная страница проекта Notion
 - Запись о получении одобрения пользователя (`approval_record`), если предоставлена
 
 ## Internal Pipeline (Внутренний процесс)
 
-1. Проверить наличие артефактов исследований и их читаемость для человека.
+1. Проверить наличие полного research pack и его читаемость для человека: `research-summary.md`, `scenario-user-flows.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`, а также `cjm-map.md`/`opportunity-roadmap.md`/доменные матрицы, если они есть.
 2. Создать русскоязычный экспорт только для результатов исследований без схем, YAML frontmatter, необработанного JSON или полных дампов кодовых блоков.
 3. Сформировать Surface Output Contract для `notion_wiki`: expected hub/child pages/databases/sections, coverage gate по research pack, evidence-to-output map, Russian Publication Gate, cross-link coverage и verification plan.
 4. Сформировать publication plan и dry-run/preview до внешней записи: target, mode, layout strategy, source artifacts, checksum, block/page/database count, database schema, unsupported blocks, expected writes, `notion_data_shape_plan` и результаты `Publication Shape Gate`, `Publication Editor Pass`, `Publication Completeness Gate`, `Publication Cross-Link Gate`.
 4. Если целевая страница, интерактивное approval или publication shape gate отсутствуют, создать резервный файл Markdown и установить статус `partial` или `blocked` с `recommended_next_step` для получения approval или исправления export. Не позволять Оркестратору завершать воркфлоу со статусом `success` без публикации.
 5. Если целевая страница и одобрение получены, выбрать способ публикации по объему: короткий export — отдельная дочерняя страница (separate Notion child page); подробный research pack — hub page с дочерними страницами по разделам; рабочие сущности — базы данных. Если одновременно есть child pages и базы, использовать `integrated_hybrid`: встроить базы как linked database views в релевантные страницы.
-6. До approval и внешней записи выполнить Publication Completeness Gate: `notion-research-export-ru.md` должен быть собран из всех доступных research artifacts, а не из краткой выжимки. Если export существенно меньше полного source pack или не покрывает ключевые разделы (`personas`, `CJM`, competitors, ICE/RICE/backlog, roadmap/SWOT/sources), вернуть `partial/needs_revision` и регенерировать export.
+6. До approval и внешней записи выполнить Publication Completeness Gate: `notion-research-export-ru.md` должен быть собран из всех доступных research artifacts, а не из краткой выжимки. Если export существенно меньше полного source pack или не покрывает ключевые разделы (`scenario-user-flows`, `personas`, `CJM`, competitors, ICE/RICE/backlog, roadmap/SWOT/sources), вернуть `partial/needs_revision` и регенерировать export.
 7. До approval и внешней записи выполнить Publication Editor Pass: убрать internal ledger/debug sections из public export, удалить duplicate control sections, назначить владельца каждой сущности (`entity_ownership_map`) и оставить publication trace только в local records. Если overview повторяет содержимое child pages вместо decision/navigation layer, вернуть `partial/needs_revision`.
 8. До approval и внешней записи выполнить Publication Cross-Link Gate: подробный hub должен содержать `Карта связей исследования` и `Цепочка решений`, а ссылки на personas, CJM, ICE/RICE, roadmap/SWOT, validation и sources должны вести на реальные Markdown artifacts или Notion child pages. Если gate не пройден, вернуть `partial/needs_revision` и исправить export; для уже опубликованного hub выполнить отдельный approval-gated cross-link pass.
 9. До approval и внешней записи выполнить Publication Anti-AI-Slop Gate и `Research Content Lint`: `yarn research:lint outputs/<project-slug>/<YYYY-MM-DD>` или `yarn research:lint <research-export-md>`. Проверка должна проходить Rules 1-6: не тезисная выжимка, CJM/user-flow depth, roadmap trace, claims с механизмом, неуниверсальные формулировки и неповторяющиеся таблицы. `publish-notion-research-hub.mjs` обязан использовать тот же смысл проверки и падать до Notion write, если lint/gate не пройден.

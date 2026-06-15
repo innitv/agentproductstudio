@@ -12,6 +12,7 @@
 
 - `recursive-brief.md`
 - `research-summary.md`
+- `scenario-user-flows.md`
 - `competitive-analysis.md`
 - `proto-personas.md`
 - `synthetic-interviews.md`
@@ -41,6 +42,7 @@
 | Responsive |  |  | pending / pass / fail / blocked |
 | Visual reference |  |  | not_applicable / pending / pass / fail / blocked |
 | Figma handoff |  |  | not_applicable / pending / pass / fail / blocked |
+| Source pair matrix |  |  | not_applicable / pending / pass / fail / blocked |
 | Notion publication |  |  | not_applicable / pending / pass / fail / blocked |
 | Analytics / PII |  |  | pending / pass / fail / blocked |
 | Release readiness |  |  | pending / pass / fail / blocked |
@@ -53,6 +55,7 @@
 | Source Quality Pass present |  |  |
 | Contradiction Review present |  |  |
 | Research-To-Design Handoff present |  |  |
+| scenario-user-flows present and P0/P1 covered |  |  |
 | proto-personas present |  |  |
 | synthetic interviews marked synthetic |  |  |
 | no synthetic-as-fact |  |  |
@@ -64,7 +67,7 @@
 
 ## Traceability Audit
 
-| Research / JTBD Signal | PRD Requirement | IA Node | Screen / Component | Copy / Prototype / Test Signal | Status |
+| Research / JTBD / Scenario Flow Signal | PRD Requirement | IA Node | Screen / Component | Copy / Prototype / Test Signal | Status |
 |---|---|---|---|---|---|
 
 ## IA / Screens / Prototype Consistency
@@ -113,13 +116,25 @@
 
 ## Visual Reference / Figma Handoff
 
+### Source Pair Matrix
+
+| Pair | Required | Evidence | Status | QA Result |
+|---|---|---|---|---|
+| `reference_to_figma` | yes / no |  | passed / passed_with_notes / accepted_difference / blocked / not_applicable |  |
+| `figma_to_frontend` | yes / no |  | passed / passed_with_notes / accepted_difference / blocked / not_applicable |  |
+| `reference_to_frontend` | yes / no |  | passed / passed_with_notes / accepted_difference / blocked / not_applicable |  |
+| `spec_to_frontend_behavior` | yes / no |  | passed / passed_with_notes / accepted_difference / blocked / not_applicable |  |
+
 | Check | Result | Evidence | Notes |
 |---|---|---|---|
 | Reference screenshots desktop/mobile |  |  |  |
 | Section screenshot pairs |  |  |  |
 | `visual-diff-result.json` present |  |  |  |
+| `visual-section-diff-result.json` present or skipped with reason |  |  |  |
 | `visual-reference-review.md` updated |  |  |  |
 | Figma target / node evidence |  |  |  |
+| Figma screenshot / object inventory |  |  |  |
+| Figma-to-frontend component/state mapping |  |  |  |
 | Variables / components / Auto Layout deviations |  |  |  |
 
 ## Validation

@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { chromium, devices, type BrowserContextOptions, type Page } from "@playwright/test";
@@ -33,16 +33,26 @@ interface SectionDiffResult {
 }
 
 const defaultSections: SectionDefinition[] = [
-  { label: "hero", referenceSelectors: [".hero"], localSelectors: [".hero-blue"] },
-  { label: "logo-strip", referenceSelectors: [".partner-wrapper"], localSelectors: [".operator-strip"] },
-  { label: "how", referenceSelectors: [".partner"], localSelectors: ["#how"] },
-  { label: "modules", referenceSelectors: ["#solutions"], localSelectors: ["#solutions"] },
-  { label: "steps", referenceSelectors: ["#how-it-works", ".steps"], localSelectors: [".blue-steps"] },
-  { label: "advantages", referenceSelectors: [".why-choose-us"], localSelectors: [".advantages"] },
-  { label: "tariffs", referenceSelectors: ["#pricing", ".partner-features"], localSelectors: ["#tariffs"] },
-  { label: "faq", referenceSelectors: [".faq"], localSelectors: [".faq-panel"] },
-  { label: "form", referenceSelectors: ["#contact-form"], localSelectors: ["#contact-form"] },
-  { label: "footer", referenceSelectors: [".footer"], localSelectors: [".a3-footer"] },
+  {
+    label: "header",
+    referenceSelectors: ["header", "nav", "[role='banner']"],
+    localSelectors: ["header", "nav", "[role='banner']"],
+  },
+  {
+    label: "hero",
+    referenceSelectors: ["main > section:first-of-type", "section.hero", ".hero", "[class*='hero']"],
+    localSelectors: ["main > section:first-of-type", "section.hero", ".hero", "[class*='hero']"],
+  },
+  {
+    label: "main",
+    referenceSelectors: ["main"],
+    localSelectors: ["main"],
+  },
+  {
+    label: "footer",
+    referenceSelectors: ["footer", "[role='contentinfo']"],
+    localSelectors: ["footer", "[role='contentinfo']"],
+  },
 ];
 
 const desktopContext: BrowserContextOptions = {
@@ -244,13 +254,89 @@ function readNumberFlag(args: string[], flag: string): number | undefined {
   return Number.isFinite(value) ? value : undefined;
 }
 
+function readStringFlag(args: string[], flag: string): string | undefined {
+  const index = args.indexOf(flag);
+  if (index === -1) return undefined;
+  return args[index + 1];
+}
+
+function normalizeSections(value: unknown): SectionDefinition[] {
+  if (!Array.isArray(value)) {
+    throw new Error("Sections config must be a JSON array.");
+  }
+
+  return value.map((item, index) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) {
+      throw new Error(`Section at index ${index} must be an object.`);
+    }
+
+    const record = item as Record<string, unknown>;
+    const label = sanitizeLabel(String(record.label ?? ""));
+    const sharedSelectors = normalizeSelectors(record.selectors);
+    const referenceSelectors =
+      normalizeSelectors(record.referenceSelectors ?? record.reference_selectors) ?? sharedSelectors;
+    const localSelectors = normalizeSelectors(record.localSelectors ?? record.local_selectors) ?? sharedSelectors;
+
+    if (!label || !referenceSelectors?.length || !localSelectors?.length) {
+      throw new Error(`Section at index ${index} must include label and selectors.`);
+    }
+
+    return { label, referenceSelectors, localSelectors };
+  });
+}
+
+function normalizeSelectors(value: unknown): string[] | undefined {
+  if (typeof value === "string" && value.trim()) {
+    return [value.trim()];
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).trim()).filter(Boolean);
+  }
+
+  return undefined;
+}
+
+function sanitizeLabel(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+async function readSectionsFlag(args: string[]): Promise<SectionDefinition[] | undefined> {
+  const sectionsPath = readStringFlag(args, "--sections");
+  if (!sectionsPath) return undefined;
+  return normalizeSections(JSON.parse(await readFile(resolve(sectionsPath), "utf8")));
+}
+
+function positionalArgs(args: string[], flagsWithValues: Set<string>): string[] {
+  const positional: string[] = [];
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (flagsWithValues.has(arg)) {
+      index += 1;
+      continue;
+    }
+
+    if (!arg.startsWith("--")) {
+      positional.push(arg);
+    }
+  }
+
+  return positional;
+}
+
 async function main(): Promise<void> {
-  const positional = process.argv.slice(2).filter((arg) => !arg.startsWith("--"));
+  const rawArgs = process.argv.slice(2);
+  const positional = positionalArgs(rawArgs, new Set(["--sections", "--threshold", "--max-mismatch-ratio"]));
   const [referenceUrl, localUrl, outputDir = "reports/visual-review/section-diff"] = positional;
 
   if (!referenceUrl || !localUrl) {
     throw new Error(
-      "Usage: yarn reference:section-diff <reference-url> <local-url> [output-dir] [--threshold 24] [--max-mismatch-ratio 0.35]",
+      "Usage: yarn reference:section-diff <reference-url> <local-url> [output-dir] [--sections sections.json] [--threshold 24] [--max-mismatch-ratio 0.35]",
     );
   }
 
@@ -258,8 +344,9 @@ async function main(): Promise<void> {
     referenceUrl,
     localUrl,
     outputDir,
-    threshold: readNumberFlag(process.argv.slice(2), "--threshold"),
-    maxMismatchRatio: readNumberFlag(process.argv.slice(2), "--max-mismatch-ratio"),
+    threshold: readNumberFlag(rawArgs, "--threshold"),
+    maxMismatchRatio: readNumberFlag(rawArgs, "--max-mismatch-ratio"),
+    sections: await readSectionsFlag(rawArgs),
   });
 
   console.log(`Visual section diff ${result.status}: ${join(resolve(outputDir), "visual-section-diff-summary.md")}`);

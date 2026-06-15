@@ -55,7 +55,7 @@
     "workflow:test-agentic-rollout": "tsx runtime/typescript/test-agentic-rollout.ts",
     "workflow:test-approval-gate": "tsx runtime/typescript/test-approval-gate.ts",
     "workflow:test-agentic-executor": "tsx runtime/typescript/test-agentic-executor.ts",
-    "workflow:test-agentic-readiness": "tsx runtime/typescript/test-agentic-readiness.ts",
+    "workflow:test-agentic-readiness": "yarn tsx runtime/typescript/test-agentic-readiness.ts",
     "workflow:test-agentic-engine": "tsx runtime/typescript/test-agentic-engine.ts",
     "reference:scan": "tsx runtime/typescript/reference-scan.ts",
     "reference:diff": "tsx runtime/typescript/visual-diff.ts",

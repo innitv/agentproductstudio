@@ -1,4 +1,5 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { inflateSync } from "node:zlib";
@@ -51,6 +52,7 @@ export async function runVisualDiff(options: {
 }): Promise<VisualDiffResult> {
   const threshold = options.threshold ?? 24;
   const maxMismatchRatio = options.maxMismatchRatio ?? 0.18;
+  await mkdir(options.outputDir, { recursive: true });
   const pairs = await Promise.all(
     options.pairs.map((pair) => compareImagePair(pair, threshold, maxMismatchRatio)),
   );
@@ -277,7 +279,7 @@ function parseArgs(args: string[]): {
   threshold?: number;
   maxMismatchRatio?: number;
 } {
-  const [referenceDir, localDir, outputDir = referenceDir] = args.filter((arg) => !arg.startsWith("--"));
+  const [referenceDir, localDir, outputDir = referenceDir] = positionalArgs(args, new Set(["--threshold", "--max-mismatch-ratio"]));
   const threshold = readNumberFlag(args, "--threshold");
   const maxMismatchRatio = readNumberFlag(args, "--max-mismatch-ratio");
 
@@ -290,6 +292,24 @@ function parseArgs(args: string[]): {
   return { referenceDir, localDir, outputDir, threshold, maxMismatchRatio };
 }
 
+function positionalArgs(args: string[], flagsWithValues: Set<string>): string[] {
+  const positional: string[] = [];
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (flagsWithValues.has(arg)) {
+      index += 1;
+      continue;
+    }
+
+    if (!arg.startsWith("--")) {
+      positional.push(arg);
+    }
+  }
+
+  return positional;
+}
+
 function readNumberFlag(args: string[], flag: string): number | undefined {
   const index = args.indexOf(flag);
   if (index === -1) return undefined;
@@ -297,25 +317,63 @@ function readNumberFlag(args: string[], flag: string): number | undefined {
   return Number.isFinite(value) ? value : undefined;
 }
 
-function screenshotPairs(referenceDir: string, localDir: string): DiffPair[] {
+async function screenshotPairs(referenceDir: string, localDir: string): Promise<DiffPair[]> {
+  const referenceFiles = (await readdir(referenceDir))
+    .filter((fileName) => /^reference-(desktop|mobile)(?:-full|-section-.+)\.png$/i.test(fileName))
+    .sort();
+
+  const pairs = referenceFiles.flatMap((referenceFile) => {
+    const localFile = referenceFile.replace(/^reference-/, "local-");
+    const localPath = join(localDir, localFile);
+    const referencePath = join(referenceDir, referenceFile);
+
+    if (existsSync(localPath)) {
+      return [
+        {
+          label: labelFromScreenshotName(referenceFile),
+          reference: referencePath,
+          local: localPath,
+        },
+      ];
+    }
+
+    return [];
+  });
+
+  if (pairs.length > 0) {
+    return pairs;
+  }
+
   return [
     {
       label: "desktop",
       reference: join(referenceDir, "reference-desktop-full.png"),
-      local: join(localDir, "local-desktop-after.png"),
+      local: firstExistingPath(localDir, ["local-desktop-full.png", "local-desktop-after.png"]),
     },
     {
       label: "mobile",
       reference: join(referenceDir, "reference-mobile-full.png"),
-      local: join(localDir, "local-mobile-after.png"),
+      local: firstExistingPath(localDir, ["local-mobile-full.png", "local-mobile-after.png"]),
     },
   ];
+}
+
+function labelFromScreenshotName(fileName: string): string {
+  return fileName
+    .replace(/^reference-/, "")
+    .replace(/\.png$/i, "")
+    .replace(/-full$/, "");
+}
+
+function firstExistingPath(directory: string, fileNames: string[]): string {
+  const found = fileNames.find((fileName) => existsSync(join(directory, fileName)));
+  return join(directory, found ?? fileNames[0]);
 }
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   const result = await runVisualDiff({
-    pairs: screenshotPairs(resolve(args.referenceDir), resolve(args.localDir)),
+    pairs: await screenshotPairs(resolve(args.referenceDir), resolve(args.localDir)),
     outputDir: resolve(args.outputDir),
     threshold: args.threshold,
     maxMismatchRatio: args.maxMismatchRatio,

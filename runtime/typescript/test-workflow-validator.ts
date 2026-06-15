@@ -24,6 +24,12 @@ const baseSections: Record<string, readonly string[]> = {
     "## Findings",
     "## Sources",
   ],
+  [artifactNames.scenarioUserFlows]: [
+    "## Индекс флоу и покрытие сценариев",
+    "## Реальные пользовательские флоу",
+    "## Сквозная карта состояний продукта",
+    "## Проверка флоу",
+  ],
   [artifactNames.competitiveAnalysis]: ["## Competitor Set", "## Comparison Matrix", "## Takeaways"],
   [artifactNames.protoPersonas]: ["## Proto Personas", "## Decision Context", "## Validation Plan"],
   [artifactNames.syntheticInterviews]: ["## Guardrail", "## Simulated Interviews", "## Patterns To Validate"],
@@ -57,6 +63,7 @@ const baseSections: Record<string, readonly string[]> = {
   [artifactNames.frontendResult]: ["## Changed Files", "## Implementation Notes", "## Commands Run", "## Known Limitations"],
   [artifactNames.visualReferenceReview]: [
     "## Inputs Used",
+    "## Source Pair Matrix",
     "## Screenshot Set",
     "## Full-Site Comparison",
     "## Gaps Found",
@@ -307,6 +314,15 @@ withRun((runDir) => {
       inputs_used: ["fixture"],
       reference_url: "https://example.com",
       local_url: "http://127.0.0.1:5173",
+      source_pairs: [
+        {
+          pair: "reference_to_frontend",
+          required: true,
+          evidence: ["fixture"],
+          status: "passed",
+          notes: "fixture",
+        },
+      ],
       screenshots: [
         { label: "reference desktop", path: "reports/visual-review/reference-desktop-home.png", viewport: "desktop", capture_type: "section" },
         { label: "reference mobile", path: "reports/visual-review/reference-mobile-home.png", viewport: "mobile", capture_type: "section" },

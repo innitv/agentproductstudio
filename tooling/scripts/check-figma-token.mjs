@@ -17,7 +17,7 @@ if (!match || !match[1].trim()) {
 }
 
 const token = match[1].trim();
-const fileKey = "4ufM1XdtXzSwbCNpulxETA"; // Target design file used in project A3-Design-System
+const fileKey = "4ufM1XdtXzSwbCNpulxETA"; // Target design file used for token smoke checks.
 
 console.log(`Checking Figma API Token for read permissions on file: ${fileKey}...`);
 

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-const [, , parentArg, exportPathArg, titleArg] = process.argv;
+const [, , parentArg, exportPathArg, titleArg, ...optionArgs] = process.argv;
 
 if (!parentArg || !exportPathArg) {
   console.error("Usage: node tooling/scripts/publish-notion-research-page.mjs <parent-page-url-or-id> <research-export-md> [page-title]");
@@ -18,8 +18,11 @@ if (!existsSync(exportPath)) {
 }
 
 const pageTitle = titleArg?.trim() || "Research Review";
+const sectionMarker = readOption(optionArgs, "--section-marker");
 const pageId = await createChildPage(parentPageId, pageTitle);
-const markdown = readFileSync(exportPath, "utf8");
+const markdown = sectionMarker
+  ? extractSectionMarkdown(readFileSync(exportPath, "utf8"), sectionMarker)
+  : readFileSync(exportPath, "utf8");
 const blocks = markdownToBlocks(markdown);
 await appendChildren(pageId, blocks);
 
@@ -139,6 +142,10 @@ function markdownToBlocks(markdown) {
       continue;
     }
 
+    if (/^<!--.*-->$/.test(trimmed)) {
+      continue;
+    }
+
     if (trimmed.startsWith("|")) {
       flushParagraph();
       flushList();
@@ -169,6 +176,13 @@ function markdownToBlocks(markdown) {
       continue;
     }
 
+    if (/^#{4,6}\s+/.test(trimmed)) {
+      flushParagraph();
+      flushList();
+      blocks.push(heading(3, trimmed.replace(/^#{4,6}\s+/, "")));
+      continue;
+    }
+
     if (/^[-*]\s+/.test(trimmed)) {
       flushParagraph();
       listBuffer.push(trimmed.replace(/^[-*]\s+/, ""));
@@ -182,6 +196,42 @@ function markdownToBlocks(markdown) {
   flushList();
   flushTable();
   return blocks;
+}
+
+function readOption(args, optionName) {
+  const index = args.indexOf(optionName);
+  if (index === -1) {
+    return undefined;
+  }
+  const value = args[index + 1]?.trim();
+  if (!value || value.startsWith("--")) {
+    throw new Error(`Missing value for ${optionName}.`);
+  }
+  return value;
+}
+
+function extractSectionMarkdown(markdown, marker) {
+  const lines = markdown.split(/\r?\n/);
+  const markerIndex = lines.findIndex((line) => line.trim() === `<!-- notion-section: ${marker} -->`);
+  if (markerIndex === -1) {
+    throw new Error(`Cannot find section marker: ${marker}`);
+  }
+
+  let start = markerIndex;
+  while (start > 0 && !/^##\s+/.test(lines[start])) {
+    start -= 1;
+  }
+
+  let end = markerIndex + 1;
+  while (end < lines.length && !/^##\s+/.test(lines[end])) {
+    end += 1;
+  }
+
+  return lines
+    .slice(start, end)
+    .filter((line) => !/^<!--.*-->$/.test(line.trim()))
+    .join("\n")
+    .trim();
 }
 
 function notionHeaders() {
