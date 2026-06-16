@@ -6,6 +6,14 @@
 
 ## Локальные команды
 
+Проверить staged-файлы перед selective commit:
+
+```bash
+yarn git:check-staged
+```
+
+Команда блокирует случайно staged `outputs/**`, `siteportfolio/runs/**`, `.lazyweb/**`, logs, build/test artifacts и media/evidence файлы. Если пользователь явно просит коммитить такой target, используй allow-флаг из `tooling/scripts/check-staged-scope.mjs --help`.
+
 Проверить standard route без visual reference:
 
 ```bash

@@ -63,6 +63,7 @@
     "reference:review": "tsx runtime/typescript/visual-reference-review.ts",
     "research:run": "tsx runtime/typescript/research-stage-runner.ts",
     "research:lint": "node tooling/scripts/lint-research-content.mjs",
+    "git:check-staged": "node tooling/scripts/check-staged-scope.mjs",
     "typecheck": "node tooling/scripts/run-and-log.mjs typecheck \"tsc --noEmit\"",
     "landing:run": "tsx runtime/typescript/run-landing-workflow.ts",
     "outputs:cleanup": "node tooling/scripts/cleanup-outputs.mjs"

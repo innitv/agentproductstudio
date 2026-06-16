@@ -14,6 +14,8 @@
 - `external write`: Notion, Figma, deploy, изменение секретов, удаление данных и git write без текущего явного запроса требуют exact approval. Model-provider calls требуют approval, кроме явно включенных non-blocking DeepSeek/Gemini advisory checks на `01-research`, описанных в разделе Research.
 - `siteportfolio update`: правки личного сайта-портфолио пользователя. Триггеры: `мой сайт`, `мой сайт портфолио`, `портфолио`, `portfolio`, `siteportfolio`, `персональный сайт`, `сайт Ивана`, `/portfolio`. Это отдельный продуктовый каталог `siteportfolio/`, а не обычный `outputs` run; по умолчанию читать `siteportfolio/README.md` и `siteportfolio/runs/2026-06-14/handoff-bundle.md`.
 
+Для selective commit/push используй `agent-pack/templates/selective-commit-sop.md`: сначала выписать include/exclude scope, staged делать только явными путями, затем выполнить `yarn git:check-staged` и проверить `git diff --cached --name-only`. `outputs/**`, `siteportfolio/runs/**`, `.lazyweb/**`, logs, build artifacts и media/evidence файлы запрещены в selective commit без прямого разрешения пользователя.
+
 Перед началом полного workflow или проверки среды запусти `yarn workflow:doctor`. Перед поздними handoff начиная с `08-frontend` используй сжатый `handoff-bundle.md`, а не полную переписку.
 
 Definition of Done для этого проекта:
