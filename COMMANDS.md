@@ -355,6 +355,7 @@ yarn workflow:start "<фраза-триггер>"
 - **Screens (06-screens)**: `сгенерируй спецификацию экранов`, `создай экраны`, `опиши экраны`, `generate screens`.
 - **Prototype (07-prototype)**: `создай прототип`, `transition map`, `карту переходов`, `make transition map`.
 - **Frontend UI (08-frontend)**: `напиши код`, `сверстай лендинг`, `реализуй фронтенд`, `собери интерфейс`, `update ui`.
+- **Siteportfolio / личный сайт**: `мой сайт`, `мой сайт портфолио`, `портфолио`, `portfolio`, `siteportfolio`, `персональный сайт`, `сайт Ивана`, `/portfolio`. Эти фразы относятся к отдельному продукту `siteportfolio/`, а не к новому run в `outputs/`.
 - **Visual Diff (09-visual-reference)**: `сравни с референсом`, `проверь скриншоты`, `visual diff`, `compare screens`.
 - **Test Bench (10-test-bench)**: `запусти тест-бенч`, `протестируй воронку`, `проверь аналитику`, `run test bench`.
 - **QA Review (11-qa)**: `проверь качество`, `запусти qa`, `проведи аудит качества`, `run qa review`.

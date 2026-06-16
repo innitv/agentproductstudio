@@ -26,8 +26,11 @@
 | Quality gates | `agent-pack/quality/quality-gates.md` | Проверки качества, Anti-AI-Slop, Surface Output и публикационные условия. |
 | Runtime manifest | `runtime/typescript/workflow.manifest.ts` | Stage ids, artifacts, profiles и route mapping для исполняемого слоя. |
 | Run outputs | `outputs/<project-slug>/<YYYY-MM-DD>/` | Единственный source of truth конкретного запуска: state, manifest, artifacts, evidence, external records. |
+| Личный сайт-портфолио | `siteportfolio/` | Отдельный продуктовый каталог для `/portfolio`, вынесенный из общего `outputs`. |
 
 `outputs/products/` остается legacy/archive-зоной. `outputs/registry.json` можно использовать как навигационный индекс, но не как нормативный источник правил.
+
+Отдельный продукт `siteportfolio` хранит историю личного сайта-портфолио в `siteportfolio/runs/2026-06-14/`. Запросы `мой сайт`, `портфолио`, `siteportfolio`, `персональный сайт`, `сайт Ивана` и `/portfolio` должны маршрутизироваться в этот каталог и frontend view `apps/frontend/src/views/PortfolioView.tsx`.
 
 ## Целевая продуктовая схема
 
@@ -272,6 +275,13 @@ integrations/observability/
   trace-review-checklist.md
 outputs/
   README.md
+siteportfolio/
+  README.md
+  runs/
+    2026-06-14/
+      frontend-result.md
+      qa-report.md
+      evidence/
 tooling/scripts/
   generate-notion-research-export.mjs
   publish-notion-research-hub.mjs

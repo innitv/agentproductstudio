@@ -31,6 +31,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - `agent-pack/workflows/ds-baseline.workflow.md`
 - `runtime/typescript/workflow-stages.ts`
 - `outputs/registry.json`
+- `siteportfolio/README.md` и `siteportfolio/runs/2026-06-14/handoff-bundle.md`, если запрос относится к личному сайту-портфолио пользователя
 - `agent-pack/artifacts/brief/recursive-brief.template.md`
 - Существующие артефакты в `outputs/<project-slug>/<YYYY-MM-DD>/` (при наличии)
 
@@ -68,6 +69,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 | `limited engineering task` | task-scoped ExecPlan | узкий scope, локальные проверки, без полного product pipeline |
 | `cleanup/sorting` | cleanup commands / staging plan | не смешивать с feature work; не удалять без явного target |
 | `external write` | approval-gated action | exact target, dry-run/preview, publication/deploy/commit record |
+| `siteportfolio update` | targeted product update для `/portfolio` | читать `siteportfolio/README.md`, не создавать новый `outputs` run без явного запроса |
 
 ## Delegation Packet Contract
 
@@ -150,6 +152,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 Этот агент активируется и обрабатывает следующие фразы пользователя (намерения):
 - **Старт нового проекта/вокфлоу**: `начать воркфлоу`, `новый лендинг`, `новый проект`, `start landing`, `create project`.
+- **Личный сайт-портфолио / siteportfolio**: `мой сайт`, `мой сайт портфолио`, `портфолио`, `portfolio`, `siteportfolio`, `персональный сайт`, `сайт Ивана`, `страница портфолио`, `/portfolio`.
 - **Продолжение воркфлоу**: `продолжить запуск`, `resume workflow`, `поехали дальше`, `погнали дальше`.
 - **Статус выполнения**: `покажи статус`, `workflow status`, `что готово`, `status check`.
 
