@@ -1,0 +1,153 @@
+{
+  "run_id": "2026-06-06-1780732134119",
+  "goal": "Workflow run",
+  "profile": "standard",
+  "execution_mode": "local",
+  "status": "pending",
+  "output_dir": "C:\\Project\\product-agent-studio\\research\\projects\\a3pay-cjm\\2026-06-06",
+  "created_at": "2026-06-06T07:48:54.114Z",
+  "updated_at": "2026-06-06T09:16:42.493Z",
+  "stages": {
+    "00-intake": {
+      "id": "00-intake",
+      "title": "Intake and Recursive Brief",
+      "status": "completed",
+      "attempts": 1,
+      "artifacts": [
+        "run-plan.md",
+        "handoff-bundle.md",
+        "stage-gate-ledger.md",
+        "recursive-brief.md"
+      ],
+      "updated_at": "2026-06-06T07:48:54.114Z"
+    },
+    "01-research": {
+      "id": "01-research",
+      "title": "Deep Research",
+      "status": "completed",
+      "attempts": 2,
+      "artifacts": [
+        "research-summary.md",
+        "competitive-analysis.md",
+        "proto-personas.md",
+        "synthetic-interviews.md",
+        "swot.md"
+      ],
+      "updated_at": "2026-06-06T08:21:50.195Z",
+      "error": "Research stage validation failed with 1 error(s).",
+      "notes": [
+        "Reset by force rerun of 01-research at 2026-06-06T08:20:47.700Z."
+      ]
+    },
+    "02-prd": {
+      "id": "02-prd",
+      "title": "Product Requirements",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-06T08:20:47.7Z",
+      "notes": [
+        "Reset by force rerun of 01-research at 2026-06-06T08:20:47.700Z."
+      ]
+    },
+    "03-ia": {
+      "id": "03-ia",
+      "title": "Information Architecture",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-06T08:20:47.7Z",
+      "notes": [
+        "Reset by force rerun of 01-research at 2026-06-06T08:20:47.700Z."
+      ]
+    },
+    "04-design": {
+      "id": "04-design",
+      "title": "Design Brief",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-06T08:20:47.7Z",
+      "notes": [
+        "Reset by force rerun of 01-research at 2026-06-06T08:20:47.700Z."
+      ]
+    },
+    "05-copy": {
+      "id": "05-copy",
+      "title": "Copy Deck",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-06T08:20:47.7Z",
+      "notes": [
+        "Reset by force rerun of 01-research at 2026-06-06T08:20:47.700Z."
+      ]
+    },
+    "06-screens": {
+      "id": "06-screens",
+      "title": "Screens",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-06T08:20:47.7Z",
+      "notes": [
+        "Reset by force rerun of 01-research at 2026-06-06T08:20:47.700Z."
+      ]
+    },
+    "07-prototype": {
+      "id": "07-prototype",
+      "title": "Prototype",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-06T08:20:47.7Z",
+      "notes": [
+        "Reset by force rerun of 01-research at 2026-06-06T08:20:47.700Z."
+      ]
+    },
+    "08-frontend": {
+      "id": "08-frontend",
+      "title": "Frontend",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-06T08:20:47.7Z",
+      "notes": [
+        "Reset by force rerun of 01-research at 2026-06-06T08:20:47.700Z."
+      ]
+    },
+    "10-test-bench": {
+      "id": "10-test-bench",
+      "title": "Test Bench",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-06T08:20:47.7Z",
+      "notes": [
+        "Reset by force rerun of 01-research at 2026-06-06T08:20:47.700Z."
+      ]
+    },
+    "11-qa": {
+      "id": "11-qa",
+      "title": "QA Review",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-06T08:20:47.7Z",
+      "notes": [
+        "Reset by force rerun of 01-research at 2026-06-06T08:20:47.700Z."
+      ]
+    },
+    "12-release": {
+      "id": "12-release",
+      "title": "Release",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-06T08:20:47.7Z",
+      "notes": [
+        "Reset by force rerun of 01-research at 2026-06-06T08:20:47.700Z."
+      ]
+    }
+  }
+}

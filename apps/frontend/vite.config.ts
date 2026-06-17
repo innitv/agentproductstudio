@@ -13,6 +13,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(appDir, "./src"),
+      "@siteportfolio": path.resolve(appDir, "../../siteportfolio/src"),
     },
   },
   build: {

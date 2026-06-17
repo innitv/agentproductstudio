@@ -14,6 +14,18 @@ yarn git:check-staged
 
 Команда блокирует случайно staged `outputs/**`, `siteportfolio/runs/**`, `.lazyweb/**`, logs, build/test artifacts и media/evidence файлы. Если пользователь явно просит коммитить такой target, используй allow-флаг из `tooling/scripts/check-staged-scope.mjs --help`.
 
+Проверить executable handoff/output contracts для agentic stages:
+
+```bash
+yarn workflow:test-agent-contracts
+```
+
+Проверить Agent Capability Registry:
+
+```bash
+yarn workflow:test-agent-capabilities
+```
+
 Проверить standard route без visual reference:
 
 ```bash
@@ -38,7 +50,7 @@ yarn landing:run "цель лендинга"
 yarn workflow:run-local "цель лендинга"
 ```
 
-Команда создаёт `outputs/<project-slug>/<YYYY-MM-DD>/`, запускает research stage,
+Команда создаёт `outputs/<project-slug>/<YYYY-MM-DD>/` для продуктового workflow, запускает research stage,
 генерирует downstream-артефакты и в конце выполняет `workflow:validate`.
 
 Запустить persisted workflow engine:
@@ -128,16 +140,16 @@ Engine сохраняет `run-state.json` и machine-readable stage results в 
 
 ## Research
 
-Запустить end-to-end research stage для существующей output-папки:
+Запустить end-to-end research stage для существующей research-папки:
 
 ```bash
-yarn research:run outputs/<project-slug>/<YYYY-MM-DD>
+yarn research:run research/projects/<research-slug>/<YYYY-MM-DD>
 ```
 
 Запустить research stage с явным research query:
 
 ```bash
-yarn research:run outputs/<project-slug>/<YYYY-MM-DD> "research query"
+yarn research:run research/projects/<research-slug>/<YYYY-MM-DD> "research query"
 ```
 
 Research runner создает:
@@ -322,8 +334,8 @@ yarn workflow:doctor --repair
 
 ```bash
 yarn landing:run "Лендинг для AI-сервиса записи в салон"
-yarn research:run outputs/<project-slug>/<YYYY-MM-DD>
-yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through 01-research --profile standard
+yarn research:run research/projects/<research-slug>/<YYYY-MM-DD>
+yarn workflow:validate research/projects/<research-slug>/<YYYY-MM-DD> --through 01-research --profile standard
 ```
 
 Сценарий с визуальным референсом:
@@ -334,8 +346,8 @@ yarn reference:scan https://example.com example-reference
 yarn reference:diff reports/visual-review/example-reference reports/visual-review/example-local reports/visual-review/example-reference
 yarn reference:section-diff https://example.com http://127.0.0.1:4173 reports/visual-review/example-reference
 yarn reference:review reports/visual-review/example-reference http://127.0.0.1:4173 --local-dir reports/visual-review/example-local
-yarn research:run outputs/<project-slug>/<YYYY-MM-DD>
-yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through 01-research --profile reference
+yarn research:run research/projects/<research-slug>/<YYYY-MM-DD>
+yarn workflow:validate research/projects/<research-slug>/<YYYY-MM-DD> --through 01-research --profile reference
 ```
 
 ## Trigger Phrases / Триггер-фразы (Natural Language Intents)

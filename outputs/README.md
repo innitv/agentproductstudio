@@ -1,6 +1,8 @@
 # Outputs (Результаты запусков)
 
-Эта папка предназначена для хранения результатов запусков workflow и разделена на две основные зоны во избежание захламления:
+Эта папка предназначена для runtime/temp/legacy результатов workflow и разделена на зоны во избежание захламления.
+
+Исследовательские runs, CJM и market research теперь вынесены в отдельный каталог `research/`.
 
 ## Структура папки
 
@@ -26,11 +28,18 @@ outputs/
         ...
   temp/                  # Временные папки проверок, тестов и дымовых (smoke) запусков
     <test-run-slug>/
+
+research/
+  projects/              # Research/CJM/market-research runs
+    <research-slug>/
+      <YYYY-MM-DD>/
 ```
 
 ## Правила и регламенты
 
 1. **Реестр (`registry.json`):** Все реальные продукты регистрируются в массиве `activeProducts` в `registry.json`.
+   Отдельные продукты могут жить вне `outputs/`, если это явно зафиксировано в корне проекта. Сейчас личный сайт-портфолио вынесен в `siteportfolio/`.
+   Исследовательские проекты регистрируются отдельно в `research/registry.json`.
 2. **Runtime source of truth:** Workflow-агент и команды `workflow:*` по умолчанию работают с `outputs/<project-slug>/<YYYY-MM-DD>/`. Содержимое прошлых run folders используется только как диагностический контекст конкретного запуска, а не как источник правил workflow.
 3. **Run ledger:** каждый полноценный run содержит `run-index.md`, `run-state.json`, `run-meta.json` и `artifact-manifest.json`. `run-index.md` — первый файл для человека; `artifact-manifest.json` — machine-readable ledger артефактов.
 4. **Artifact types:** manifest классифицирует файлы как `state`, `manifest`, `product_artifact`, `evidence`, `external_record` или `export`.
@@ -39,6 +48,7 @@ outputs/
 7. **Sync:** после ручной правки run artifacts запускай `yarn workflow:sync outputs/<project-slug>/<YYYY-MM-DD>`, чтобы `run-state.json`, `artifact-manifest.json`, `run-index.md` и stage results не расходились с Markdown-артефактами.
 8. **Очистка (`yarn outputs:cleanup`):** Для наведения порядка в корне `outputs/` используйте команду `yarn outputs:cleanup`. Она оставляет зарегистрированные активные продукты в runtime-пути `outputs/<project-slug>/` и переносит только незарегистрированные папки/файлы в `outputs/temp/`.
 9. **Legacy/archive:** `outputs/products/` хранит старые или вручную перенесенные результаты и не является путем по умолчанию для новых запусков.
-10. **Безопасность:** Категорически запрещено сохранять секреты, пароли или токены доступа в отчетах.
-11. **Достоверность:** Все утверждения (claims) без явных внешних источников обязаны помечаться статусом `needs validation`.
-12. **Согласованность:** Каждый отчет `prototype-report` обязан содержать transition map и конкретный completion step.
+10. **Research:** `research/projects/` хранит исследовательские runs, CJM, market research, source logs и Notion-ready research exports.
+11. **Безопасность:** Категорически запрещено сохранять секреты, пароли или токены доступа в отчетах.
+12. **Достоверность:** Все утверждения (claims) без явных внешних источников обязаны помечаться статусом `needs validation`.
+13. **Согласованность:** Каждый отчет `prototype-report` обязан содержать transition map и конкретный completion step.

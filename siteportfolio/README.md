@@ -8,10 +8,16 @@
 
 | Слой | Путь | Назначение |
 |---|---|---|
-| Frontend route | `apps/frontend/src/App.tsx` | Маршрут `/portfolio` подключает портфолио. |
-| Frontend view | `apps/frontend/src/views/PortfolioView.tsx` | Основной React-view сайта портфолио. |
-| Styles | `apps/frontend/src/styles.css` | CSS-блоки `.portfolio-*` для сайта портфолио. |
+| Route hook | `apps/frontend/src/App.tsx` | Тонкое подключение маршрута `/portfolio` к сайту. |
+| Site source | `siteportfolio/src/` | Исходники личного сайта портфолио. |
 | Product ledger | `siteportfolio/runs/2026-06-14/` | История редизайна, QA, screenshots, surface contract и frontend-result. |
+
+## Внутренняя структура
+
+| Папка / файл | Назначение |
+|---|---|
+| `src/PortfolioView.tsx` | Основной React-view сайта: главная, страницы компаний и детальные кейсы. |
+| `src/styles.css` | Все scoped-стили сайта с namespace `.portfolio-*`. |
 
 ## Правило маршрутизации
 
@@ -20,11 +26,11 @@
 Для таких задач:
 
 - сначала читать этот README и `siteportfolio/runs/2026-06-14/handoff-bundle.md`;
-- для UI-правок менять `apps/frontend/src/views/PortfolioView.tsx` и соответствующие `.portfolio-*` стили;
+- для UI-правок менять `siteportfolio/src/PortfolioView.tsx` и `siteportfolio/src/styles.css`;
+- общий frontend-route в `apps/frontend/src/App.tsx` менять только если меняется способ подключения `/portfolio`;
 - не создавать новый `outputs/<project-slug>/...` без явного запроса на полный новый workflow;
 - после визуально значимой правки обновлять или добавлять evidence в `siteportfolio/runs/<date>/`.
 
 ## Текущий статус
 
 Активный продуктовый run: `siteportfolio/runs/2026-06-14/`.
-

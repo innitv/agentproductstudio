@@ -1,0 +1,114 @@
+{
+  "run_id": "2026-06-16-1781598010959",
+  "goal": "Workflow run",
+  "profile": "standard",
+  "execution_mode": "local",
+  "status": "partial",
+  "output_dir": "C:\\Project\\product-agent-studio\\research\\projects\\crm-russia-payments\\2026-06-16",
+  "created_at": "2026-06-16T08:20:10.957Z",
+  "updated_at": "2026-06-16T08:20:10.957Z",
+  "stages": {
+    "00-intake": {
+      "id": "00-intake",
+      "title": "Intake and Recursive Brief",
+      "status": "partial",
+      "attempts": 1,
+      "artifacts": [
+        "run-plan.md",
+        "handoff-bundle.md",
+        "stage-gate-ledger.md"
+      ],
+      "updated_at": "2026-06-16T08:20:10.957Z"
+    },
+    "01-research": {
+      "id": "01-research",
+      "title": "Deep Research",
+      "status": "partial",
+      "attempts": 1,
+      "artifacts": [
+        "research-summary.md"
+      ],
+      "updated_at": "2026-06-16T08:20:10.957Z"
+    },
+    "02-prd": {
+      "id": "02-prd",
+      "title": "Product Requirements",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-16T08:20:10.957Z"
+    },
+    "03-ia": {
+      "id": "03-ia",
+      "title": "Information Architecture",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-16T08:20:10.957Z"
+    },
+    "04-design": {
+      "id": "04-design",
+      "title": "Design Brief",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-16T08:20:10.957Z"
+    },
+    "05-copy": {
+      "id": "05-copy",
+      "title": "Copy Deck",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-16T08:20:10.957Z"
+    },
+    "06-screens": {
+      "id": "06-screens",
+      "title": "Screens",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-16T08:20:10.957Z"
+    },
+    "07-prototype": {
+      "id": "07-prototype",
+      "title": "Prototype",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-16T08:20:10.957Z"
+    },
+    "08-frontend": {
+      "id": "08-frontend",
+      "title": "Frontend",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-16T08:20:10.957Z"
+    },
+    "10-test-bench": {
+      "id": "10-test-bench",
+      "title": "Test Bench",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-16T08:20:10.957Z"
+    },
+    "11-qa": {
+      "id": "11-qa",
+      "title": "QA Review",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-16T08:20:10.957Z"
+    },
+    "12-release": {
+      "id": "12-release",
+      "title": "Release",
+      "status": "pending",
+      "attempts": 0,
+      "artifacts": [],
+      "updated_at": "2026-06-16T08:20:10.957Z"
+    }
+  }
+}

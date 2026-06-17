@@ -11,7 +11,8 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "paths": {
-      "@/*": ["./apps/frontend/src/*"]
+      "@/*": ["./apps/frontend/src/*"],
+      "@siteportfolio/*": ["./siteportfolio/src/*"]
     },
     "types": ["node", "vite/client"]
   },
@@ -19,6 +20,8 @@
     "runtime/typescript/**/*.ts",
     "apps/frontend/src/**/*.ts",
     "apps/frontend/src/**/*.tsx",
+    "siteportfolio/src/**/*.ts",
+    "siteportfolio/src/**/*.tsx",
     "apps/frontend/vite.config.ts",
     "playwright.config.ts",
     "tests/**/*.ts"
