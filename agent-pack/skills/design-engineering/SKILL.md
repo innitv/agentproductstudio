@@ -35,6 +35,7 @@ contract_schema: agent-pack/templates/skill.template.md
 
 1. Прочитай `design-brief.md`, `screens.md`, `prototype-report.md` и `frontend-result.md`.
 2. Если есть `figma-handoff-bundle.md`, проверь, что motion/state rules и component variants не потерялись при переносе в код.
+2a. Проверь Component Contract Matrix: Figma properties/values должны иметь React prop mapping, state story/test/locator или explicit deviation.
 3. Определи критичные user actions: primary CTA, navigation, form submit, modal/open close, selected row/card, filter/sort/search.
 4. Проверь каждый action в состояниях default, hover, focus, active/pressed, disabled, loading, error и success.
 5. Для визуально значимой UI-задачи проверь desktop/mobile viewport через browser/Playwright screenshots или зафиксируй blocker.
@@ -52,6 +53,8 @@ contract_schema: agent-pack/templates/skill.template.md
 - Disabled/loading/error/empty/success states не ломают layout.
 - Частые keyboard actions не получают декоративную анимацию.
 - Длинный текст не меняет высоту fixed controls, не выталкивает icons и не создает horizontal overflow.
+- Figma-driven component имеет state story/route и paired screenshot для must-cover states.
+- Новый bespoke primitive не дублирует существующий production contract без `gap_reason`.
 - Dashboard/console interactions не превращаются в декоративный motion; priority отдается scanability, predictability и repeated-use ergonomics.
 - Landing/marketing interactions поддерживают narrative flow, но не скрывают primary CTA и brand/product signal.
 

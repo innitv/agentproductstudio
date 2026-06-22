@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Figma component contract registry",
+  "type": "object",
+  "required": ["fileKey", "codeConnectStatus", "components"],
+  "properties": {
+    "fileKey": { "type": "string", "minLength": 1 },
+    "fileName": { "type": "string" },
+    "codeConnectStatus": {
+      "enum": ["connected", "unavailable_plan", "not_configured", "skipped_with_reason"]
+    },
+    "codeConnectCheckedAt": { "type": "string", "format": "date" },
+    "components": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "nodeId", "codeSource", "codeExport", "expectedVariants"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "nodeId": { "type": "string", "pattern": "^[0-9]+:[0-9]+$" },
+          "codeSource": { "type": "string", "minLength": 1 },
+          "codeExport": { "type": "string", "minLength": 1 },
+          "expectedVariants": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

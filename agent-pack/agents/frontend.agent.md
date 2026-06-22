@@ -20,6 +20,7 @@ approval_actions: []
 skills:
   - landing-builder
   - figma-token-extractor
+  - figma-roundtrip
   - design-engineering
   - ds-to-storybook
 contract_schema: agent-pack/schemas/agent-output.schema.json
@@ -70,16 +71,18 @@ Lazyweb для frontend используется как benchmark/critique layer
 3a. **Surface Output Contract Pass**: определить тип поверхности (`landing`, `product_ui`, `dashboard_console`, `frontend` или blended), expected views/components/states, upstream coverage, evidence-to-output map и verification plan по `agent-pack/templates/surface-output-contract.template.md`.
 3b. **Visual Evidence Grounding Pass**: проверить наличие real-world visual evidence для layout, density, hierarchy, states и responsive behavior. Перенести примененные/отклоненные visual references в `frontend-result.md` как Visual Evidence-To-Implementation Map.
 3c. **Source Pair Implementation Matrix**: определить, какие пары обязательны для текущей реализации: `reference_to_figma`, `figma_to_frontend`, `reference_to_frontend`, `spec_to_frontend_behavior`. Для каждой обязательной пары зафиксировать evidence, status и deviation в `frontend-result.md`. Если есть Figma handoff, но нет Figma screenshot/node evidence, frontend не может закрыть `figma_to_frontend` как `pass`.
+3d. **Design System Mode Pass**: прочитать `design_system_mode`. Для `reuse` не дублировать primitives; для `extend` реализовать только подтвержденные gaps; для `product_specific` использовать локальные product tokens/components; для `bespoke` выносить компонент только при доказанном повторе.
+3e. **Component Contract Pass**: сопоставить Figma component/property/value → React component/prop → semantic CSS token → state story/route → test locator. Любой gap имеет reason/deviation. Если Code Connect недоступен, использовать matrix из handoff как обязательный fallback.
 4. **Surface Routing**: Определить тип поверхности: `marketing/landing`, `app/dashboard/console` или blended. Для blended задач разделить presentation view и operational view вместо смешивания hero-композиции с dashboard-интерфейсом.
 5. **Применение Навыков**: Использовать навык [landing-builder/SKILL.md](file:///c:/Project/product-agent-studio/agent-pack/skills/landing-builder/SKILL.md) для сборки премиальных кастомных интерфейсов с нуля на чистом Tailwind и React без готовых библиотек.
 6. **Синхронизация С Figma Handoff**: Если есть `figma-handoff-bundle.md`, сопоставить Figma variables/component inventory/component states с frontend tokens/components. Не игнорировать `Auto Layout intent`: он переводится в Flex/Grid, min/max constraints, stable dimensions и text wrapping rules.
-7. **Component Architecture**: Написать модульные семантические React/TypeScript компоненты. Предпочитать composition over configuration, отделять view-level композицию от переиспользуемых компонентов и не строить over-configured config-object UI.
+7. **Component Architecture**: Написать модульные семантические React/TypeScript компоненты по Component Contract Matrix. Предпочитать composition over configuration, отделять view-level композицию от переиспользуемых компонентов и не строить over-configured config-object UI.
 8. **Машина состояний и симулятор**: Создать интерактивные состояния (hover, active, modal, overlays), формы ввода и полнофункциональный симулятор (например, окно чата, Switch-переключатели) со скелетон-загрузчиками.
 9. **Адаптивность и A11y**: Применить правила адаптивной верстки (Flex/Grid) для мобильных устройств, планшетов и десктопа. Добавить aria-labels, семантические теги HTML5, клавиатурный фокус и не использовать цвет как единственный индикатор состояния.
 10. **Интеграция аналитики**: Внедрить анонимные дата-атрибуты для отслеживания шагов воронки без сбора персональных данных.
 11. **Motion и interaction polish**: Проверить, что анимации имеют явную цель, UI transitions обычно короче 300ms, нет `transition: all`, hover-анимации ограничены `@media (hover: hover) and (pointer: fine)`, есть `prefers-reduced-motion`, press/focus/disabled/loading/error states и нет лишней анимации на частых keyboard actions.
 12. **Frontend QA Inventory**: До финального ответа пройти инвентаризацию claims, controls, state changes, responsive constraints, long-text behavior, Surface Output Contract coverage и visual-critical zones. Для визуально значимой UI-задачи приложить desktop/mobile screenshot evidence или явный blocker. Если использовался Lazyweb, записать в `frontend-result.md`, какие patterns были применены, отклонены или помечены как непригодные.
-13. **Storybook export**: Если пользователь запросил компонентную библиотеку или handoff, подготовить optional `storybook-result.md` по шаблону `agent-pack/artifacts/frontend/storybook-result.template.md`.
+13. **State catalog / Storybook**: Если пользователь запросил компонентную библиотеку, подготовить Storybook. Для Figma-driven components обязательно создать Storybook stories или эквивалентные отдельные state routes/catalog и записать mapping в `storybook-result.md`/`frontend-result.md`.
 14. **Тестирование и сборка**: Запустить проверку типов, линтинг, сборку и автотесты. Исправить любые ошибки компилятора или верстки.
 15. **Запись результатов**: Создать итоговый отчет фронтенда с описанием Surface Output Summary, измененных файлов, логов тестов и известных ограничений.
 
@@ -90,6 +93,8 @@ Lazyweb для frontend используется как benchmark/critique layer
 - **Минимизация зависимостей**: Не добавлять сторонние Yarn-зависимости без крайней необходимости. Максимально использовать существующие токены дизайн-системы.
 - **Motion hygiene**: Не использовать `transition: all`, не начинать UI entry с `scale(0)`, не применять `ease-in` для responsive UI entry, не анимировать часто повторяемые keyboard actions, не делать hover-анимации на touch без media query, поддерживать `prefers-reduced-motion`.
 - **Figma handoff fidelity**: Если `figma-handoff-bundle.md` содержит variables, component sets, variants или Auto Layout rules, frontend должен либо реализовать их эквиваленты в коде, либо явно записать deviation в `frontend-result.md`.
+- **Component contract fidelity**: Figma-driven frontend не может быть `success`, если обязательные Figma properties/states не имеют React prop mapping, state catalog/test locator или explicit deviation.
+- **No forced legacy DS**: Наличие A3 или другой локальной библиотеки не обязывает использовать ее; решение определяется `design_system_mode`. При `product_specific` нельзя незаметно подмешивать A3 tokens/components.
 - **Source pair fidelity**: Frontend не может считаться `success`, если обязательная пара `figma_to_frontend`, `reference_to_frontend` или `spec_to_frontend_behavior` не имеет evidence или explicit deviation/waiver в `frontend-result.md`.
 - **Surface fidelity**: Landing/marketing surface должен давать сильный first viewport brand/product signal; dashboard/console surface должен показывать primary workspace/action, а не набор равных decorative cards.
 - **Evidence-first UI**: Визуально значимые изменения не закрываются одной сборкой. Нужны browser/Playwright desktop и mobile checks либо честный `blocked`/`partial` с причиной.

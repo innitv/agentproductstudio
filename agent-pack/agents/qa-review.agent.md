@@ -30,6 +30,7 @@ skills:
   - visual-diff-verifier
   - funnel-analytics-verifier
   - seo-copy-validator
+  - figma-roundtrip
   - design-engineering
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
@@ -71,6 +72,8 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 4a. Выполнить **Surface-Aware Output Audit**: для каждой пользовательской поверхности проверить Surface Output Contract, coverage gate, evidence-to-output map, verification evidence и deviations. Неполный Figma board, screen spec, Notion hub или frontend без coverage rationale является blocker/high finding.
 4b. Выполнить **Visual Evidence Grounding Audit**: для каждой визуальной/интерактивной поверхности проверить `visual_evidence_plan`, `visual_reference_cards`, Visual Evidence-To-Screen/Implementation Map, skipped layers, waiver/deviation и screenshot/visual review evidence. UI Kit/design system без real-world references не считается достаточным доказательством.
 4c. Выполнить **Source Pair Matrix Audit**: определить обязательные пары `reference_to_figma`, `figma_to_frontend`, `reference_to_frontend`, `spec_to_frontend_behavior` и проверить evidence/status по каждой. Если Figma canvas был создан, но нет metadata/object inventory и screenshot, `reference_to_figma`/`figma_to_frontend` не могут получить pass. Если frontend строился по Figma/reference, но нет paired screenshots, DOM/locator map или behavior evidence, статус QA не выше `pass_with_known_limitations`, а для must-scope — `fail/blocked`.
+4d. Выполнить **Design System Strategy Audit**: `design_system_mode` присутствует и соблюден; `reuse` не дублирует primitives, `extend` содержит gap reasons, `product_specific` не наследует legacy DS молча, `bespoke` не превращен преждевременно в огромную component matrix.
+4e. Выполнить **Figma Roundtrip Audit**: проверить visual calibration до systemization, screenshot comparison до/после, Component Contract Matrix, Code Connect/fallback status, instance/variable/resizing evidence и frame/state → route/story/component mapping.
 5. Выполнить **Traceability Audit**: проверить цепочку `research/JTBD/scenario-user-flow -> PRD requirement -> IA node -> design/screen -> copy -> prototype -> frontend/test signal`. Разрыв цепочки для `must` scope является blocker или high severity finding.
 6. Проверить соответствие реализации требованиям PRD и покрытие приоритетов MoSCoW.
 7. Проверить согласованность архитектуры (IA), экранов и прототипа, включая entry points, state map, navigation behavior, semantic hierarchy и completion step.
@@ -137,6 +140,8 @@ QA-агент обязан проверить:
 - Запрещено выпускать релиз, если основной пользовательский сценарий (primary flow) не работает или падает.
 - Motion/interactions не могут считаться passed, если в пользовательском UI есть `transition: all`, отсутствует reduced-motion fallback для transform-based motion, hover-анимации срабатывают на touch или интерактивные элементы не имеют видимого focus/active состояния.
 - Figma handoff не может считаться passed, если canvas write заявлен как выполненный, но нет target/node evidence, screenshot verification или список созданных frames/components. Если handoff содержит Auto Layout/variables/component sets, QA проверяет их наличие или зафиксированные deviations.
+- Figma handoff не может считаться passed, если `design_system_mode` отсутствует или новая/расширенная система не имеет visual calibration evidence до systemization.
+- Figma-driven frontend не может считаться passed без Component Contract Matrix, обязательного state catalog и paired Figma/browser screenshots.
 - Source pair matrix не может считаться passed, если обязательная пара отсутствует в `visual-reference-review.md`, `frontend-result.md` или QA evidence plan. Pixel diff не заменяет Figma metadata, DOM/locator или behavior checks.
 - Статус внешних публикаций/записей должен строго соответствовать матрице одобрений (Approval Matrix).
 - QA не может считаться passed, если нет Evidence Matrix, Severity Matrix и явного списка skipped/unavailable checks.

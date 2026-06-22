@@ -30,6 +30,24 @@
 - Libraries/components reused:
 - Что создается с нуля:
 
+## Design System Strategy
+
+| Field | Value |
+|---|---|
+| `design_system_mode` | `reuse` / `extend` / `product_specific` / `bespoke` |
+| Selected foundation / none |  |
+| Rationale |  |
+| Rejected alternatives |  |
+| Product-specific boundaries |  |
+| Maintenance impact |  |
+
+## Two-Pass Build
+
+| Pass | Scope | Evidence | Verdict |
+|---|---|---|---|
+| `visual_calibration` | 2-3 key screens; composition, density, hierarchy, rhythm, copy fit, responsive direction | screenshots / visual review | `passed|passed_with_notes|blocked` |
+| `systemization` | variables, styles, component sets/properties, instances, Auto Layout/resizing, prototype | object inventory + before/after screenshot | `passed|regression_found|blocked` |
+
 ## Surface Output Contract
 
 | Field | Value |
@@ -106,6 +124,22 @@
 | Component Set | Variant Properties | Required States | Resize Contract |
 |---|---|---|---|
 
+## Component Contract Matrix
+
+| Stable ID | Figma source | Property / allowed values | Semantic variables | React target / prop mapping | Required states | Story / test / locator | Deviation owner / follow-up |
+|---|---|---|---|---|---|---|---|
+
+## Code Connect / Mapping Status
+
+- Code Connect status: `connected|unavailable|not_configured|skipped_with_reason`
+- Mapping location / URL:
+- Fallback registry location:
+
+## Frame / State Handoff Map
+
+| Figma frame / state | Node ID / screenshot | Frontend route / story / component | Behavior evidence | Status |
+|---|---|---|---|---|
+
 ## Экраны Для Сборки
 
 | Screen | Frame | Size | Components | Layout Strategy | Notes |
@@ -128,6 +162,11 @@
 - Screenshot review result: `passed|passed_with_notes|blocked`
 - Auto Layout smoke check:
 - Variables/components smoke check:
+- Detached instance audit:
+- Variable binding / raw-value deviation audit:
+- Resize / long-copy audit:
+- Systemization visual regression check:
+- Paired Figma/browser screenshot status:
 - Известные расхождения:
 
 ## Блокеры

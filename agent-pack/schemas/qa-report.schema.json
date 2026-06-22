@@ -14,6 +14,8 @@
     "accessibility",
     "responsive",
     "negative_edge_path_pass",
+    "design_system_strategy_audit",
+    "component_contract_audit",
     "funnel_analytics",
     "secrets_sensitive_data",
     "validation",
@@ -82,6 +84,33 @@
           "result": { "enum": ["pass", "fail", "blocked", "not_applicable"] },
           "evidence": { "type": "string" },
           "notes": { "type": "string" }
+        }
+      }
+    },
+    "design_system_strategy_audit": {
+      "type": "object",
+      "required": ["mode_present", "mode_consistent", "calibration_before_systemization", "visual_regression_status"],
+      "properties": {
+        "mode_present": { "type": "boolean" },
+        "mode_consistent": { "type": "boolean" },
+        "calibration_before_systemization": { "type": "boolean" },
+        "visual_regression_status": { "enum": ["pass", "fail", "blocked", "not_applicable"] },
+        "notes": { "type": "string" }
+      }
+    },
+    "component_contract_audit": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["stable_id", "figma_status", "frontend_status", "state_evidence_status", "result"],
+        "properties": {
+          "stable_id": { "type": "string" },
+          "figma_status": { "type": "string" },
+          "frontend_status": { "type": "string" },
+          "state_evidence_status": { "type": "string" },
+          "paired_screenshot_status": { "type": "string" },
+          "result": { "enum": ["pass", "gap", "blocked", "not_applicable"] },
+          "deviation": { "type": "string" }
         }
       }
     },

@@ -15,6 +15,17 @@
 | Итерация | Вход | Выход | Статус |
 |---|---|---|---|
 
+## Visual Calibration Verdict
+
+| Check | Evidence | Result | Required revision |
+|---|---|---|---|
+| Сценарная иерархия |  | `passed|needs_work|blocked` |  |
+| Композиция и density |  |  |  |
+| Visual rhythm |  |  |  |
+| Copy fit / long text |  |  |  |
+| Mobile direction |  |  |  |
+| Real-world reference grounding |  |  |  |
+
 ## Что Выглядит Дешево И Почему
 
 | Было | Стало | Почему |
@@ -49,6 +60,13 @@
 - До:
 - После:
 - Скриншоты:
+
+## Systemization Regression Check
+
+| Calibration screenshot | Systemized screenshot | Composition preserved | Deviations / fix |
+|---|---|---|---|
+
+Структурно более правильный результат не проходит gate, если визуально проигрывает calibration version.
 
 ## Gate Result
 

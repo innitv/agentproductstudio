@@ -25,6 +25,10 @@ const requiredFiles = [
   "agent-pack/workflows/stage-handoff-contract.md",
   "agent-pack/templates/agent-output-contract.schema.md",
   "agent-pack/templates/surface-output-contract.template.md",
+  "agent-pack/skills/figma-roundtrip/SKILL.md",
+  "integrations/mcp/figma-canvas-write-guide.md",
+  "agent-pack/workflows/ds-baseline.workflow.md",
+  "design/figma/a3-design-system/ds-baseline-policy.md",
   "agent-pack/guardrails/guardrails.policy.md",
   "agent-pack/guardrails/approval-matrix.md",
 ];
@@ -102,11 +106,11 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/agents/design.agent.md",
-    requiredSnippets: ["Visual Reference Rule", "Lazyweb Evidence Rule", "Universal Visual Evidence Rule", "visual_evidence_plan", "visual_reference_card", "lazyweb_evidence", "section-by-section visual spec", "frontend stage is blocked", "Surface Output Contract Pass", "surface_output"],
+    requiredSnippets: ["Visual Reference Rule", "Lazyweb Evidence Rule", "Universal Visual Evidence Rule", "visual_evidence_plan", "visual_reference_card", "lazyweb_evidence", "section-by-section visual spec", "frontend stage is blocked", "Surface Output Contract Pass", "Design System Strategy Gate", "design_system_mode=reuse|extend|product_specific|bespoke", "Two-Pass Figma Build", "surface_output"],
   },
   {
     file: "agent-pack/agents/frontend.agent.md",
-    requiredSnippets: ["Visual Reference Rule", "Lazyweb Implementation Check", "Visual Evidence Implementation Check", "visual_evidence_plan", "visual_reference_cards", "lazyweb_evidence", "section-by-section structural mapping", "generic landing template", "Surface Output Contract Pass", "Surface Output Summary", "surface_output"],
+    requiredSnippets: ["Visual Reference Rule", "Lazyweb Implementation Check", "Visual Evidence Implementation Check", "visual_evidence_plan", "visual_reference_cards", "lazyweb_evidence", "section-by-section structural mapping", "generic landing template", "Surface Output Contract Pass", "Surface Output Summary", "Design System Mode Pass", "Component Contract Pass", "figma-roundtrip", "surface_output"],
   },
   {
     file: "agent-pack/agents/notion-publisher.agent.md",
@@ -114,7 +118,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "AGENTS.md",
-    requiredSnippets: ["публикация research в Notion обязательна", "Universal Visual Evidence Grounding", "visual_evidence_plan", "visual_reference_card", "Lazyweb Evidence Gate", "section-by-section visual spec", "шаблонный стиль", "Не заменяй требуемый источник", "Не обходи approval", "человекочитаемый research pack", "отдельную child page", "Publication Cross-Link Gate", "Publication Editor Pass", "Карта связей исследования", "Anti-AI-Slop Gate", "Research Content Lint", "notion_data_shape_plan", "integrated_hybrid", "Combined Notion Workspace Gate", "Notion research page publication record", "Surface-Aware Output Framework", "Surface Type Gate", "Write -> Verify -> Fix Gate"],
+    requiredSnippets: ["публикация research в Notion обязательна", "Universal Visual Evidence Grounding", "visual_evidence_plan", "visual_reference_card", "Lazyweb Evidence Gate", "section-by-section visual spec", "шаблонный стиль", "Не заменяй требуемый источник", "Не обходи approval", "человекочитаемый research pack", "отдельную child page", "Publication Cross-Link Gate", "Publication Editor Pass", "Карта связей исследования", "Anti-AI-Slop Gate", "Research Content Lint", "notion_data_shape_plan", "integrated_hybrid", "Combined Notion Workspace Gate", "Notion research page publication record", "Surface-Aware Output Framework", "Surface Type Gate", "Write -> Verify -> Fix Gate", "Design System Strategy Gate", "Two-Pass Figma Build Gate", "Component Contract и Roundtrip Gate", "product_specific", "figma-roundtrip"],
   },
   {
     file: "agent-pack/guardrails/guardrails.policy.md",
@@ -134,19 +138,35 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/artifacts/design/screens.template.md",
-    requiredSnippets: ["Surface Output Contract", "Coverage Gate", "Evidence-To-Output Map", "Visual Evidence-To-Screen Map"],
+    requiredSnippets: ["Surface Output Contract", "Coverage Gate", "Evidence-To-Output Map", "Visual Evidence-To-Screen Map", "Design System Strategy", "Component Contract Matrix", "Frame / State Implementation Map"],
   },
   {
     file: "agent-pack/artifacts/design/figma-handoff-bundle.template.md",
-    requiredSnippets: ["Surface Output Contract", "Evidence-To-Frame Map"],
+    requiredSnippets: ["Surface Output Contract", "Evidence-To-Frame Map", "Design System Strategy", "Two-Pass Build", "Component Contract Matrix", "Code Connect / Mapping Status", "Systemization visual regression check"],
   },
   {
     file: "agent-pack/artifacts/frontend/frontend-result.template.md",
-    requiredSnippets: ["Surface Output Summary", "Upstream Coverage", "Evidence-To-Implementation Map", "Visual Evidence-To-Implementation Map"],
+    requiredSnippets: ["Surface Output Summary", "Upstream Coverage", "Evidence-To-Implementation Map", "Visual Evidence-To-Implementation Map", "Design System Implementation", "Component Contract Implementation", "Frame / State Implementation Map", "Figma Roundtrip Deviations"],
   },
   {
     file: "agent-pack/artifacts/qa/qa-report.template.md",
-    requiredSnippets: ["Surface Output Gates", "Surface Evidence Map"],
+    requiredSnippets: ["Surface Output Gates", "Surface Evidence Map", "Design System Strategy Audit", "Component Contract Audit", "Systemization regression check"],
+  },
+  {
+    file: "agent-pack/skills/figma-roundtrip/SKILL.md",
+    requiredSnippets: ["reuse|extend|product_specific|bespoke", "visual_calibration", "systemization", "Component Contract Matrix", "Code Connect", "frame/state → route/story/component mapping"],
+  },
+  {
+    file: "integrations/mcp/figma-canvas-write-guide.md",
+    requiredSnippets: ["Design System Strategy Gate", "Two-pass build", "Component Contract Matrix", "Frontend → Figma", "Figma → frontend", "Visual regression", "pseudo-REST"],
+  },
+  {
+    file: "agent-pack/workflows/ds-baseline.workflow.md",
+    requiredSnippets: ["design_system_mode=product_specific", "Visual calibration", "Foundation extraction", "Component Contract Matrix", "Regression check"],
+  },
+  {
+    file: "design/figma/a3-design-system/ds-baseline-policy.md",
+    requiredSnippets: ["product_specific", "A3 не является обязательным foundation", "Component Contract Matrix", "visual regression"],
   },
   {
     file: "agent-pack/artifacts/release/release-notes.template.md",

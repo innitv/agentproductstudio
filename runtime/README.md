@@ -34,3 +34,5 @@
   - `visual-section-diff.ts` сравнивает URL-to-URL секции с универсальными default selectors или `--sections sections.json`;
   - `visual-reference-review.ts` генерирует `visual-reference-review.md` с `Source Pair Matrix`;
 - Figma/frontend visual QA должен различать пары `reference_to_figma`, `figma_to_frontend`, `reference_to_frontend` и `spec_to_frontend_behavior`.
+- Figma roundtrip использует `design_system_mode=reuse|extend|product_specific|bespoke`, visual calibration до systemization, Component Contract Matrix и frame/state -> route/story/component mapping.
+- Agent Capability Registry собирается в `runtime/typescript/agent-capability-registry.ts` и проверяется `yarn workflow:test-agent-capabilities`.

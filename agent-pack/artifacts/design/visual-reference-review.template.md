@@ -27,6 +27,17 @@
 | `reference_to_frontend` | yes / no | paired screenshots; `visual-diff-result.json`; section diff | passed / passed_with_notes / accepted_difference / blocked / not_applicable |  |
 | `spec_to_frontend_behavior` | yes / no | prototype state inventory; Playwright interactions; traces/screenshots | passed / passed_with_notes / accepted_difference / blocked / not_applicable |  |
 
+## Figma Roundtrip Review
+
+| Check | Evidence | Status | Correction / deviation |
+|---|---|---|---|
+| Design system mode respected |  |  |  |
+| Calibration before systemization |  |  |  |
+| No systemization visual regression |  |  |  |
+| Component Contract Matrix parity |  |  |  |
+| Frame/state implementation mapping |  |  |  |
+| Paired Figma/browser screenshots |  |  |  |
+
 ## Screenshot Set
 
 | Screenshot | Path | Viewport | Capture type |

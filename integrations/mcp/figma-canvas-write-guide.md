@@ -1,176 +1,145 @@
-# Руководство по записи на холст Figma через MCP
+# SOP: Figma canvas и roundtrip Figma ↔ frontend
 
-## 1. Введение и назначение
+## Назначение
 
-Это руководство описывает спецификацию и правила использования Figma MCP сервера для автоматической генерации, размещения и редактирования UI-макетов непосредственно на холсте Figma. Агенты используют это руководство для переноса текстовых спецификаций экранов (из `screens.md`) во фреймы и слои Figma, обеспечивая синхронизацию проектирования и разработки.
+Этот документ — нормативный источник для Figma read/write, создания новой продуктовой дизайн-системы и передачи между Figma и frontend. Старый pseudo-REST формат `action/create_node/payload`, hardcoded Slate/Inter и обязательное наследование A3 запрещены.
 
----
+## 1. Design System Strategy Gate
 
-## 2. Подключение и доступы
+До генерации зафиксируй один режим:
 
-Запись на холст Figma возможна в двух режимах, прописанных в `mcp_config.json`:
+| Mode | Когда выбирать | Правило |
+|---|---|---|
+| `reuse` | Существующая система соответствует продукту и бренду | Не дублировать primitives/components |
+| `extend` | Foundation подходит, но есть доказанные product gaps | Новые entities имеют gap/reason и совместимый contract |
+| `product_specific` | Нужна самостоятельная продуктовая система | Создать новую foundation после visual calibration |
+| `bespoke` | Повторяемость мала, уникальная композиция критична | Сначала screens; components только после подтвержденного повтора |
 
-1. **Remote MCP Server (Рекомендуемый)**:
-   - URL: `https://mcp.figma.com/mcp`
-   - Требует OAuth-авторизации и локального ключа `FIGMA_API_TOKEN` в файле `.env`.
-2. **Desktop Fallback Server**:
-   - URL: `http://127.0.0.1:3845/mcp`
-   - Работает локально через приложение Figma Desktop с включенной панелью Inspect (Dev Mode).
+Доступная библиотека не означает автоматический `reuse`. Запиши решение, rejected alternatives и влияние на frontend maintenance в `design-brief.md`, `screens.md` и `figma-handoff-bundle.md`.
 
----
+## 2. Read path: Figma → context
 
-## 3. Спецификация инструмента `use_figma`
+Для точной реализации используй минимальный exact node scope:
 
-Универсальный инструмент для работы с элементами Figma — **`use_figma`**. Он позволяет создавать, изменять и удалять элементы.
+1. Получи structured design context для exact frame/component node.
+2. Если контекст слишком большой, сначала получи metadata/object map, затем перечитай только нужные nodes.
+3. Получи screenshot того же node/state.
+4. Собери inventory: variables/styles, component sets, properties, instances, Auto Layout/resizing, assets, prototype reactions.
+5. Не считай screenshot заменой structure/state evidence, а metadata — заменой визуальной проверке.
 
-### Параметры инструмента `use_figma`
+## 3. Two-pass build
 
-| Параметр | Тип | Описание |
-| :--- | :--- | :--- |
-| `figma_url` | string | Ссылка на файл или фрейм Figma (например, `https://www.figma.com/design/KEY/Name?node-id=ID`) |
-| `action` | string | Выполняемое действие: `create_node`, `update_node`, `delete_node`, `get_node_details`, `create_component` |
-| `payload` | object | Тело запроса (спецификация ноды в формате Figma REST API) |
+### Pass A — visual calibration
 
----
+- Собери 2-3 ключевых экрана или состояния.
+- Используй same-domain, adjacent и interaction/state references.
+- Проверь сценарную иерархию, composition, density, rhythm, copy fit, long text и mobile direction.
+- Не создавай большую variant matrix до visual review.
+- Зафиксируй screenshots и verdict: `passed|passed_with_notes|blocked`.
 
-## 4. Маппинг токенов дизайн-системы A3
+### Pass B — systemization
 
-При генерации элементов на холсте агенты обязаны использовать значения из локальной дизайн-системы `design/figma/a3-design-system/token-map.md`.
+После `passed|passed_with_notes`:
 
-### Цветовая палитра A3 (в формате Figma RGBA 0-1)
+- создай primitive и semantic variables;
+- создай text/paint/effect styles там, где это оправдано;
+- создай component sets и properties из реально повторяющихся patterns;
+- собирай screens из instances, а не копий frames;
+- настрой Auto Layout, HUG/FILL/FIXED, min/max и wrapping;
+- добавь required states и prototype links;
+- сравни screenshot до/после, чтобы systemization не ухудшила composition.
 
-| Токен | Назначение | Значение HEX | Значение Figma RGBA |
-| :--- | :--- | :--- | :--- |
-| `a3-bg-primary` | Основной фон страницы | `#0F172A` (Slate 900) | `{"r": 0.059, "g": 0.09, "b": 0.165, "a": 1}` |
-| `a3-bg-secondary`| Фон карточек и секций | `#1E293B` (Slate 800) | `{"r": 0.118, "g": 0.161, "b": 0.231, "a": 1}` |
-| `a3-text-primary`| Основной текст и заголовки| `#F8FAFC` (Slate 50) | `{"r": 0.973, "g": 0.98, "b": 0.988, "a": 1}` |
-| `a3-text-muted`  | Вспомогательный текст | `#94A3B8` (Slate 400) | `{"r": 0.58, "g": 0.639, "b": 0.722, "a": 1}` |
-| `a3-accent-cta`  | Кнопки призыва к действию | `#3B82F6` (Blue 500) | `{"r": 0.231, "g": 0.509, "b": 0.965, "a": 1}` |
-| `a3-border`      | Разделители и рамки | `#334155` (Slate 700) | `{"r": 0.2, "g": 0.255, "b": 0.333, "a": 1}` |
+## 4. Component Contract Matrix
 
-### Типографика (Шрифт по умолчанию: Inter или Outfit)
-- **Заголовок H1**: `fontSize: 48`, `fontWeight: 700` (Bold), `letterSpacing: -0.02`
-- **Заголовок H2**: `fontSize: 32`, `fontWeight: 600` (SemiBold)
-- **Основной текст**: `fontSize: 16`, `fontWeight: 400` (Regular)
-- **Кнопки/Подписи**: `fontSize: 14`, `fontWeight: 500` (Medium)
+Для каждого повторяемого/интерактивного компонента запиши:
 
----
+| Field | Required content |
+|---|---|
+| Stable component id | Независимый от display name идентификатор |
+| Figma source | File/node/component key |
+| Figma properties | Property names, allowed values, defaults |
+| Variables | Semantic bindings; raw value только с reason |
+| Required states | По применимости: default, hover, pressed, focus, disabled, loading, error, success, empty, selected |
+| Resize contract | HUG/FILL/FIXED, min/max, long text, icon behavior |
+| Frontend target | Import path/component |
+| Prop mapping | Figma property → React prop/value |
+| Evidence | Story/route, test locator, paired screenshots |
+| Deviation | Accepted mismatch, owner, follow-up |
 
-## 5. Примеры JSON-запросов (Payloads)
+Если Code Connect доступен, опубликуй mapping и запиши URL/status. Если недоступен, matrix остается обязательным fallback.
 
-### А. Создание основного фрейма страницы (Desktop Landing Frame)
+## 5. Write path: спецификация/код → Figma
 
-Создает холст размером 1440x3000 пикселей со Slate 900 фоном и Auto Layout.
+Используй официальный plugin-context `use_figma` или эквивалентный доступный write tool. Перед каждым вызовом загрузи обязательный skill инструмента текущей среды.
 
-```json
-{
-  "figma_url": "https://www.figma.com/design/4ufM1XdtXzSwbCNpulxETA/A3-Design-System",
-  "action": "create_node",
-  "payload": {
-    "parent_id": "0:1",
-    "node": {
-      "type": "FRAME",
-      "name": "Desktop Landing - AI Agent Studio",
-      "absoluteBoundingBox": { "x": 100, "y": 100, "width": 1440, "height": 3000 },
-      "backgroundColor": { "r": 0.059, "g": 0.09, "b": 0.165, "a": 1 },
-      "layoutMode": "VERTICAL",
-      "primaryAxisSizingMode": "AUTO",
-      "counterAxisSizingMode": "FIXED",
-      "itemSpacing": 0,
-      "paddingTop": 0,
-      "paddingBottom": 0,
-      "paddingLeft": 0,
-      "paddingRight": 0
-    }
-  }
-}
-```
+Порядок:
 
-### Б. Создание секции Hero с заголовком и CTA-кнопкой
+1. Проверить auth, editor type, target file/page/node и edit rights.
+2. Получить exact approval на target и scope; `write_allowed=true`.
+3. Выполнить non-destructive probe/inspection.
+4. Искать existing variables/components/libraries.
+5. Выполнять небольшие idempotent patches: foundation → components → instances/screens → prototype.
+6. После каждого логического блока получать object inventory; после визуально значимого блока — screenshot.
+7. Не удалять/перестраивать чужие frames; устаревшие версии помечать `superseded` или скрывать по согласованному scope.
 
-Добавляет Auto Layout секцию с заголовком и кнопкой внутрь созданного Landing Frame.
+Один огромный генеративный write запрещен для большой component matrix или multi-screen surface.
 
-```json
-{
-  "figma_url": "https://www.figma.com/design/4ufM1XdtXzSwbCNpulxETA/A3-Design-System",
-  "action": "create_node",
-  "payload": {
-    "parent_id": "LANDING_FRAME_NODE_ID",
-    "node": {
-      "type": "FRAME",
-      "name": "Hero Section",
-      "layoutMode": "VERTICAL",
-      "primaryAxisSizingMode": "AUTO",
-      "counterAxisSizingMode": "FIXED",
-      "width": 1440,
-      "itemSpacing": 32,
-      "paddingTop": 120,
-      "paddingBottom": 120,
-      "paddingLeft": 160,
-      "paddingRight": 160,
-      "backgroundColor": { "r": 0.059, "g": 0.09, "b": 0.165, "a": 1 },
-      "children": [
-        {
-          "type": "TEXT",
-          "name": "Headline",
-          "characters": "Создавайте AI-агентов без кода",
-          "style": {
-            "fontFamily": "Inter",
-            "fontSize": 56,
-            "fontWeight": 800,
-            "fills": [{ "type": "SOLID", "color": { "r": 0.973, "g": 0.98, "b": 0.988 } }]
-          }
-        },
-        {
-          "type": "TEXT",
-          "name": "Subtitle",
-          "characters": "Платформа для быстрой сборки, оркестрации и деплоя автономных агентов для вашего бизнеса.",
-          "style": {
-            "fontFamily": "Inter",
-            "fontSize": 20,
-            "fontWeight": 400,
-            "fills": [{ "type": "SOLID", "color": { "r": 0.58, "g": 0.639, "b": 0.722 } }]
-          }
-        },
-        {
-          "type": "FRAME",
-          "name": "CTA Button",
-          "layoutMode": "HORIZONTAL",
-          "primaryAxisSizingMode": "AUTO",
-          "counterAxisSizingMode": "AUTO",
-          "paddingTop": 16,
-          "paddingBottom": 16,
-          "paddingLeft": 32,
-          "paddingRight": 32,
-          "cornerRadius": 8,
-          "backgroundColor": { "r": 0.231, "g": 0.509, "b": 0.965, "a": 1 },
-          "children": [
-            {
-              "type": "TEXT",
-              "name": "Button Text",
-              "characters": "Начать бесплатно",
-              "style": {
-                "fontFamily": "Inter",
-                "fontSize": 16,
-                "fontWeight": 600,
-                "fills": [{ "type": "SOLID", "color": { "r": 1, "g": 1, "b": 1 } }]
-              }
-            }
-          ]
-        }
-      ]
-    }
-  }
-}
-```
+## 6. Frontend → Figma
 
----
+Классифицируй изменение:
 
-## 6. Правила безопасности и Guardrails
+- `token_change`: обновить versioned token source, затем Figma Variables и CSS variables.
+- `component_api_change`: обновить Component Contract Matrix, Code Connect/fallback mapping, Figma properties и frontend stories.
+- `screen_composition_change`: приложить browser screenshot/DOM evidence и patch существующих instances; DOM/screenshot import допустим только как draft.
 
-1. **Режим одобрения (Human-in-the-Loop)**:
-   - Перед любой отправкой мутирующих JSON-запросов в Figma MCP агент ОБЯЗАН вывести сгенерированный JSON в чат пользователю и дождаться явного текстового подтверждения (например: *"Да, отправляй в Figma"*).
-2. **Только разрешенные файлы**:
-   - Агент может изменять только те файлы Figma, ссылки на которые явно предоставил пользователь во входном брифе или в параметре `figma_url`.
-3. **Безопасность токенов**:
-   - Запрещено жестко кодировать API-токены в генерируемый код. Рантайм извлекает их из системных переменных окружения.
+Не синхронизируй каждый DOM node с каждым Figma layer. Source of truth — contracts, states, tokens и accepted composition, а не идентичное дерево.
+
+## 7. Figma → frontend
+
+Перед кодом подготовь implementation packet:
+
+- exact frame/node URLs и screenshots на целевых viewports;
+- component/instance inventory;
+- variables/styles/assets;
+- state matrix и prototype transitions;
+- frame/state → route/story/component mapping;
+- Component Contract Matrix;
+- intentional deviations.
+
+Frontend сначала ищет production component по Code Connect/registry. Новый primitive допустим только с `gap_reason`; локальный bespoke component не должен дублировать уже доступный contract.
+
+## 8. Verification
+
+### Structural evidence
+
+- page/frame/node inventory;
+- components/component sets/instances count;
+- no detached instances для repeated primitives;
+- variable/style bindings и raw-value deviations;
+- Auto Layout/resizing audit;
+- Russian Publication Gate.
+
+### Visual evidence
+
+- calibration screenshots;
+- before/after systemization comparison;
+- paired Figma/browser screenshots для must-cover frames/states;
+- desktop/mobile и long-copy checks.
+
+Visual regression после systemization блокирует `ready`, даже если object inventory стал формально полнее.
+
+### Behavioral evidence
+
+- prototype transition или interaction spec;
+- story/state catalog;
+- keyboard/focus/disabled/loading/error/success checks;
+- Playwright/manual flow evidence.
+
+## 9. Status rules
+
+- `ready/success` запрещен, если выбранный `design_system_mode` не записан.
+- `ready/success` запрещен без visual calibration evidence для новой/расширяемой системы.
+- Наличие components/variables не компенсирует visual regression.
+- Figma write без inventory + screenshot имеет статус не выше `partial`.
+- Figma-driven frontend без Component Contract Matrix, frame/state mapping и paired screenshots имеет статус не выше `partial`.
+- Любой accepted mismatch имеет deviation, owner и follow-up.

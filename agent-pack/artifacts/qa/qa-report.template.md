@@ -116,6 +116,21 @@
 
 ## Visual Reference / Figma Handoff
 
+### Design System Strategy Audit
+
+| Check | Result | Evidence | Notes |
+|---|---|---|---|
+| `design_system_mode` выбран и обоснован |  |  |  |
+| Mode соблюден во Figma и frontend |  |  |  |
+| Visual calibration предшествует systemization |  |  |  |
+| Screenshot до/после systemization без regression |  |  |  |
+| Product-specific system не смешана с legacy DS молча |  |  |  |
+
+### Component Contract Audit
+
+| Stable ID | Figma properties/states | React props/states | Story/test/locator | Paired screenshots | Result / deviation |
+|---|---|---|---|---|---|
+
 ### Source Pair Matrix
 
 | Pair | Required | Evidence | Status | QA Result |
@@ -136,6 +151,10 @@
 | Figma screenshot / object inventory |  |  |  |
 | Figma-to-frontend component/state mapping |  |  |  |
 | Variables / components / Auto Layout deviations |  |  |  |
+| Code Connect / fallback mapping |  |  |  |
+| Detached instances / variable bindings |  |  |  |
+| Frame/state → route/story/component mapping |  |  |  |
+| Systemization regression check |  |  |  |
 
 ## Validation
 

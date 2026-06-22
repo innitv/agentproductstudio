@@ -2,13 +2,68 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Frontend Result",
   "type": "object",
-  "required": ["status", "inputs_used", "changed_files", "implementation_notes", "commands_run", "known_limitations"],
+  "required": ["status", "inputs_used", "changed_files", "implementation_notes", "design_system_implementation", "component_contract_implementation", "frame_state_implementation_map", "commands_run", "known_limitations", "figma_roundtrip_deviations"],
   "properties": {
     "status": { "enum": ["success", "partial", "blocked"] },
     "inputs_used": { "type": "array", "items": { "type": "string" } },
     "changed_files": { "type": "array", "items": { "type": "string" } },
     "implementation_notes": { "type": "array", "items": { "type": "string" } },
+    "design_system_implementation": {
+      "type": "object",
+      "required": ["mode", "production_foundation", "code_connect_status"],
+      "properties": {
+        "mode": { "enum": ["reuse", "extend", "product_specific", "bespoke"] },
+        "production_foundation": { "type": "string" },
+        "new_components_with_gap_reason": { "type": "array", "items": { "type": "string" } },
+        "legacy_system_excluded": { "type": "string" },
+        "code_connect_status": { "enum": ["connected", "unavailable", "not_configured", "skipped_with_reason", "not_applicable"] }
+      }
+    },
+    "component_contract_implementation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["stable_id", "react_target", "state_evidence", "status"],
+        "properties": {
+          "stable_id": { "type": "string" },
+          "figma_property_value": { "type": "string" },
+          "react_target": { "type": "string" },
+          "css_semantic_token": { "type": "string" },
+          "state_evidence": { "type": "string" },
+          "test_locator": { "type": "string" },
+          "status": { "enum": ["pass", "partial", "blocked", "not_applicable"] },
+          "deviation": { "type": "string" }
+        }
+      }
+    },
+    "frame_state_implementation_map": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["figma_frame_state", "frontend_target", "paired_screenshot_status", "behavior_status"],
+        "properties": {
+          "figma_frame_state": { "type": "string" },
+          "node_screenshot": { "type": "string" },
+          "frontend_target": { "type": "string" },
+          "paired_screenshot_status": { "enum": ["pass", "partial", "blocked", "not_applicable"] },
+          "behavior_status": { "enum": ["pass", "partial", "blocked", "not_applicable"] }
+        }
+      }
+    },
     "commands_run": { "type": "array", "items": { "type": "object" } },
-    "known_limitations": { "type": "array", "items": { "type": "string" } }
+    "known_limitations": { "type": "array", "items": { "type": "string" } },
+    "figma_roundtrip_deviations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["deviation", "reason", "owner", "follow_up"],
+        "properties": {
+          "deviation": { "type": "string" },
+          "reason": { "type": "string" },
+          "owner": { "type": "string" },
+          "follow_up": { "type": "string" }
+        }
+      }
+    }
   }
 }

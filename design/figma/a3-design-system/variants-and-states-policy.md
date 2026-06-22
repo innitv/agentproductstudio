@@ -4,6 +4,8 @@
 
 Дополнить существующий компонент в дизайн-системе недостающими variants, состояниями и/или размерами. На входе — компонент в Figma и его строка в `design/figma/a3-design-system/component-map.md` (в тексте директивы обозначается как `ds/components.md`). На выходе — расширенный Component Set с матрицей `variants x states x sizes`, где все привязки идут через Semantic Variables, и обновлённые `ds/components.md` (актуальная матрица в строке компонента) и `design/figma/a3-design-system/token-map.md` (`ds/foundation.md`) (новые Semantic-токены под состояния, если они потребовались).
 
+Политика применяется только при `design_system_mode=reuse|extend` с выбранной A3 foundation. Для `product_specific|bespoke` используй `agent-pack/workflows/ds-baseline.workflow.md` и не копируй A3 variant matrix автоматически.
+
 Директива работает в двух режимах:
 * **`--Single--`** — `component_variants <ComponentName>` для одного конкретного компонента.
 * **`--Bulk--`** — `component_variants` без аргумента: агент проходит по `ds/components.md`, находит компоненты с неполной матрицей и предлагает расширить каждый по очереди.
@@ -74,7 +76,7 @@
 
 ### Шаг 6: Контроль качества и Guardrails
 
-- **Human-in-the-Loop**: Перед вызовом `use_figma` агент обязан вывести полный сформированный JSON-запрос в чат и получить явное согласие: *«Подтверждаю запись расширенной матрицы для компонента <ComponentName>»*.
+- **Human-in-the-Loop**: Перед write нужен exact approval на target, component и scope. Полный raw JSON/Plugin API script в чат выводить не требуется; после approval выполнять небольшие проверяемые patches по `integrations/mcp/figma-canvas-write-guide.md`.
 - **Запрет на дублирование**: Не создавать новые примитивные цвета. Использовать существующую палитру из `ds/foundation.md`.
 - **Проверка доступности (A11y)**: Каждое расширение полей ввода или кнопок обязано включать контрастное состояние `focus` (фокус-кольцо) и состояние `disabled` с читаемым контрастом текста не менее `4.5:1` (или `3:1` для крупных элементов).
 

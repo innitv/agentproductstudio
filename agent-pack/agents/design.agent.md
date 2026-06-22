@@ -19,6 +19,7 @@ approval_actions:
 skills:
   - figma-token-extractor
   - style-decompose
+  - figma-roundtrip
   - figma-handoff
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
@@ -75,13 +76,15 @@ UI Kit и дизайн-система используются только ка
 ## Internal Pipeline (Внутренний процесс)
 
 1. Проверить product context: `prd.md`, `research-summary.md`, `scenario-user-flows.md`, `ia-brief.md`, `copy-deck.md` при наличии, constraints, целевое действие, user journey, возражения пользователей, статусы/исключения и trust requirements.
+1a. Выполнить **Design System Strategy Gate** и записать `design_system_mode=reuse|extend|product_specific|bespoke`, rationale, rejected alternatives и maintenance impact. Наличие A3/другой библиотеки не обязывает выбирать `reuse`; новая продуктовая система является штатным маршрутом.
 2. Если задача reference-driven, убедиться, что технический scan референса уже выполнен и evidence сохранен. Без scan evidence не создавать финальный `reference-analysis.md`.
 3. Выполнить **Universal Visual Evidence Grounding** для любой визуальной/интерактивной поверхности: собрать или явно отклонить same-domain, adjacent high-quality, interaction/state references и design-system grounding; сформировать `visual_evidence_plan` и `visual_reference_cards`.
 4. Если задача UI-heavy/high-visual-risk или research handoff содержит `lazyweb_evidence_need`, выбрать один Lazyweb mode, получить реальные product screenshots/flows/patterns и записать применимость. Не отправлять приватные скриншоты, макеты или код в `lazyweb_compare_image` без отдельного approval.
 5. Создать `reference-analysis.md` с section-by-section visual spec: структура, иерархия, сетка, цвета, typography scale, spacing, components, CTA, forms/controls, media, mobile behavior, allowed/disallowed patterns, IP risks, `visual_reference_cards` и `lazyweb_evidence` при наличии.
 6. Для reference-driven/high-visual-risk задач вызвать skill `style-decompose` и создать `STYLE_GUIDE.md` до финального `design-brief.md`. `STYLE_GUIDE.md` должен отделять слой подачи/рендера от слоя UI-структуры и фиксировать tokens/composition metrics.
 7. **Surface Output Contract Pass**: если результат должен стать Figma board, screen spec, dashboard, landing, prototype или Notion/wiki surface, заполнить контракт по `agent-pack/templates/surface-output-contract.template.md`: surface type, expected units, coverage gate, visual evidence grounding, evidence-to-output map, quality bar и verification plan.
-8. Сформировать `design-brief.md`: пользовательский путь из `scenario-user-flows.md`, visual direction, interaction tone, layout principles, component inventory, responsive rules, accessibility notes, visual evidence grounding, риски и решения для следующего этапа.
+8. Сформировать `design-brief.md`: пользовательский путь из `scenario-user-flows.md`, `design_system_mode`, visual direction, interaction tone, layout principles, component strategy, responsive rules, accessibility notes, visual evidence grounding, риски и решения для следующего этапа.
+8a. Для `extend|product_specific` зафиксировать Two-Pass Figma Build: сначала `visual_calibration` на 2-3 экранах, затем `systemization`; component matrix нельзя масштабировать до visual verdict.
 9. Если нужен Figma canvas write или дизайн-система в Figma, не писать на холст на этом этапе. Зафиксировать requirement `figma_handoff_required=true` и передать задачу в `06-screens` после `screens.md`, потому что `figma-handoff-bundle.md` требует screen/component inventory.
 10. Обновить `handoff-bundle.md`: какие visual decisions приняты, какой Surface Output Contract выбран, какие assumptions остались, какие optional skills/Lazyweb modes применены или пропущены через `skipped_with_reason`.
 

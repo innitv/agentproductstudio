@@ -102,6 +102,16 @@
 | `reference_to_frontend` | yes / no | paired screenshots; `visual-diff-result.json`; section diff | `passed|passed_with_notes|accepted_difference|blocked|not_applicable` |  |
 | `spec_to_frontend_behavior` | yes / no | prototype states; Playwright/manual interactions; traces/screenshots | `passed|passed_with_notes|accepted_difference|blocked|not_applicable` |  |
 
+### Figma / Design System Strategy
+
+| Field | Value |
+|---|---|
+| `design_system_mode` | `reuse|extend|product_specific|bespoke|not_applicable` |
+| Visual calibration before systemization | `required|not_required` |
+| Component Contract Matrix | path / planned / not_applicable |
+| Code Connect / fallback mapping | status / path |
+| Frame/state implementation map | path / planned / not_applicable |
+
 Правило: pixel diff не заменяет metadata/object inventory, DOM/locator/component mapping или behavior checks.
 
 ## 6. Surface Quality Bar

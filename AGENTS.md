@@ -246,6 +246,41 @@ Notion research publication обязательна для полного workflo
 
 Если пользователь дал screenshot, URL референса или просит «как этот сайт», задача считается reference-driven.
 
+### Design System Strategy Gate
+
+До `design-brief.md`, `screens.md`, Figma write или frontend implementation выбери и зафиксируй `design_system_mode`:
+
+- `reuse`: существующая дизайн-система подходит продукту; используй ее variables/components без создания параллельных primitives.
+- `extend`: foundation подходит, но нужны новые product-specific components/variants; каждое расширение имеет gap/reason и не ломает существующий contract.
+- `product_specific`: продукту нужен самостоятельный визуальный язык; создай новую локальную систему из подтвержденных экранов и не наследуй A3 или другую библиотеку по умолчанию.
+- `bespoke`: уникальная композиция важнее библиотеки; сначала создай экраны, а в компоненты выноси только доказанно повторяющиеся элементы.
+
+Наличие A3 или другой готовой системы не обязывает использовать ее. Запрещено автоматически выбирать `reuse` только потому, что библиотека доступна. Решение должно учитывать характер продукта, аудиторию, brand separation, плотность, платформу, срок жизни интерфейса и цену поддержки. Результат выбора записывается в `design-brief.md`, `screens.md` и `figma-handoff-bundle.md`.
+
+### Two-Pass Figma Build Gate
+
+Для `product_specific`, `extend` и визуально рискованных задач Figma собирается в два прохода:
+
+1. `visual_calibration`: 2-3 ключевых экрана, реальные visual references, сценарная иерархия, плотность, rhythm, copy fit и responsive direction. На этом проходе запрещено систематизировать макет ценой ухудшения композиции.
+2. `systemization`: только после visual review создаются/уточняются variables, styles, component sets, properties, nested instances, Auto Layout, resizing и prototype links. Если systemization меняет утвержденную композицию, нужен screenshot comparison и deviation record.
+
+Figma-макет не считается качественным только по числу components/variables/Auto Layout frames. Для `ready` одновременно нужны visual calibration evidence и structural evidence.
+
+### Component Contract и Roundtrip Gate
+
+Для каждого повторяемого или интерактивного компонента создай Component Contract Matrix:
+
+`Figma component/property -> allowed values -> semantic variables -> React component/prop -> required states -> story/test/locator -> deviation`.
+
+- Если Code Connect доступен по тарифу и доступам, используй его как основной production mapping.
+- Если Code Connect недоступен, та же связь обязательна в `figma-handoff-bundle.md`, `screens.md` и `frontend-result.md`; зафиксируй `code_connect_status=unavailable|not_configured|skipped_with_reason`.
+- Для A3 при `reuse|extend` запускай `yarn figma:audit:a3` после изменения component sets или React API. Live-аудит со статусом `needs_revision|blocked` запрещает закрывать Figma roundtrip как `success` без deviation/waiver.
+- Нельзя выдавать импорт DOM/screenshot в Figma за полноценную обратную синхронизацию. Такой импорт является только draft/evidence; финальная версия должна использовать variables, components и instances.
+- Code -> Figma изменения разделяй на `token_change`, `component_api_change` и `screen_composition_change`. Не перерисовывай весь canvas, если достаточно patch существующих instances.
+- Frontend, собранный по Figma, не может иметь статус `success` без frame/state -> route/story/component mapping, paired Figma/browser screenshots и behavior evidence для обязательных состояний.
+
+Единый исполняемый SOP: `integrations/mcp/figma-canvas-write-guide.md`. Skill `figma-roundtrip` обязателен для Figma design system, Figma canvas write, Figma -> frontend и frontend -> Figma задач.
+
 Обязательный порядок:
 
 1. **Обязательный технический скан референса:** Перед созданием `reference-analysis.md` ИИ-агент ОБЯЗАН запустить команду сканирования референса (`yarn reference:scan <url> [slug]`). 

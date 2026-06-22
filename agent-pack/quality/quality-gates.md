@@ -29,6 +29,16 @@
 - Для каждого примененного референса есть `visual_reference_card`: source, surface/screen/state, observed pattern, what to borrow, what to avoid, applicability, IP/trade-dress risk и output unit.
 - Evidence-To-Output Map содержит не только research/JTBD, но и visual evidence: `visual reference -> visual decision -> frame/screen/component -> screenshot/visual review signal`.
 - Для Figma/frontend/reference задач определена Source Pair Matrix: `reference_to_figma`, `figma_to_frontend`, `reference_to_frontend`, `spec_to_frontend_behavior`. Каждая обязательная пара имеет required yes/no, evidence, status и notes.
+
+## Universal Gate: Figma Roundtrip Quality
+
+- До design/Figma/frontend зафиксирован `design_system_mode`: `reuse|extend|product_specific|bespoke`; наличие существующей системы не означает обязательный reuse.
+- Для `extend|product_specific` visual calibration на 2-3 экранах завершена до systemization.
+- Systemization имеет screenshot comparison до/после; visual regression блокирует `ready`, даже если стало больше components/variables/Auto Layout.
+- Повторяемые/интерактивные компоненты имеют Component Contract Matrix: Figma properties/values, semantic variables, React props, required states, story/test/locator и deviations.
+- Code Connect используется при доступности; иначе записан fallback mapping и `code_connect_status`.
+- Figma-driven frontend имеет frame/state -> route/story/component mapping и paired Figma/browser screenshots для must-cover states.
+- DOM/screenshot import в Figma считается draft/evidence, а не полноценной обратной синхронизацией.
 - `ready/success` запрещен, если layout, density, visual hierarchy, state patterns или responsive behavior основаны только на generic template, UI Kit или предпочтениях модели без реального visual evidence. Допустимы только `partial/blocked` или explicit waiver/deviation.
 - QA проверяет, что после генерации есть screenshot/object inventory/browser evidence и side-by-side review с выбранными visual references или зафиксированная причина невозможности сравнения.
 
@@ -107,6 +117,7 @@
 - Если создан `STYLE_GUIDE.md`, он содержит два слоя: presentation/render и UI structure, а также явные tokens, composition metrics, allowed/disallowed patterns и anti-patterns.
 - Если создан `design-loop-report.md`, он содержит таблицу `Before | After | Why`, style drift и revision block.
 - Если запрошен Figma handoff, `figma-handoff-bundle.md` создан после `screens.md` и содержит canvas strategy, variables/styles/components/screens, Auto Layout rules, approval state и target.
+- Figma handoff содержит Design System Strategy, Two-Pass Build verdict, Component Contract Matrix и Code Connect/fallback status.
 - Если создается Figma board или Figma-ready handoff, Surface Output Contract содержит список expected frames/sections/entities, карту данных к фреймам и критерии screenshot verification. Неполная доска без coverage rationale блокирует `ready`.
 - Если Figma write выполнен, bundle содержит node/frame evidence, screenshot verification и известные visual gaps.
 - Если Figma write выполнен в reference-driven или high-visual-risk задаче, `figma-handoff-bundle.md` содержит Source Pair Plan и evidence/status для `reference_to_figma` либо blocker/deviation. Frontend handoff содержит план `figma_to_frontend`.
@@ -148,6 +159,7 @@
 - Базовые responsive и accessibility требования реализованы.
 - Motion/interaction gate: нет `transition: all`, UI-анимации имеют явную цель и обычно короче 300ms, hover-анимации gated через fine pointer media query, transform-based motion имеет `prefers-reduced-motion`, интерактивные элементы имеют focus/active/disabled/loading/error states.
 - Если есть `figma-handoff-bundle.md`, frontend либо реализует эквиваленты variables/component states/Auto Layout rules, либо фиксирует deviations в `frontend-result.md`.
+- Frontend содержит Design System Implementation, Component Contract Implementation и Frame/State Implementation Map; новый primitive без `gap_reason` является finding.
 - Frontend содержит Source Pair Implementation Matrix: обязательные пары `figma_to_frontend`, `reference_to_frontend` и `spec_to_frontend_behavior` имеют evidence/status/deviation. Без этого frontend status не выше `partial` для визуально значимой поверхности.
 - Если есть `storybook-result.md`, он содержит связь Figma component -> frontend component -> Story и проверку states.
 - Доступные build/typecheck/test commands выполнены или blockers задокументированы.

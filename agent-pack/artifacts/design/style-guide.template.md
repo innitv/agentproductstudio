@@ -108,6 +108,11 @@
 
 ## Figma Notes
 
+- `design_system_mode`: `reuse|extend|product_specific|bespoke`
+- Что нельзя наследовать из существующей системы:
+- Что остается bespoke до подтвержденного повторения:
+- Visual calibration screens и verdict:
+
 - Какие variables должны стать Figma Variables:
 - Какие компоненты должны стать component sets:
 - Какие области обязаны использовать Auto Layout:

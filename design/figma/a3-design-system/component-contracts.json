@@ -1,0 +1,65 @@
+{
+  "$schema": "./component-contracts.schema.json",
+  "fileKey": "4ufM1XdtXzSwbCNpulxETA",
+  "fileName": "A3 Design System",
+  "codeConnectStatus": "unavailable_plan",
+  "codeConnectCheckedAt": "2026-06-22",
+  "components": [
+    {
+      "name": "Button",
+      "nodeId": "213:183",
+      "codeSource": "apps/frontend/src/components/ui/button.tsx",
+      "codeExport": "Button",
+      "expectedVariants": {
+        "size": ["xl", "l", "m", "s"],
+        "variant": ["primary", "secondary", "outline", "ghost"],
+        "colorScheme": ["accent"],
+        "state": ["default", "hover", "pressed", "disabled"]
+      }
+    },
+    {
+      "name": "Input",
+      "nodeId": "492:2765",
+      "codeSource": "apps/frontend/src/components/ui/input.tsx",
+      "codeExport": "Input",
+      "expectedVariants": {
+        "size": ["l", "m", "s"],
+        "state": ["default", "filled", "hover", "focus", "error", "disabled"],
+        "value": ["none", "placeholder", "filled"]
+      }
+    },
+    {
+      "name": "Switch",
+      "nodeId": "608:662",
+      "codeSource": "apps/frontend/src/components/ui/switch.tsx",
+      "codeExport": "Switch",
+      "expectedVariants": {
+        "size": ["s", "xs"],
+        "state": ["default", "hover", "disabled"],
+        "checked": ["false", "true"],
+        "label position": ["right", "left"]
+      }
+    },
+    {
+      "name": "Chips",
+      "nodeId": "234:38",
+      "codeSource": "apps/frontend/src/components/ui/chip.tsx",
+      "codeExport": "Chip",
+      "expectedVariants": {
+        "size": ["m"],
+        "variant": ["primary", "secondary"],
+        "state": ["default", "hover", "pressed", "disabled"],
+        "selected": ["false", "true"]
+      }
+    },
+    {
+      "name": "InlineNotification",
+      "nodeId": "579:4735",
+      "codeSource": "apps/frontend/src/components/ui/inline-notification.tsx",
+      "codeExport": "InlineNotification",
+      "expectedVariants": {
+        "colorScheme": ["info", "success", "warning", "error"]
+      }
+    }
+  ]
+}

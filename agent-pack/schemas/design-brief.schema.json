@@ -2,10 +2,23 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Design Brief",
   "type": "object",
-  "required": ["status", "inputs_used", "visual_direction", "sections", "components", "responsive_notes", "accessibility_notes"],
+  "required": ["status", "inputs_used", "design_system_strategy", "visual_direction", "sections", "components", "responsive_notes", "accessibility_notes"],
   "properties": {
     "status": { "enum": ["draft", "partial", "blocked", "ready"] },
     "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "design_system_strategy": {
+      "type": "object",
+      "required": ["mode", "rationale", "maintenance_impact", "visual_calibration_required"],
+      "properties": {
+        "mode": { "enum": ["reuse", "extend", "product_specific", "bespoke"] },
+        "selected_foundation": { "type": "string" },
+        "rationale": { "type": "string", "minLength": 1 },
+        "rejected_alternatives": { "type": "array", "items": { "type": "string" } },
+        "brand_separation_requirement": { "type": "string" },
+        "maintenance_impact": { "type": "string", "minLength": 1 },
+        "visual_calibration_required": { "type": "boolean" }
+      }
+    },
     "visual_direction": { "type": "string" },
     "sections": { "type": "array", "items": { "type": "object" } },
     "components": { "type": "array", "items": { "type": "string" } },

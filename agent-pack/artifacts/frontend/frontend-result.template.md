@@ -23,6 +23,26 @@
 
 ## Implementation Notes
 
+## Design System Implementation
+
+| Field | Value |
+|---|---|
+| `design_system_mode` | `reuse` / `extend` / `product_specific` / `bespoke` |
+| Production foundation used |  |
+| New primitives/components and `gap_reason` |  |
+| Legacy system intentionally excluded |  |
+| Code Connect / fallback registry status |  |
+
+### Component Contract Implementation
+
+| Stable ID | Figma property/value | React component/prop | CSS semantic token | State story/route | Test locator | Status / deviation |
+|---|---|---|---|---|---|---|
+
+### Frame / State Implementation Map
+
+| Figma frame/state | Node/screenshot | Frontend route/story/component | Paired screenshot | Behavior evidence | Status |
+|---|---|---|---|---|---|
+
 ## Surface Output Summary
 
 | Field | Value |
@@ -70,5 +90,10 @@
 |---|---|
 
 ## Known Limitations
+
+## Figma Roundtrip Deviations
+
+| Deviation | Reason | Owner | Follow-up / review date |
+|---|---|---|---|
 
 ## Handoff To QA

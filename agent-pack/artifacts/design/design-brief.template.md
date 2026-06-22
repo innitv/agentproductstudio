@@ -17,6 +17,20 @@
 
 ## Visual Direction
 
+## Design System Strategy
+
+| Field | Value |
+|---|---|
+| `design_system_mode` | `reuse` / `extend` / `product_specific` / `bespoke` |
+| Selected foundation |  |
+| Why this mode fits the product |  |
+| Rejected alternatives |  |
+| Brand separation requirement |  |
+| Maintenance impact |  |
+| Visual calibration required | yes / no |
+
+Наличие локальной A3 или другой библиотеки не требует `reuse`. Для `product_specific` опишите, почему продукту нужен самостоятельный visual language.
+
 ## Visual Evidence Grounding
 
 ### Visual Evidence Plan
@@ -59,6 +73,11 @@
 |---|---|---|---|
 
 ## Components
+
+### Component Strategy
+
+| Pattern | Reuse / Extend / New / Keep Bespoke | Reason / Gap | When to componentize |
+|---|---|---|---|
 
 ## Responsive Notes
 

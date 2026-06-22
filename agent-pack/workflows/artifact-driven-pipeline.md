@@ -57,6 +57,8 @@
 
 Если визуальная поверхность проходит через несколько источников правды, stage обязан определить **Source Pair Matrix**: `reference_to_figma`, `figma_to_frontend`, `reference_to_frontend`, `spec_to_frontend_behavior`. Для каждой пары фиксируются required yes/no, evidence, status и notes. Эта матрица записывается в `figma-handoff-bundle.md`, `frontend-result.md`, `visual-reference-review.md` или `qa-report.md` в зависимости от stage.
 
+Если поверхность проходит через Figma или дизайн-систему, stage обязан выполнить **Design System Strategy Gate**: выбрать `reuse|extend|product_specific|bespoke`. Новая продуктовая дизайн-система является штатным маршрутом. Для `extend|product_specific` действует Two-Pass Figma Build: сначала `visual_calibration` на 2-3 экранах, затем `systemization` без visual regression. Перед frontend handoff обязательны Component Contract Matrix, Code Connect/fallback status и frame/state -> route/story/component mapping по `integrations/mcp/figma-canvas-write-guide.md`.
+
 Невыполнение любого из пунктов переводит этап в статус `blocked` (заблокирован); следующий этап не может быть начат.
 
 ## Рабочий режим

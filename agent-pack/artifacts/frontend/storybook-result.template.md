@@ -26,6 +26,11 @@
 | Figma Component / Frame | Frontend Component | Story | Tokens / Variables | Gap |
 |---|---|---|---|---|
 
+## Component Contract Coverage
+
+| Stable ID | Figma property / value | React prop / value | Story / state route | Test locator | Paired screenshot | Status |
+|---|---|---|---|---|---|---|
+
 ## Design Tokens Coverage
 
 - Цветовые tokens:

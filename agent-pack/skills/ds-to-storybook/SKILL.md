@@ -2,7 +2,7 @@
 id: ds-to-storybook
 name: ds-to-storybook
 title: "Design System To Storybook"
-description: "Использовать, когда пользователь просит component library или Storybook export из frontend/design system artifacts. Создает storybook-result.md с инвентарем компонентов и validation evidence."
+description: "Использовать для component library, Storybook/state catalog или Figma-driven frontend handoff. Создает storybook-result.md с variant/state coverage, Component Contract Matrix mapping и validation evidence."
 platforms:
   - codex
 mcp_servers:
@@ -27,12 +27,12 @@ contract_schema: agent-pack/templates/skill.template.md
 
 ## Назначение
 
-Готовит optional Storybook/component-library evidence, когда пользователь явно просит UI kit, компонентную библиотеку или handoff.
+Готовит Storybook/component state catalog. Для обычного frontend он optional; для Figma-driven component handoff обязателен Storybook или эквивалентный отдельный state route/catalog.
 
 ## Процедура
 
 1. Собери inventory компонентов из frontend source, `design-brief.md`, `screens.md`, `STYLE_GUIDE.md` и `figma-handoff-bundle.md` при наличии.
-2. Если есть `figma-handoff-bundle.md`, сопоставь Figma component/component set -> frontend component -> Storybook story. Зафиксируй gaps.
+2. Если есть `figma-handoff-bundle.md`, сопоставь Figma component/property/value -> frontend component/prop -> Storybook story/state -> test locator. Зафиксируй gaps и accepted deviations.
 3. Опиши stories по категориям: forms, async buttons, tabs/toggles, overlays, search/pagination, data visualization.
 4. Проверь states: default, hover, focus, disabled, loading, error, empty, selected, active.
 5. Проверь, что tokens/variables из handoff имеют frontend equivalents или deviations.

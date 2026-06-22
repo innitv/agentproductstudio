@@ -33,7 +33,7 @@ contract_schema: agent-pack/templates/skill.template.md
 
 1. Убедись, что есть `STYLE_GUIDE.md`, `design-brief.md`, `ia-brief.md` и `copy-deck.md`. Если `copy-deck.md` отсутствует, не придумывай финальный copy; пометь copy gaps.
 2. Собери `design-generator-prompt.md` по шаблону `agent-pack/artifacts/design/design-generator-prompt.template.md`.
-3. Ограничь первичную генерацию 2-3 экранами, чтобы проверить стиль, компоненты и layout до масштабирования на весь продукт.
+3. Ограничь первичную генерацию 2-3 экранами и считай ее `visual_calibration`: проверь композицию, плотность, сценарную иерархию, rhythm, copy fit и responsive direction до systemization.
 4. Сравни результат с `STYLE_GUIDE.md`: tokens, composition metrics, hierarchy, accent usage, typography, spacing, data visualization, interaction states, mobile behavior.
 5. Проведи критику как дизайнерский QA, а не как общую вкусовую оценку:
    - что выглядит generic/default;
@@ -43,7 +43,8 @@ contract_schema: agent-pack/templates/skill.template.md
    - где есть visual debt перед Figma/frontend.
 6. Запиши `design-loop-report.md` по шаблону `agent-pack/artifacts/design/design-loop-report.template.md`.
 7. Критика должна быть таблицей `Before | After | Why`, а не общим "сделай лучше".
-8. Если результат уходит в Figma, добавь revision notes для `figma-handoff-bundle.md`.
+8. Если результат уходит в Figma, добавь calibration verdict и revision notes для `figma-handoff-bundle.md`.
+9. После создания components/variables сравни screenshot до/после systemization. Структурно более правильный, но визуально более слабый результат считается regression и блокирует `ready`.
 
 ## Gate
 

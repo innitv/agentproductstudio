@@ -1,0 +1,237 @@
+{
+  "generatedAt": "2026-06-22T06:24:46.549Z",
+  "status": "pass",
+  "issueCount": 0,
+  "file": {
+    "key": "4ufM1XdtXzSwbCNpulxETA",
+    "name": "A3 Design System",
+    "version": "2367794377715796662",
+    "lastModified": "2026-06-22T06:22:46Z"
+  },
+  "codeConnectStatus": "unavailable_plan",
+  "results": [
+    {
+      "name": "Button",
+      "nodeId": "213:183",
+      "codeSource": "apps/frontend/src/components/ui/button.tsx",
+      "codeExport": "Button",
+      "expectedVariants": {
+        "size": [
+          "xl",
+          "l",
+          "m",
+          "s"
+        ],
+        "variant": [
+          "primary",
+          "secondary",
+          "outline",
+          "ghost"
+        ],
+        "colorScheme": [
+          "accent"
+        ],
+        "state": [
+          "default",
+          "hover",
+          "pressed",
+          "disabled"
+        ]
+      },
+      "status": "pass",
+      "issues": [],
+      "variants": 64,
+      "axes": {
+        "size": [
+          "l",
+          "m",
+          "s",
+          "xl"
+        ],
+        "variant": [
+          "ghost",
+          "outline",
+          "primary",
+          "secondary"
+        ],
+        "colorScheme": [
+          "accent"
+        ],
+        "state": [
+          "default",
+          "disabled",
+          "hover",
+          "pressed"
+        ]
+      }
+    },
+    {
+      "name": "Input",
+      "nodeId": "492:2765",
+      "codeSource": "apps/frontend/src/components/ui/input.tsx",
+      "codeExport": "Input",
+      "expectedVariants": {
+        "size": [
+          "l",
+          "m",
+          "s"
+        ],
+        "state": [
+          "default",
+          "filled",
+          "hover",
+          "focus",
+          "error",
+          "disabled"
+        ],
+        "value": [
+          "none",
+          "placeholder",
+          "filled"
+        ]
+      },
+      "status": "pass",
+      "issues": [],
+      "variants": 45,
+      "axes": {
+        "size": [
+          "l",
+          "m",
+          "s"
+        ],
+        "state": [
+          "default",
+          "disabled",
+          "error",
+          "filled",
+          "focus",
+          "hover"
+        ],
+        "value": [
+          "filled",
+          "none",
+          "placeholder"
+        ]
+      }
+    },
+    {
+      "name": "Switch",
+      "nodeId": "608:662",
+      "codeSource": "apps/frontend/src/components/ui/switch.tsx",
+      "codeExport": "Switch",
+      "expectedVariants": {
+        "size": [
+          "s",
+          "xs"
+        ],
+        "state": [
+          "default",
+          "hover",
+          "disabled"
+        ],
+        "checked": [
+          "false",
+          "true"
+        ],
+        "label position": [
+          "right",
+          "left"
+        ]
+      },
+      "status": "pass",
+      "issues": [],
+      "variants": 24,
+      "axes": {
+        "size": [
+          "s",
+          "xs"
+        ],
+        "state": [
+          "default",
+          "disabled",
+          "hover"
+        ],
+        "checked": [
+          "false",
+          "true"
+        ],
+        "label position": [
+          "left",
+          "right"
+        ]
+      }
+    },
+    {
+      "name": "Chips",
+      "nodeId": "234:38",
+      "codeSource": "apps/frontend/src/components/ui/chip.tsx",
+      "codeExport": "Chip",
+      "expectedVariants": {
+        "size": [
+          "m"
+        ],
+        "variant": [
+          "primary",
+          "secondary"
+        ],
+        "state": [
+          "default",
+          "hover",
+          "pressed",
+          "disabled"
+        ],
+        "selected": [
+          "false",
+          "true"
+        ]
+      },
+      "status": "pass",
+      "issues": [],
+      "variants": 16,
+      "axes": {
+        "size": [
+          "m"
+        ],
+        "variant": [
+          "primary",
+          "secondary"
+        ],
+        "state": [
+          "default",
+          "disabled",
+          "hover",
+          "pressed"
+        ],
+        "selected": [
+          "false",
+          "true"
+        ]
+      }
+    },
+    {
+      "name": "InlineNotification",
+      "nodeId": "579:4735",
+      "codeSource": "apps/frontend/src/components/ui/inline-notification.tsx",
+      "codeExport": "InlineNotification",
+      "expectedVariants": {
+        "colorScheme": [
+          "info",
+          "success",
+          "warning",
+          "error"
+        ]
+      },
+      "status": "pass",
+      "issues": [],
+      "variants": 4,
+      "axes": {
+        "colorScheme": [
+          "error",
+          "info",
+          "success",
+          "warning"
+        ]
+      }
+    }
+  ]
+}

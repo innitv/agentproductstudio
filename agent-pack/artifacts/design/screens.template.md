@@ -31,6 +31,16 @@
 
 ## Design-System Grounding
 
+### Design System Strategy
+
+| Field | Value |
+|---|---|
+| `design_system_mode` | `reuse` / `extend` / `product_specific` / `bespoke` |
+| Source / foundation |  |
+| Gap rationale |  |
+| Elements intentionally kept bespoke |  |
+| Visual calibration verdict | `passed` / `passed_with_notes` / `blocked` / `not_required` |
+
 | Asset | Reuse Decision | Gap / New Need | Notes |
 |---|---|---|---|
 | Tokens / variables |  |  |  |
@@ -116,6 +126,16 @@
 | Component | Source | Variants | States | Auto Layout Intent | Frontend Owner |
 |---|---|---|---|---|---|
 
+## Component Contract Matrix
+
+| Stable ID | Figma component / node | Figma properties / values | Semantic variables | React target / props | Required states | Story / route / locator | Deviation |
+|---|---|---|---|---|---|---|---|
+
+## Frame / State Implementation Map
+
+| Figma frame / state | Node / screenshot evidence | Frontend route / story / component | Behavior test | Status |
+|---|---|---|---|---|
+
 ## State Inventory
 
 | Surface | Default | Loading | Empty | Error | Validation | Success | Disabled / Permission |
@@ -151,6 +171,10 @@
 | Auto Layout critical areas defined |  |  |
 | Canvas strategy |  |  |
 | Screenshot verification plan |  |  |
+| Visual calibration completed before systemization |  |  |
+| Component Contract Matrix completed |  |  |
+| Code Connect / fallback mapping planned |  |  |
+| Before/after systemization comparison planned |  |  |
 
 ## Asset Notes
 

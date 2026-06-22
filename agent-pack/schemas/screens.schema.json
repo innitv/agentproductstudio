@@ -6,12 +6,15 @@
     "status",
     "inputs_used",
     "input_readiness_pass",
+    "design_system_strategy",
     "design_system_grounding",
     "screen_list",
     "screen_traceability",
     "desktop_specification",
     "mobile_specification",
     "component_inventory",
+    "component_contract_matrix",
+    "frame_state_implementation_map",
     "state_inventory",
     "responsive_constraints",
     "accessibility_notes",
@@ -45,6 +48,17 @@
           "gap_new_need": { "type": "string" },
           "notes": { "type": "string" }
         }
+      }
+    },
+    "design_system_strategy": {
+      "type": "object",
+      "required": ["mode", "source_foundation", "visual_calibration_verdict"],
+      "properties": {
+        "mode": { "enum": ["reuse", "extend", "product_specific", "bespoke"] },
+        "source_foundation": { "type": "string" },
+        "gap_rationale": { "type": "string" },
+        "intentionally_bespoke": { "type": "array", "items": { "type": "string" } },
+        "visual_calibration_verdict": { "enum": ["passed", "passed_with_notes", "blocked", "not_required"] }
       }
     },
     "screen_list": {
@@ -108,6 +122,39 @@
           "states": { "type": "array", "items": { "type": "string" } },
           "auto_layout_intent": { "type": "string" },
           "frontend_owner": { "type": "string" }
+        }
+      }
+    },
+    "component_contract_matrix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["stable_id", "figma_source", "figma_properties", "react_target", "required_states", "evidence_status"],
+        "properties": {
+          "stable_id": { "type": "string", "minLength": 1 },
+          "figma_source": { "type": "string" },
+          "figma_properties": { "type": "array", "items": { "type": "string" } },
+          "semantic_variables": { "type": "array", "items": { "type": "string" } },
+          "react_target": { "type": "string" },
+          "prop_mapping": { "type": "array", "items": { "type": "string" } },
+          "required_states": { "type": "array", "items": { "type": "string" } },
+          "story_test_locator": { "type": "string" },
+          "evidence_status": { "enum": ["planned", "mapped", "partial", "blocked", "not_applicable"] },
+          "deviation": { "type": "string" }
+        }
+      }
+    },
+    "frame_state_implementation_map": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["figma_frame_state", "frontend_target", "status"],
+        "properties": {
+          "figma_frame_state": { "type": "string" },
+          "node_screenshot_evidence": { "type": "string" },
+          "frontend_target": { "type": "string" },
+          "behavior_test": { "type": "string" },
+          "status": { "enum": ["planned", "mapped", "partial", "blocked", "not_applicable"] }
         }
       }
     },

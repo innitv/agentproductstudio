@@ -25,6 +25,14 @@
 5.
 6.
 
+## Design System Strategy
+
+- Mode: `reuse|extend|product_specific|bespoke`
+- Existing foundation candidate:
+- What must remain product-specific:
+- What must not be inherited:
+- Componentization threshold:
+
 ## Токены, Которые Нужно Сохранить
 
 - Цвет:
@@ -78,6 +86,9 @@
 - Auto Layout critical areas:
 - Existing design system to search:
 - Screens for first write pass:
+- First pass: `visual_calibration` only, 2-3 screens
+- Visual calibration verdict required before systemization: `yes`
+- Screenshot comparison before/after systemization: `required`
 
 ## Запрос На Выход
 

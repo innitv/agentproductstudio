@@ -119,14 +119,17 @@ codex mcp add figma --url https://mcp.figma.com/mcp
 
 ## Write to Canvas (Запись на холст)
 
-Для создания и редактирования макетов на холсте Figma используется универсальный инструмент **`use_figma`**. Подробное описание формата запросов, структуры нод и привязки к дизайн-токенам системы A3 изложено в документе:
+Для создания и редактирования макетов на холсте Figma используется официальный plugin-context **`use_figma`** или эквивалентный доступный write tool. Нормативный процесс выбора дизайн-системы, двухпроходной сборки, component contracts и roundtrip описан здесь:
 
 - [figma-canvas-write-guide.md](file:///c:/Project/product-agent-studio/integrations/mcp/figma-canvas-write-guide.md)
 
 При использовании записи на холст:
-1. Агент обязан скомпилировать JSON-структуру элементов в соответствии с дизайн-системой A3.
-2. Перед выполнением запроса в Figma MCP агент должен вывести payload в чат и запросить явное текстовое подтверждение пользователя.
-3. Инструмент `use_figma` выполняет операции создания фреймов (`FRAME`), текстовых полей (`TEXT`) и Auto Layout групп.
+
+1. Сначала выбрать `design_system_mode`: `reuse|extend|product_specific|bespoke`. A3 не является обязательным foundation.
+2. Сначала выполнить visual calibration на 2-3 экранах, затем systemization без visual regression.
+3. Перед write получить exact approval на target/scope и `write_allowed=true`.
+4. Выполнять небольшие plugin-context patches и проверять inventory/screenshots после логических блоков.
+5. Для повторяемых компонентов вести Component Contract Matrix и Code Connect/fallback mapping.
 
 ## Guardrails
 
@@ -134,7 +137,7 @@ codex mcp add figma --url https://mcp.figma.com/mcp
 - Активация режима записи требует `write_allowed: true` во входном контракте и явного подтверждения от пользователя перед каждым MCP-запросом.
 - `write to canvas`, `create file`, `update components`, редактирование переменных и добавление комментариев требуют отдельной `figma_write` авторизации (human approval).
 - Запрещается несанкционированно перезаписывать или удалять существующие элементы дизайна вне области макета, предоставленной пользователем.
-- При записи строго следовать руководству [figma-canvas-write-guide.md](file:///c:/Project/product-agent-studio/integrations/mcp/figma-canvas-write-guide.md).
+- При записи строго следовать руководству [figma-canvas-write-guide.md](file:///c:/Project/product-agent-studio/integrations/mcp/figma-canvas-write-guide.md); pseudo-REST `action/create_node/payload` не использовать.
 - Не прогоняй весь тяжелый файл целиком, если достаточно frame/node link.
 - Не сохраняй private file dumps в публичные artifacts.
 - Claims из Figma не считаются research evidence без отдельной проверки.
