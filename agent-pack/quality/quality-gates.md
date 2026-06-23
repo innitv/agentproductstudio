@@ -51,7 +51,7 @@
 - Для research, CJM, roadmap, Notion hub, Figma board и handoff обязательна цепочка `персона/сегмент -> жизненная ситуация -> трение -> решение -> проверка`.
 - Если пользователь просит "проработать", "подробно", "не выжимку", `success` запрещен без подробных кейсов, user flow и связи с CJM.
 - QA помечает результат `needs_revision`, если ключевые решения объяснены только тезисами и не связаны с пользовательским поведением, метриками или проверкой гипотез.
-- Для research pack и Notion export дополнительно запускается исполняемый `Research Content Lint`: `yarn research:lint outputs/<project-slug>/<YYYY-MM-DD>` или `yarn research:lint <research-export-md>`. Lint реализует Rules 1-6 и блокирует external write при `status=fail`.
+- Для research pack и Notion export дополнительно запускается исполняемый `Research Content Lint`: `yarn research:lint research/projects/<research-slug>/<YYYY-MM-DD>` для standalone research, `yarn research:lint outputs/<project-slug>/<YYYY-MM-DD>` для продуктового workflow или `yarn research:lint <research-export-md>` для точечного export. Lint реализует Rules 1-6 и блокирует external write при `status=fail`.
 - Для любого deep research обязателен отдельный `scenario-user-flows.md`: research считается неполным, если ключевые выводы не разложены в реальные флоу с участником, ситуацией, шагами, статусами, исключениями, доказательствами и проверкой.
 
 ## Gate 1: целостность исследования

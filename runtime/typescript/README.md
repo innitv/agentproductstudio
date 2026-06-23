@@ -76,7 +76,7 @@ yarn workflow:approvals outputs/<project-slug>/<YYYY-MM-DD>
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
 yarn workflow:doctor
-yarn research:run outputs/<project-slug>/<YYYY-MM-DD> ["research query"]
+yarn research:run research/projects/<research-slug>/<YYYY-MM-DD> ["research query"]
 yarn reference:scan "<reference url>" [slug]
 yarn reference:diff reports/visual-review/<reference-slug> reports/visual-review/<local-slug> [output-dir]
 yarn reference:section-diff "<reference url>" "<local url>" [output-dir]
@@ -84,3 +84,4 @@ yarn reference:review reports/visual-review/<slug> [local-url] [output-path] [--
 ```
 
 `workflow:validate` поддерживает профили `standard`, `reference` и `auto`. Standard workflow не требует `visual-reference-review.md`; reference workflow требует его строго.
+Для standalone research/CJM run используй тот же `workflow:validate`/`workflow:sync` с путем `research/projects/<research-slug>/<YYYY-MM-DD>`.

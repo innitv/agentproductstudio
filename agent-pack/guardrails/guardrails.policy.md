@@ -39,7 +39,7 @@
 - Не начинай frontend до PRD, IA, design, copy, screens и prototype, кроме явного режима `quick draft`.
 - `quick draft` допустим только по явному запросу пользователя, не может завершаться как `success` и запрещен для reference-driven задач, внешних публикаций, Figma write, deploy и production-quality acceptance.
 - Обновляй `handoff-bundle.md` и `stage-gate-ledger.md` после каждого stage.
-- После ручной правки артефактов запускай `yarn workflow:sync outputs/<project-slug>/<YYYY-MM-DD>` или фиксируй blocker, если синхронизация невозможна.
+- После ручной правки артефактов запускай `yarn workflow:sync <run-dir>` (`outputs/<project-slug>/<YYYY-MM-DD>` для product workflow или `research/projects/<research-slug>/<YYYY-MM-DD>` для standalone research) или фиксируй blocker, если синхронизация невозможна.
 
 ## Внешние записи
 

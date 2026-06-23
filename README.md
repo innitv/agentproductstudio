@@ -28,7 +28,7 @@
 | Архитектура repo | `docs/architecture/repo-map.md`, `docs/architecture/git-workflow.md` | Границы app targets, ledgers, веток, deploy branches и QA targets. |
 | Product run outputs | `outputs/<project-slug>/<YYYY-MM-DD>/` | Source of truth конкретного продуктового запуска: state, manifest, artifacts, evidence, external records. |
 | Research runs | `research/projects/<research-slug>/<YYYY-MM-DD>/` | Source of truth для standalone research, CJM, market research и Notion-ready exports. |
-| Личный сайт-портфолио | `siteportfolio/` | Отдельный продуктовый каталог для `/portfolio`, вынесенный из общего `outputs`. |
+| Личный сайт-портфолио | `siteportfolio/`, `apps/portfolio` | Отдельный продуктовый source + production app boundary, вынесенный из общего `outputs`. |
 
 `outputs/products/` остается legacy/archive-зоной. `outputs/registry.json` можно использовать как навигационный индекс, но не как нормативный источник правил.
 
@@ -269,6 +269,11 @@ apps/
       views/
         LandingView.tsx
         ConsoleView.tsx
+  portfolio/
+    index.html
+    vite.config.ts
+    src/
+      main.tsx
 design/
   figma/
     a3-design-system/
@@ -351,7 +356,7 @@ Notion-публикация не является raw dump локальных ф
 - `Publication Shape Gate`: personas, CJM/user paths, competitive matrix и ICE/RICE/backlog представлены таблицами или схемами.
 - `Publication Editor Pass`: public/private split, отсутствие internal ledger/debug sections, отсутствие повторных full-table копий сущностей, `entity_ownership_map` и `publication_editor_gate.pass=true`.
 - `Publication Cross-Link Gate`: hub содержит `Карта связей исследования` и `Цепочка решений`, а ссылки на personas, CJM, roadmap, validation и sources ведут на реальные child pages/mentions.
-- `Research Content Lint`: `yarn research:lint outputs/<project-slug>/<YYYY-MM-DD>` или точечно по export.
+- `Research Content Lint`: `yarn research:lint research/projects/<research-slug>/<YYYY-MM-DD>` для standalone research, `yarn research:lint outputs/<project-slug>/<YYYY-MM-DD>` для product workflow или точечно по export.
 
 Layout strategy выбирается по форме работы: короткий export можно публиковать как `flat_child_page`; подробный research pack — как `hub_with_child_pages`; рабочие сущности для фильтрации/сортировки/обновления — как `database_index`. Если в одной публикации есть и narrative child pages, и базы, обязательна форма `integrated_hybrid`: каждая база встраивается linked database view в релевантную child page, а не остается отдельным detached database рядом с отчетом.
 
@@ -425,13 +430,16 @@ yarn validate:config
 yarn typecheck
 yarn agents:inspect
 yarn build
+yarn build:portfolio
+yarn qa:studio
+yarn qa:portfolio
 yarn qa:playwright
 yarn qa:firecrawl
 yarn reference:scan <reference-url> [slug]
 yarn reference:diff <reference-report-dir> <local-report-dir> [output-dir]
 yarn reference:section-diff <reference-url> <local-url> [output-dir] [--sections sections.json]
 yarn reference:review <reference-report-dir> [local-url] [output-path] [--local-dir <local-screenshot-dir>]
-yarn research:run outputs/<project-slug>/<YYYY-MM-DD> ["research query"]
+yarn research:run research/projects/<research-slug>/<YYYY-MM-DD> ["research query"]
 yarn landing:run "<цель workflow>"
 yarn workflow:run-local "<цель workflow>"
 yarn workflow:start "<цель workflow>"
@@ -448,7 +456,7 @@ yarn workflow:approval-request outputs/<project-slug>/<YYYY-MM-DD> notion_resear
 yarn workflow:approve outputs/<project-slug>/<YYYY-MM-DD> notion_research_publish --target <notion-parent-page-id> --by human
 yarn workflow:approvals outputs/<project-slug>/<YYYY-MM-DD>
 yarn workflow:deny outputs/<project-slug>/<YYYY-MM-DD> notion_research_publish --target <notion-parent-page-id> --by human
-yarn workflow:sync outputs/<project-slug>/<YYYY-MM-DD>
+yarn workflow:sync <run-dir>
 yarn workflow:cleanup-temp
 yarn workflow:archive outputs/<project-slug>/<YYYY-MM-DD>
 yarn workflow:test-agentic
@@ -459,7 +467,7 @@ yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through 01-research
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
 yarn workflow:doctor
-yarn research:lint outputs/<project-slug>/<YYYY-MM-DD>
+yarn research:lint <run-dir>
 yarn notion:check
 yarn notion:publish-research-hub <notion-parent-page-id> <research-export-md> "<hub title>" --dry-run
 yarn notion:publish-research-hub <notion-parent-page-id> <research-export-md> "<hub title>"
@@ -505,9 +513,11 @@ schema_payload:
 - external records: Notion/Figma/deploy/publication records;
 - export: человекочитаемые пакеты вроде `notion-research-export-ru.md`.
 
-После ручных правок run artifacts запускай `yarn workflow:sync outputs/<project-slug>/<YYYY-MM-DD>`. Для навигации используй `yarn workflow:list`, для диагностики `yarn workflow:inspect`, для человекочитаемого объяснения `yarn workflow:outputs`.
+После ручных правок run artifacts запускай `yarn workflow:sync <run-dir>`, где `<run-dir>` — `outputs/<project-slug>/<YYYY-MM-DD>` для product workflow или `research/projects/<research-slug>/<YYYY-MM-DD>` для standalone research/CJM. Для навигации используй `yarn workflow:list`, для диагностики `yarn workflow:inspect`, для человекочитаемого объяснения `yarn workflow:outputs`.
 
 `outputs/temp/` используется для smoke/test/dry-run артефактов. Архивные переносы выполняются через `yarn workflow:archive`; `outputs/products/` не является source of truth для новых workflow.
+
+Исторические run ledgers, например `siteportfolio/runs/2026-06-14/**`, могут содержать пути и маршруты, актуальные на дату запуска. Их не нужно переписывать при изменении архитектуры; текущая нормативная правда находится в `AGENTS.md`, `README.md`, `docs/architecture/**`, `siteportfolio/README.md` и agent docs.
 
 Текущий статус:
 
@@ -528,9 +538,9 @@ schema_payload:
 - `tooling/scripts/publish-notion-research-hub.mjs` выполняет dry-run/publish подробного Notion hub, проверяет `publication_shape_gate`, `publication_completeness_gate`, `publication_editor_gate`, cross-links, content lint и `notion_data_shape_plan`.
 - `design/figma/a3-design-system/` хранит долгоживущую карту Figma design-system tokens/components; workflow outputs должны ссылаться на неё через `Inputs Used`, а не дублировать как run output.
 - `tooling/scripts/validate-config.mjs` проверяет обязательные файлы и secret-like values без внешней сети.
-- React, Vite, Tailwind CSS и Framer Motion подключены как frontend stack в `apps/frontend/`.
-- `yarn build` собирает frontend в `dist/frontend`.
-- Playwright QA подключён через `@playwright/test`; `yarn qa:playwright` собирает frontend и проверяет desktop/mobile Chromium.
+- React, Vite, Tailwind CSS и Framer Motion подключены как frontend stack в `apps/frontend/`; production-портфолио имеет отдельный Vite app target `apps/portfolio/`.
+- `yarn build` является alias для `yarn build:studio` и собирает studio app в `dist/frontend`; `yarn build:portfolio` собирает production-портфолио в `dist/portfolio`.
+- Playwright QA подключён через `@playwright/test`; `yarn qa:studio` проверяет `apps/frontend`, `yarn qa:portfolio` проверяет `apps/portfolio`, а `yarn qa:playwright` последовательно запускает studio, portfolio и firecrawl targets.
 - Firecrawl QA подключён через `@mendable/firecrawl-js`; `yarn qa:firecrawl` проверяет Firecrawl scrape вместе с Playwright, а `yarn reference:scan <url> [slug]` создает пакет для visual reference review.
 - Notion MCP установлен как opt-in provider через `@notionhq/notion-mcp-server`; запуск: `yarn notion:mcp` при наличии локального `NOTION_TOKEN`.
 - Локальная token-инструкция для Notion: `integrations/mcp/notion-local-token.md`.

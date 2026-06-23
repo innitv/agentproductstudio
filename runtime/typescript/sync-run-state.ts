@@ -274,7 +274,7 @@ function renderSummary(result: SyncResult, outputDir: string, preview: boolean):
 function parseArgs(args: string[]): SyncOptions {
   const outputDir = args.find((arg) => !arg.startsWith("--"));
   if (!outputDir) {
-    throw new Error("Usage: yarn workflow:sync <outputs/project-slug/YYYY-MM-DD> [--preview] [--profile standard|reference] [--mode local|agentic]");
+    throw new Error("Usage: yarn workflow:sync <run-dir> [--preview] [--profile standard|reference] [--mode local|agentic]");
   }
 
   const profile = readFlag(args, "--profile");

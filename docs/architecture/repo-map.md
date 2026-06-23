@@ -43,6 +43,8 @@ Ledger — это история работы, evidence, screenshots, run state 
 | Site portfolio ledger | `siteportfolio/runs/<YYYY-MM-DD>/` | Только при визуально значимой portfolio work, QA evidence или explicit ledger update. |
 | Generated artifacts | `reports/`, `test-results/`, `dist/` | Никогда не коммитить в обычных tasks. |
 
+Исторические ledger-файлы отражают состояние на дату run. Если в них встречаются старые route/path references, не используй их как текущие правила архитектуры; сверяйся с `AGENTS.md`, этим документом, `docs/architecture/git-workflow.md`, `siteportfolio/README.md` и актуальными app configs.
+
 ## Целевая структура
 
 ```text

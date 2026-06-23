@@ -42,7 +42,7 @@ recommended_next_step: <рекомендуемый_следующий_шаг>
 
 Правила:
 
-- `inputs_used` обязан ссылаться на файлы из каталога `outputs/<project-slug>/<YYYY-MM-DD>/`.
+- `inputs_used` обязан ссылаться на реальные входные файлы из текущего run directory: `outputs/<project-slug>/<YYYY-MM-DD>/` для продуктового workflow или `research/projects/<research-slug>/<YYYY-MM-DD>/` для standalone research/CJM.
 - `skills_used` опционален, но если stage применял skill из agent frontmatter, укажи его id из `agent-pack/skills/*/SKILL.md`.
 - `outputs` обязан содержать созданный артефакт текущего этапа (stage) по artifact name из `runtime/typescript/route.config.ts` или по file name из `runtime/typescript/workflow-stages.ts`.
 - `surface_output` обязателен для `figma_board`, `product_ui`, `dashboard_console`, `landing`, `prototype`, `frontend`, `notion_wiki`, `research_report`, `presentation` и `handoff` outputs. Для неприменимых инженерных задач укажи `surface_type: not_applicable` и причину в `scope_contract`.

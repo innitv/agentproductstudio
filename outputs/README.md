@@ -38,14 +38,14 @@ research/
 ## Правила и регламенты
 
 1. **Реестр (`registry.json`):** Все реальные продукты регистрируются в массиве `activeProducts` в `registry.json`.
-   Отдельные продукты могут жить вне `outputs/`, если это явно зафиксировано в корне проекта. Сейчас личный сайт-портфолио вынесен в `siteportfolio/`.
+   Отдельные продукты могут жить вне `outputs/`, если это явно зафиксировано в корне проекта. Сейчас личный сайт-портфолио вынесен в `siteportfolio/`, а production app shell живет в `apps/portfolio/`.
    Исследовательские проекты регистрируются отдельно в `research/registry.json`.
 2. **Runtime source of truth:** Workflow-агент и команды `workflow:*` по умолчанию работают с `outputs/<project-slug>/<YYYY-MM-DD>/`. Содержимое прошлых run folders используется только как диагностический контекст конкретного запуска, а не как источник правил workflow.
 3. **Run ledger:** каждый полноценный run содержит `run-index.md`, `run-state.json`, `run-meta.json` и `artifact-manifest.json`. `run-index.md` — первый файл для человека; `artifact-manifest.json` — machine-readable ledger артефактов.
 4. **Artifact types:** manifest классифицирует файлы как `state`, `manifest`, `product_artifact`, `evidence`, `external_record` или `export`.
 5. **Visual evidence:** для reference/Figma/frontend задач run должен хранить реальные evidence-файлы: paired screenshots, `visual-diff-result.json`, `visual-section-diff-result.json` при наличии, Figma screenshot/node evidence, `visual-reference-review.md` с Source Pair Matrix.
 6. **Inspection:** для списка runs используй `yarn workflow:list`; для технической диагностики одного run — `yarn workflow:inspect outputs/<project-slug>/<YYYY-MM-DD>`; для человекочитаемого объяснения outputs — `yarn workflow:outputs outputs/<project-slug>/<YYYY-MM-DD>`.
-7. **Sync:** после ручной правки run artifacts запускай `yarn workflow:sync outputs/<project-slug>/<YYYY-MM-DD>`, чтобы `run-state.json`, `artifact-manifest.json`, `run-index.md` и stage results не расходились с Markdown-артефактами.
+7. **Sync:** после ручной правки product run artifacts запускай `yarn workflow:sync outputs/<project-slug>/<YYYY-MM-DD>`, чтобы `run-state.json`, `artifact-manifest.json`, `run-index.md` и stage results не расходились с Markdown-артефактами. Для standalone research используй аналогичный путь `research/projects/<research-slug>/<YYYY-MM-DD>`.
 8. **Очистка (`yarn outputs:cleanup`):** Для наведения порядка в корне `outputs/` используйте команду `yarn outputs:cleanup`. Она оставляет зарегистрированные активные продукты в runtime-пути `outputs/<project-slug>/` и переносит только незарегистрированные папки/файлы в `outputs/temp/`.
 9. **Legacy/archive:** `outputs/products/` хранит старые или вручную перенесенные результаты и не является путем по умолчанию для новых запусков.
 10. **Research:** `research/projects/` хранит исследовательские runs, CJM, market research, source logs и Notion-ready research exports.

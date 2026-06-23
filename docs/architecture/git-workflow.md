@@ -77,4 +77,12 @@ Deployment branches можно использовать только как publ
 | `yarn qa:playwright` | Последовательно запускает studio, portfolio и firecrawl targets. |
 | `yarn qa:all` | Быстрые проверки + все Playwright targets. |
 
+Build targets:
+
+| Command | Что собирает |
+|---|---|
+| `yarn build` | Alias для `yarn build:studio`. |
+| `yarn build:studio` | `apps/frontend` в `dist/frontend`. |
+| `yarn build:portfolio` | `apps/portfolio` в `dist/portfolio`. |
+
 Если `qa:playwright` падает из-за теста другой поверхности, нельзя молча обходить hook. Нужно либо запустить relevant target и записать deviation, либо разделить тесты/commands так, чтобы branch-specific работа не конфликтовала с другой поверхностью.

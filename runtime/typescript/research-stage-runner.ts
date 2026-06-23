@@ -1516,7 +1516,7 @@ async function main(): Promise<void> {
   const [outputDir, ...queryParts] = process.argv.slice(2);
 
   if (!outputDir) {
-    throw new Error("Usage: yarn research:run <outputs/project-slug/YYYY-MM-DD> [research query]");
+    throw new Error("Usage: yarn research:run <research/projects/research-slug/YYYY-MM-DD> [research query]");
   }
 
   await runResearchStage({

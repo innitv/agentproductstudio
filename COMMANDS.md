@@ -263,6 +263,18 @@ yarn workflow:test-agentic
 yarn qa:playwright
 ```
 
+Проверить только studio/AgentFlow app:
+
+```bash
+yarn qa:studio
+```
+
+Проверить production-портфолио на root route `/`:
+
+```bash
+yarn qa:portfolio
+```
+
 Проверка Firecrawl + Playwright:
 
 ```bash
@@ -283,16 +295,36 @@ Dev server:
 yarn dev
 ```
 
-Production-сборка:
+Dev server для production-портфолио:
 
 ```bash
-yarn build
+yarn dev:portfolio
 ```
 
-Предпросмотр собранного фронтенда:
+Production-сборка studio app:
+
+```bash
+yarn build:studio
+```
+
+Production-сборка portfolio app:
+
+```bash
+yarn build:portfolio
+```
+
+`yarn build` оставлен как alias для `yarn build:studio`.
+
+Предпросмотр собранного studio app:
 
 ```bash
 yarn preview
+```
+
+Предпросмотр собранного portfolio app:
+
+```bash
+yarn preview:portfolio
 ```
 
 ## Notion
@@ -375,7 +407,7 @@ yarn workflow:start "<фраза-триггер>"
 - **Screens (06-screens)**: `сгенерируй спецификацию экранов`, `создай экраны`, `опиши экраны`, `generate screens`.
 - **Prototype (07-prototype)**: `создай прототип`, `transition map`, `карту переходов`, `make transition map`.
 - **Frontend UI (08-frontend)**: `напиши код`, `сверстай лендинг`, `реализуй фронтенд`, `собери интерфейс`, `update ui`.
-- **Siteportfolio / личный сайт**: `мой сайт`, `мой сайт портфолио`, `портфолио`, `portfolio`, `siteportfolio`, `персональный сайт`, `сайт Ивана`, `/portfolio`. Эти фразы относятся к отдельному продукту `siteportfolio/`, а не к новому run в `outputs/`.
+- **Siteportfolio / личный сайт**: `мой сайт`, `мой сайт портфолио`, `портфолио`, `portfolio`, `siteportfolio`, `персональный сайт`, `сайт Ивана`, `/portfolio`. Эти фразы относятся к продукту `siteportfolio/` + production app `apps/portfolio`, а не к новому run в `outputs/`.
 - **Visual Diff (09-visual-reference)**: `сравни с референсом`, `проверь скриншоты`, `visual diff`, `compare screens`.
 - **Test Bench (10-test-bench)**: `запусти тест-бенч`, `протестируй воронку`, `проверь аналитику`, `run test bench`.
 - **QA Review (11-qa)**: `проверь качество`, `запусти qa`, `проведи аудит качества`, `run qa review`.

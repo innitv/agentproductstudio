@@ -20,7 +20,7 @@
 
 ## Artifact Context Inventory
 
-Research stage must read the current run ledger before provider synthesis. Include local artifacts actually used from `outputs/<project-slug>/<YYYY-MM-DD>/`.
+Research stage must read the current run ledger before provider synthesis. Include local artifacts actually used from the current run directory: `outputs/<project-slug>/<YYYY-MM-DD>/` for product workflow or `research/projects/<research-slug>/<YYYY-MM-DD>/` for standalone research/CJM.
 
 | Artifact | Type | Used for | Notes |
 |---|---|---|---|
@@ -242,7 +242,7 @@ Required before Notion/Figma/external publication.
 
 | Command | Status | Blocking findings |
 |---|---|---|
-| `yarn research:lint outputs/<project-slug>/<YYYY-MM-DD>` | not_run / pass / fail |  |
+| `yarn research:lint <run-dir>` | not_run / pass / fail | Use `research/projects/<research-slug>/<YYYY-MM-DD>` for standalone research or `outputs/<project-slug>/<YYYY-MM-DD>` for product workflow. |
 
 ## Notion Data Shape Plan
 

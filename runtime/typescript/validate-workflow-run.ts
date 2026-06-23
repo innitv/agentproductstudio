@@ -502,7 +502,7 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const outputDir = args[0];
   if (!outputDir) {
-    throw new Error("Usage: yarn workflow:validate <outputs/project-slug/YYYY-MM-DD> [--through <stage-id>]");
+    throw new Error("Usage: yarn workflow:validate <run-dir> [--through <stage-id>]");
   }
 
   const throughIndex = args.indexOf("--through");

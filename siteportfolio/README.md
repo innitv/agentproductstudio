@@ -15,6 +15,8 @@
 | Site source | `siteportfolio/src/` | Shared source личного сайта портфолио. |
 | Product ledger | `siteportfolio/runs/2026-06-14/` | История редизайна, QA, screenshots, surface contract и frontend-result. |
 
+`siteportfolio/runs/**` — исторический ledger. Он может ссылаться на маршруты и файлы, актуальные на дату run, например `/portfolio` внутри `apps/frontend`. Текущие правила app/deploy boundaries находятся в `docs/architecture/repo-map.md`, `docs/architecture/git-workflow.md` и этом README.
+
 ## Внутренняя структура
 
 | Папка / файл | Назначение |
