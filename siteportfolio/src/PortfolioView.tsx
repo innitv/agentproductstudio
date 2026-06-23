@@ -408,10 +408,23 @@ const companies: Company[] = [
   },
 ];
 
-function getRoute() {
+const portfolioBasePath: string = String(import.meta.env.VITE_PORTFOLIO_BASE_PATH ?? "/portfolio").replace(/\/$/, "");
+
+function getRouteParts() {
   const parts = window.location.pathname.split("/").filter(Boolean);
-  const companyId = parts[1] as CompanyId | undefined;
-  const caseId = parts[3];
+  const baseParts = portfolioBasePath.split("/").filter(Boolean);
+  return baseParts.every((part, index) => parts[index] === part) ? parts.slice(baseParts.length) : parts;
+}
+
+function portfolioPath(path = "") {
+  const suffix = path ? `/${path.replace(/^\/+/, "")}` : "";
+  return `${portfolioBasePath}${suffix}` || "/";
+}
+
+function getRoute() {
+  const parts = getRouteParts();
+  const companyId = parts[0] as CompanyId | undefined;
+  const caseId = parts[2];
   return { companyId, caseId };
 }
 
@@ -470,7 +483,7 @@ function PortfolioHome() {
             className="portfolio-company-tile"
             key={company.id}
             aria-label={`Открыть компанию ${company.name}, ${company.cases.length} кейсов`}
-            onClick={() => push(`/portfolio/${company.id}`)}
+            onClick={() => push(portfolioPath(company.id))}
             type="button"
           >
             <span className="portfolio-tile-top">
@@ -506,7 +519,7 @@ function CompanyPage({ company }: { company: Company }) {
   return (
     <main className="portfolio-shell portfolio-company-shell">
       <div className="portfolio-breadcrumb">
-        <button onClick={() => push("/portfolio")} type="button">
+        <button onClick={() => push(portfolioPath())} type="button">
           ← Портфолио
         </button>
         <span>·</span>
@@ -533,7 +546,7 @@ function CompanyPage({ company }: { company: Company }) {
             className="portfolio-case-tile"
             key={caseStudy.id}
             aria-label={`Открыть кейс ${caseStudy.title}`}
-            onClick={() => push(`/portfolio/${company.id}/case/${caseStudy.id}`)}
+            onClick={() => push(portfolioPath(`${company.id}/case/${caseStudy.id}`))}
             type="button"
           >
             <span className="portfolio-tile-top">
@@ -643,11 +656,11 @@ function CasePage({ company, caseStudy }: { company: Company; caseStudy: CaseStu
   return (
     <main className="portfolio-shell portfolio-article-shell">
       <div className="portfolio-breadcrumb">
-        <button onClick={() => push("/portfolio")} type="button">
+        <button onClick={() => push(portfolioPath())} type="button">
           ← Портфолио
         </button>
         <span>·</span>
-        <button onClick={() => push(`/portfolio/${company.id}`)} type="button">
+        <button onClick={() => push(portfolioPath(company.id))} type="button">
           {company.name}
         </button>
         <span>·</span>
@@ -686,7 +699,7 @@ function CasePage({ company, caseStudy }: { company: Company; caseStudy: CaseStu
             </ArticleSection>
           ))}
           <nav className="portfolio-next">
-            <button onClick={() => push(`/portfolio/${company.id}`)} type="button">
+            <button onClick={() => push(portfolioPath(company.id))} type="button">
               ← Все кейсы {company.name}
             </button>
           </nav>

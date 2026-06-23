@@ -25,13 +25,14 @@
 | Шаблоны артефактов | `agent-pack/artifacts/**`, `agent-pack/templates/**` | Что именно должны создавать агенты. |
 | Quality gates | `agent-pack/quality/quality-gates.md` | Проверки качества, Anti-AI-Slop, Surface Output и публикационные условия. |
 | Runtime manifest | `runtime/typescript/workflow.manifest.ts` | Stage ids, artifacts, profiles и route mapping для исполняемого слоя. |
+| Архитектура repo | `docs/architecture/repo-map.md`, `docs/architecture/git-workflow.md` | Границы app targets, ledgers, веток, deploy branches и QA targets. |
 | Product run outputs | `outputs/<project-slug>/<YYYY-MM-DD>/` | Source of truth конкретного продуктового запуска: state, manifest, artifacts, evidence, external records. |
 | Research runs | `research/projects/<research-slug>/<YYYY-MM-DD>/` | Source of truth для standalone research, CJM, market research и Notion-ready exports. |
 | Личный сайт-портфолио | `siteportfolio/` | Отдельный продуктовый каталог для `/portfolio`, вынесенный из общего `outputs`. |
 
 `outputs/products/` остается legacy/archive-зоной. `outputs/registry.json` можно использовать как навигационный индекс, но не как нормативный источник правил.
 
-Отдельный продукт `siteportfolio` хранит исходники личного сайта в `siteportfolio/src/`, а историю и evidence — в `siteportfolio/runs/2026-06-14/`. Запросы `мой сайт`, `портфолио`, `siteportfolio`, `персональный сайт`, `сайт Ивана` и `/portfolio` должны маршрутизироваться в этот каталог.
+Отдельный продукт `siteportfolio` хранит shared source личного сайта в `siteportfolio/src/`, production app shell в `apps/portfolio`, а историю и evidence — в `siteportfolio/runs/2026-06-14/`. Запросы `мой сайт`, `портфолио`, `siteportfolio`, `персональный сайт`, `сайт Ивана` и `/portfolio` должны маршрутизироваться в этот каталог и учитывать `docs/architecture/repo-map.md`.
 
 ## Целевая продуктовая схема
 

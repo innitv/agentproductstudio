@@ -1,5 +1,14 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const webServer = process.env.PLAYWRIGHT_NO_WEBSERVER === "1"
+  ? undefined
+  : {
+      command: "node tooling/scripts/run-playwright-with-preview.mjs --server-only --app=frontend",
+      url: "http://127.0.0.1:4173",
+      reuseExistingServer: !process.env.CI,
+      timeout: 60_000,
+    };
+
 export default defineConfig({
   testDir: "tests/playwright",
   timeout: 30_000,
@@ -10,12 +19,7 @@ export default defineConfig({
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
-  webServer: {
-    command: "yarn preview --port 4173",
-    url: "http://127.0.0.1:4173",
-    reuseExistingServer: !process.env.CI,
-    timeout: 60_000,
-  },
+  webServer,
   projects: [
     {
       name: "chromium-desktop",

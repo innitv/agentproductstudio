@@ -12,7 +12,7 @@
 - `limited engineering task`: узкая правка кода, документации, runtime или rules; можно использовать task-scoped ExecPlan вместо полного product workflow.
 - `cleanup/sorting`: очистка `outputs/temp`, `outputs/products`, `research/temp`, архивов или грязного дерева; не смешивать с feature work.
 - `external write`: Notion, Figma, deploy, изменение секретов, удаление данных и git write без текущего явного запроса требуют exact approval. Model-provider calls требуют approval, кроме явно включенных non-blocking DeepSeek/Gemini advisory checks на `01-research`, описанных в разделе Research.
-- `siteportfolio update`: правки личного сайта-портфолио пользователя. Триггеры: `мой сайт`, `мой сайт портфолио`, `портфолио`, `portfolio`, `siteportfolio`, `персональный сайт`, `сайт Ивана`, `/portfolio`. Это отдельный продуктовый каталог `siteportfolio/`, а не обычный `outputs` run; по умолчанию читать `siteportfolio/README.md` и `siteportfolio/runs/2026-06-14/handoff-bundle.md`.
+- `siteportfolio update`: правки личного сайта-портфолио пользователя. Триггеры: `мой сайт`, `мой сайт портфолио`, `портфолио`, `portfolio`, `siteportfolio`, `персональный сайт`, `сайт Ивана`, `/portfolio`. Это отдельный продуктовый каталог `siteportfolio/`, а не обычный `outputs` run; по умолчанию читать `siteportfolio/README.md`, `docs/architecture/repo-map.md`, `docs/architecture/git-workflow.md` и `siteportfolio/runs/2026-06-14/handoff-bundle.md`.
 
 Для selective commit/push используй `agent-pack/templates/selective-commit-sop.md`: сначала выписать include/exclude scope, staged делать только явными путями, затем выполнить `yarn git:check-staged` и проверить `git diff --cached --name-only`. `outputs/**`, `research/projects/**`, `research/archive/**`, `siteportfolio/runs/**`, `.lazyweb/**`, logs, build artifacts и media/evidence файлы запрещены в selective commit без прямого разрешения пользователя.
 
@@ -60,6 +60,8 @@ Codex работает как инженерно-продуктовый аген
 - Лучшие практики внешних агентных систем адаптированы в `agent-pack/workflows/agent-ops-best-practices.md`; используй их как вспомогательный слой, но не как замену текущему pipeline.
 
 Субагенты описаны в `agent-pack/agents/*.agent.md`. Route/dependency graph описан в `runtime/typescript/route.config.ts` и `runtime/typescript/workflow-stages.ts`.
+
+Архитектурные границы repo и правила веток описаны в `docs/architecture/repo-map.md` и `docs/architecture/git-workflow.md`. Если меняется app boundary, deploy route или branch policy, обновляй эти документы вместе с `AGENTS.md`, README и релевантными тестами.
 
 ## 3. Рабочий режим
 
