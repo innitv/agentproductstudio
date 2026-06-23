@@ -56,3 +56,5 @@
 ## Статус
 
 Выполнено: добавлен отдельный Vite app target `apps/portfolio`, чтобы домен собирался без отдельной долгоживущей ветки. Source портфолио пока остается в `siteportfolio/src` как shared product source для production app и legacy preview route `/portfolio`.
+
+Дополнительно выполнено: синхронизированы `AGENTS.md`, `README.md`, `frontend.agent.md` и `orchestrator.agent.md`, чтобы будущие задачи по портфолио читали `docs/architecture/**`, `apps/portfolio/` и `siteportfolio/src/`, а не старые пути внутри `apps/frontend/src/views`.

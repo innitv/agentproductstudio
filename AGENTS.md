@@ -123,13 +123,13 @@ Source of truth:
 
 - Реальные продуктовые workflow runtime: `outputs/<project-slug>/<YYYY-MM-DD>/`.
 - Исследовательские workflow, CJM, market research и Notion-ready research exports: `research/projects/<research-slug>/<YYYY-MM-DD>/`. Реестр исследований находится в `research/registry.json`.
-- Отдельный продукт личного портфолио: `siteportfolio/`. Его активный ledger находится в `siteportfolio/runs/2026-06-14/`, а frontend source — `siteportfolio/src/` с route `/portfolio`.
+- Отдельный продукт личного портфолио: `siteportfolio/` + `apps/portfolio/`. Активный ledger находится в `siteportfolio/runs/2026-06-14/`, shared frontend source — `siteportfolio/src/`, production app shell — `apps/portfolio/` с root route `/`, legacy preview route в studio — `/portfolio`.
 - Тестовые, smoke и временные запуски: `outputs/temp/`.
 - Архивные запуски: `outputs/archive/<project-slug>/<YYYY-MM-DD>/`; поврежденные или неполные переносы помещаются в quarantine-зону через lifecycle-команды runtime.
 - `outputs/products/` является legacy/archive-зоной для старых или вручную перенесенных результатов и не является источником правил workflow.
 - Перед возвратом к проекту можно читать `outputs/registry.json` и `research/registry.json` как навигационные индексы, если они доступны. Эти registry и прошлые run artifacts не являются нормативным источником для изменения правил агента.
 
-Если запрос пользователя относится к `siteportfolio`, не создавай новый `outputs/<project-slug>/...` без явного запроса на полный новый workflow. Для UI-правок работай с `siteportfolio/src/PortfolioView.tsx`, `siteportfolio/src/styles.css` и актуальным ledger в `siteportfolio/runs/`.
+Если запрос пользователя относится к `siteportfolio`, не создавай новый `outputs/<project-slug>/...` без явного запроса на полный новый workflow. Для UI-правок работай с `siteportfolio/src/PortfolioView.tsx`, `siteportfolio/src/styles.css` и актуальным ledger в `siteportfolio/runs/`. Для production-domain shell, build/deploy route и root route `/` работай с `apps/portfolio/` и `docs/architecture/**`.
 
 Если запрос пользователя относится к standalone research/CJM/market research без frontend/product delivery, не создавай новый `outputs/<project-slug>/...`; используй `research/projects/<research-slug>/<YYYY-MM-DD>/` и `research/README.md`.
 

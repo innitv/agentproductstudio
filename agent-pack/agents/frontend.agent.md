@@ -61,7 +61,7 @@ Lazyweb для frontend используется как benchmark/critique layer
 - `prototype-report.md` (переходы состояний, спецификация анимаций)
 - `STYLE_GUIDE.md`, `design-loop-report.md`, `figma-handoff-bundle.md` при наличии
 - Существующие файлы исходного кода фронтенда
-- Для запросов `мой сайт`, `портфолио`, `siteportfolio` или `/portfolio`: `siteportfolio/README.md`, `siteportfolio/runs/2026-06-14/handoff-bundle.md`, `apps/frontend/src/views/PortfolioView.tsx` и `.portfolio-*` секции в `apps/frontend/src/styles.css`
+- Для запросов `мой сайт`, `портфолио`, `siteportfolio` или `/portfolio`: `siteportfolio/README.md`, `docs/architecture/repo-map.md`, `docs/architecture/git-workflow.md`, `siteportfolio/runs/2026-06-14/handoff-bundle.md`, `siteportfolio/src/PortfolioView.tsx`, `siteportfolio/src/styles.css` и `apps/portfolio/`, если меняется production app shell/root route.
 
 ## Internal Pipeline
 
@@ -103,7 +103,7 @@ Lazyweb для frontend используется как benchmark/critique layer
 - **Lazyweb evidence fidelity**: Если upstream artifacts содержат `lazyweb_evidence`, frontend должен либо реализовать релевантные паттерны, либо явно записать deviation в `frontend-result.md`. Запрещено использовать Lazyweb screenshots как шаблон для прямого копирования брендинга, композиции один-в-один или чужого trade dress.
 - **Целостность состояний**: Строго следовать карте переходов прототипа. Не создавать компоненты, у которых не описаны состояния загрузки, ошибок и пустых экранов.
 - **Изоляция представлений (Modular Views Architecture):** Целевая верстка презентационных страниц, промо-лендингов и калькуляторов должна жить в отдельном presentation view внутри `apps/frontend/src/views/`. Для обновления существующего лендинга используй [LandingView.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/views/LandingView.tsx); для нового самостоятельного продукта допустим отдельный `<ProductName>View.tsx`. Файл [ConsoleView.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/views/ConsoleView.tsx) является защищенной внутренней B2B-консолью управления оркестрацией и не должен модифицироваться кодом лендингов. Файл [App.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/App.tsx) должен оставаться легким роутером и может меняться только для подключения/выбора view. Все общие типы выносятся в [types.ts](file:///c:/Project/product-agent-studio/apps/frontend/src/types.ts).
-- **Siteportfolio Routing:** Если пользователь просит изменить `мой сайт`, `портфолио`, `portfolio`, `siteportfolio`, `персональный сайт`, `сайт Ивана` или route `/portfolio`, работай с [PortfolioView.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/views/PortfolioView.tsx) и `.portfolio-*` стилями. Продуктовый ledger хранится в `siteportfolio/runs/`, а не в `outputs/`.
+- **Siteportfolio Routing:** Если пользователь просит изменить `мой сайт`, `портфолио`, `portfolio`, `siteportfolio`, `персональный сайт`, `сайт Ивана` или route `/portfolio`, работай с [PortfolioView.tsx](file:///c:/Project/product-agent-studio/siteportfolio/src/PortfolioView.tsx) и [styles.css](file:///c:/Project/product-agent-studio/siteportfolio/src/styles.css). Production app shell для домена находится в [apps/portfolio](file:///c:/Project/product-agent-studio/apps/portfolio/), legacy preview route `/portfolio` подключен в `apps/frontend`. Продуктовый ledger хранится в `siteportfolio/runs/`, а не в `outputs/`.
 - **Сохранение кода пользователя**: Не перезаписывать и не портить файлы кода пользователя без явного согласования.
 
 ## Required Output

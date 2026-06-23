@@ -279,7 +279,12 @@ design/
 tests/
   playwright/
     firecrawl.spec.ts
-    frontend.spec.ts
+    studio.spec.ts
+    portfolio.spec.ts
+docs/
+  architecture/
+    repo-map.md
+    git-workflow.md
 agent-pack/guardrails/
   guardrails.policy.md
   approval-matrix.md
@@ -291,6 +296,9 @@ outputs/
   README.md
 siteportfolio/
   README.md
+  src/
+    PortfolioView.tsx
+    styles.css
   runs/
     2026-06-14/
       frontend-result.md
