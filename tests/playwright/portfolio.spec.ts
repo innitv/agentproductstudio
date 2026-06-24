@@ -20,7 +20,9 @@ test("supports portfolio company and case routes", async ({ page }) => {
 
   await page.goto(portfolioUrl("/a3/case/dashboard-redesign"));
 
-  await expect(page.getByRole("heading", { name: "Редизайн главной. Из промо-блока в рабочий B2B-dashboard" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Редизайн главной. Рабочий дашборд для B2B-сценариев" })).toBeVisible();
   await expect(page.getByRole("link", { name: /Контекст/ })).toBeVisible();
+  await expect(page.getByRole("img", { name: "Новый дашборд А3" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Следующий кейс: Оптимизация флоу/ })).toBeVisible();
   await expect(page.getByRole("button", { name: "А3", exact: true })).toBeVisible();
 });
