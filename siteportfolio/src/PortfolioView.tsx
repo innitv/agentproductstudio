@@ -1,4 +1,5 @@
 import * as React from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import "./styles.css";
 
 type CompanyId = "a3" | "rtk" | "smlt";
@@ -56,6 +57,21 @@ type Company = {
   description: string;
   cases: CaseStudy[];
 };
+
+const pageTransition = {
+  duration: 0.42,
+  ease: [0.22, 1, 0.36, 1] as const,
+};
+const loaderMinimumMs = 260;
+const contacts = [
+  { label: "tg", href: "https://t.me/innitv", external: true },
+  { label: "email", href: "mailto:ignatov@a-3.ru", external: false },
+  {
+    label: "linkedin",
+    href: "https://www.linkedin.com/in/%D0%B8%D0%B2%D0%B0%D0%BD-%D0%B8%D0%B3%D0%BD%D0%B0%D1%82%D0%BE%D0%B2-59284326a/",
+    external: true,
+  },
+];
 
 const companies: Company[] = [
   {
@@ -863,6 +879,11 @@ function push(path: string) {
 
 export function PortfolioView() {
   const [route, setRoute] = React.useState(getRoute);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const lastRouteKey = React.useRef<string | null>(null);
+  const loadingStartedAt = React.useRef(Date.now());
+  const activeRouteKey = React.useRef("home-index");
+  const loaderTimeout = React.useRef<number | undefined>(undefined);
 
   React.useEffect(() => {
     const handleRoute = () => setRoute(getRoute());
@@ -872,47 +893,173 @@ export function PortfolioView() {
 
   const company = companies.find((item) => item.id === route.companyId);
   const caseStudy = company?.cases.find((item) => item.id === route.caseId);
+  const routeKey = `${route.companyId ?? "home"}-${route.caseId ?? "index"}`;
 
-  if (company && caseStudy) {
-    return <CasePage company={company} caseStudy={caseStudy} />;
-  }
+  React.useEffect(() => {
+    activeRouteKey.current = routeKey;
+    window.clearTimeout(loaderTimeout.current);
 
-  if (company) {
-    return <CompanyPage company={company} />;
-  }
+    if (lastRouteKey.current === null || lastRouteKey.current === routeKey) {
+      lastRouteKey.current = routeKey;
+      setIsLoading(false);
+      return () => window.clearTimeout(loaderTimeout.current);
+    }
 
-  return <PortfolioHome />;
+    lastRouteKey.current = routeKey;
+    loadingStartedAt.current = Date.now();
+    setIsLoading(true);
+
+    return () => window.clearTimeout(loaderTimeout.current);
+  }, [routeKey]);
+
+  const handlePageReady = React.useCallback((readyRouteKey: string) => {
+    if (readyRouteKey !== activeRouteKey.current) {
+      return;
+    }
+
+    const elapsed = Date.now() - loadingStartedAt.current;
+    const delay = Math.max(0, loaderMinimumMs - elapsed);
+    window.clearTimeout(loaderTimeout.current);
+    loaderTimeout.current = window.setTimeout(() => {
+      if (readyRouteKey === activeRouteKey.current) {
+        setIsLoading(false);
+      }
+    }, delay);
+  }, []);
+
+  const page = (() => {
+    if (company && caseStudy) {
+      return <CasePage company={company} caseStudy={caseStudy} />;
+    }
+
+    if (company) {
+      return <CompanyPage company={company} />;
+    }
+
+    return <PortfolioHome />;
+  })();
+
+  return (
+    <div className="portfolio-stage">
+      <AnimatePresence initial={false}>
+        {React.cloneElement(page, { key: routeKey, onReady: () => handlePageReady(routeKey) })}
+      </AnimatePresence>
+      <AnimatePresence>{isLoading && <PortfolioLoader key="portfolio-loader" />}</AnimatePresence>
+    </div>
+  );
 }
 
-function PortfolioHome() {
+function PortfolioLoader() {
   return (
-    <main className="portfolio-shell portfolio-home-shell">
+    <motion.div
+      className="portfolio-loader"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.18 }}
+      aria-live="polite"
+      aria-label="Загрузка страницы портфолио"
+    >
+      <motion.div
+        className="portfolio-loader-line"
+        initial={{ scaleX: 0, transformOrigin: "0% 50%" }}
+        animate={{ scaleX: 1 }}
+        transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
+      />
+      <span>Загрузка</span>
+    </motion.div>
+  );
+}
+
+function MotionPage({
+  children,
+  className,
+  onReady,
+}: {
+  children: React.ReactNode;
+  className: string;
+  onReady?: () => void;
+}) {
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <motion.main
+      className={className}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 18, filter: "blur(8px)" }}
+      animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, filter: "blur(0px)" }}
+      exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -12, filter: "blur(4px)" }}
+      transition={pageTransition}
+      onAnimationComplete={onReady}
+    >
+      {children}
+    </motion.main>
+  );
+}
+
+function MotionReveal({
+  children,
+  className,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
+}) {
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      className={className}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+      whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-12% 0px -12% 0px" }}
+      transition={{ ...pageTransition, delay }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function PortfolioHome({ onReady }: { onReady?: () => void }) {
+  return (
+    <MotionPage className="portfolio-shell portfolio-home-shell" onReady={onReady}>
       <Header />
-      <section className="portfolio-hero">
-        <div>
+      <motion.section
+        className="portfolio-hero"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: {},
+          visible: { transition: { staggerChildren: 0.08, delayChildren: 0.08 } },
+        }}
+      >
+        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={pageTransition}>
           <p className="portfolio-kicker">Портфолио</p>
           <h1 aria-label="Дизайнер сложных продуктов">
             Дизайнер
             <br />
             <em>сложных продуктов</em>
           </h1>
-        </div>
-        <div className="portfolio-hero-copy">
+        </motion.div>
+        <motion.div className="portfolio-hero-copy" variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={pageTransition}>
           <p>
             Проектирую B2B-платежи, сервисные кабинеты, подписки и proptech-инструменты,
             где важны сценарии, статусы, данные и понятные действия.
           </p>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
       <section className="portfolio-company-tiles" aria-label="Компании">
-        {companies.map((company) => (
-          <button
+        {companies.map((company, index) => (
+          <motion.button
             className="portfolio-company-tile"
             key={company.id}
             aria-label={`Открыть компанию ${company.name}, ${company.cases.length} кейсов`}
             onClick={() => push(portfolioPath(company.id))}
             type="button"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...pageTransition, delay: 0.12 + index * 0.08 }}
           >
             <span className="portfolio-tile-top">
               <span className="portfolio-row-index">{company.index}</span>
@@ -934,17 +1081,17 @@ function PortfolioHome() {
                 Смотреть кейсы <span>→</span>
               </span>
             </span>
-          </button>
+          </motion.button>
         ))}
       </section>
       <PortfolioFooter />
-    </main>
+    </MotionPage>
   );
 }
 
-function CompanyPage({ company }: { company: Company }) {
+function CompanyPage({ company, onReady }: { company: Company; onReady?: () => void }) {
   return (
-    <main className="portfolio-shell portfolio-company-shell">
+    <MotionPage className="portfolio-shell portfolio-company-shell" onReady={onReady}>
       <div className="portfolio-breadcrumb">
         <button onClick={() => push(portfolioPath())} type="button">
           ← Главная
@@ -953,24 +1100,27 @@ function CompanyPage({ company }: { company: Company }) {
         <strong>{company.name}</strong>
       </div>
       <section className="portfolio-company-hero">
-        <div>
+        <MotionReveal delay={0.04}>
           <p className="portfolio-kicker">
             {company.industry} · {company.years}
           </p>
           <h1>{company.name}</h1>
-        </div>
-        <div>
+        </MotionReveal>
+        <MotionReveal delay={0.1}>
           <p>{company.description}</p>
-        </div>
+        </MotionReveal>
       </section>
       <section className="portfolio-case-tiles" aria-label={`Кейсы компании ${company.name}`}>
-        {company.cases.map((caseStudy) => (
-          <button
+        {company.cases.map((caseStudy, index) => (
+          <motion.button
             className="portfolio-case-tile"
             key={caseStudy.id}
             aria-label={`Открыть кейс ${caseStudy.title}`}
             onClick={() => push(portfolioPath(`${company.id}/case/${caseStudy.id}`))}
             type="button"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...pageTransition, delay: 0.12 + index * 0.07 }}
           >
             <span className="portfolio-tile-top">
               <span className="portfolio-row-index">{caseStudy.index}</span>
@@ -990,15 +1140,23 @@ function CompanyPage({ company }: { company: Company }) {
                 Читать кейс <span>→</span>
               </span>
             </span>
-          </button>
+          </motion.button>
         ))}
       </section>
       <PortfolioFooter suffix={company.name} />
-    </main>
+    </MotionPage>
   );
 }
 
-function CasePage({ company, caseStudy }: { company: Company; caseStudy: CaseStudy }) {
+function CasePage({
+  company,
+  caseStudy,
+  onReady,
+}: {
+  company: Company;
+  caseStudy: CaseStudy;
+  onReady?: () => void;
+}) {
   const caseIndex = company.cases.findIndex((item) => item.id === caseStudy.id);
   const previousCase = caseIndex > 0 ? company.cases[caseIndex - 1] : undefined;
   const nextCase = caseIndex >= 0 && caseIndex < company.cases.length - 1 ? company.cases[caseIndex + 1] : undefined;
@@ -1080,7 +1238,7 @@ function CasePage({ company, caseStudy }: { company: Company; caseStudy: CaseStu
   }, [caseStudy.id, sections]);
 
   return (
-    <main className="portfolio-shell portfolio-article-shell">
+    <MotionPage className="portfolio-shell portfolio-article-shell" onReady={onReady}>
       <div className="portfolio-breadcrumb">
         <button onClick={() => push(portfolioPath())} type="button">
           ← Главная
@@ -1093,14 +1251,14 @@ function CasePage({ company, caseStudy }: { company: Company; caseStudy: CaseStu
         <strong>{caseStudy.title}</strong>
       </div>
       <section className="portfolio-article-hero">
-        <div>
+        <MotionReveal delay={0.04}>
           <h1 aria-label={`${caseStudy.title}. ${caseStudy.subtitle}`}>
             {caseStudy.title}
             <br />
             <em>{caseStudy.subtitle}</em>
           </h1>
           <p>{caseStudy.summary}</p>
-        </div>
+        </MotionReveal>
       </section>
       <div className="portfolio-article-layout">
         <aside>
@@ -1127,7 +1285,7 @@ function CasePage({ company, caseStudy }: { company: Company; caseStudy: CaseStu
             >
               {caseStudy.coverImage && section.title.toLocaleLowerCase("ru").startsWith("цель") && (
                 <figure className="portfolio-source-image portfolio-article-cover">
-                  <img alt={caseStudy.coverImage.alt} src={caseStudy.coverImage.src} />
+                  <MediaImage alt={caseStudy.coverImage.alt} src={caseStudy.coverImage.src} />
                   <figcaption>{caseStudy.coverImage.caption}</figcaption>
                 </figure>
               )}
@@ -1166,7 +1324,7 @@ function CasePage({ company, caseStudy }: { company: Company; caseStudy: CaseStu
           </nav>
         </article>
       </div>
-    </main>
+    </MotionPage>
   );
 }
 
@@ -1176,9 +1334,17 @@ function Header() {
       <div>
         <strong>Иван Игнатов</strong>
       </div>
-      <nav>
-        <span>Продуктовый дизайнер</span>
-        <span>B2B/B2C продукты</span>
+      <nav aria-label="Контакты">
+        {contacts.map((contact) => (
+          <a
+            href={contact.href}
+            key={contact.label}
+            rel={contact.external ? "noreferrer" : undefined}
+            target={contact.external ? "_blank" : undefined}
+          >
+            {contact.label}
+          </a>
+        ))}
       </nav>
     </header>
   );
@@ -1188,7 +1354,20 @@ function PortfolioFooter({ suffix = "портфолио" }: { suffix?: string })
   return (
     <footer className="portfolio-footer">
       <span>© 2026 Иван Игнатов · {suffix}</span>
-      <span>Telegram · LinkedIn · Email</span>
+      <span>
+        {contacts.map((contact, index) => (
+          <React.Fragment key={contact.label}>
+            {index > 0 && " · "}
+            <a
+              href={contact.href}
+              rel={contact.external ? "noreferrer" : undefined}
+              target={contact.external ? "_blank" : undefined}
+            >
+              {contact.label}
+            </a>
+          </React.Fragment>
+        ))}
+      </span>
     </footer>
   );
 }
@@ -1214,13 +1393,20 @@ function ArticleSection({
   title: string;
 }) {
   return (
-    <section className="portfolio-article-section" id={id}>
+    <motion.section
+      className="portfolio-article-section"
+      id={id}
+      initial={{ opacity: 0, y: 26 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-18% 0px -18% 0px" }}
+      transition={pageTransition}
+    >
       <h2>
         <span>{index}</span>
         {title}
       </h2>
       {children}
-    </section>
+    </motion.section>
   );
 }
 
@@ -1234,7 +1420,7 @@ function CaseSectionContent({ section }: { section: CaseDetailSection }) {
       {section.items && <NumberedList items={section.items} />}
       {section.image && (
         <figure className="portfolio-source-image">
-          <img alt={section.image.alt} src={section.image.src} />
+          <MediaImage alt={section.image.alt} src={section.image.src} />
           <figcaption>{section.image.caption}</figcaption>
         </figure>
       )}
@@ -1242,7 +1428,7 @@ function CaseSectionContent({ section }: { section: CaseDetailSection }) {
         <div className="portfolio-source-slider" aria-label={`${section.title}: изображения`}>
           {section.images.map((image) => (
             <figure className="portfolio-source-slide" key={image.src}>
-              <img alt={image.alt} src={image.src} />
+              <MediaImage alt={image.alt} src={image.src} />
               <figcaption>{image.caption}</figcaption>
             </figure>
           ))}
@@ -1254,14 +1440,40 @@ function CaseSectionContent({ section }: { section: CaseDetailSection }) {
           aria-label={`${section.title}: видео`}
         >
           {section.videos.map((video) => (
-            <figure className="portfolio-source-slide" key={video.src}>
+            <motion.figure
+              className="portfolio-source-slide"
+              key={video.src}
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-10% 0px" }}
+              transition={pageTransition}
+            >
               <video controls playsInline preload="metadata" src={video.src} />
               <figcaption>{video.caption}</figcaption>
-            </figure>
+            </motion.figure>
           ))}
         </div>
       )}
     </>
+  );
+}
+
+function MediaImage({ alt, src }: { alt: string; src: string }) {
+  const [isLoaded, setIsLoaded] = React.useState(false);
+
+  return (
+    <span className={`portfolio-media-frame ${isLoaded ? "is-loaded" : ""}`}>
+      <motion.img
+        alt={alt}
+        src={src}
+        loading="lazy"
+        decoding="async"
+        initial={{ opacity: 0, scale: 0.985 }}
+        animate={isLoaded ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.985 }}
+        transition={pageTransition}
+        onLoad={() => setIsLoaded(true)}
+      />
+    </span>
   );
 }
 

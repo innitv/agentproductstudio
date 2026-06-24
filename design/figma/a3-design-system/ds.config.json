@@ -1,0 +1,33 @@
+{
+  "$schema": "../design-system-index.schema.json",
+  "slug": "a3-design-system",
+  "name": "A3 Design System",
+  "source": {
+    "figma_url": "https://www.figma.com/design/4ufM1XdtXzSwbCNpulxETA/A3-Design-System",
+    "file_key": "4ufM1XdtXzSwbCNpulxETA",
+    "scope": "owned design system pilot",
+    "source_type": "owned"
+  },
+  "ingest": {
+    "status": "indexed",
+    "last_ingested_at": "2026-06-22"
+  },
+  "foundation": {
+    "path": "design/figma/a3-design-system/token-map.md",
+    "semantic_modes": [],
+    "variable_collections": [],
+    "notes": ["Исторический A3 индекс был создан до общего figma-ds-ingest workflow."]
+  },
+  "components": {
+    "map_path": "design/figma/a3-design-system/component-map.md",
+    "profile_dir": "design/figma/a3-design-system/components",
+    "component_count": 0,
+    "component_set_count": 5,
+    "categories": ["actions", "forms", "feedback"]
+  },
+  "contracts": {
+    "component_contracts_path": "design/figma/a3-design-system/component-contracts.json",
+    "code_connect_status": "unavailable_plan",
+    "fallback_mapping_path": "design/figma/a3-design-system/code-connect-fallback.md"
+  }
+}

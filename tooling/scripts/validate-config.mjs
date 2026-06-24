@@ -26,9 +26,17 @@ const requiredFiles = [
   "agent-pack/templates/agent-output-contract.schema.md",
   "agent-pack/templates/surface-output-contract.template.md",
   "agent-pack/skills/figma-roundtrip/SKILL.md",
+  "agent-pack/skills/figma-ds-ingest/SKILL.md",
   "integrations/mcp/figma-canvas-write-guide.md",
+  "integrations/mcp/figma-design-system-mcp.md",
   "agent-pack/workflows/ds-baseline.workflow.md",
+  "agent-pack/workflows/figma-ds-ingest.workflow.md",
+  "design/figma/README.md",
+  "design/figma/registry.json",
+  "design/figma/registry.schema.json",
+  "design/figma/design-system-index.schema.json",
   "design/figma/a3-design-system/ds-baseline-policy.md",
+  "design/figma/a3-design-system/ds.config.json",
   "agent-pack/guardrails/guardrails.policy.md",
   "agent-pack/guardrails/approval-matrix.md",
 ];
@@ -118,7 +126,7 @@ const researchEnforcementFiles = [
   },
   {
     file: "AGENTS.md",
-    requiredSnippets: ["публикация research в Notion обязательна", "Universal Visual Evidence Grounding", "visual_evidence_plan", "visual_reference_card", "Lazyweb Evidence Gate", "section-by-section visual spec", "шаблонный стиль", "Не заменяй требуемый источник", "Не обходи approval", "человекочитаемый research pack", "отдельную child page", "Publication Cross-Link Gate", "Publication Editor Pass", "Карта связей исследования", "Anti-AI-Slop Gate", "Research Content Lint", "notion_data_shape_plan", "integrated_hybrid", "Combined Notion Workspace Gate", "Notion research page publication record", "Surface-Aware Output Framework", "Surface Type Gate", "Write -> Verify -> Fix Gate", "Design System Strategy Gate", "Two-Pass Figma Build Gate", "Component Contract и Roundtrip Gate", "product_specific", "figma-roundtrip"],
+    requiredSnippets: ["публикация research в Notion обязательна", "Universal Visual Evidence Grounding", "visual_evidence_plan", "visual_reference_card", "Lazyweb Evidence Gate", "section-by-section visual spec", "шаблонный стиль", "Не заменяй требуемый источник", "Не обходи approval", "человекочитаемый research pack", "отдельную child page", "Publication Cross-Link Gate", "Publication Editor Pass", "Карта связей исследования", "Anti-AI-Slop Gate", "Research Content Lint", "notion_data_shape_plan", "integrated_hybrid", "Combined Notion Workspace Gate", "Notion research page publication record", "Surface-Aware Output Framework", "Surface Type Gate", "Write -> Verify -> Fix Gate", "Design System Strategy Gate", "Two-Pass Figma Build Gate", "Component Contract и Roundtrip Gate", "product_specific", "figma-roundtrip", "design/figma/registry.json", "selected_design_system_slug"],
   },
   {
     file: "agent-pack/guardrails/guardrails.policy.md",
@@ -154,15 +162,39 @@ const researchEnforcementFiles = [
   },
   {
     file: "agent-pack/skills/figma-roundtrip/SKILL.md",
-    requiredSnippets: ["reuse|extend|product_specific|bespoke", "visual_calibration", "systemization", "Component Contract Matrix", "Code Connect", "frame/state → route/story/component mapping"],
+    requiredSnippets: ["reuse|extend|product_specific|bespoke", "visual_calibration", "systemization", "Component Contract Matrix", "Code Connect", "frame/state → route/story/component mapping", "design/figma/registry.json", "figma-ds-ingest"],
+  },
+  {
+    file: "agent-pack/skills/figma-ds-ingest/SKILL.md",
+    requiredSnippets: ["Census First", "Chunk Manifest", "Foundation", "Deep Profiles", "design/figma/<design_system_slug>", "Node ID"],
   },
   {
     file: "integrations/mcp/figma-canvas-write-guide.md",
-    requiredSnippets: ["Design System Strategy Gate", "Two-pass build", "Component Contract Matrix", "Frontend → Figma", "Figma → frontend", "Visual regression", "pseudo-REST"],
+    requiredSnippets: ["Design System Strategy Gate", "Two-pass build", "Component Contract Matrix", "Frontend → Figma", "Figma → frontend", "Visual regression", "pseudo-REST", "Local DS index first"],
+  },
+  {
+    file: "integrations/mcp/figma-design-system-mcp.md",
+    requiredSnippets: ["design/figma/registry.json", "Large DS Ingest", "census", "manifest", "локальный индекс"],
   },
   {
     file: "agent-pack/workflows/ds-baseline.workflow.md",
     requiredSnippets: ["design_system_mode=product_specific", "Visual calibration", "Foundation extraction", "Component Contract Matrix", "Regression check"],
+  },
+  {
+    file: "agent-pack/workflows/figma-ds-ingest.workflow.md",
+    requiredSnippets: ["Census", "Chunk Manifest", "Foundation", "Component Map", "Deep Profiles", "registry.json"],
+  },
+  {
+    file: "design/figma/README.md",
+    requiredSnippets: ["registry.json", "selected_design_system_slug", "локальным индексом"],
+  },
+  {
+    file: "design/figma/registry.json",
+    requiredSnippets: ["a3-design-system", "component_contracts", "unavailable_plan"],
+  },
+  {
+    file: "design/figma/design-system-index.schema.json",
+    requiredSnippets: ["foundation", "components", "component_contracts_path"],
   },
   {
     file: "design/figma/a3-design-system/ds-baseline-policy.md",

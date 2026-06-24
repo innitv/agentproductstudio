@@ -48,9 +48,16 @@ codex mcp add figma --url https://mcp.figma.com/mcp
 
 Рекомендуемые долгоживущие design-source результаты:
 
+- `design/figma/registry.json`.
+- `design/figma/<design-system-slug>/ds.config.json`.
+- `design/figma/<design-system-slug>/source.md`.
+- `design/figma/<design-system-slug>/_scan/census.md`.
+- `design/figma/<design-system-slug>/_scan/manifest.md`.
+- `design/figma/<design-system-slug>/foundation.md`.
+- `design/figma/<design-system-slug>/components.md`.
+- `design/figma/<design-system-slug>/components/<category>.md`.
 - `design/figma/<design-system-slug>/design-system-audit.md`.
-- `design/figma/<design-system-slug>/token-map.md`.
-- `design/figma/<design-system-slug>/component-map.md`.
+- `design/figma/<design-system-slug>/token-map.md` и `component-map.md` допустимы как legacy/human-readable aliases.
 
 Рекомендуемые workflow-specific результаты:
 
@@ -60,6 +67,21 @@ codex mcp add figma --url https://mcp.figma.com/mcp
 - `outputs/<slug>/<date>/figma-component-map.md` только для task-specific Figma frames, не для общей библиотеки.
 
 Если Figma library является общей дизайн-системой, не дублируй её в каждом `outputs/` run. Сохраняй её в `design/figma/`, а workflow artifacts должны ссылаться на эти файлы в `Inputs Used`.
+
+## Large DS Ingest
+
+Для больших библиотек используй `agent-pack/workflows/figma-ds-ingest.workflow.md` и skill `figma-ds-ingest`.
+
+Порядок:
+
+1. Census-first: страницы, counts, Variable collections.
+2. Chunk manifest: порции `pending|done|blocked`.
+3. Foundation: Variables по коллекциям и modes.
+4. Components: compact map с Node ID и variant matrix.
+5. Deep profiles: только нужные категории.
+6. Contract: `component-contracts.json` и Code Connect/fallback.
+
+После ingest агент обязан читать локальный индекс до обращения в Figma.
 
 ## Design System Audit Template
 

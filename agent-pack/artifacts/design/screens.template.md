@@ -15,8 +15,10 @@
 - `prd.md`
 - `STYLE_GUIDE.md`, если применимо
 - `reference-analysis.md`, если применимо
-- `design/figma/a3-design-system/token-map.md`, если применимо
-- `design/figma/a3-design-system/variants-and-states-policy.md`, если применимо
+- `design/figma/registry.json`, если используется Figma DS
+- `design/figma/<selected_design_system_slug>/ds.config.json`, если выбран `reuse|extend`
+- `design/figma/<selected_design_system_slug>/foundation.md|token-map.md`, если применимо
+- `design/figma/<selected_design_system_slug>/components.md|component-map.md`, если применимо
 
 ## Input Readiness Pass
 

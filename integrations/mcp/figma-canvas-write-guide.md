@@ -19,6 +19,21 @@
 
 ## 2. Read path: Figma → context
 
+### 2.1 Local DS index first
+
+Если задача использует существующую дизайн-систему (`reuse|extend`), сначала проверь `design/figma/registry.json`.
+
+- Если `selected_design_system_slug` есть и статус `indexed`, читай локальный индекс:
+  - `design/figma/<slug>/ds.config.json`;
+  - `foundation.md|token-map.md`;
+  - `components.md|component-map.md`;
+  - только нужные `components/<category>.md`.
+- Не читай весь Figma-файл повторно, если локальный индекс отвечает на вопрос.
+- В Figma обращайся только для missing nodes, refresh, screenshot/object verification или approved write.
+- Если нужной DS нет в registry или индекс `partial|blocked`, сначала выполни read-only `figma-ds-ingest`.
+
+### 2.2 Exact node context
+
 Для точной реализации используй минимальный exact node scope:
 
 1. Получи structured design context для exact frame/component node.
@@ -98,6 +113,7 @@
 
 Перед кодом подготовь implementation packet:
 
+- selected design-system slug и пути локального индекса;
 - exact frame/node URLs и screenshots на целевых viewports;
 - component/instance inventory;
 - variables/styles/assets;

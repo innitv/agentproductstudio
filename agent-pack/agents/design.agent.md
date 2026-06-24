@@ -70,8 +70,11 @@ UI Kit и дизайн-система используются только ка
 - `copy-deck.md` (при наличии)
 - `integrations/mcp/figma-canvas-write-guide.md`
 - `agent-pack/workflows/ds-baseline.workflow.md`
-- `design/figma/a3-design-system/variants-and-states-policy.md`
-- `design/figma/a3-design-system/ds-baseline-policy.md`
+- `design/figma/registry.json`
+- `design/figma/<selected_design_system_slug>/ds.config.json`, если выбран `reuse|extend`
+- `design/figma/<selected_design_system_slug>/foundation.md|token-map.md`, если выбран `reuse|extend`
+- `design/figma/<selected_design_system_slug>/components.md|component-map.md`, если выбран `reuse|extend`
+- `agent-pack/workflows/figma-ds-ingest.workflow.md`, если выбранная Figma DS еще не внесена в registry
 
 ## Internal Pipeline (Внутренний процесс)
 
@@ -109,7 +112,7 @@ UI Kit и дизайн-система используются только ка
 - Видимая дизайн-поверхность не может считаться полной, если нет Surface Output Contract и карты `input evidence -> output unit`.
 - Избегать декоративной сложности, которая снижает удобство выполнения целевых задач пользователя.
 - Доступность (A11y) и адаптивное поведение обязательны, а не опциональны.
-- **Правило Figma-макетов**: Не создавать и не изменять макеты на холсте Figma без явного запроса пользователя, включенного параметра `write_allowed=true` и получения явного согласия пользователя. Перед write нужно проверить доступность remote Figma MCP `use_figma`, целевой `fileKey`/`nodeId`, права на edit и применимость существующих libraries/components через `search_design_system`. В случае включения строго следовать инструкциям [figma-canvas-write-guide.md](file:///c:/Project/product-agent-studio/integrations/mcp/figma-canvas-write-guide.md), [variants-and-states-policy.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/variants-and-states-policy.md), [ds-baseline.workflow.md](file:///c:/Project/product-agent-studio/agent-pack/workflows/ds-baseline.workflow.md) и [ds-baseline-policy.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/ds-baseline-policy.md).
+- **Правило Figma-макетов**: Не создавать и не изменять макеты на холсте Figma без явного запроса пользователя, включенного параметра `write_allowed=true` и получения явного согласия пользователя. Перед write нужно проверить доступность remote Figma MCP `use_figma`, целевой `fileKey`/`nodeId`, права на edit и применимость существующих libraries/components через `design/figma/registry.json`, локальный индекс выбранной ДС и `search_design_system`. В случае включения строго следовать инструкциям [figma-canvas-write-guide.md](file:///c:/Project/product-agent-studio/integrations/mcp/figma-canvas-write-guide.md), [figma-ds-ingest.workflow.md](file:///c:/Project/product-agent-studio/agent-pack/workflows/figma-ds-ingest.workflow.md) для новой/большой ДС и [ds-baseline.workflow.md](file:///c:/Project/product-agent-studio/agent-pack/workflows/ds-baseline.workflow.md) для `product_specific`.
 
 ## Required Outputs (Обязательные результаты)
 

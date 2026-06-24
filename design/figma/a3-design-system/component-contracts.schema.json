@@ -4,6 +4,7 @@
   "type": "object",
   "required": ["fileKey", "codeConnectStatus", "components"],
   "properties": {
+    "designSystemSlug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
     "fileKey": { "type": "string", "minLength": 1 },
     "fileName": { "type": "string" },
     "codeConnectStatus": {
@@ -19,6 +20,15 @@
         "properties": {
           "name": { "type": "string", "minLength": 1 },
           "nodeId": { "type": "string", "pattern": "^[0-9]+:[0-9]+$" },
+          "source": {
+            "type": "object",
+            "properties": {
+              "designSystemSlug": { "type": "string" },
+              "figmaUrl": { "type": "string" },
+              "category": { "type": "string" }
+            },
+            "additionalProperties": false
+          },
           "codeSource": { "type": "string", "minLength": 1 },
           "codeExport": { "type": "string", "minLength": 1 },
           "expectedVariants": {
@@ -28,7 +38,12 @@
               "minItems": 1,
               "items": { "type": "string" }
             }
-          }
+          },
+          "semanticVariables": { "type": "array", "items": { "type": "string" } },
+          "slots": { "type": "array", "items": { "type": "string" } },
+          "resizeContract": { "type": "string" },
+          "requiredStates": { "type": "array", "items": { "type": "string" } },
+          "storyTestLocator": { "type": "string" }
         },
         "additionalProperties": false
       }

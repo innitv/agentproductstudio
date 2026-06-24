@@ -34,9 +34,11 @@ contract_schema: agent-pack/templates/skill.template.md
 
 1. Прочитай `STYLE_GUIDE.md`, `design-brief.md`, `screens.md` и при наличии `design-loop-report.md`.
 2. Прочитай `integrations/mcp/figma-canvas-write-guide.md` и зафиксируй `design_system_mode`: `reuse|extend|product_specific|bespoke`, rationale и rejected alternatives.
-2a. Для `extend|product_specific` проверь visual calibration verdict по 2-3 ключевым экранам. Без него component systemization блокируется.
-2b. Подготовь primitive variables, semantic aliases, text styles, paint/effect styles, components и screen list.
-2a. Подготовь `Source Pair Plan`: какие пары обязательны для этой поверхности (`reference_to_figma`, `figma_to_frontend`, `reference_to_frontend`, `spec_to_frontend_behavior`) и какое evidence будет нужно после Figma write/frontend implementation.
+2a. Для `reuse|extend` выбери `selected_design_system_slug` из `design/figma/registry.json` и прочитай локальный индекс. Если индекс отсутствует, остановись на `partial` и направь в `figma-ds-ingest`.
+2b. Для внесенной ДС подтягивай только нужные категории `components/<category>.md`, а не весь Figma файл.
+2c. Для `extend|product_specific` проверь visual calibration verdict по 2-3 ключевым экранам. Без него component systemization блокируется.
+2d. Подготовь primitive variables, semantic aliases, text styles, paint/effect styles, components и screen list.
+2e. Подготовь `Source Pair Plan`: какие пары обязательны для этой поверхности (`reference_to_figma`, `figma_to_frontend`, `reference_to_frontend`, `spec_to_frontend_behavior`) и какое evidence будет нужно после Figma write/frontend implementation.
 3. Определи canvas strategy:
    - отдельные frames на странице, если это полноценная дизайн-доска;
    - target frame, если пользователь явно просит вписать результат в конкретное место;
@@ -66,6 +68,7 @@ contract_schema: agent-pack/templates/skill.template.md
 После записи в Figma зафиксируй в `figma-handoff-bundle.md`:
 
 - target file и target node/anchor;
+- selected design-system slug и paths локального индекса;
 - созданные frame names и node IDs, если доступны;
 - использованные libraries/components или причину `none_found`;
 - `design_system_mode`, visual calibration verdict и systemization regression result;

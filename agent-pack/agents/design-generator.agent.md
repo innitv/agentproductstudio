@@ -34,9 +34,12 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - `copy-deck.md`
 - `prd.md`
 - `integrations/mcp/figma-canvas-write-guide.md`
-- `design/figma/a3-design-system/token-map.md`
-- `design/figma/a3-design-system/variants-and-states-policy.md`
-- `design/figma/a3-design-system/ds-baseline-policy.md`
+- `design/figma/registry.json`
+- `design/figma/<selected_design_system_slug>/ds.config.json`, если выбран `reuse|extend`
+- `design/figma/<selected_design_system_slug>/foundation.md|token-map.md`, если выбран `reuse|extend`
+- `design/figma/<selected_design_system_slug>/components.md|component-map.md`, если выбран `reuse|extend`
+- `design/figma/<selected_design_system_slug>/components/<category>.md`, только для нужных категорий
+- `agent-pack/workflows/figma-ds-ingest.workflow.md`, если выбранная Figma DS еще не внесена в registry
 
 ## Internal Pipeline (Внутренний процесс)
 

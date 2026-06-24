@@ -47,7 +47,7 @@ contract_schema: agent-pack/templates/skill.template.md
    - type: color, typography, spacing, radius, shadow, effect, asset;
    - Figma style/node id;
    - usage context.
-4. Сверь с `design/figma/a3-design-system/token-map.md`, если файл существует.
+4. Сверь с выбранной системой из `design/figma/registry.json`: `design/figma/<selected_design_system_slug>/foundation.md` или legacy `token-map.md`, если файл существует. A3 использовать только при явно выбранном `selected_design_system_slug=a3-design-system`.
 5. Запиши результат в `design-brief.md` в секцию `## Visual Direction` или `## Design Tokens`.
 
 ## 4. Frontend mapping

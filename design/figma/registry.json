@@ -1,0 +1,26 @@
+{
+  "$schema": "./registry.schema.json",
+  "version": 1,
+  "systems": [
+    {
+      "slug": "a3-design-system",
+      "name": "A3 Design System",
+      "file_key": "4ufM1XdtXzSwbCNpulxETA",
+      "figma_url": "https://www.figma.com/design/4ufM1XdtXzSwbCNpulxETA/A3-Design-System",
+      "status": "indexed",
+      "source_type": "owned",
+      "code_connect_status": "unavailable_plan",
+      "last_ingested_at": "2026-06-22",
+      "paths": {
+        "root": "design/figma/a3-design-system",
+        "source": "design/figma/a3-design-system/README.md",
+        "foundation": "design/figma/a3-design-system/token-map.md",
+        "components": "design/figma/a3-design-system/component-map.md",
+        "component_contracts": "design/figma/a3-design-system/component-contracts.json",
+        "code_connect_fallback": "design/figma/a3-design-system/code-connect-fallback.md",
+        "live_audit": "design/figma/a3-design-system/live-audit.latest.md"
+      },
+      "notes": "Первый пилотный индекс. Использовать только при явно выбранном selected_design_system_slug=a3-design-system."
+    }
+  ]
+}

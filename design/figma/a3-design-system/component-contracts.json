@@ -1,5 +1,6 @@
 {
   "$schema": "./component-contracts.schema.json",
+  "designSystemSlug": "a3-design-system",
   "fileKey": "4ufM1XdtXzSwbCNpulxETA",
   "fileName": "A3 Design System",
   "codeConnectStatus": "unavailable_plan",

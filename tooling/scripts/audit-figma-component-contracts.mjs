@@ -2,16 +2,29 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 
 const root = process.cwd();
-const defaultRegistry = "design/figma/a3-design-system/component-contracts.json";
 const registryArg = process.argv.indexOf("--registry");
 const outputArg = process.argv.indexOf("--out");
-const registryPath = resolve(root, registryArg >= 0 ? process.argv[registryArg + 1] : defaultRegistry);
-const outputPath = resolve(
-  root,
-  outputArg >= 0
-    ? process.argv[outputArg + 1]
-    : "design/figma/a3-design-system/live-audit.latest.md",
-);
+
+function readDesignSystemRegistry() {
+  const registryPath = join(root, "design/figma/registry.json");
+  if (!existsSync(registryPath)) return undefined;
+  return JSON.parse(readFileSync(registryPath, "utf8"));
+}
+
+function resolveDefaultRegistryPath() {
+  const registry = readDesignSystemRegistry();
+  const defaultSlug = registry?.default_system;
+  const systems = Array.isArray(registry?.systems) ? registry.systems : [];
+  const selected = (defaultSlug && systems.find((system) => system.slug === defaultSlug))
+    || (systems.length === 1 ? systems[0] : undefined);
+  const path = selected?.paths?.component_contracts;
+  if (!path) {
+    throw new Error("Укажите --registry <path>. В design/figma/registry.json нет однозначного default_system/component_contracts.");
+  }
+  return path;
+}
+
+const registryPath = resolve(root, registryArg >= 0 ? process.argv[registryArg + 1] : resolveDefaultRegistryPath());
 
 function readToken() {
   const envPath = join(root, ".env");
@@ -77,6 +90,12 @@ function compareContract(contract, nodeRecord) {
 }
 
 const registry = JSON.parse(readFileSync(registryPath, "utf8"));
+const outputPath = resolve(
+  root,
+  outputArg >= 0
+    ? process.argv[outputArg + 1]
+    : join(dirname(registryPath), "live-audit.latest.md"),
+);
 const token = readToken();
 const nodeIds = registry.components.map((component) => component.nodeId);
 const url = `https://api.figma.com/v1/files/${registry.fileKey}/nodes?ids=${encodeURIComponent(nodeIds.join(","))}`;

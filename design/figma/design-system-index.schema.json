@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Local Figma design-system index",
+  "type": "object",
+  "required": ["slug", "name", "source", "ingest", "foundation", "components"],
+  "properties": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "name": { "type": "string", "minLength": 1 },
+    "source": {
+      "type": "object",
+      "required": ["figma_url", "scope"],
+      "properties": {
+        "figma_url": { "type": "string" },
+        "file_key": { "type": "string" },
+        "scope": { "type": "string" },
+        "source_type": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "ingest": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": { "enum": ["planned", "partial", "indexed", "blocked"] },
+        "last_ingested_at": { "type": "string" },
+        "manifest_path": { "type": "string" },
+        "census_path": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "foundation": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string" },
+        "semantic_modes": { "type": "array", "items": { "type": "string" } },
+        "variable_collections": { "type": "array", "items": { "type": "string" } },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "components": {
+      "type": "object",
+      "properties": {
+        "map_path": { "type": "string" },
+        "profile_dir": { "type": "string" },
+        "component_count": { "type": "integer", "minimum": 0 },
+        "component_set_count": { "type": "integer", "minimum": 0 },
+        "categories": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "contracts": {
+      "type": "object",
+      "properties": {
+        "component_contracts_path": { "type": "string" },
+        "code_connect_status": { "type": "string" },
+        "fallback_mapping_path": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

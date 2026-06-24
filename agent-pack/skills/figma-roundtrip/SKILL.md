@@ -38,18 +38,22 @@ contract_schema: agent-pack/templates/skill.template.md
 ## Порядок
 
 1. Выбери `design_system_mode`: `reuse|extend|product_specific|bespoke`. Не выбирай `reuse` только из-за доступности библиотеки.
-2. Для новой/расширяемой системы выполни `visual_calibration` на 2-3 ключевых экранах до создания большой component matrix.
-3. После visual verdict выполни `systemization`: variables/styles, component sets/properties, instances, Auto Layout/resizing и prototype links.
-4. Создай Component Contract Matrix для повторяемых и интерактивных компонентов.
-5. Используй Code Connect, если доступен; иначе запиши полный fallback mapping и причину недоступности.
-6. Для Figma write проверь exact target/approval, загрузи обязательный skill текущего `use_figma` tool и пиши небольшими idempotent patches.
-7. Для Figma → frontend передай exact nodes/screenshots, state inventory, contracts и frame/state mapping.
-8. Для frontend → Figma классифицируй patch как `token_change|component_api_change|screen_composition_change`; DOM/screenshot import считай только draft/evidence.
-9. Проверь structural, visual и behavioral evidence. Visual regression после systemization блокирует `ready`.
+2. Если mode `reuse|extend`, выбери `selected_design_system_slug` из `design/figma/registry.json`. Если нужной ДС нет или индекс `partial|blocked`, сначала используй `figma-ds-ingest`.
+3. Для внесенной ДС сначала читай локальный индекс: `ds.config.json`, `foundation.md|token-map.md`, `components.md|component-map.md` и только нужные `components/<category>.md`. Не читай весь Figma файл, если индекс достаточен.
+4. Для новой/расширяемой системы выполни `visual_calibration` на 2-3 ключевых экранах до создания большой component matrix.
+5. После visual verdict выполни `systemization`: variables/styles, component sets/properties, instances, Auto Layout/resizing и prototype links.
+6. Создай Component Contract Matrix для повторяемых и интерактивных компонентов.
+7. Используй Code Connect, если доступен; иначе запиши полный fallback mapping и причину недоступности.
+8. Для Figma write проверь exact target/approval, загрузи обязательный skill текущего `use_figma` tool и пиши небольшими idempotent patches.
+9. Для Figma → frontend передай exact nodes/screenshots, state inventory, contracts и frame/state mapping.
+10. Для frontend → Figma классифицируй patch как `token_change|component_api_change|screen_composition_change`; DOM/screenshot import считай только draft/evidence.
+11. Проверь structural, visual и behavioral evidence. Visual regression после systemization блокирует `ready`.
 
 ## Минимальный output
 
 - выбранный mode и rationale;
+- selected design-system slug или reason `none`;
+- локальный DS index paths или ingest blocker;
 - visual calibration verdict/evidence;
 - Component Contract Matrix или ссылка на нее;
 - Code Connect/fallback status;

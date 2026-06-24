@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Figma design-system registry",
+  "type": "object",
+  "required": ["version", "systems"],
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "default_system": { "type": "string" },
+    "systems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["slug", "name", "status", "paths"],
+        "properties": {
+          "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "file_key": { "type": "string" },
+          "figma_url": { "type": "string" },
+          "status": { "enum": ["indexed", "partial", "planned", "blocked", "archived"] },
+          "source_type": { "enum": ["owned", "corporate", "community_copy", "project_specific", "unknown"] },
+          "code_connect_status": {
+            "enum": ["connected", "unavailable_plan", "not_configured", "skipped_with_reason", "not_applicable"]
+          },
+          "last_ingested_at": { "type": "string" },
+          "paths": {
+            "type": "object",
+            "required": ["root"],
+            "properties": {
+              "root": { "type": "string" },
+              "source": { "type": "string" },
+              "census": { "type": "string" },
+              "manifest": { "type": "string" },
+              "foundation": { "type": "string" },
+              "components": { "type": "string" },
+              "component_contracts": { "type": "string" },
+              "code_connect_fallback": { "type": "string" },
+              "live_audit": { "type": "string" }
+            },
+            "additionalProperties": false
+          },
+          "notes": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
