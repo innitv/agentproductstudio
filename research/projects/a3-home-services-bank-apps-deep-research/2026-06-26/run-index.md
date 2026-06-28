@@ -6,7 +6,7 @@
 - Profile: standard
 - Execution mode: local
 - Current stage: none
-- Updated: 2026-06-28T08:16:15.183Z
+- Updated: 2026-06-28T13:55:44.451Z
 
 ## What To Read First
 
@@ -21,7 +21,7 @@
 
 ## Progress
 
-- Completed artifacts: 13/23
+- Completed artifacts: 15/25
 - Blocking stages: 0
 
 ## Blocking Stages
@@ -51,6 +51,7 @@
 | screens.md | missing | 06-screens design-generator | yes |
 | prototype-report.md | missing | 07-prototype prototype | yes |
 | frontend-result.md | missing | 08-frontend frontend | no |
+| figma-layout-ir.json | completed | 06-screens design-generator | no |
 
 ### evidence
 
@@ -58,6 +59,7 @@
 |---|---|---|---|
 | test-bench-result.md | missing | 10-test-bench test-bench | no |
 | qa-report.md | missing | 11-qa qa-review | no |
+| figma-visual-qa.json | completed | 06-screens design-generator | no |
 
 ### export
 

@@ -70,6 +70,11 @@ withAgentDocFixture((root) => {
 });
 
 withAgentDocFixture((root) => {
+  overwriteAgent(root, "prd.agent.md", (content) => content.replace("  - handoff_bundle\n", "  - handoff_bundle\n  - frontend_result\n"));
+  assertMetadataError(validateAgentMetadata(root), /routeTools never provide metadata required_input 'frontend_result'/);
+});
+
+withAgentDocFixture((root) => {
   overwriteAgent(root, "frontend.agent.md", (content) => content.replace("  - landing-builder", "  - unknown-skill"));
   assertMetadataError(validateAgentMetadata(root), /skills contains unknown skill 'unknown-skill'/);
 });

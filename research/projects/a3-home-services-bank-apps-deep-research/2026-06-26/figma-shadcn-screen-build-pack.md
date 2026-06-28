@@ -17,6 +17,8 @@ Source DS file key: `NUoNEuTJ3OZOGH2c780Z55`
 
 Главная ошибка: экранная матрица была построена вокруг компонентов и отдельных flows, а не вокруг P0-сценария `Дом -> объект -> счет ЖКУ -> оплата -> статус поставщика -> исправление проблемы`.
 
+Новая коррекция после review 2026-06-28: этот artifact нельзя использовать как источник для новых макетов. Он описывает технический путь `reconstruct-from-contracts`, который производит служебные Figma-картинки вместо product UI. Для запроса "собери макеты/use cases/flow" использовать только Figma Make-like маршрут: Lazyweb/reference evidence -> use cases -> текущая дизайн-система -> реальные product screens; technical inventory только после визуального результата.
+
 ## Inputs Used
 
 - `figma-home-usecase-mockups.md`
@@ -38,11 +40,11 @@ Source DS file key: `NUoNEuTJ3OZOGH2c780Z55`
 | Режим | Когда использовать | Токены | Риск |
 |---|---|---:|---|
 | `target-local-ds` | DS components уже скопированы в target file | low | лучший вариант: используем локальные node IDs target-файла |
-| `reconstruct-from-contracts` | DS нет в target file | low-medium | рисуем shadcn-like компоненты по контрактам, без настоящих instances |
+| `reconstruct-from-contracts` | deprecated | blocked | запрещен для product UI макетов; может использоваться только как явно помеченный technical fallback, если пользователь просит схему или audit artifact |
 | `write-in-source-ds-file` | пользователь явно разрешил писать в community/source copy | low | не рекомендуется для исходной DS |
 | `import-library-components` | DS опубликована как library и доступна target-файлу | medium | требует отдельной настройки library/import |
 
-Рекомендуемый режим для следующего шага: `reconstruct-from-contracts`, если в target file нет локальной копии DS. Если нужна именно instance-сборка по node ID, сначала нужно один раз перенести/создать локальный kit в target file и сохранить его target-local IDs.
+Рекомендуемый режим для следующего шага: `target-local-ds` или `import-library-components`. Если нужного компонента нет, создать только точечный gap-компонент и продолжить сборку экранов из существующей DS. `reconstruct-from-contracts` не использовать для продуктовых макетов.
 
 ## Screen build matrix
 
@@ -77,7 +79,7 @@ Source DS file key: `NUoNEuTJ3OZOGH2c780Z55`
 
 1. В target file `dL70YFBGi981ETZX2hcxBp` создать новую страницу `A3 Home Services / shadcn DS`.
 2. Если target-local DS уже есть: найти только локальные component names по exact list из `Component ID pack`, сохранить target node IDs в `figma-shadcn-target-id-map.json`.
-3. Если target-local DS нет: собрать локальный мини-kit из shadcn-like компонентов по контрактам выше и сразу использовать его для 6 экранов.
+3. Если target-local DS нет: остановиться и выбрать `import-library-components` или создать только недостающий компонент-gap. Не собирать локальный мини-kit из shadcn-like компонентов.
 4. Собрать 6 mobile frames шириной `390`, с Auto Layout и русским видимым текстом.
 5. Создать `Evidence to output map`, где каждая карточка связана с F01-F06.
 6. Выполнить metadata/object inventory проверку target page. Screenshot QA делать только после записи, не перед ней.
@@ -103,10 +105,8 @@ Verification:
 - Первый auto-layout вариант был удален после screenshot QA из-за схлопывания карточек.
 - Исправленный fixed-layout вариант проверен screenshot-ом wrapper node `10:3`; явных overlap/обрезок на общем board screenshot не найдено.
 
-## Approval options for a future iteration
+## Future Iteration Rule
 
-Нужен явный выбор режима:
-
-- `reconstruct-from-contracts`: быстро рисуем в target file по локальным контрактам DS, без настоящих imported instances.
+Для будущих продуктовых макетов режим `reconstruct-from-contracts` запрещен. Нужен UI-first route: найти/import existing DS components, собрать реальные app screens, а недостающие элементы создавать точечно как gap-компоненты.
 - `target-local-ds`: сначала ищем/используем локальную копию DS в target file и работаем по target-local node IDs.
 - `new file`: создаем отдельный Figma file под shadcn-версию экранов.

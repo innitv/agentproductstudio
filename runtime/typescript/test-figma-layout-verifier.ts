@@ -10,8 +10,8 @@ const baseIr = {
   design_system: {
     mode: "reuse",
     selected_slug: "shadcn-ui-components-2026",
-    reuse_honesty: "local_components_with_deviation",
-    notes: "Fixture accepts local components with explicit deviation.",
+    reuse_honesty: "ds_instances_required",
+    notes: "Fixture requires selected DS instances.",
   },
   viewport: { width: 390, height: 844, safe_area_top: 34, safe_area_bottom: 18 },
   route: [
@@ -45,10 +45,9 @@ const baseIr = {
       components: [
         {
           stable_id: "primary_button",
-          source: "local:Button",
+          source: "design_system_component:Button 73:3681",
           resize_contract: "fill",
           required_states: ["default"],
-          deviation: "Fixture uses local component.",
         },
       ],
     },
@@ -56,10 +55,9 @@ const baseIr = {
   component_sources: [
     {
       stable_id: "primary_button",
-      source_type: "local_component",
-      source_ref: "local/Button",
-      instance_required: false,
-      deviation: "Local component accepted in fixture.",
+      source_type: "design_system_component",
+      source_ref: "Buttons component set 73:3681",
+      instance_required: true,
     },
   ],
   verification_contract: {
@@ -87,7 +85,50 @@ const passingInventory = {
     { id: "screen-home", screen_id: "home", name: "screen / home", type: "FRAME", x: 0, y: 0, width: 390, height: 844 },
     { id: "header", screen_id: "home", parent_id: "screen-home", name: "screen header", type: "FRAME", x: 18, y: 38, width: 354, height: 60 },
     { id: "title", screen_id: "home", parent_id: "header", name: "title", type: "TEXT", x: 18, y: 38, width: 220, height: 30, font_size: 24, line_height_px: 29 },
-    { id: "button", screen_id: "home", parent_id: "screen-home", name: "button / primary", type: "FRAME", x: 18, y: 120, width: 354, height: 44 },
+    { id: "button", screen_id: "home", parent_id: "screen-home", name: "button / primary", type: "INSTANCE", x: 18, y: 120, width: 354, height: 44, main_component_id: "73:3681", main_component_name: "Buttons / Type=primary, State=default", component_source: "design_system_component:Buttons component set 73:3681" },
+  ],
+};
+
+const localOnlyIr = {
+  ...baseIr,
+  design_system: {
+    mode: "extend",
+    selected_slug: "shadcn-ui-components-2026",
+    reuse_honesty: "local_components_with_deviation",
+    notes: "This reproduces a broken shortcut: local wrappers replace selected DS instances.",
+  },
+  screens: [
+    {
+      ...baseIr.screens[0],
+      components: [
+        {
+          stable_id: "primary_button",
+          source: "local:Button",
+          resize_contract: "fill",
+          required_states: ["default"],
+          deviation: "Local wrapper incorrectly replaces selected DS Button.",
+        },
+      ],
+    },
+  ],
+  component_sources: [
+    {
+      stable_id: "primary_button",
+      source_type: "local_component",
+      source_ref: "local/Button",
+      instance_required: false,
+      deviation: "Local component should not satisfy extend mode by itself.",
+    },
+  ],
+};
+
+const localOnlyInventory = {
+  ...passingInventory,
+  nodes: [
+    { id: "screen-home", screen_id: "home", name: "screen / home", type: "FRAME", x: 0, y: 0, width: 390, height: 844 },
+    { id: "header", screen_id: "home", parent_id: "screen-home", name: "screen header", type: "FRAME", x: 18, y: 38, width: 354, height: 60 },
+    { id: "title", screen_id: "home", parent_id: "header", name: "title", type: "TEXT", x: 18, y: 38, width: 220, height: 30, font_size: 24, line_height_px: 29 },
+    { id: "button", screen_id: "home", parent_id: "screen-home", name: "A3 Button / primary", type: "INSTANCE", x: 18, y: 120, width: 354, height: 44, main_component_id: "3029:3", main_component_name: "A3 Button / Intent=primary, State=default", component_source: "local_component:A3 Button 3029:9" },
   ],
 };
 
@@ -120,8 +161,28 @@ await withFixture(async (root) => {
   const result = await runFigmaLayoutVerifier({ irPath, inventoryPath, outputPath });
   assert.equal(result.gate_result.ready_allowed, true);
   assert.equal(result.status, "passed");
+  assert.equal(result.ds_instance_summary.design_system_sources, 1);
+  assert.equal(result.ds_instance_summary.local_component_sources, 0);
+  assert.equal(result.ds_instance_summary.visible_selected_ds_instances, 1);
   assert.ok(result.checks.some((check) => check.check === "text_height" && check.result === "passed"));
   assert.ok(readFileSync(outputPath, "utf8").includes("\"ready_allowed\": true"));
+});
+
+await withFixture(async (root) => {
+  const irPath = join(root, "figma-layout-ir.json");
+  const inventoryPath = join(root, "inventory-local-only.json");
+  const outputPath = join(root, "figma-visual-qa.json");
+  writeFileSync(irPath, JSON.stringify(localOnlyIr, null, 2), "utf8");
+  writeFileSync(inventoryPath, JSON.stringify(localOnlyInventory, null, 2), "utf8");
+
+  const result = await runFigmaLayoutVerifier({ irPath, inventoryPath, outputPath });
+  assert.equal(result.gate_result.ready_allowed, false);
+  assert.equal(result.gate_result.verdict, "blocked");
+  assert.equal(result.ds_instance_summary.design_system_sources, 0);
+  assert.equal(result.ds_instance_summary.local_component_sources, 1);
+  assert.equal(result.ds_instance_summary.visible_selected_ds_instances, 0);
+  assert.ok(result.checks.some((check) => check.check === "ds_instance_honesty" && check.result === "blocked"));
+  assert.ok(readFileSync(outputPath, "utf8").includes("no design_system_component sources"));
 });
 
 await withFixture(async (root) => {

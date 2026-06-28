@@ -31,7 +31,9 @@ contract_schema: agent-pack/templates/skill.template.md
 
 Применяй этот skill перед любым Figma canvas write для `figma_board`, `product_ui` или `prototype`, если результат должен быть похож на приложение, а не на набор декоративных страниц.
 
-Skill превращает `screens.md` и дизайн-контекст в `figma-layout-ir.json`: компактный machine-readable контракт для route, screens, zones, layout constraints, component sources, copy-fit и verification contract.
+Skill превращает `screens.md` и дизайн-контекст в `figma-layout-ir.json`: компактный machine-readable контракт для route, screens, zones, layout constraints, component sources, copy-fit и verification contract. IR — внутренний guardrail, а не макет и не canvas deliverable.
+
+Если пользователь просит макеты/use cases/flow, этот skill обязан поддержать Figma Make-like результат: приближенные product UI screens в реальном viewport. Запрещено превращать IR в видимую техническую доску, таблицу зон, node inventory или набор мелких карточек.
 
 ## 2. Обязательные inputs
 
@@ -45,12 +47,15 @@ Skill превращает `screens.md` и дизайн-контекст в `fig
 
 1. Прочитай входы и выпиши `inputs_used`.
 2. Определи `surface`, `design_system.mode`, `selected_slug` и `reuse_honesty`.
-3. Если заявлен `reuse`, но нет component source для реальных DS components/instances, ставь `reuse_honesty=blocked` или `local_components_with_deviation`.
+3. Если заявлен `reuse|extend`, каждый screen обязан иметь хотя бы один `design_system_component` source из выбранного `selected_slug`; локальные компоненты допускаются только как documented product gaps и не заменяют DS source.
+3a. Если выбранная DS содержит подходящий компонент, но IR предлагает локальный wrapper вместо DS component instance, ставь `reuse_honesty=blocked`, а не `local_components_with_deviation`.
+3b. `local_components_with_deviation` допустим только когда в IR уже есть реальные `design_system_component` sources и локальный компонент является wrapper/composition вокруг DS instances или закрывает явно отсутствующую молекулу.
 4. Скомпилируй P0 route: каждый step обязан иметь `screen_id`, `primary_action`, `next_state`, `completion_evidence` и recovery path по применимости.
-5. Для каждого screen запиши zones, priorities, max text lines, overflow behavior, min row height, touch target, bottom nav behavior, no-clip/no-overlap constraints.
+5. Для каждого screen запиши zones, priorities, max text lines, overflow behavior, min row height, touch target, bottom nav behavior, no-clip/no-overlap constraints и `ui_fidelity_target`: какой реальный app pattern должен получиться на screenshot.
 6. Для каждого повторяемого component запиши `stable_id`, source, resize contract, required states и deviation.
 7. Запиши `verification_contract`: обязательные screenshots, object inventory, route walkthrough и visual QA.
 8. Если IR не может быть собран без выдумывания product logic или copy, верни `partial|blocked`; не переходи к Figma write.
+9. Если IR описывает только техническую проверку, component matrix или route labels без полноценной UI-композиции, верни `blocked_for_ui_redesign`; не передавай это в Figma write как макет.
 
 ## 4. Evidence и failure modes
 
@@ -60,9 +65,12 @@ Skill превращает `screens.md` и дизайн-контекст в `fig
 
 - screens являются набором страниц без P0 route;
 - нет copy-fit constraints для длинного русского текста;
-- DS reuse заявлен, но не подтвержден component source/instance strategy;
+- DS reuse/extend заявлен, но нет реальных `design_system_component` sources по выбранной DS;
+- локальные components заменяют выбранную DS вместо того, чтобы быть wrapper/gap вокруг DS instances;
 - нет `verification_contract.visual_qa_required=true`;
 - screen zones не отражают user question, primary action и next state.
+- `ui_fidelity_target` отсутствует или допускает технический board вместо product screen;
+- IR может пройти `screen_count`/copy-fit, но screenshot результата не будет похож на реальное приложение.
 
 ## 5. Validation gates
 
@@ -70,4 +78,6 @@ Skill превращает `screens.md` и дизайн-контекст в `fig
 - [ ] Route содержит минимум один P0 walkthrough.
 - [ ] Every screen has zones and layout constraints.
 - [ ] Every repeated component has source and resize contract.
+- [ ] For `reuse|extend`, every screen declares selected-DS component sources; local wrappers have gap reasons and do not outvote DS evidence.
 - [ ] Verification contract requires screenshots and visual QA.
+- [ ] IR explicitly blocks technical boards as deliverables and requires product UI screenshot review.

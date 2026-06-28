@@ -129,6 +129,8 @@ interface VisualQaCheck {
   repair?: string;
 }
 
+const dsSourceTypes = new Set<LayoutIr["component_sources"][number]["source_type"]>(["design_system_component"]);
+
 interface VisualQaResult {
   status: "draft" | "partial" | "blocked" | "passed";
   target: FigmaInventory["target"];
@@ -150,6 +152,14 @@ interface VisualQaResult {
     verdict: "passed" | "passed_with_notes" | "blocked";
     ready_allowed: boolean;
     known_deviations: string[];
+  };
+  ds_instance_summary: {
+    mode: LayoutIr["design_system"]["mode"];
+    selected_slug: string;
+    design_system_sources: number;
+    local_component_sources: number;
+    visible_selected_ds_instances: number;
+    missing_required_ds_sources: string[];
   };
 }
 
@@ -189,12 +199,33 @@ export async function runFigmaLayoutVerifier(options: {
       ready_allowed: !blocked && !needsRepair,
       known_deviations: knownDeviations,
     },
+    ds_instance_summary: summarizeDsInstances(ir, inventory),
   };
 
   const outputPath = resolve(options.outputPath);
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, `${JSON.stringify(result, null, 2)}\n`, "utf8");
   return result;
+}
+
+function summarizeDsInstances(ir: LayoutIr, inventory: FigmaInventory): VisualQaResult["ds_instance_summary"] {
+  const dsSources = ir.component_sources.filter((source) => source.source_type === "design_system_component");
+  const localSources = ir.component_sources.filter((source) => source.source_type === "local_component");
+  const instances = visibleNodes(inventory.nodes).filter((node) => node.type === "INSTANCE" || node.main_component_name);
+  const matched = dsSources.filter((source) => instances.some((node) => matchesComponentSource(node, source)));
+  const missingRequired = dsSources
+    .filter((source) => source.instance_required)
+    .filter((source) => !instances.some((node) => matchesComponentSource(node, source)))
+    .map((source) => source.stable_id);
+
+  return {
+    mode: ir.design_system.mode,
+    selected_slug: ir.design_system.selected_slug,
+    design_system_sources: dsSources.length,
+    local_component_sources: localSources.length,
+    visible_selected_ds_instances: matched.length,
+    missing_required_ds_sources: missingRequired,
+  };
 }
 
 function runChecks(ir: LayoutIr, inventory: FigmaInventory): VisualQaCheck[] {
@@ -407,16 +438,46 @@ function checkDsInstanceHonesty(ir: LayoutIr, inventory: FigmaInventory): Visual
     return { check: "ds_instance_honesty", result: "not_applicable", evidence: "IR allows bespoke UI." };
   }
 
-  if (ir.design_system.reuse_honesty === "local_components_with_deviation") {
+  if (ir.design_system.reuse_honesty === "blocked") {
     return {
       check: "ds_instance_honesty",
-      result: "passed",
-      evidence: "IR explicitly records local components with deviation; DS instance reuse is not claimed as passed.",
+      result: "blocked",
+      evidence: "IR marks design-system reuse honesty as blocked.",
+      repair: "Resolve design-system source mapping before Figma readiness.",
     };
   }
 
-  const required = ir.component_sources.filter((source) => source.instance_required);
-  if (!required.length) {
+  const dsSources = ir.component_sources.filter((source) => dsSourceTypes.has(source.source_type));
+  const localSources = ir.component_sources.filter((source) => source.source_type === "local_component");
+  const requiresDsEvidence = ir.design_system.mode === "reuse" || ir.design_system.mode === "extend";
+
+  if (requiresDsEvidence && !dsSources.length) {
+    return {
+      check: "ds_instance_honesty",
+      result: "blocked",
+      evidence: `design_system_mode=${ir.design_system.mode} selected ${ir.design_system.selected_slug}, but figma-layout-ir.json has no design_system_component sources.`,
+      repair: "Use selected design-system component sources from the local DS index, or change design_system_mode to product_specific/bespoke with an explicit rationale.",
+    };
+  }
+
+  const screensWithoutDs = requiresDsEvidence
+    ? ir.screens.filter((screen) => !screen.components.some((component) => {
+      const source = ir.component_sources.find((candidate) => candidate.stable_id === component.stable_id);
+      return source?.source_type === "design_system_component" || component.source.startsWith("design_system_component");
+    }))
+    : [];
+
+  if (screensWithoutDs.length) {
+    return {
+      check: "ds_instance_honesty",
+      result: "blocked",
+      evidence: `Screens do not declare selected-DS component usage: ${screensWithoutDs.map((screen) => screen.id).join(", ")}`,
+      repair: "For reuse/extend Figma surfaces, each screen must declare at least one selected design-system component source, with local components limited to documented gaps.",
+    };
+  }
+
+  const required = (requiresDsEvidence ? dsSources : ir.component_sources).filter((source) => source.instance_required);
+  if (!required.length && !requiresDsEvidence) {
     return {
       check: "ds_instance_honesty",
       result: "not_applicable",
@@ -425,7 +486,7 @@ function checkDsInstanceHonesty(ir: LayoutIr, inventory: FigmaInventory): Visual
   }
 
   const instances = visibleNodes(inventory.nodes).filter((node) => node.type === "INSTANCE" || node.main_component_name);
-  const missing = required.filter((source) => !instances.some((node) => matchesComponentSource(node, source.source_ref)));
+  const missing = required.filter((source) => !instances.some((node) => matchesComponentSource(node, source)));
 
   if (missing.length) {
     return {
@@ -436,10 +497,24 @@ function checkDsInstanceHonesty(ir: LayoutIr, inventory: FigmaInventory): Visual
     };
   }
 
+  if (requiresDsEvidence && localSources.length > dsSources.length) {
+    return {
+      check: "ds_instance_honesty",
+      result: "needs_repair",
+      evidence: `Local component sources (${localSources.length}) exceed selected-DS component sources (${dsSources.length}) for design_system_mode=${ir.design_system.mode}.`,
+      repair: "Replace local wrappers with selected design-system instances where the DS has a matching component; keep local wrappers only for explicit product gaps.",
+    };
+  }
+
   return {
     check: "ds_instance_honesty",
-    result: "passed",
-    evidence: `Found DS instance evidence for ${required.length} required component sources.`,
+    result: ir.design_system.reuse_honesty === "local_components_with_deviation" ? "needs_repair" : "passed",
+    evidence: ir.design_system.reuse_honesty === "local_components_with_deviation"
+      ? `Found DS instance evidence for ${required.length} required selected-DS sources, but IR still records local component deviations that need human review.`
+      : `Found DS instance evidence for ${required.length} required selected-DS component sources.`,
+    repair: ir.design_system.reuse_honesty === "local_components_with_deviation"
+      ? "Review local component deviations and confirm they are true product gaps, not replacements for selected DS components."
+      : undefined,
   };
 }
 
@@ -500,13 +575,46 @@ function groupBy<T>(items: T[], keyFn: (item: T) => string): Map<string, T[]> {
   return result;
 }
 
-function matchesComponentSource(node: InventoryNode, sourceRef: string): boolean {
-  const haystack = [node.main_component_name, node.component_source, node.name].filter(Boolean).join(" ").toLowerCase();
+function matchesComponentSource(node: InventoryNode, source: LayoutIr["component_sources"][number]): boolean {
+  const componentSource = node.component_source?.toLowerCase() ?? "";
+  const componentId = [node.main_component_id, componentSource].filter(Boolean).join(" ").toLowerCase();
+  const sourceRef = source.source_ref.toLowerCase();
+  const sourceIds = sourceRef.match(/\b\d+[:]\d+\b/g) ?? [];
+
+  if (sourceIds.length) {
+    return sourceIds.some((id) => componentId.includes(id));
+  }
+
+  if (componentSource) {
+    const sourceTokens = meaningfulSourceTokens(sourceRef);
+    return sourceTokens.length > 0 && sourceTokens.some((token) => componentSource.includes(token));
+  }
+
+  const nameTokens = meaningfulSourceTokens(sourceRef);
+  const nameHaystack = [node.main_component_name, node.name].filter(Boolean).join(" ").toLowerCase();
+  return nameTokens.length > 0 && nameTokens.some((token) => nameHaystack.includes(token));
+}
+
+function meaningfulSourceTokens(sourceRef: string): string[] {
+  const ignored = new Set([
+    "component",
+    "components",
+    "set",
+    "figma",
+    "source",
+    "local",
+    "node",
+    "page",
+    "design",
+    "system",
+    "instance",
+    "instances",
+  ]);
   return sourceRef
     .toLowerCase()
-    .split(/[/:#\s]+/)
-    .filter(Boolean)
-    .some((part) => haystack.includes(part));
+    .split(/[^a-z0-9_-]+/)
+    .map((part) => part.trim())
+    .filter((part) => part.length >= 3 && !ignored.has(part) && !/^\d+$/.test(part));
 }
 
 function normalizeDisplayPath(path: string): string {

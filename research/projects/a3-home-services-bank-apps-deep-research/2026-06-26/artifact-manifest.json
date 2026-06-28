@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-28T08:16:15.197Z",
+  "generated_at": "2026-06-28T13:55:44.469Z",
   "run_id": "2026-06-26-1782455072271",
   "workflow_profile": "standard",
   "artifacts": [
@@ -39,9 +39,9 @@
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "active",
-      "size_bytes": 12057,
-      "updated_at": "2026-06-28T08:16:01.318Z",
-      "checksum_sha256": "986b296f5426f4873b6bb3abcd7432550e62f663247bfe05fcfbf576ebef3db7"
+      "size_bytes": 13650,
+      "updated_at": "2026-06-28T13:55:29.325Z",
+      "checksum_sha256": "5f4b6fc60b599bc16631e549839bcd1b7ddd831e2443f9f725867c39915ec482"
     },
     {
       "artifact_name": "stage_gate_ledger",
@@ -60,9 +60,9 @@
       "human_readable": true,
       "safe_to_publish": false,
       "lifecycle": "active",
-      "size_bytes": 8366,
-      "updated_at": "2026-06-28T08:16:02.229Z",
-      "checksum_sha256": "850f924a024c85b28d28b7ac1a0b9bf2ca3331dd0d66af94b53c73c6979baa66"
+      "size_bytes": 9813,
+      "updated_at": "2026-06-28T13:55:30.180Z",
+      "checksum_sha256": "20295f8522226671248aa181d0e12b6e7e68726c44f16f9610ded9820c35db5d"
     },
     {
       "artifact_name": "recursive_brief",
@@ -445,6 +445,50 @@
       "size_bytes": 89155,
       "updated_at": "2026-06-26T07:03:34.701Z",
       "checksum_sha256": "d91b274a073b02b741bdc3e58628a5fb9b249b974491fe7f07aa2c53ee915023"
+    },
+    {
+      "artifact_name": "figma_layout_ir",
+      "file": "figma-layout-ir.json",
+      "artifact_type": "product_artifact",
+      "stage_id": "06-screens",
+      "stage_title": "Figma Layout IR",
+      "producer_stage": "06-screens",
+      "producer_agent": "design-generator",
+      "consumers": [
+        "08-frontend",
+        "11-qa"
+      ],
+      "status": "completed",
+      "exists": true,
+      "human_readable": false,
+      "safe_to_publish": false,
+      "lifecycle": "active",
+      "schema": "agent-pack/schemas/figma-layout-ir.schema.json",
+      "size_bytes": 8713,
+      "updated_at": "2026-06-28T08:14:12.863Z",
+      "checksum_sha256": "bdd114079fd46106ae571a87c577a08853f85db313219ea439e9afdefc8446cb"
+    },
+    {
+      "artifact_name": "figma_visual_qa",
+      "file": "figma-visual-qa.json",
+      "artifact_type": "evidence",
+      "stage_id": "06-screens",
+      "stage_title": "Figma Visual QA",
+      "producer_stage": "06-screens",
+      "producer_agent": "design-generator",
+      "consumers": [
+        "08-frontend",
+        "11-qa"
+      ],
+      "status": "completed",
+      "exists": true,
+      "human_readable": false,
+      "safe_to_publish": false,
+      "lifecycle": "active",
+      "schema": "agent-pack/schemas/figma-visual-qa.schema.json",
+      "size_bytes": 2946,
+      "updated_at": "2026-06-28T08:16:57.590Z",
+      "checksum_sha256": "494e1af8963c3847c36e66aee9cce50d5744fd999362c87cd5d68328bee1bad4"
     },
     {
       "artifact_name": "approval_state",

@@ -46,7 +46,17 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Inputs (Входные данные)
 
-### Required (Обязательные)
+QA Review Agent владеет двумя маршрутами, поэтому входы зависят от stage:
+
+### `09-visual-reference` Required
+
+- `reference-analysis.md`
+- `design-brief.md`
+- `screens.md`
+- `frontend-result.md`
+- `reference_url`, `local_url`, `screenshots`
+
+### `11-qa` Required
 
 - `recursive-brief.md`
 - `research-summary.md`
@@ -65,6 +75,8 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - `frontend-result.md`
 - `figma-layout-ir.json` и `figma-visual-qa.json`, если workflow создавал Figma/product UI/prototype surface
 - `test-bench-result.md`
+- `stage-gate-ledger.md`
+- `handoff-bundle.md`
 
 ## Internal Pipeline (Внутренний процесс)
 

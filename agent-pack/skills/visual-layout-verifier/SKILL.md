@@ -48,7 +48,8 @@ contract_schema: agent-pack/templates/skill.template.md
    - подозрительно низкая высота text nodes;
    - text width меньше ожидаемой зоны;
    - screen/card clipping;
-   - detached/local copies там, где IR требует DS instances.
+   - detached/local copies там, где IR требует DS instances;
+   - при `reuse|extend`: наличие visible instances именно выбранной DS по `component_source`/`main_component_id`, а не локальных компонентов с похожими именами.
 4. Проверь screenshot вручную или инструментально:
    - safe area title/header;
    - overlap amount/subtitle/button/list rows;
@@ -67,7 +68,8 @@ contract_schema: agent-pack/templates/skill.template.md
 
 - любой required screen имеет clipped text, overlap или unsafe header;
 - нет screenshot evidence по required screens;
-- DS reuse заявлен без real instances/imports/component mapping и без deviation;
+- DS reuse/extend заявлен без real instances/imports/component mapping выбранной DS;
+- `local_components_with_deviation` используется как замена выбранной DS, а не как wrapper/gap вокруг подтвержденных DS instances;
 - route walkthrough не читается из board/screens;
 - visual regression после systemization не исправлен.
 

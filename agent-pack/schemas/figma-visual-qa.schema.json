@@ -9,7 +9,8 @@
     "screenshot_evidence",
     "checks",
     "repair_actions",
-    "gate_result"
+    "gate_result",
+    "ds_instance_summary"
   ],
   "properties": {
     "status": { "enum": ["draft", "partial", "blocked", "passed"] },
@@ -83,6 +84,25 @@
         "verdict": { "enum": ["passed", "passed_with_notes", "blocked"] },
         "ready_allowed": { "type": "boolean" },
         "known_deviations": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "ds_instance_summary": {
+      "type": "object",
+      "required": [
+        "mode",
+        "selected_slug",
+        "design_system_sources",
+        "local_component_sources",
+        "visible_selected_ds_instances",
+        "missing_required_ds_sources"
+      ],
+      "properties": {
+        "mode": { "enum": ["reuse", "extend", "product_specific", "bespoke"] },
+        "selected_slug": { "type": "string" },
+        "design_system_sources": { "type": "number", "minimum": 0 },
+        "local_component_sources": { "type": "number", "minimum": 0 },
+        "visible_selected_ds_instances": { "type": "number", "minimum": 0 },
+        "missing_required_ds_sources": { "type": "array", "items": { "type": "string" } }
       }
     }
   }

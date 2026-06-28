@@ -61,6 +61,7 @@
 - создай text/paint/effect styles там, где это оправдано;
 - создай component sets и properties из реально повторяющихся patterns;
 - собирай screens из instances, а не копий frames;
+- при `reuse|extend` instances должны приходить из выбранной DS (`selected_design_system_slug`) везде, где DS имеет подходящий компонент; локальный component допустим только как product gap или wrapper вокруг DS instances, а не как замена существующего DS компонента;
 - настрой Auto Layout, HUG/FILL/FIXED, min/max и wrapping;
 - добавь required states и prototype links;
 - сравни screenshot до/после, чтобы systemization не ухудшила composition.
@@ -83,6 +84,17 @@
 | Deviation | Accepted mismatch, owner, follow-up |
 
 Если Code Connect доступен, опубликуй mapping и запиши URL/status. Если недоступен, matrix остается обязательным fallback.
+
+### 4.1 DS Instance Enforcement
+
+Для `design_system_mode=reuse|extend` Figma surface не считается готовой, если:
+
+- в `figma-layout-ir.json` нет `component_sources[].source_type=design_system_component` для выбранной DS;
+- screen-level `components[]` не ссылаются на selected-DS sources;
+- object inventory не показывает visible `INSTANCE` nodes с `component_source` или `main_component_id`, совпадающими с выбранной DS;
+- локальные wrapper components численно или функционально заменяют selected-DS components без отдельного перехода в `product_specific|bespoke`.
+
+`local_components_with_deviation` — это не waiver. Это только отметка gap/wrapper, которая требует human review и не снимает обязанность использовать реальные selected-DS instances.
 
 ## 5. Write path: спецификация/код → Figma
 
@@ -132,6 +144,7 @@ Frontend сначала ищет production component по Code Connect/registry
 
 - page/frame/node inventory;
 - components/component sets/instances count;
+- selected-DS instance count vs local wrapper count;
 - no detached instances для repeated primitives;
 - variable/style bindings и raw-value deviations;
 - Auto Layout/resizing audit;

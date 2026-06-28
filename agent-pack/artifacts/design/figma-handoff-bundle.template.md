@@ -147,6 +147,19 @@
 | UI element | Claimed source | Actual Figma source | Instance required | Status | Deviation |
 |---|---|---|---:|---|---|
 
+### DS Instance Summary
+
+Required for `design_system_mode=reuse|extend`.
+
+| Field | Value |
+|---|---|
+| Selected DS slug |  |
+| Selected-DS component sources in IR |  |
+| Visible selected-DS instances in inventory |  |
+| Local wrapper component sources |  |
+| Missing required DS sources |  |
+| Verdict | `passed|needs_repair|blocked` |
+
 ## Code Connect / Mapping Status
 
 - Code Connect status: `connected|unavailable|not_configured|skipped_with_reason`

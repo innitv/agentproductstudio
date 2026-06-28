@@ -45,6 +45,8 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Internal Pipeline (Внутренний процесс)
 
+0a. **Design-Agent Prerequisite Gate**: для запросов `собери макеты`, `собери use cases`, `собери flow`, `мобильное приложение`, `интерфейс приложения`, `Figma макеты`, `mobile app screens` и любых app-like UI surfaces этот агент не является первым владельцем. Он стартует только после `04-design`, когда есть `design-brief.md` с LazyWeb/reference grounding, `design_system_mode`, reuse/extend strategy, визуальным направлением и списком DS gaps. Если такого design handoff нет, вернуть `blocked_missing_design_agent_handoff` вместо генерации технической спецификации или Figma-картинок.
+
 0. **Input Readiness Pass**: Проверить, что `prd.md`, `ia-brief.md`, `design-brief.md` и `copy-deck.md` содержат primary screen/action, requirements, state map, responsive notes, copy constraints и claims-to-validate. Если данных не хватает, вернуть `partial` с open questions.
 1. **Surface Output Contract Pass**: определить surface type (`figma_board`, `product_ui`, `dashboard_console`, `landing`, `prototype` или `handoff`), expected screens/frames/sections/states/components и coverage gate по `agent-pack/templates/surface-output-contract.template.md`.
 2. **Visual Evidence Grounding Pass**: проверить, что `design-brief.md`, `STYLE_GUIDE.md` или `reference-analysis.md` содержат `visual_evidence_plan`, `visual_reference_cards` и applicability notes. Если их нет для визуальной/интерактивной поверхности, вернуть `partial` и запросить design evidence, либо записать explicit waiver/deviation.
@@ -104,6 +106,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 Этот агент активируется и генерирует спецификацию экранов по следующим фразам:
 - **Генерация экранов**: `сгенерируй спецификацию экранов`, `создай экраны`, `опиши экраны`, `generate screens`, `create screens spec`.
+- **Макеты после дизайн-агента**: `собери макеты`, `собери use cases`, `собери flow`, `мобильные макеты`, `app UI flow`, `mobile app screens` — только если уже есть свежий `design-brief.md` от Design Agent для того же запроса; иначе вернуть blocker на `04-design`.
 - **Обновление экранов**: `обнови спецификацию экранов`, `обнови экраны`, `update screens`.
 
 ## Required Outputs (Обязательные результаты)

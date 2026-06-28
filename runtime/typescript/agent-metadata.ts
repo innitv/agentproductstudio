@@ -118,16 +118,39 @@ export function validateAgentMetadata(root = process.cwd()): string[] {
 
     const routeArtifactInputs = Object.values(routeTools)
       .filter((route) => route.agent === expectedAgentName)
-      .flatMap((route) => route.inputs)
+      .flatMap((route) => [
+        ...route.inputs,
+        ...("dependsOn" in route ? route.dependsOn : []),
+      ])
       .filter((input) => knownArtifacts.has(input));
-    for (const artifact of routeArtifactInputs) {
+    const routeReachableArtifacts = new Set<string>([
+      ...routeArtifactInputs,
+      ...Object.values(routeTools)
+        .filter((route) => route.agent === expectedAgentName)
+        .flatMap((route) => [
+          ...("referenceInputs" in route ? route.referenceInputs : []),
+          ...("referenceDependsOn" in route ? route.referenceDependsOn : []),
+        ])
+        .filter((input) => knownArtifacts.has(input)),
+    ]);
+    for (const artifact of unique(routeArtifactInputs)) {
       if (!metadata.required_inputs.includes(artifact)) {
         errors.push(`${file}: metadata required_inputs is missing route input '${artifact}'.`);
+      }
+    }
+
+    for (const artifact of metadata.required_inputs.filter((input) => knownArtifacts.has(input))) {
+      if (!routeReachableArtifacts.has(artifact)) {
+        errors.push(`${file}: routeTools never provide metadata required_input '${artifact}'.`);
       }
     }
   }
 
   return errors;
+}
+
+function unique<T>(items: readonly T[]): T[] {
+  return [...new Set(items)];
 }
 
 function isAgentMetadata(value: unknown): value is AgentMetadata {

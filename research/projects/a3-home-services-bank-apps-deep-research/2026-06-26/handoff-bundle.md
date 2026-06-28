@@ -192,3 +192,19 @@
 | Design system grounding | Existing shadcn file pages, Tailwind variable collections, Inter text styles and box-shadow styles; local primitives strip documents `button`, `card`, `badge`, `tabs`, `input row`, `bottom nav` |
 | Verification | Figma metadata/inline screenshot QA; fixed board positioning and clipped text; executable verifier `figma-visual-qa.json` passed with notes; final board screenshot asset `03286ce3-48d5-458d-b9f0-80fc9d9b6343` |
 | Layout QA | `figma-layout-ir.json`, `figma-inventory-v3-shadcn-ds-2026-06-28.json`, `figma-visual-qa.json`; 342 nodes and 176 text nodes checked; first pass found checkbox overflow `3013:183` outside `3013:182`, repaired in Figma and rerun |
+
+## Figma App Flow v4 / Mobile Use Cases
+
+| Field | Value |
+|---|---|
+| Status | `rejected_needs_redesign` |
+| Artifact | `figma-app-flow-v4-mobile-usecases-2026-06-28.md` |
+| Surface | `figma_board` |
+| Figma file | https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=3038-2 |
+| Figma page | `for flow` |
+| Board node | `3038:2` |
+| Screen nodes | `3038:6`, `3038:55`, `3038:105`, `3038:165`, `3038:214`, `3038:268`, `3038:313`, `3038:358` |
+| Scope | Eight mobile screens that turn F01-F06 use cases into one app route: object confirmation, home dashboard, bill detail, payment review, payment status, debt recovery, meter error and services/family access |
+| Reuse-first component result | Existing v3 board had no component/instance nodes to reuse directly. v4 reused the shadcn/Tailwind file context and created only local screen primitives needed for the route; no full component library was generated. |
+| Lazyweb evidence | Degraded evidence path: `mobile dashboard` and `payment review` moderate coverage, `support request` moderate coverage, `status tracking` weak adjacent coverage; full report unavailable in current MCP schema because image-upload tools were absent and inline Figma export was too large |
+| Verification | Rejected by human review: screenshot looked like a technical board with small service screens, not polished mobile app UI. `text_issue_count=0`, `clip_issue_count=0`, `overlap_count=0` are retained only as structural notes and do not count as UI readiness. |

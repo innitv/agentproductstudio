@@ -62,6 +62,8 @@
 
 Если поверхность проходит через Figma или дизайн-систему, stage обязан выполнить **Design System Strategy Gate**: выбрать `reuse|extend|product_specific|bespoke`. Новая продуктовая дизайн-система является штатным маршрутом. Для `extend|product_specific` действует Two-Pass Figma Build: сначала `visual_calibration` на 2-3 экранах, затем `systemization` без visual regression. Для `figma_board|product_ui|prototype` surface до Figma write обязателен `figma-layout-ir.json` с route, zones, copy-fit, component sources, resize constraints и verification contract; после write обязателен `figma-visual-qa.json` с screenshot/object inventory checks и `gate_result.ready_allowed=true` или explicit deviation. Перед frontend handoff обязательны Component Contract Matrix, Code Connect/fallback status и frame/state -> route/story/component mapping по `integrations/mcp/figma-canvas-write-guide.md`.
 
+Для запросов на макеты, use cases, app flow, мобильное приложение, Figma screens или product UI действует **Design Agent First Gate**: первым визуальным владельцем всегда является `04-design` (`design`). `06-screens`, `figma-screen-compiler`, `figma-handoff`, `figma-roundtrip`, `visual-layout-verifier` и Figma `use_figma` не могут начинать работу, если нет свежего `design-brief.md` от Design Agent для того же запроса. Этот handoff должен содержать LazyWeb/reference evidence, `design_system_mode`, решение reuse/extend/product_specific/bespoke, список существующих компонентов для переиспользования и список только недостающих gap-компонентов. Если gate не выполнен, stage status = `blocked_missing_design_agent_handoff`.
+
 Невыполнение любого из пунктов переводит этап в статус `blocked` (заблокирован); следующий этап не может быть начат.
 
 ## Рабочий режим

@@ -88,6 +88,16 @@ const stagePatterns: Record<string, RegExp[]> = {
     /создай\s+дизайн/i,
     /сделай\s+дизайн-спеку/i,
     /создай\s+визуальную\s+концепцию/i,
+    /собери\s+макет/i,
+    /собери\s+макеты/i,
+    /собери\s+use\s*cases/i,
+    /собери\s+(?:app\s*)?flow/i,
+    /собери\s+мобильн(?:ое|ые)\s+(?:приложение|макеты|экраны)/i,
+    /макеты\s+в\s+figma/i,
+    /интерфейс\s+приложения/i,
+    /мобильн(?:ое|ые)\s+(?:приложение|макеты|экраны)/i,
+    /mobile\s+app\s+screens/i,
+    /app\s+ui\s+flow/i,
     /проанализируй\s+референс/i,
     /обнови\s+дизайн/i,
     /make\s+design\s+brief/i,
@@ -236,7 +246,7 @@ export function parseUserIntent(prompt: string): ParsedIntent | null {
   if (/sitemap|user\s*flow|карту\s+сайта|структур|архитектур/i.test(trimmed)) {
     return { command: "run-stage", stageId: "03-ia", args: [], confidence: "medium" };
   }
-  if (/дизайн|оформлен|стиль|визуаль|design/i.test(trimmed)) {
+  if (/макет|use\s*cases|app\s*flow|мобильн(?:ое|ые)\s+(?:приложение|макеты|экраны)|интерфейс\s+приложения|дизайн|оформлен|стиль|визуаль|design/i.test(trimmed)) {
     return { command: "run-stage", stageId: "04-design", args: [], confidence: "medium" };
   }
   if (/текст|копирайт|copy|deck/i.test(trimmed)) {

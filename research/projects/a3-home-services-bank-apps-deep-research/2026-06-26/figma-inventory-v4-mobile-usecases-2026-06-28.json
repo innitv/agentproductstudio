@@ -1,0 +1,38 @@
+{
+  "status": "ready",
+  "surface": "figma_board",
+  "file_key": "NUoNEuTJ3OZOGH2c780Z55",
+  "page": "for flow",
+  "board": {
+    "id": "3038:2",
+    "name": "A3 Home Services / v4 mobile app flow / 2026-06-28",
+    "width": 3592,
+    "height": 1080
+  },
+  "screens": [
+    { "id": "3038:6", "name": "screen / 01 Добавить дом", "route_step": 1 },
+    { "id": "3038:55", "name": "screen / 02 Дом", "route_step": 2 },
+    { "id": "3038:105", "name": "screen / 03 Счет ЖКУ", "route_step": 3 },
+    { "id": "3038:165", "name": "screen / 04 Проверка платежа", "route_step": 4 },
+    { "id": "3038:214", "name": "screen / 05 Платеж принят", "route_step": 5 },
+    { "id": "3038:268", "name": "screen / 06 Долг еще висит", "route_step": 6 },
+    { "id": "3038:313", "name": "screen / 07 Показания", "route_step": 7 },
+    { "id": "3038:358", "name": "screen / 08 Сервисы дома", "route_step": 8 }
+  ],
+  "design_system": {
+    "mode": "reuse",
+    "selected_slug": "shadcn-ui-components-2026",
+    "reuse_first_result": "existing board had no component or instance nodes to reuse directly; v4 reused file styles, variables and visual conventions, then created only local screen primitives needed for the mobile flow",
+    "full_library_generated": false
+  },
+  "route": [
+    "Добавить дом",
+    "Дом",
+    "Счет ЖКУ",
+    "Проверка платежа",
+    "Платеж принят",
+    "Долг еще висит",
+    "Показания",
+    "Сервисы дома"
+  ]
+}

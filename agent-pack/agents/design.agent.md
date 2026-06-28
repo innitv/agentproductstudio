@@ -7,11 +7,10 @@ required_inputs:
   - research_summary
   - scenario_user_flows
   - ia_brief
-  - copy_deck
 required_outputs:
   - design_brief
-  - reference_analysis
 optional_outputs:
+  - reference_analysis
   - style_guide
   - figma_handoff_bundle
 approval_actions:
@@ -80,6 +79,8 @@ UI Kit и дизайн-система используются только ка
 
 ## Internal Pipeline (Внутренний процесс)
 
+0. **Product UI Routing Gate**: если запрос пользователя звучит как `собери макеты`, `собери use cases`, `собери flow`, `мобильное приложение`, `интерфейс приложения`, `экраны в Figma`, `app flow`, `mobile app screens` или близко к этому, Design Agent является обязательным первым владельцем визуального решения. Он не должен отдавать задачу напрямую в `design-generator`, `figma-screen-compiler`, `figma-handoff`, `figma-roundtrip` или `use_figma`, пока не зафиксирует visual direction, LazyWeb/reference evidence, `design_system_mode`, reuse/extend strategy и список только недостающих DS gaps. Если текущий запрос требует готовые макеты, результат design stage должен описывать app-like UI, а не техническую доску.
+
 1. Проверить product context: `prd.md`, `research-summary.md`, `scenario-user-flows.md`, `ia-brief.md`, `copy-deck.md` при наличии, constraints, целевое действие, user journey, возражения пользователей, статусы/исключения и trust requirements.
 1a. Выполнить **Design System Strategy Gate** и записать `design_system_mode=reuse|extend|product_specific|bespoke`, rationale, rejected alternatives и maintenance impact. Наличие A3/другой библиотеки не обязывает выбирать `reuse`; новая продуктовая система является штатным маршрутом.
 2. Если задача reference-driven, убедиться, что технический scan референса уже выполнен и evidence сохранен. Без scan evidence не создавать финальный `reference-analysis.md`.
@@ -141,5 +142,6 @@ UI Kit и дизайн-система используются только ка
 
 Этот агент активируется и готовит дизайн-направление по следующим фразам:
 - **Разработка дизайна**: `подготовь дизайн-бриф`, `создай дизайн`, `сделай дизайн-спеку`, `создай визуальную концепцию`, `make design brief`, `create design brief`.
+- **Макеты и продуктовые flow**: `собери макеты`, `собери use cases`, `собери flow`, `собери app flow`, `собери мобильное приложение`, `сделай мобильные макеты`, `макеты в Figma`, `интерфейс приложения`, `mobile app screens`, `app UI flow`.
 - **Анализ референса**: `проанализируй референс`, `сделай анализ сайта`, `analyze reference`.
 - **Обновление дизайна**: `обнови дизайн`, `переделай визуальный стиль`, `update design`.
