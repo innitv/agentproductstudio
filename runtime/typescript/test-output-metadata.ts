@@ -26,7 +26,9 @@ try {
   await writeFile(join(outputDir, artifactFiles.notion_prd_export), "# Notion PRD Export\n\nPrepared for publication.\n", "utf8");
   await writeFile(join(outputDir, artifactFiles.style_guide), "# STYLE_GUIDE\n\n## Status\n\n`ready`\n", "utf8");
   await writeFile(join(outputDir, artifactFiles.design_loop_report), "# Design Loop Report\n\n## Status\n\n`ready`\n", "utf8");
+  await writeFile(join(outputDir, artifactFiles.figma_layout_ir), `${JSON.stringify({ status: "ready" }, null, 2)}\n`, "utf8");
   await writeFile(join(outputDir, artifactFiles.figma_handoff_bundle), "# Figma Handoff Bundle\n\n## Status\n\n`partial`\n", "utf8");
+  await writeFile(join(outputDir, artifactFiles.figma_visual_qa), `${JSON.stringify({ status: "passed" }, null, 2)}\n`, "utf8");
   await writeFile(join(outputDir, artifactFiles.storybook_result), "# Storybook Result\n\n## Status\n\n`ready`\n", "utf8");
   await writeFile(join(outputDir, approvalStateFileName), `${JSON.stringify({ approvals: [] }, null, 2)}\n`, "utf8");
 
@@ -49,7 +51,9 @@ try {
   const notionPrdExport = manifest.artifacts.find((artifact) => artifact.file === artifactFiles.notion_prd_export);
   const styleGuide = manifest.artifacts.find((artifact) => artifact.file === artifactFiles.style_guide);
   const designLoopReport = manifest.artifacts.find((artifact) => artifact.file === artifactFiles.design_loop_report);
+  const figmaLayoutIr = manifest.artifacts.find((artifact) => artifact.file === artifactFiles.figma_layout_ir);
   const figmaHandoffBundle = manifest.artifacts.find((artifact) => artifact.file === artifactFiles.figma_handoff_bundle);
+  const figmaVisualQa = manifest.artifacts.find((artifact) => artifact.file === artifactFiles.figma_visual_qa);
   const storybookResult = manifest.artifacts.find((artifact) => artifact.file === artifactFiles.storybook_result);
   const approvalState = manifest.artifacts.find((artifact) => artifact.file === approvalStateFileName);
   if (!runPlan || !prd) {
@@ -58,7 +62,7 @@ try {
   if (!notionPrdExport || !approvalState) {
     throw new Error("artifact manifest should include discovered optional/export and external record files.");
   }
-  if (!styleGuide || !designLoopReport || !figmaHandoffBundle || !storybookResult) {
+  if (!styleGuide || !designLoopReport || !figmaLayoutIr || !figmaHandoffBundle || !figmaVisualQa || !storybookResult) {
     throw new Error("artifact manifest should include discovered design enhancement files.");
   }
   assert(runPlan.exists === true, "artifact manifest should mark existing artifacts.");
@@ -74,7 +78,9 @@ try {
   assert(styleGuide.artifact_type === "product_artifact", "artifact manifest should classify style guide as product artifact.");
   assert(styleGuide.safe_to_publish === false, "style guide should not be publishable by default.");
   assert(designLoopReport.artifact_type === "evidence", "artifact manifest should classify design loop report as evidence.");
+  assert(figmaLayoutIr.artifact_type === "product_artifact", "artifact manifest should classify figma layout IR as product artifact.");
   assert(figmaHandoffBundle.artifact_type === "export", "artifact manifest should classify figma handoff bundle as export.");
+  assert(figmaVisualQa.artifact_type === "evidence", "artifact manifest should classify figma visual QA as evidence.");
   assert(storybookResult.artifact_type === "evidence", "artifact manifest should classify storybook result as evidence.");
   assert(approvalState.artifact_type === "external_record", "artifact manifest should classify approval state as external record.");
   assert(approvalState.safe_to_publish === false, "artifact manifest should not mark approval records publishable.");
@@ -102,7 +108,9 @@ try {
   assert(outputsGuide.includes("notion-prd-export.md"), "workflow outputs guide should include discovered exports.");
   assert(outputsGuide.includes("STYLE_GUIDE.md"), "workflow outputs guide should include discovered style guides.");
   assert(outputsGuide.includes("design-loop-report.md"), "workflow outputs guide should include discovered design loop reports.");
+  assert(outputsGuide.includes("figma-layout-ir.json"), "workflow outputs guide should include figma layout IR.");
   assert(outputsGuide.includes("figma-handoff-bundle.md"), "workflow outputs guide should include figma handoff bundles.");
+  assert(outputsGuide.includes("figma-visual-qa.json"), "workflow outputs guide should include figma visual QA.");
   assert(outputsGuide.includes("storybook-result.md"), "workflow outputs guide should include storybook results.");
   assert(outputsGuide.includes("### external record"), "workflow outputs guide should group external records.");
   assert(outputsGuide.includes(approvalStateFileName), "workflow outputs guide should include approval records.");

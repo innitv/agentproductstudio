@@ -539,6 +539,16 @@ async function createDiscoveredArtifactEntries(
       safeToPublish: false,
     },
     {
+      artifactName: artifactNames.figmaLayoutIr,
+      file: artifactFiles[artifactNames.figmaLayoutIr],
+      artifactType: "product_artifact" as const,
+      producerStage: "06-screens",
+      producerAgent: routeTools.screens.agent,
+      stageTitle: "Figma Layout IR",
+      humanReadable: false,
+      safeToPublish: false,
+    },
+    {
       artifactName: artifactNames.figmaHandoffBundle,
       file: artifactFiles[artifactNames.figmaHandoffBundle],
       artifactType: "export" as const,
@@ -546,6 +556,16 @@ async function createDiscoveredArtifactEntries(
       producerAgent: routeTools.design.agent,
       stageTitle: "Figma Handoff Bundle",
       humanReadable: true,
+      safeToPublish: false,
+    },
+    {
+      artifactName: artifactNames.figmaVisualQa,
+      file: artifactFiles[artifactNames.figmaVisualQa],
+      artifactType: "evidence" as const,
+      producerStage: "06-screens",
+      producerAgent: routeTools.screens.agent,
+      stageTitle: "Figma Visual QA",
+      humanReadable: false,
       safeToPublish: false,
     },
     {
@@ -735,6 +755,7 @@ function classifyArtifact(artifactName: string): ArtifactType {
     artifactName === artifactNames.testBenchResult ||
     artifactName === artifactNames.qaReport ||
     artifactName === artifactNames.designLoopReport ||
+    artifactName === artifactNames.figmaVisualQa ||
     artifactName === artifactNames.storybookResult
   ) {
     return "evidence";
