@@ -30,6 +30,19 @@
 - Libraries/components reused:
 - Что создается с нуля:
 
+## Layout Compiler Contract
+
+| Field | Value |
+|---|---|
+| `figma-layout-ir.json` status | `ready|partial|blocked|not_required` |
+| Layout IR path |  |
+| Route compiled | yes / no |
+| Screen zones compiled | yes / no |
+| Copy-fit constraints compiled | yes / no |
+| Component sources compiled | yes / no |
+| Verification contract compiled | yes / no |
+| Blocker / deviation |  |
+
 ## Design System Strategy
 
 | Field | Value |
@@ -129,6 +142,11 @@
 | Stable ID | Figma source | Property / allowed values | Semantic variables | React target / prop mapping | Required states | Story / test / locator | Deviation owner / follow-up |
 |---|---|---|---|---|---|---|---|
 
+## DS Honesty Audit
+
+| UI element | Claimed source | Actual Figma source | Instance required | Status | Deviation |
+|---|---|---|---:|---|---|
+
 ## Code Connect / Mapping Status
 
 - Code Connect status: `connected|unavailable|not_configured|skipped_with_reason`
@@ -159,12 +177,16 @@
 
 - Figma node IDs:
 - Скриншоты:
+- `figma-visual-qa.json`:
 - Screenshot review result: `passed|passed_with_notes|blocked`
 - Auto Layout smoke check:
 - Variables/components smoke check:
 - Detached instance audit:
 - Variable binding / raw-value deviation audit:
 - Resize / long-copy audit:
+- Text height / clipping audit:
+- Overlap / safe area audit:
+- Route walkthrough audit:
 - Systemization visual regression check:
 - Paired Figma/browser screenshot status:
 - Известные расхождения:

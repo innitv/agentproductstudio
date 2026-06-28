@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Figma Layout IR",
+  "type": "object",
+  "required": [
+    "status",
+    "surface",
+    "design_system",
+    "viewport",
+    "route",
+    "screens",
+    "component_sources",
+    "verification_contract"
+  ],
+  "properties": {
+    "status": { "enum": ["draft", "partial", "blocked", "ready"] },
+    "surface": { "enum": ["figma_board", "product_ui", "prototype", "handoff"] },
+    "design_system": {
+      "type": "object",
+      "required": ["mode", "selected_slug", "reuse_honesty"],
+      "properties": {
+        "mode": { "enum": ["reuse", "extend", "product_specific", "bespoke"] },
+        "selected_slug": { "type": "string" },
+        "reuse_honesty": {
+          "enum": ["ds_instances_required", "local_components_with_deviation", "bespoke_allowed", "blocked"]
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "viewport": {
+      "type": "object",
+      "required": ["width", "height", "safe_area_top", "safe_area_bottom"],
+      "properties": {
+        "width": { "type": "number", "minimum": 1 },
+        "height": { "type": "number", "minimum": 1 },
+        "safe_area_top": { "type": "number", "minimum": 0 },
+        "safe_area_bottom": { "type": "number", "minimum": 0 }
+      }
+    },
+    "route": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["step", "screen_id", "primary_action", "next_state", "completion_evidence"],
+        "properties": {
+          "step": { "type": "number", "minimum": 1 },
+          "screen_id": { "type": "string", "minLength": 1 },
+          "primary_action": { "type": "string", "minLength": 1 },
+          "next_state": { "type": "string", "minLength": 1 },
+          "completion_evidence": { "type": "string", "minLength": 1 },
+          "error_or_recovery_path": { "type": "string" }
+        }
+      }
+    },
+    "screens": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "zones", "layout_constraints", "components"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "zones": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["id", "role", "priority", "copy_fit"],
+              "properties": {
+                "id": { "type": "string", "minLength": 1 },
+                "role": { "type": "string", "minLength": 1 },
+                "priority": { "enum": ["primary", "secondary", "supporting", "navigation"] },
+                "copy_fit": {
+                  "type": "object",
+                  "required": ["max_lines", "overflow_behavior"],
+                  "properties": {
+                    "max_lines": { "type": "number", "minimum": 1 },
+                    "overflow_behavior": { "enum": ["wrap", "truncate_with_deviation", "move_to_detail", "blocked"] }
+                  }
+                }
+              }
+            }
+          },
+          "layout_constraints": {
+            "type": "object",
+            "required": ["no_clip", "no_overlap", "min_touch_target", "bottom_nav_pinned"],
+            "properties": {
+              "no_clip": { "type": "boolean" },
+              "no_overlap": { "type": "boolean" },
+              "min_touch_target": { "type": "number", "minimum": 24 },
+              "bottom_nav_pinned": { "type": "boolean" },
+              "min_row_height": { "type": "number", "minimum": 1 }
+            }
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["stable_id", "source", "resize_contract", "required_states"],
+              "properties": {
+                "stable_id": { "type": "string", "minLength": 1 },
+                "source": { "type": "string", "minLength": 1 },
+                "resize_contract": { "enum": ["fixed", "hug", "fill", "mixed"] },
+                "required_states": { "type": "array", "items": { "type": "string" } },
+                "deviation": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "component_sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["stable_id", "source_type", "source_ref", "instance_required"],
+        "properties": {
+          "stable_id": { "type": "string" },
+          "source_type": { "enum": ["design_system_component", "local_component", "bespoke_frame"] },
+          "source_ref": { "type": "string" },
+          "instance_required": { "type": "boolean" },
+          "deviation": { "type": "string" }
+        }
+      }
+    },
+    "verification_contract": {
+      "type": "object",
+      "required": ["screenshots_required", "object_inventory_required", "route_walkthrough_required", "visual_qa_required"],
+      "properties": {
+        "screenshots_required": { "type": "array", "items": { "type": "string" } },
+        "object_inventory_required": { "type": "boolean" },
+        "route_walkthrough_required": { "type": "boolean" },
+        "visual_qa_required": { "type": "boolean" }
+      }
+    }
+  }
+}

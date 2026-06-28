@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Figma Visual QA",
+  "type": "object",
+  "required": [
+    "status",
+    "target",
+    "inputs_used",
+    "screenshot_evidence",
+    "checks",
+    "repair_actions",
+    "gate_result"
+  ],
+  "properties": {
+    "status": { "enum": ["draft", "partial", "blocked", "passed"] },
+    "target": {
+      "type": "object",
+      "required": ["file_key", "page", "board_node_id"],
+      "properties": {
+        "file_key": { "type": "string" },
+        "page": { "type": "string" },
+        "board_node_id": { "type": "string" }
+      }
+    },
+    "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "screenshot_evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["screen_or_board", "node_id", "asset_id", "review_status"],
+        "properties": {
+          "screen_or_board": { "type": "string" },
+          "node_id": { "type": "string" },
+          "asset_id": { "type": "string" },
+          "review_status": { "enum": ["passed", "needs_repair", "blocked"] },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["check", "result", "evidence"],
+        "properties": {
+          "check": {
+            "enum": [
+              "text_height",
+              "text_overflow",
+              "overlap",
+              "clipping",
+              "safe_area",
+              "density",
+              "hierarchy",
+              "route_coherence",
+              "ds_instance_honesty",
+              "systemization_regression"
+            ]
+          },
+          "result": { "enum": ["passed", "needs_repair", "blocked", "not_applicable"] },
+          "evidence": { "type": "string" },
+          "repair": { "type": "string" }
+        }
+      }
+    },
+    "repair_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action", "status"],
+        "properties": {
+          "action": { "type": "string" },
+          "status": { "enum": ["applied", "deferred", "blocked"] },
+          "node_ids": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "gate_result": {
+      "type": "object",
+      "required": ["verdict", "ready_allowed"],
+      "properties": {
+        "verdict": { "enum": ["passed", "passed_with_notes", "blocked"] },
+        "ready_allowed": { "type": "boolean" },
+        "known_deviations": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

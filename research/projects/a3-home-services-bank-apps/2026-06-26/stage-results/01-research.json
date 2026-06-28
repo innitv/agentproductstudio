@@ -1,0 +1,22 @@
+{
+  "stage_id": "01-research",
+  "title": "Deep Research",
+  "status": "completed",
+  "artifacts_created": [
+    "research-summary.md",
+    "scenario-user-flows.md",
+    "competitive-analysis.md",
+    "proto-personas.md",
+    "synthetic-interviews.md",
+    "swot.md"
+  ],
+  "inputs_used": [
+    "`run-plan.md`",
+    "`source-log.md`",
+    "запрос пользователя: A3 предоставляет банкам данные и сервисы по адресу плательщика через API;",
+    "публичные источники по ГИС ЖКХ, Госуслуги.Дом, ПОС, городским жалобам, правовой роли управляющих организаций."
+  ],
+  "warnings": [],
+  "errors": [],
+  "completed_at": "2026-06-26T06:07:30.696Z"
+}

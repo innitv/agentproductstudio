@@ -17,6 +17,7 @@ required_inputs:
   - screens
 required_outputs:
   - figma_handoff_bundle
+  - figma_layout_ir
 approval_actions:
   - figma_write
 validation_commands:
@@ -33,6 +34,7 @@ contract_schema: agent-pack/templates/skill.template.md
 ## Процедура
 
 1. Прочитай `STYLE_GUIDE.md`, `design-brief.md`, `screens.md` и при наличии `design-loop-report.md`.
+1a. Если surface `figma_board|product_ui|prototype`, убедись, что `figma-screen-compiler` уже создал `figma-layout-ir.json`. Если нет, остановись на `partial` и сначала выполни compiler. Figma write без IR запрещен.
 2. Прочитай `integrations/mcp/figma-canvas-write-guide.md` и зафиксируй `design_system_mode`: `reuse|extend|product_specific|bespoke`, rationale и rejected alternatives.
 2a. Для `reuse|extend` выбери `selected_design_system_slug` из `design/figma/registry.json` и прочитай локальный индекс. Если индекс отсутствует, остановись на `partial` и направь в `figma-ds-ingest`.
 2b. Для внесенной ДС подтягивай только нужные категории `components/<category>.md`, а не весь Figma файл.
@@ -46,6 +48,7 @@ contract_schema: agent-pack/templates/skill.template.md
    - не вписывать все в один frame только потому, что пользователь дал ссылку на anchor.
 4. Проверь существующую дизайн-систему: `search_design_system`, libraries, variables, styles, components. Найденная библиотека является кандидатом, а не обязательным выбором; следуй выбранному `design_system_mode`.
 4a. Подготовь Component Contract Matrix и Code Connect/fallback status для каждого повторяемого или интерактивного компонента.
+4b. Подготовь DS honesty audit: где используются реальные DS components/instances, где local components, где bespoke frames, и какие deviations приняты.
 5. Запиши `figma-handoff-bundle.md` по `agent-pack/artifacts/design/figma-handoff-bundle.template.md`.
 6. Выполни Russian Publication Gate до Figma write:
    - весь видимый текст в Figma, включая frame names, headers, labels, cards, chips, table headers и descriptions, должен быть на русском;
@@ -59,6 +62,7 @@ contract_schema: agent-pack/templates/skill.template.md
    - foundation/components;
    - screen frames;
    - screenshot verification;
+   - `visual-layout-verifier` с `figma-visual-qa.json`;
    - screenshot comparison до/после systemization и polish pass;
    - update handoff status and node IDs.
 10. Если approval отсутствует, `use_figma` недоступен или нет edit прав, верни `partial`/`blocked`; не имитируй запись в Figma.
@@ -73,6 +77,8 @@ contract_schema: agent-pack/templates/skill.template.md
 - использованные libraries/components или причину `none_found`;
 - `design_system_mode`, visual calibration verdict и systemization regression result;
 - Component Contract Matrix и Code Connect/fallback status;
+- `figma-layout-ir.json` status и DS honesty audit;
+- `figma-visual-qa.json` gate result после write;
 - результат `get_screenshot` или другую визуальную проверку;
 - status/evidence для `reference_to_figma` и план проверки `figma_to_frontend`;
 - Russian Publication Gate status;

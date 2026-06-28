@@ -1,0 +1,25 @@
+{
+  "stage_id": "00-intake",
+  "title": "Intake and Recursive Brief",
+  "status": "completed",
+  "artifacts_created": [
+    "run-plan.md",
+    "handoff-bundle.md",
+    "stage-gate-ledger.md",
+    "recursive-brief.md"
+  ],
+  "inputs_used": [
+    "`recursive-brief.md`",
+    "`run-plan.md`",
+    "`stage-gate-ledger.md`",
+    "current research artifacts in run directory",
+    "source-backed pages: Google Play Госуслуги Дом, App Store Госуслуги.Дом, ГИС ЖКХ/Gosuslugi context, secondary source for лицевые счета as low-confidence signal",
+    "Запрос пользователя от 2026-06-26.",
+    "Корневые правила проекта `AGENTS.md`.",
+    "`agent-pack/agents/research.agent.md`.",
+    "`agent-pack/workflows/deep-research.workflow.md`."
+  ],
+  "warnings": [],
+  "errors": [],
+  "completed_at": "2026-06-26T06:24:32.265Z"
+}

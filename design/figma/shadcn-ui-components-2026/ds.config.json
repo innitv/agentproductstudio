@@ -1,0 +1,35 @@
+{
+  "$schema": "../design-system-index.schema.json",
+  "slug": "shadcn-ui-components-2026",
+  "name": "shadcn/ui components with variables - Tailwind classes - Updated January 2026",
+  "source": {
+    "figma_url": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=0-1&t=MXPujchvftWrxiMT-1",
+    "file_key": "NUoNEuTJ3OZOGH2c780Z55",
+    "scope": "full_library",
+    "source_type": "community_copy"
+  },
+  "ingest": {
+    "status": "partial",
+    "last_ingested_at": "2026-06-27",
+    "manifest_path": "design/figma/shadcn-ui-components-2026/_scan/manifest.md",
+    "census_path": "design/figma/shadcn-ui-components-2026/_scan/census.md"
+  },
+  "foundation": {
+    "path": "design/figma/shadcn-ui-components-2026/foundation.md",
+    "semantic_modes": ["light mode", "dark mode"],
+    "variable_collections": ["tw/colors", "tw/padding", "tw/space", "tw/border-radius", "tw/margin", "tokens", "mode", "tw/border-width", "tw/gap", "tw/stroke-width", "tw/font", "tw/height", "tw/max-height", "tw/max-width", "rdx/colors", "tw/opacity"],
+    "notes": ["Community source indexed read-only. Full variable values are intentionally not dumped; use targeted reads for implementation.", "Variable audit saved at design/figma/shadcn-ui-components-2026/_scan/variable-audit.md."]
+  },
+  "components": {
+    "map_path": "design/figma/shadcn-ui-components-2026/components.md",
+    "profile_dir": "design/figma/shadcn-ui-components-2026/components",
+    "component_count": 14203,
+    "component_set_count": 89,
+    "categories": ["actions", "forms", "overlays", "navigation", "feedback", "data-display", "blocks", "charts", "icons"]
+  },
+  "contracts": {
+    "component_contracts_path": "design/figma/shadcn-ui-components-2026/component-contracts.json",
+    "code_connect_status": "not_configured",
+    "fallback_mapping_path": "design/figma/shadcn-ui-components-2026/code-connect-fallback.md"
+  }
+}

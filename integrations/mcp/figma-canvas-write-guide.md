@@ -48,6 +48,7 @@
 
 - Собери 2-3 ключевых экрана или состояния.
 - Используй same-domain, adjacent и interaction/state references.
+- Проверь Primary App Flow Gate: entry point, primary action, next state, success evidence, error/recovery path и walkthrough основного сценария.
 - Проверь сценарную иерархию, composition, density, rhythm, copy fit, long text и mobile direction.
 - Не создавай большую variant matrix до visual review.
 - Зафиксируй screenshots и verdict: `passed|passed_with_notes|blocked`.
@@ -95,6 +96,7 @@
 4. Искать existing variables/components/libraries.
 5. Выполнять небольшие idempotent patches: foundation → components → instances/screens → prototype.
 6. После каждого логического блока получать object inventory; после визуально значимого блока — screenshot.
+6a. После записи экранов выполнить app-flow walkthrough по созданным frames/prototype links: P0 entry → primary action → next state → success/error path. Без этого Figma surface остается `partial`.
 7. Не удалять/перестраивать чужие frames; устаревшие версии помечать `superseded` или скрывать по согласованному scope.
 
 Один огромный генеративный write запрещен для большой component matrix или multi-screen surface.
@@ -147,6 +149,7 @@ Visual regression после systemization блокирует `ready`, даже 
 ### Behavioral evidence
 
 - prototype transition или interaction spec;
+- Primary App Flow Gate walkthrough для app/prototype/frontend/Figma surface;
 - story/state catalog;
 - keyboard/focus/disabled/loading/error/success checks;
 - Playwright/manual flow evidence.
@@ -157,5 +160,6 @@ Visual regression после systemization блокирует `ready`, даже 
 - `ready/success` запрещен без visual calibration evidence для новой/расширяемой системы.
 - Наличие components/variables не компенсирует visual regression.
 - Figma write без inventory + screenshot имеет статус не выше `partial`.
+- Figma/app surface без Primary App Flow Gate walkthrough имеет статус не выше `partial`.
 - Figma-driven frontend без Component Contract Matrix, frame/state mapping и paired screenshots имеет статус не выше `partial`.
 - Любой accepted mismatch имеет deviation, owner и follow-up.

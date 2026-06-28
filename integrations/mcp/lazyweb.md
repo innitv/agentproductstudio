@@ -9,15 +9,16 @@ Lazyweb используется как evidence layer для продуктов
 - Benchmark экранов: onboarding, pricing, paywall, dashboard, checkout, settings, forms, empty/loading/error states.
 - Design critique существующего интерфейса.
 - Поиск нестандартных cross-category идей.
-- Monetization/A/B test research только при явном запросе и понимании, что `lazyweb-ab-test-research` может быть paid feature.
+- Monetization/A/B test research только при явном запросе через `lazyweb_search_ab_tests`.
 
 ## Режимы skills
 
-- `lazyweb-design-research`: глубокий benchmark, best practices, competitive design research.
-- `lazyweb-quick-references`: быстрые примеры и screenshots без полного отчета.
-- `lazyweb-design-improve`: critique или сравнение текущего UI с сильными примерами.
-- `lazyweb-design-brainstorm`: нестандартные идеи из соседних категорий.
-- `lazyweb-ab-test-research`: paywall/pricing/onboarding/monetization experiments при явном запросе.
+- `lazyweb-design`: umbrella skill для optimize/improve/create product screen; использовать для critique существующего UI и создания нового экрана.
+- `lazyweb-quick-search`: быстрые grouped examples, UI references и screenshots без полного отчета.
+- `lazyweb-update`: update/reinstall/sync локального skill pack.
+- `lazyweb_search_ab_tests`: MCP tool для mobile A/B evidence, paywall/pricing/onboarding/monetization experiments при явном запросе.
+
+Retired aliases (`lazyweb-design-research`, `lazyweb-quick-references`, `lazyweb-design-improve`, `lazyweb-design-brainstorm`, `lazyweb-ab-test-research`) не вызываются напрямую. Их intent маршрутизируется в актуальные skills/tools выше.
 
 ## Ожидаемые MCP tools
 
@@ -28,10 +29,10 @@ Lazyweb используется как evidence layer для продуктов
 - `lazyweb_find_similar`
 - `lazyweb_compare_image`
 - `lazyweb_list_categories`
-- `lazyweb_list_collections`
 - `lazyweb_get_workflows`
 - `lazyweb_get_flows`
-- `lazyweb_ab_test_research`
+- `lazyweb_search_ab_tests`
+- `lazyweb_paywall_cta_research`
 
 Перед использованием optional filters или backend aliases агент обязан проверить live tool schema. Не предполагай наличие `high_design_bar`, `lazyweb_find_experiments`, `lazyweb_recent_experiments` или `list_companies_by_categories`, пока они не видны в текущем MCP tool list.
 

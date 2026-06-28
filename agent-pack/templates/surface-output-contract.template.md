@@ -64,7 +64,30 @@
 
 Правило: evidence должен быть не просто прочитан, а связан с конкретным решением и местом в output.
 
-## 5. Visual Evidence Grounding
+## 5. Primary App Flow Gate
+
+Заполняется для `figma_board`, `product_ui`, `prototype`, `frontend` и интерактивного `dashboard_console`.
+
+| Field | Value |
+|---|---|
+| Primary user/job |  |
+| Trigger / entry point |  |
+| P0 route / transition map |  |
+| Primary action |  |
+| Success / completion evidence |  |
+| Error / recovery path |  |
+| Secondary entry / exit points |  |
+| Acceptance walkthrough | step-by-step check from entry to outcome |
+
+### Screen Flow Contract
+
+| Screen / state | User question | Entry condition | Primary action | Next state | Success evidence | Error/recovery path |
+|---|---|---|---|---|---|---|
+|  |  |  |  |  |  |  |
+
+Правило: app/prototype/Figma/frontend surface не может быть `success`, если P0-сценарий не проходит walkthrough или экраны не имеют next states.
+
+## 6. Visual Evidence Grounding
 
 Заполняется для любой визуальной или интерактивной поверхности: `figma_board`, `product_ui`, `dashboard_console`, `landing`, `prototype`, `frontend`, `presentation` и visual `handoff`.
 
@@ -114,15 +137,15 @@
 
 Правило: pixel diff не заменяет metadata/object inventory, DOM/locator/component mapping или behavior checks.
 
-## 6. Surface Quality Bar
+## 7. Surface Quality Bar
 
 | Surface | Required checks |
 |---|---|
-| `figma_board` | структура canvas, фреймы/секции, readable hierarchy, native/editable layers, Visual Evidence Grounding, Source Pair Matrix, Russian Publication Gate, screenshot smoke, object inventory |
-| `product_ui` / `frontend` | primary workflow, navigation, Visual Evidence Grounding, Source Pair Matrix, responsive, a11y, loading/empty/error/disabled states, browser screenshots, implementation evidence |
+| `figma_board` | Primary App Flow Gate, route/transition map, структура canvas, фреймы/секции, readable hierarchy, native/editable layers, Visual Evidence Grounding, Source Pair Matrix, Russian Publication Gate, screenshot smoke, object inventory |
+| `product_ui` / `frontend` | Primary App Flow Gate, primary workflow, navigation, Visual Evidence Grounding, Source Pair Matrix, responsive, a11y, loading/empty/error/disabled states, browser screenshots, implementation evidence |
 | `dashboard_console` | decision hierarchy, chart-to-question fit, metric definitions, no chartjunk, data quality labels, real dashboard references for density/states, scan time under 5 seconds for primary KPI |
 | `landing` | first viewport product signal, offer clarity, trust proof, CTA flow, real landing/product references, responsive screenshots, no generic template |
-| `prototype` | transition map, task path, state coverage, clickable/interaction notes, real flow/state references |
+| `prototype` | Primary App Flow Gate, transition map, task path, state coverage, clickable/interaction notes, real flow/state references |
 | `notion_wiki` / `research_report` | publication completeness, structured tables/schemes, cross-links, navigation, source/evidence status, `notion_data_shape_plan` for page/table/database choice, `integrated_hybrid` linked views when pages and databases coexist |
 | `presentation` | narrative arc, slide hierarchy, visual references for comparable deck/surface style when design-critical, no overloaded slides, source notes for claims |
 
@@ -150,7 +173,7 @@
 
 Правило: если linked view не встроен в подходящую страницу или fetch/metadata verification не подтверждает inline database block, Notion surface получает `partial` до исправления.
 
-## 7. Write -> Verify -> Fix Plan
+## 8. Write -> Verify -> Fix Plan
 
 | Step | Required evidence | Status |
 |---|---|---|
@@ -159,7 +182,7 @@
 | Verify | API metadata/object inventory/screenshot/build/test evidence | `pending` |
 | Fix | Gaps corrected or recorded as deviation | `pending` |
 
-## 8. Deviations
+## 9. Deviations
 
 | Deviation | Reason | Approval / waiver | Downstream impact |
 |---|---|---|---|

@@ -57,6 +57,7 @@
 |---|---|
 | Surface type | `figma_board` / `product_ui` / `dashboard_console` / `landing` / `prototype` / `handoff` |
 | Expected output units | screens / frames / sections / states / components |
+| Primary App Flow Gate | pending / pass / partial / blocked / not_applicable |
 | Coverage result | pending / pass / partial / blocked |
 | Verification plan | screenshot / browser / prototype / QA / manual review |
 
@@ -85,10 +86,26 @@
 | `reference_to_frontend` | yes / no | paired screenshots; `visual-diff-result.json`; section diff | frontend / qa-review |
 | `spec_to_frontend_behavior` | yes / no | prototype states; Playwright/manual flow evidence | prototype / frontend / qa-review |
 
+### Primary App Flow Gate
+
+| Field | Value |
+|---|---|
+| Primary user/job |  |
+| Trigger / entry point |  |
+| P0 route / transition map |  |
+| Primary action |  |
+| Success / completion evidence |  |
+| Error / recovery path |  |
+| Acceptance walkthrough |  |
+
+| Step | Screen / state | User question | Primary action | Next state | Evidence / assertion |
+|---|---|---|---|---|---|
+| 1 |  |  |  |  |  |
+
 ## Screen List
 
-| Screen | Purpose | Entry Point | Completion Action | PRD Requirement | IA Node | Status |
-|---|---|---|---|---|---|---|
+| Screen | Purpose | Entry Point | Primary Action | Next State | Completion Evidence | PRD Requirement | IA Node | Status |
+|---|---|---|---|---|---|---|---|---|
 
 ## Screen Traceability
 
@@ -100,8 +117,12 @@
 ### Screen Goal
 
 - User goal:
+- User question:
+- Entry condition:
 - Primary action:
+- Next state:
 - Success outcome:
+- Error / recovery path:
 
 ### Desktop Specification
 
@@ -172,7 +193,10 @@
 | Component sets/variants defined |  |  |
 | Auto Layout critical areas defined |  |  |
 | Canvas strategy |  |  |
+| `figma-layout-ir.json` required |  |  |
+| Layout IR route/zones/copy-fit/component sources |  |  |
 | Screenshot verification plan |  |  |
+| `figma-visual-qa.json` required after write |  |  |
 | Visual calibration completed before systemization |  |  |
 | Component Contract Matrix completed |  |  |
 | Code Connect / fallback mapping planned |  |  |

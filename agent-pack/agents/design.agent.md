@@ -19,6 +19,7 @@ approval_actions:
 skills:
   - figma-token-extractor
   - style-decompose
+  - figma-screen-compiler
   - figma-roundtrip
   - figma-handoff
 contract_schema: agent-pack/schemas/agent-output.schema.json
@@ -40,10 +41,11 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 Для UI-heavy, reference-driven, high-visual-risk, dashboard/console, onboarding, checkout, pricing/paywall, settings или Figma handoff задач Агент Дизайна обязан использовать Lazyweb MCP/skills как evidence layer, если tools доступны и source policy разрешает внешний MCP. Lazyweb применяется до финального `design-brief.md`:
 
-- `lazyweb-design-research` — глубокий benchmark, конкурентные паттерны и best practices;
-- `lazyweb-quick-references` — быстрые screen references без полного отчета;
-- `lazyweb-design-improve` — critique существующего UI/макета;
-- `lazyweb-design-brainstorm` — нестандартные cross-category идеи.
+- `lazyweb-design` — optimize/improve/create для product screen, включая critique существующего UI и новый screen design;
+- `lazyweb-quick-search` — быстрые grouped examples, screen references, benchmark screenshots и best-practice scan без полного отчета;
+- `lazyweb_search_ab_tests` MCP tool — только для явного monetization/A/B evidence.
+
+Retired aliases (`lazyweb-design-research`, `lazyweb-quick-references`, `lazyweb-design-improve`, `lazyweb-design-brainstorm`, `lazyweb-ab-test-research`) не вызываются напрямую. Если они встречаются в старом handoff, агент маршрутизирует intent в актуальные skills/tools выше.
 
 Результаты Lazyweb фиксируются в `reference-analysis.md`, `STYLE_GUIDE.md` или `design-brief.md` как `lazyweb_evidence`: screen type, company/category, observed pattern, applicability, risk, disallowed copying. Lazyweb не заменяет технический scan пользовательского URL/скриншота и не дает права копировать trade dress. Если tools недоступны после установки до reload, записать `skipped_with_reason=lazyweb_unavailable_reload_required`.
 
@@ -86,9 +88,10 @@ UI Kit и дизайн-система используются только ка
 5. Создать `reference-analysis.md` с section-by-section visual spec: структура, иерархия, сетка, цвета, typography scale, spacing, components, CTA, forms/controls, media, mobile behavior, allowed/disallowed patterns, IP risks, `visual_reference_cards` и `lazyweb_evidence` при наличии.
 6. Для reference-driven/high-visual-risk задач вызвать skill `style-decompose` и создать `STYLE_GUIDE.md` до финального `design-brief.md`. `STYLE_GUIDE.md` должен отделять слой подачи/рендера от слоя UI-структуры и фиксировать tokens/composition metrics.
 7. **Surface Output Contract Pass**: если результат должен стать Figma board, screen spec, dashboard, landing, prototype или Notion/wiki surface, заполнить контракт по `agent-pack/templates/surface-output-contract.template.md`: surface type, expected units, coverage gate, visual evidence grounding, evidence-to-output map, quality bar и verification plan.
-8. Сформировать `design-brief.md`: пользовательский путь из `scenario-user-flows.md`, `design_system_mode`, visual direction, interaction tone, layout principles, component strategy, responsive rules, accessibility notes, visual evidence grounding, риски и решения для следующего этапа.
+7a. **Primary App Flow Gate**: для `figma_board`, `product_ui`, `prototype` и `frontend` surface зафиксировать primary user/job, trigger, entry point, P0 route/transition map, главный экран/действие, success evidence, error/recovery path и acceptance walkthrough. Если есть только набор страниц без сквозного сценария, вернуть `partial`.
+8. Сформировать `design-brief.md`: пользовательский путь из `scenario-user-flows.md`, `design_system_mode`, visual direction, interaction tone, layout principles, component strategy, responsive rules, accessibility notes, visual evidence grounding, Primary App Flow Gate result, риски и решения для следующего этапа.
 8a. Для `extend|product_specific` зафиксировать Two-Pass Figma Build: сначала `visual_calibration` на 2-3 экранах, затем `systemization`; component matrix нельзя масштабировать до visual verdict.
-9. Если нужен Figma canvas write или дизайн-система в Figma, не писать на холст на этом этапе. Зафиксировать requirement `figma_handoff_required=true` и передать задачу в `06-screens` после `screens.md`, потому что `figma-handoff-bundle.md` требует screen/component inventory.
+9. Если нужен Figma canvas write или дизайн-система в Figma, не писать на холст на этом этапе. Зафиксировать requirement `figma_handoff_required=true` и `figma_layout_ir_required=true`, затем передать задачу в `06-screens` после `screens.md`, потому что Figma write требует screen/component inventory и `figma-layout-ir.json`.
 10. Обновить `handoff-bundle.md`: какие visual decisions приняты, какой Surface Output Contract выбран, какие assumptions остались, какие optional skills/Lazyweb modes применены или пропущены через `skipped_with_reason`.
 
 ## Design Skills Order (Порядок дизайн-навыков)
@@ -110,6 +113,7 @@ UI Kit и дизайн-система используются только ка
 - **UI Kit не равен visual evidence:** UI Kit, token map и готовые компоненты нельзя использовать как единственный источник layout, density, hierarchy, states или визуального ритма. Для `ready` нужен real-world visual evidence или explicit waiver/deviation.
 - Дизайн не должен гарантировать неподтвержденные результаты.
 - Видимая дизайн-поверхность не может считаться полной, если нет Surface Output Contract и карты `input evidence -> output unit`.
+- Figma/product UI/prototype не может считаться `ready`, если экраны не связаны в P0 route/transition map с primary action, next state, completion evidence и error/recovery path.
 - Избегать декоративной сложности, которая снижает удобство выполнения целевых задач пользователя.
 - Доступность (A11y) и адаптивное поведение обязательны, а не опциональны.
 - **Правило Figma-макетов**: Не создавать и не изменять макеты на холсте Figma без явного запроса пользователя, включенного параметра `write_allowed=true` и получения явного согласия пользователя. Перед write нужно проверить доступность remote Figma MCP `use_figma`, целевой `fileKey`/`nodeId`, права на edit и применимость существующих libraries/components через `design/figma/registry.json`, локальный индекс выбранной ДС и `search_design_system`. В случае включения строго следовать инструкциям [figma-canvas-write-guide.md](file:///c:/Project/product-agent-studio/integrations/mcp/figma-canvas-write-guide.md), [figma-ds-ingest.workflow.md](file:///c:/Project/product-agent-studio/agent-pack/workflows/figma-ds-ingest.workflow.md) для новой/большой ДС и [ds-baseline.workflow.md](file:///c:/Project/product-agent-studio/agent-pack/workflows/ds-baseline.workflow.md) для `product_specific`.

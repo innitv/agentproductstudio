@@ -21,6 +21,27 @@
         "live_audit": "design/figma/a3-design-system/live-audit.latest.md"
       },
       "notes": "Первый пилотный индекс. Использовать только при явно выбранном selected_design_system_slug=a3-design-system."
+    },
+    {
+      "slug": "shadcn-ui-components-2026",
+      "name": "shadcn/ui components with variables - Tailwind classes - Updated January 2026",
+      "file_key": "NUoNEuTJ3OZOGH2c780Z55",
+      "figma_url": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=0-1&t=MXPujchvftWrxiMT-1",
+      "status": "partial",
+      "source_type": "community_copy",
+      "code_connect_status": "not_configured",
+      "last_ingested_at": "2026-06-27",
+      "paths": {
+        "root": "design/figma/shadcn-ui-components-2026",
+        "source": "design/figma/shadcn-ui-components-2026/source.md",
+        "census": "design/figma/shadcn-ui-components-2026/_scan/census.md",
+        "manifest": "design/figma/shadcn-ui-components-2026/_scan/manifest.md",
+        "foundation": "design/figma/shadcn-ui-components-2026/foundation.md",
+        "components": "design/figma/shadcn-ui-components-2026/components.md",
+        "component_contracts": "design/figma/shadcn-ui-components-2026/component-contracts.json",
+        "code_connect_fallback": "design/figma/shadcn-ui-components-2026/code-connect-fallback.md"
+      },
+      "notes": "Read-only ingest of community shadcn/Tailwind Figma kit. Use selected_design_system_slug=shadcn-ui-components-2026 for reuse/extend; run focused reads before implementation because one component set reports existing Figma errors."
     }
   ]
 }

@@ -1,0 +1,441 @@
+{
+  "$schema": "../component-contracts.schema.json",
+  "designSystemSlug": "shadcn-ui-components-2026",
+  "fileKey": "NUoNEuTJ3OZOGH2c780Z55",
+  "fileName": "shadcn/ui components with variables - Tailwind classes - Updated January 2026 (Community)",
+  "codeConnectStatus": "not_configured",
+  "codeConnectCheckedAt": "2026-06-27",
+  "components": [
+    {
+      "name": "Button",
+      "nodeId": "402:654",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=402-654",
+        "category": "actions"
+      },
+      "codeSource": "components/ui/button.tsx",
+      "codeExport": "Button",
+      "expectedVariants": {
+        "type": ["Size-small", "Size-default", "Size-large", "primary", "secondary", "destructive", "outline", "hhost", "link", "icon", "with icon", "Rounded", "loading", "Button group"],
+        "state": ["default", "hover", "loading"]
+      },
+      "semanticVariables": ["--background", "--foreground", "--primary", "--primary-foreground", "--secondary", "--secondary-foreground", "--destructive", "--border", "--accent", "--accent-foreground"],
+      "slots": ["label", "leading icon", "trailing icon"],
+      "resizeContract": "Component set `Buttons` has Figma-side property-definition errors; variant axes are reconstructed from child names. Preserve intrinsic button sizing through CSS classes.",
+      "requiredStates": ["default", "hover", "loading"],
+      "storyTestLocator": "button"
+    },
+    {
+      "name": "Button Group",
+      "nodeId": "1185:1980",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=1185-1980",
+        "category": "actions"
+      },
+      "codeSource": "components/ui/button-group.tsx",
+      "codeExport": "ButtonGroup",
+      "expectedVariants": {
+        "buttonSize": ["small", "default", "large"],
+        "state": ["default", "open"]
+      },
+      "semanticVariables": ["--background", "--foreground", "--border", "--accent", "--accent-foreground"],
+      "slots": ["button", "split trigger", "input", "dropdown", "select", "popover"],
+      "resizeContract": "Composite component: use standalone sources for orientation, nested, separator, split, input and input group patterns.",
+      "requiredStates": ["default", "open"],
+      "storyTestLocator": "button-group"
+    },
+    {
+      "name": "Toggle",
+      "nodeId": "79:10987",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=79-10987",
+        "category": "actions"
+      },
+      "codeSource": "components/ui/toggle.tsx",
+      "codeExport": "Toggle",
+      "expectedVariants": {
+        "variant": ["Default", "Outline", "With_text", "Small", "Large"],
+        "state": ["default", "active"]
+      },
+      "semanticVariables": ["--background", "--foreground", "--border", "--accent", "--accent-foreground"],
+      "slots": ["icon", "label"],
+      "resizeContract": "Use fixed icon button sizing for icon-only variants and intrinsic width for text variants.",
+      "requiredStates": ["default", "active", "disabled"],
+      "storyTestLocator": "toggle"
+    },
+    {
+      "name": "Toggle Group",
+      "nodeId": "79:11264",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=79-11264",
+        "category": "actions"
+      },
+      "codeSource": "components/ui/toggle-group.tsx",
+      "codeExport": "ToggleGroup",
+      "expectedVariants": {
+        "variant": ["Default", "Outline", "Small"],
+        "state": ["default", "active"]
+      },
+      "semanticVariables": ["--background", "--foreground", "--border", "--accent", "--accent-foreground"],
+      "slots": ["toggle item", "disabled example"],
+      "resizeContract": "Composite group with repeated toggle items; keep item sizing stable and expose selection through state.",
+      "requiredStates": ["default", "active", "disabled"],
+      "storyTestLocator": "toggle-group"
+    },
+    {
+      "name": "Input",
+      "nodeId": "76:8518",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=76-8518",
+        "category": "forms"
+      },
+      "codeSource": "components/ui/input.tsx",
+      "codeExport": "Input",
+      "expectedVariants": {
+        "kind": ["Default", "With Label", "With Button", "File"],
+        "state": ["default", "active"]
+      },
+      "semanticVariables": ["--background", "--foreground", "--border", "--ring", "--input"],
+      "slots": ["value", "placeholder", "label", "button", "file label"],
+      "resizeContract": "Default input frame uses fixed specimen width; production input should fill parent width with stable height.",
+      "requiredStates": ["default", "active", "disabled"],
+      "storyTestLocator": "input"
+    },
+    {
+      "name": "Textarea",
+      "nodeId": "76:10807",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=76-10807",
+        "category": "forms"
+      },
+      "codeSource": "components/ui/textarea.tsx",
+      "codeExport": "Textarea",
+      "expectedVariants": {
+        "kind": ["Default", "With_label", "With_text", "With_button"],
+        "state": ["default", "active"]
+      },
+      "semanticVariables": ["--background", "--foreground", "--border", "--ring", "--input"],
+      "slots": ["value", "placeholder", "label", "help text", "button"],
+      "resizeContract": "Textarea should keep min-height and width fill behavior; specimen includes disabled standalone source.",
+      "requiredStates": ["default", "active", "disabled"],
+      "storyTestLocator": "textarea"
+    },
+    {
+      "name": "Select",
+      "nodeId": "76:9053",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=76-9053",
+        "category": "forms"
+      },
+      "codeSource": "components/ui/select.tsx",
+      "codeExport": "Select",
+      "expectedVariants": {
+        "kind": ["Select", "Scrollable"],
+        "state": ["default", "open"]
+      },
+      "semanticVariables": ["--background", "--foreground", "--border", "--popover", "--popover-foreground", "--accent", "--accent-foreground"],
+      "slots": ["trigger", "value", "item", "group label", "check icon"],
+      "resizeContract": "Trigger and popover widths are specimen-driven; production mapping should align popover to trigger and support scrollable content.",
+      "requiredStates": ["default", "open", "disabled"],
+      "storyTestLocator": "select"
+    },
+    {
+      "name": "Checkbox",
+      "nodeId": "73:4564",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=73-4564",
+        "category": "forms"
+      },
+      "codeSource": "components/ui/checkbox.tsx",
+      "codeExport": "Checkbox",
+      "expectedVariants": {
+        "type": ["card", "checked"]
+      },
+      "semanticVariables": ["--background", "--foreground", "--border", "--primary", "--primary-foreground"],
+      "slots": ["control", "label", "description"],
+      "resizeContract": "Includes standalone default, subtext and disabled sources; card variant is represented as component set.",
+      "requiredStates": ["unchecked", "checked", "disabled"],
+      "storyTestLocator": "checkbox"
+    },
+    {
+      "name": "Switch",
+      "nodeId": "76:10548",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=76-10548",
+        "category": "forms"
+      },
+      "codeSource": "components/ui/switch.tsx",
+      "codeExport": "Switch",
+      "expectedVariants": {
+        "state": ["Off", "On"]
+      },
+      "semanticVariables": ["--background", "--foreground", "--border", "--primary", "--primary-foreground"],
+      "slots": ["track", "thumb", "label"],
+      "resizeContract": "Binary switch with stable track/thumb size; expose checked state through data/state attribute.",
+      "requiredStates": ["Off", "On", "disabled"],
+      "storyTestLocator": "switch"
+    },
+    {
+      "name": "Dialog",
+      "nodeId": "74:7828",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=74-7828",
+        "category": "overlays"
+      },
+      "codeSource": "components/ui/dialog.tsx",
+      "codeExport": "Dialog",
+      "expectedVariants": {
+        "kind": ["Dialog", "Custom_close_button"],
+        "state": ["default", "open"]
+      },
+      "semanticVariables": ["--background", "--foreground", "--border", "--muted-foreground"],
+      "slots": ["trigger", "title", "description", "body", "footer", "close button"],
+      "resizeContract": "Overlay content should stay centered and preserve max-width constraints.",
+      "requiredStates": ["default", "open"],
+      "storyTestLocator": "dialog"
+    },
+    {
+      "name": "Dropdown Menu",
+      "nodeId": "74:8113",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=74-8113",
+        "category": "overlays"
+      },
+      "codeSource": "components/ui/dropdown-menu.tsx",
+      "codeExport": "DropdownMenu",
+      "expectedVariants": {
+        "kind": ["Dropdown_menu", "Checkboxes", "Radio_group"],
+        "state": ["default", "open"]
+      },
+      "semanticVariables": ["--popover", "--popover-foreground", "--accent", "--accent-foreground", "--border"],
+      "slots": ["trigger", "item", "separator", "label", "shortcut", "checkbox item", "radio item"],
+      "resizeContract": "Menu width is content/specimen driven; production menu should position relative to trigger and support keyboard focus.",
+      "requiredStates": ["default", "open", "hover", "disabled"],
+      "storyTestLocator": "dropdown-menu"
+    },
+    {
+      "name": "Sheet",
+      "nodeId": "76:10203",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=76-10203",
+        "category": "overlays"
+      },
+      "codeSource": "components/ui/sheet.tsx",
+      "codeExport": "Sheet",
+      "expectedVariants": {
+        "state": ["default", "open"]
+      },
+      "semanticVariables": ["--background", "--foreground", "--border", "--muted-foreground"],
+      "slots": ["trigger", "title", "description", "content", "close button"],
+      "resizeContract": "Side overlay should preserve edge alignment and responsive width constraints.",
+      "requiredStates": ["default", "open"],
+      "storyTestLocator": "sheet"
+    },
+    {
+      "name": "Tooltip",
+      "nodeId": "79:11350",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=79-11350",
+        "category": "overlays"
+      },
+      "codeSource": "components/ui/tooltip.tsx",
+      "codeExport": "Tooltip",
+      "expectedVariants": {
+        "state": ["default", "hover"]
+      },
+      "semanticVariables": ["--primary", "--primary-foreground", "--border"],
+      "slots": ["trigger", "content"],
+      "resizeContract": "Tooltip should hug content and position relative to trigger.",
+      "requiredStates": ["default", "hover"],
+      "storyTestLocator": "tooltip"
+    },
+    {
+      "name": "Breadcrumb",
+      "nodeId": "101:424",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=101-424",
+        "category": "navigation"
+      },
+      "codeSource": "components/ui/breadcrumb.tsx",
+      "codeExport": "Breadcrumb",
+      "expectedVariants": {
+        "type": ["collapsed", "custom_seperator", "dropdown", "link_component", "responsive"]
+      },
+      "semanticVariables": ["--foreground", "--muted-foreground", "--border", "--accent"],
+      "slots": ["item", "link", "separator", "dropdown", "ellipsis"],
+      "resizeContract": "Keep source spelling `custom_seperator` in Figma contract; map to corrected code spelling only in adapter.",
+      "requiredStates": ["default", "collapsed", "dropdown", "responsive"],
+      "storyTestLocator": "breadcrumb"
+    },
+    {
+      "name": "Sidebar",
+      "nodeId": "269:47",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=269-47",
+        "category": "navigation"
+      },
+      "codeSource": "components/ui/sidebar.tsx",
+      "codeExport": "Sidebar",
+      "expectedVariants": {
+        "state": ["Closed", "Open"]
+      },
+      "semanticVariables": ["--background", "--foreground", "--border", "--accent", "--accent-foreground"],
+      "slots": ["header", "nav item", "group", "footer", "collapse trigger"],
+      "resizeContract": "Reusable component sidebar; do not confuse with block-level Sidebar page.",
+      "requiredStates": ["Closed", "Open"],
+      "storyTestLocator": "sidebar"
+    },
+    {
+      "name": "Tabs",
+      "nodeId": "76:10755",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=76-10755",
+        "category": "navigation"
+      },
+      "codeSource": "components/ui/tabs.tsx",
+      "codeExport": "Tabs",
+      "expectedVariants": {
+        "source": ["standalone"]
+      },
+      "semanticVariables": ["--background", "--foreground", "--border", "--muted", "--muted-foreground"],
+      "slots": ["tab list", "tab trigger", "tab panel"],
+      "resizeContract": "Standalone specimen; production tabs should maintain stable trigger sizing and panel width.",
+      "requiredStates": ["default", "active"],
+      "storyTestLocator": "tabs"
+    },
+    {
+      "name": "Sonner",
+      "nodeId": "76:10521",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=76-10521",
+        "category": "feedback"
+      },
+      "codeSource": "components/ui/sonner.tsx",
+      "codeExport": "Sonner",
+      "expectedVariants": {
+        "type": ["default", "success", "info", "warning", "error", "promise"]
+      },
+      "semanticVariables": ["--background", "--foreground", "--border", "--muted-foreground", "--destructive"],
+      "slots": ["icon", "title", "description", "action"],
+      "resizeContract": "Toast width is fixed in source specimens; production mapping should support stack placement.",
+      "requiredStates": ["default", "success", "info", "warning", "error", "promise"],
+      "storyTestLocator": "sonner"
+    },
+    {
+      "name": "Spinner",
+      "nodeId": "1196:1175",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=1196-1175",
+        "category": "feedback"
+      },
+      "codeSource": "components/ui/spinner.tsx",
+      "codeExport": "Spinner",
+      "expectedVariants": {
+        "size": ["12", "16", "24", "32"],
+        "color": ["red", "green", "blue", "yellow"],
+        "type": ["default", "outline", "secondary", "InputGroupInput", "InputGroupTextarea"]
+      },
+      "semanticVariables": ["--foreground", "--muted-foreground", "--primary", "--secondary", "--border"],
+      "slots": ["loader", "label", "button", "badge", "input group"],
+      "resizeContract": "Primitive loader sizes are explicit; composed examples inherit host component sizing.",
+      "requiredStates": ["loading"],
+      "storyTestLocator": "spinner"
+    },
+    {
+      "name": "Badge",
+      "nodeId": "73:3479",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=73-3479",
+        "category": "data-display"
+      },
+      "codeSource": "components/ui/badge.tsx",
+      "codeExport": "Badge",
+      "expectedVariants": {
+        "type": ["default", "default_number", "destructive", "destructive_number", "outline", "secondary", "secondary_icon", "secondary_number"]
+      },
+      "semanticVariables": ["--primary", "--primary-foreground", "--secondary", "--secondary-foreground", "--destructive", "--border"],
+      "slots": ["label", "number", "icon"],
+      "resizeContract": "Badge should hug content; number and icon variants add fixed internal slots.",
+      "requiredStates": ["default"],
+      "storyTestLocator": "badge"
+    },
+    {
+      "name": "Item",
+      "nodeId": "1196:924",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=1196-924",
+        "category": "data-display"
+      },
+      "codeSource": "components/ui/item.tsx",
+      "codeExport": "Item",
+      "expectedVariants": {
+        "type": ["default", "outline", "muted"],
+        "size": ["sm", "default"],
+        "state": ["default", "open"]
+      },
+      "semanticVariables": ["--background", "--foreground", "--border", "--muted", "--muted-foreground", "--accent"],
+      "slots": ["icon", "image", "avatar", "link", "dropdown", "header", "body"],
+      "resizeContract": "Versatile content item; keep content slots composable and avoid fixed text assumptions.",
+      "requiredStates": ["default", "open"],
+      "storyTestLocator": "item"
+    },
+    {
+      "name": "Table",
+      "nodeId": "76:10620",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=76-10620",
+        "category": "data-display"
+      },
+      "codeSource": "components/ui/table.tsx",
+      "codeExport": "Table",
+      "expectedVariants": {
+        "source": ["standalone"]
+      },
+      "semanticVariables": ["--background", "--foreground", "--border", "--muted", "--muted-foreground"],
+      "slots": ["header", "row", "cell"],
+      "resizeContract": "Responsive table specimen; production table should allow horizontal overflow without text collisions.",
+      "requiredStates": ["default", "hover"],
+      "storyTestLocator": "table"
+    },
+    {
+      "name": "Card",
+      "nodeId": "73:4333",
+      "source": {
+        "designSystemSlug": "shadcn-ui-components-2026",
+        "figmaUrl": "https://www.figma.com/design/NUoNEuTJ3OZOGH2c780Z55/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community-?node-id=73-4333",
+        "category": "data-display"
+      },
+      "codeSource": "components/ui/card.tsx",
+      "codeExport": "Card",
+      "expectedVariants": {
+        "source": ["standalone"]
+      },
+      "semanticVariables": ["--card", "--card-foreground", "--border", "--muted-foreground"],
+      "slots": ["header", "title", "description", "content", "footer"],
+      "resizeContract": "Card should preserve section padding and allow content-defined height.",
+      "requiredStates": ["default"],
+      "storyTestLocator": "card"
+    }
+  ]
+}

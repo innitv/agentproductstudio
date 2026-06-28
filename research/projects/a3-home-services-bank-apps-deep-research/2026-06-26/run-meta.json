@@ -1,0 +1,15 @@
+{
+  "project_slug": "a3-home-services-bank-apps-deep-research",
+  "run_date": "2026-06-26",
+  "run_id": "2026-06-26-1782455072271",
+  "created_at": "2026-06-26T06:24:32.265Z",
+  "updated_at": "2026-06-28T08:16:15.183Z",
+  "workflow_profile": "standard",
+  "execution_mode": "local",
+  "status": "pending",
+  "source_request": "Провести глубокое исследование A3 как API-поставщика для раздела \"Дом\" в приложениях Т-Банка и Альфа-Банка: юзкейсы жильцов, данные по адресу, ГИС ЖКХ, Госуслуги.Дом, управляющая компания, тарифы, начисления, аварийные контакты, отзывы пользователей, протоколы A3.",
+  "output_dir": "C:\\Project\\product-agent-studio\\research\\projects\\a3-home-services-bank-apps-deep-research\\2026-06-26",
+  "has_reference": false,
+  "notion_publication": "unknown",
+  "last_validated_at": "2026-06-26T06:24:32.265Z"
+}
