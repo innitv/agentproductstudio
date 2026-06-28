@@ -19,6 +19,8 @@ required_inputs:
   - copy_deck
   - prototype_report
   - frontend_result
+  - figma_layout_ir
+  - figma_visual_qa
   - test_bench_result
   - stage_gate_ledger
   - handoff_bundle
@@ -31,6 +33,7 @@ skills:
   - funnel-analytics-verifier
   - seo-copy-validator
   - figma-roundtrip
+  - visual-layout-verifier
   - design-engineering
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
@@ -60,6 +63,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - `screens.md`
 - `prototype-report.md`
 - `frontend-result.md`
+- `figma-layout-ir.json` и `figma-visual-qa.json`, если workflow создавал Figma/product UI/prototype surface
 - `test-bench-result.md`
 
 ## Internal Pipeline (Внутренний процесс)
@@ -74,6 +78,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 4c. Выполнить **Source Pair Matrix Audit**: определить обязательные пары `reference_to_figma`, `figma_to_frontend`, `reference_to_frontend`, `spec_to_frontend_behavior` и проверить evidence/status по каждой. Если Figma canvas был создан, но нет metadata/object inventory и screenshot, `reference_to_figma`/`figma_to_frontend` не могут получить pass. Если frontend строился по Figma/reference, но нет paired screenshots, DOM/locator map или behavior evidence, статус QA не выше `pass_with_known_limitations`, а для must-scope — `fail/blocked`.
 4d. Выполнить **Design System Strategy Audit**: `design_system_mode` присутствует и соблюден; `reuse` не дублирует primitives, `extend` содержит gap reasons, `product_specific` не наследует legacy DS молча, `bespoke` не превращен преждевременно в огромную component matrix.
 4e. Выполнить **Figma Roundtrip Audit**: проверить visual calibration до systemization, screenshot comparison до/после, Component Contract Matrix, Code Connect/fallback status, instance/variable/resizing evidence и frame/state → route/story/component mapping.
+4f. Выполнить **Figma Layout Compiler/Verifier Audit** для `figma_board|product_ui|prototype` surfaces: `figma-layout-ir.json` существует до Figma write, route/zones/copy-fit/component sources/verification contract заполнены, `figma-visual-qa.json` создан после write, checks покрывают text height, overflow, overlap, clipping, safe area, density/hierarchy, route coherence, DS honesty и systemization regression. Если `gate_result.ready_allowed=false`, QA verdict не может быть `pass`.
 5. Выполнить **Traceability Audit**: проверить цепочку `research/JTBD/scenario-user-flow -> PRD requirement -> IA node -> design/screen -> copy -> prototype -> frontend/test signal`. Разрыв цепочки для `must` scope является blocker или high severity finding.
 6. Проверить соответствие реализации требованиям PRD и покрытие приоритетов MoSCoW.
 7. Проверить согласованность архитектуры (IA), экранов и прототипа, включая entry points, state map, navigation behavior, semantic hierarchy и completion step.
@@ -81,7 +86,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 9. **Визуальная скриншот-сверка:** При наличии визуального референса применить навык [visual-diff-verifier/SKILL.md](file:///c:/Project/product-agent-studio/agent-pack/skills/visual-diff-verifier/SKILL.md) для поблочного Playwright-сравнения desktop/mobile версий с референсным сайтом. Desktop-only проверка запрещена для финального pass.
 10. Проверить доступность (accessibility), адаптивное поведение (responsiveness), keyboard path и прохождение основного сценария.
 11. Выполнить **Negative & Edge Path Pass**: проверить empty/error/loading/validation/success states, невалидные формы, повторный submit, длинный текст, mobile overflow и отсутствие скрытых blockers на touch/keyboard.
-12. Если есть `figma-handoff-bundle.md`, проверить Figma handoff fidelity: variables/components/states/Auto Layout rules имеют соответствие во frontend или явно описанные deviations.
+12. Если есть `figma-handoff-bundle.md`, проверить Figma handoff fidelity: variables/components/states/Auto Layout rules имеют соответствие во frontend или явно описанные deviations. Если есть `figma-layout-ir.json`/`figma-visual-qa.json`, сверить `frontend-result.md` с route/zones/component sources и visual QA deviations.
 13. Проверить design-engineering слой: motion duration/easing, отсутствие `transition: all`, `prefers-reduced-motion`, focus/active states, hover только для fine pointer, отсутствие лишних анимаций на частых keyboard actions.
 14. Проверить спецификацию аналитики и отсутствие рисков утечки персональных данных (PII).
 15. Выполнить **Security & Sensitive Data Pass**: проверить отсутствие secrets, токенов, raw PII, unsafe analytics payloads, fake external publication claims и случайных дампов provider outputs.
@@ -141,6 +146,8 @@ QA-агент обязан проверить:
 - Motion/interactions не могут считаться passed, если в пользовательском UI есть `transition: all`, отсутствует reduced-motion fallback для transform-based motion, hover-анимации срабатывают на touch или интерактивные элементы не имеют видимого focus/active состояния.
 - Figma handoff не может считаться passed, если canvas write заявлен как выполненный, но нет target/node evidence, screenshot verification или список созданных frames/components. Если handoff содержит Auto Layout/variables/component sets, QA проверяет их наличие или зафиксированные deviations.
 - Figma handoff не может считаться passed, если `design_system_mode` отсутствует или новая/расширенная система не имеет visual calibration evidence до systemization.
+- Figma surface не может считаться passed, если отсутствует `figma-layout-ir.json` до write или `figma-visual-qa.json` после write. Если `figma-visual-qa.json.gate_result.ready_allowed=false`, QA ставит `fail/blocked` для must-scope, пока repair/deviation не зафиксированы.
+- Figma surface не может считаться passed, если visual QA не проверяет text height, overflow, overlap, clipping, safe area, route coherence и DS instance honesty для required screens.
 - Figma-driven frontend не может считаться passed без Component Contract Matrix, обязательного state catalog и paired Figma/browser screenshots.
 - Source pair matrix не может считаться passed, если обязательная пара отсутствует в `visual-reference-review.md`, `frontend-result.md` или QA evidence plan. Pixel diff не заменяет Figma metadata, DOM/locator или behavior checks.
 - Статус внешних публикаций/записей должен строго соответствовать матрице одобрений (Approval Matrix).

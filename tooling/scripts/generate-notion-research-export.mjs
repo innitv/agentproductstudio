@@ -24,6 +24,20 @@ const sourceFileSlots = [
   { required: true, files: ["swot.md"] },
   { required: false, files: ["source-log.md"] },
 ];
+const promotedPublicationSectionRules = [
+  {
+    title: "CJM и сценарии",
+    marker: "cjm",
+    files: new Set(["research-summary.md", "scenario-user-flows.md", "cjm-map.md"]),
+    match: /^(CJM и сценарии|CJM и карта сценариев|Сквозной user flow под CJM|Общая модель CJM|Матрица сценариев CJM)$/iu,
+  },
+  {
+    title: "ICE/RICE бэклог",
+    marker: "scoring",
+    files: new Set(["research-summary.md", "swot.md", "opportunity-roadmap.md"]),
+    match: /^(ICE\/RICE backlog|ICE\/RICE бэклог|Opportunity Roadmap|Возможности, приоритизация ICE\/RICE и дорожная карта|Opportunity Backlog|ICE Matrix|RICE Matrix)$/iu,
+  },
+];
 const requiredFiles = resolveSourceFiles(runDir, sourceFileSlots);
 const missing = sourceFileSlots
   .filter((slot) => slot.required && !slot.files.some((file) => existsSync(join(runDir, file))))
@@ -35,10 +49,7 @@ if (missing.length > 0) {
 
 // Publication Editor Pass: keep public Notion export curated; internal ledger/debug
 // sections stay in local publication records, not in the public hub.
-const sections = requiredFiles.map((file) => ({
-  file,
-  markdown: normalizeMarkdown(readFileSync(join(runDir, file), "utf8"), file),
-}));
+const sections = requiredFiles.flatMap((file) => buildExportSections(file, readFileSync(join(runDir, file), "utf8")));
 
 const exportMarkdown = [
   `# ${inferExportTitle(runMeta)}`,
@@ -47,9 +58,9 @@ const exportMarkdown = [
   "",
   ...sections.flatMap((section) => [
     `## ${titleForFile(section.file)}`,
-    markerForFile(section.file),
+    markerForSection(section),
     "",
-    ...demoteMarkdown(section.markdown).split(/\r?\n/),
+    ...demoteMarkdown(localizeMarkdownForPublication(section.markdown)).split(/\r?\n/),
     "",
   ]),
 ].join("\n");
@@ -68,6 +79,69 @@ function normalizeMarkdown(markdown, file) {
     .trim();
 
   return removeEmptyHeadings(removeNotionInternalSections(normalized, file));
+}
+
+function buildExportSections(file, rawMarkdown) {
+  const normalized = normalizeMarkdown(rawMarkdown, file);
+  const { markdown, promotedSections } = extractPromotedPublicationSections(normalized, file);
+  const sections = [];
+
+  if (markdown.trim()) {
+    sections.push({
+      file,
+      title: titleForFile(file),
+      marker: markerForFile(file),
+      markdown,
+    });
+  }
+
+  sections.push(...promotedSections);
+  return sections;
+}
+
+function extractPromotedPublicationSections(markdown, file) {
+  const lines = markdown.split("\n");
+  const kept = [];
+  const promotedSections = [];
+
+  for (let index = 0; index < lines.length;) {
+    const heading = lines[index].match(/^(#{1,6})\s+(.+?)\s*$/);
+    const rule = heading ? promotedPublicationSectionRules.find((candidate) =>
+      candidate.files.has(file) && candidate.match.test(heading[2].trim())
+    ) : null;
+
+    if (!rule || !heading) {
+      kept.push(lines[index]);
+      index += 1;
+      continue;
+    }
+
+    const level = heading[1].length;
+    let end = index + 1;
+    while (end < lines.length) {
+      const nextHeading = lines[end].match(/^(#{1,6})\s+\S/);
+      if (nextHeading && nextHeading[1].length <= level) {
+        break;
+      }
+      end += 1;
+    }
+
+    const body = lines.slice(index + 1, end).join("\n").trim();
+    if (body) {
+      promotedSections.push({
+        file: `${file}:${rule.marker}`,
+        title: rule.title,
+        marker: rule.marker,
+        markdown: body,
+      });
+    }
+    index = end;
+  }
+
+  return {
+    markdown: removeEmptyHeadings(kept.join("\n").trim()),
+    promotedSections,
+  };
 }
 
 function removeNotionInternalSections(markdown, file) {
@@ -183,6 +257,132 @@ function demoteMarkdown(markdown) {
     .join("\n");
 }
 
+function localizeMarkdownForPublication(markdown) {
+  return localizeMarkdownTableHeaders(markdown)
+    .replace(/^Status:\s*ready\s*$/gim, "Статус: готово")
+    .replace(/\bsource-backed\b/g, "подтверждено источниками")
+    .replace(/\bneeds_validation\b/g, "нужно проверить")
+    .replace(/\bsource-informed\b/g, "основано на источниках")
+    .replace(/\breview-informed\b/g, "основано на отзывах")
+    .replace(/\bsynthetic\b/g, "синтетическая гипотеза")
+    .replace(/\bopen\b/g, "открыто");
+}
+
+function localizeMarkdownTableHeaders(markdown) {
+  const lines = markdown.split("\n");
+  return lines.map((line, index) => {
+    if (!line.trim().startsWith("|") || !lines[index + 1]?.trim().startsWith("|")) {
+      return line;
+    }
+
+    if (!/^\|\s*:?-{3,}/.test(lines[index + 1].trim())) {
+      return line;
+    }
+
+    const cells = splitMarkdownTableRow(line);
+    if (!cells.length) {
+      return line;
+    }
+
+    return `| ${cells.map(localizeTableHeader).join(" | ")} |`;
+  }).join("\n");
+}
+
+function splitMarkdownTableRow(line) {
+  return line.split("|").slice(1, -1).map((cell) => cell.trim());
+}
+
+function localizeTableHeader(header) {
+  const normalized = header.trim().replace(/\s+/g, " ");
+  const key = normalized.toLowerCase();
+  const map = {
+    "persona": "Персона",
+    "segment": "Сегмент",
+    "jtbd": "Задача",
+    "trigger": "Триггер",
+    "pain": "Боль",
+    "desired outcome": "Ценность",
+    "evidence status": "Статус доказательств",
+    "buying / adoption context": "Контекст принятия",
+    "objections": "Возражения",
+    "trust signals": "Сигналы доверия",
+    "success metric": "Метрика успеха",
+    "evidence": "Доказательство",
+    "source": "Источник",
+    "confidence": "Уверенность",
+    "needs validation": "Что проверить",
+    "what to validate": "Что проверить",
+    "who": "Кто",
+    "method": "Метод",
+    "minimum signal": "Минимальный сигнал",
+    "name": "Игрок",
+    "type": "Тип",
+    "category": "Категория",
+    "source url": "URL источника",
+    "what it proves": "Что подтверждает",
+    "capability": "Возможность",
+    "bank + a3 opportunity": "Возможность для банка и A3",
+    "evidence / risk": "Доказательство / риск",
+    "scenario": "Сценарий",
+    "priority": "Приоритет",
+    "validation": "Проверка",
+    "risk": "Риск",
+    "why it matters": "Почему важно",
+    "mitigation": "Снижение риска",
+    "quadrant": "Квадрант",
+    "item": "Пункт",
+    "implication": "Вывод",
+    "decision": "Решение",
+    "rationale": "Обоснование",
+    "interview": "Интервью",
+    "key paraphrase": "Ключевая формулировка",
+    "question": "Вопрос",
+    "why ask": "Зачем спрашивать",
+    "expected decision": "Какое решение проверяет",
+    "opportunity": "Возможность",
+    "pattern": "Паттерн",
+    "how to validate with real evidence": "Как проверить реальными данными",
+    "research question": "Исследовательский вопрос",
+    "decision unlocked": "Какое решение открывает",
+    "evidence needed": "Какие доказательства нужны",
+    "status": "Статус",
+    "used for": "Где использовано",
+    "quality note": "Комментарий к качеству",
+    "finding": "Наблюдение",
+    "case": "Кейс",
+    "validation_metric": "Метрика проверки",
+    "stage": "Этап",
+    "cjm link": "Сценарий",
+    "initiative": "Инициатива",
+    "why this order": "Почему такой порядок",
+    "validation method": "Метод проверки",
+    "a3 home services response": "Ответ A3 Home Services",
+    "source-backed evidence": "Доказательство из источников",
+    "current evidence": "Текущее доказательство",
+    "claim": "Гипотеза",
+    "hypothesis": "Гипотеза",
+    "who to interview or observe": "Кого интервьюировать или наблюдать",
+    "minimum evidence": "Минимальное доказательство",
+    "field": "Поле",
+    "content": "Содержание",
+    "flow": "Флоу",
+    "step": "Шаг",
+    "exception": "Исключение",
+    "product response": "Продуктовый ответ",
+    "severity": "Серьезность",
+  };
+
+  if (map[key]) {
+    return map[key];
+  }
+
+  if (/^боли$/iu.test(normalized)) {
+    return "Боль";
+  }
+
+  return humanHeading(normalized);
+}
+
 function humanHeading(title) {
   const normalized = title.trim();
   return {
@@ -228,6 +428,14 @@ function humanHeading(title) {
 }
 
 function titleForFile(file) {
+  if (file.includes(":")) {
+    const [, marker] = file.split(":");
+    return {
+      cjm: "CJM и сценарии",
+      scoring: "ICE/RICE бэклог",
+    }[marker] || file;
+  }
+
   return {
     "research-summary.md": "Сводка исследования",
     "scenario-matrix.md": "Матрица сценариев и путь ценности",
@@ -242,6 +450,18 @@ function titleForFile(file) {
     "swot.md": "SWOT-анализ",
     "source-log.md": "Источники и журнал доказательств",
   }[file] || file;
+}
+
+function markerForSection(section) {
+  if (!section.marker) {
+    return markerForFile(section.file);
+  }
+
+  if (section.marker.startsWith("<!--")) {
+    return section.marker;
+  }
+
+  return `<!-- notion-section: ${section.marker} -->`;
 }
 
 function markerForFile(file) {

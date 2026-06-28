@@ -18,6 +18,7 @@
     "state_inventory",
     "responsive_constraints",
     "accessibility_notes",
+    "layout_compiler_contract",
     "figma_readiness",
     "acceptance_notes"
   ],
@@ -173,6 +174,30 @@
           "success": { "type": "string" },
           "disabled_permission": { "type": "string" }
         }
+      }
+    },
+    "layout_compiler_contract": {
+      "type": "object",
+      "required": [
+        "figma_layout_ir_required",
+        "layout_ir_status",
+        "route_compiled",
+        "screen_zones_compiled",
+        "copy_fit_constraints_compiled",
+        "component_sources_compiled",
+        "verification_contract_compiled"
+      ],
+      "properties": {
+        "figma_layout_ir_required": { "type": "boolean" },
+        "layout_ir_status": { "enum": ["ready", "partial", "blocked", "not_required"] },
+        "layout_ir_path": { "type": "string" },
+        "route_compiled": { "type": "boolean" },
+        "screen_zones_compiled": { "type": "boolean" },
+        "copy_fit_constraints_compiled": { "type": "boolean" },
+        "component_sources_compiled": { "type": "boolean" },
+        "verification_contract_compiled": { "type": "boolean" },
+        "visual_qa_required": { "type": "boolean" },
+        "blocker_deviation": { "type": "string" }
       }
     },
     "responsive_constraints": {

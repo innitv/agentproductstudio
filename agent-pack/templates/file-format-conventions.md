@@ -56,7 +56,9 @@ Task ExecPlan не заменяет `run-plan.md` полного workflow. SOP �
 - `STYLE_GUIDE.md` -> `agent-pack/artifacts/design/style-guide.template.md`
 - `design-generator-prompt.md` -> `agent-pack/artifacts/design/design-generator-prompt.template.md`
 - `design-loop-report.md` -> `agent-pack/artifacts/design/design-loop-report.template.md`
+- `figma-layout-ir.json` -> `agent-pack/schemas/figma-layout-ir.schema.json`
 - `figma-handoff-bundle.md` -> `agent-pack/artifacts/design/figma-handoff-bundle.template.md`
+- `figma-visual-qa.json` -> `agent-pack/schemas/figma-visual-qa.schema.json`
 - `visual-reference-review.md` -> `agent-pack/artifacts/design/visual-reference-review.template.md` для reference/Figma/frontend source-pair evidence
 - `storybook-result.md` -> `agent-pack/artifacts/frontend/storybook-result.template.md`
 

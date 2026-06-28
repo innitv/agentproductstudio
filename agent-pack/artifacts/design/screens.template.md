@@ -159,6 +159,21 @@
 | Figma frame / state | Node / screenshot evidence | Frontend route / story / component | Behavior test | Status |
 |---|---|---|---|---|
 
+## Layout Compiler Contract
+
+| Field | Value |
+|---|---|
+| `figma-layout-ir.json` required | yes / no |
+| Layout IR status | `ready` / `partial` / `blocked` / `not_required` |
+| Route compiled | yes / no |
+| Screen zones compiled | yes / no |
+| Copy-fit constraints compiled | yes / no |
+| Component sources / DS honesty compiled | yes / no |
+| Verification contract requires screenshots | yes / no |
+| Verification contract requires object inventory | yes / no |
+| Verification contract requires visual QA | yes / no |
+| Blocker / deviation |  |
+
 ## State Inventory
 
 | Surface | Default | Loading | Empty | Error | Validation | Success | Disabled / Permission |

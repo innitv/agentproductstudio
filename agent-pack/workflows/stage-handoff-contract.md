@@ -11,7 +11,7 @@
 - `handoff-bundle.md` после каждого этапа должен перечислять completed artifacts, решения, assumptions, risks, open questions и next required artifact.
 - `stage-gate-ledger.md` после каждого этапа должен фиксировать stage status, gate notes, validation state и blockers/deviations.
 - Design/Figma/frontend handoff должен фиксировать `design_system_mode=reuse|extend|product_specific|bespoke`; наличие существующей системы не означает обязательный reuse.
-- Для Figma-driven surfaces обязательны visual calibration до systemization, Component Contract Matrix и frame/state -> route/story/component mapping.
+- Для Figma-driven surfaces обязательны visual calibration до systemization, `figma-layout-ir.json` до Figma write, `figma-visual-qa.json` после write, Component Contract Matrix и frame/state -> route/story/component mapping.
 
 ## Матрица этапов
 
@@ -23,12 +23,12 @@
 | `03-ia` | `ia` | `prd.md`, `research-summary.md`, `scenario-user-flows.md` | `ia-brief.md` | Design, screens, prototype, frontend, test bench, QA. |
 | `04-design` | `design` | `prd.md`, `research-summary.md`, `scenario-user-flows.md`, `ia-brief.md` | `design-brief.md` с Design System Strategy; для reference profile также `reference-analysis.md` | Copy, screens, prototype, frontend, visual reference review, QA. |
 | `05-copy` | `copywriting` | `prd.md`, `design-brief.md`, `research-summary.md`, `scenario-user-flows.md` | `copy-deck.md` | Screens, prototype, frontend, QA. |
-| `06-screens` | `design-generator` | `prd.md`, `ia-brief.md`, `design-brief.md`, `copy-deck.md` | `screens.md` с Component Contract Matrix и Frame/State Implementation Map; optional `design-loop-report.md`, `figma-handoff-bundle.md` | Prototype, frontend, visual reference review, QA. |
+| `06-screens` | `design-generator` | `prd.md`, `ia-brief.md`, `design-brief.md`, `copy-deck.md` | `screens.md` с Component Contract Matrix и Frame/State Implementation Map; optional `design-loop-report.md`, `figma-layout-ir.json`, `figma-handoff-bundle.md`, `figma-visual-qa.json` после approved Figma write | Prototype, frontend, visual reference review, QA. |
 | `07-prototype` | `prototype` | `prd.md`, `ia-brief.md`, `design-brief.md`, `screens.md`, `copy-deck.md`, `handoff-bundle.md` | `prototype-report.md` | Frontend, test bench, QA. |
-| `08-frontend` | `frontend` | `prd.md`, `ia-brief.md`, `design-brief.md`, `screens.md`, `copy-deck.md`, `prototype-report.md`; при Figma handoff также `figma-handoff-bundle.md`; начиная с этого этапа использовать сжатый `handoff-bundle.md` | `frontend-result.md` с component/state mapping и roundtrip deviations; optional `storybook-result.md`/state catalog | Visual reference review, test bench, QA, release. |
+| `08-frontend` | `frontend` | `prd.md`, `ia-brief.md`, `design-brief.md`, `screens.md`, `copy-deck.md`, `prototype-report.md`; при Figma handoff также `figma-layout-ir.json`, `figma-handoff-bundle.md`, `figma-visual-qa.json`; начиная с этого этапа использовать сжатый `handoff-bundle.md` | `frontend-result.md` с component/state mapping, visual QA gate summary и roundtrip deviations; optional `storybook-result.md`/state catalog | Visual reference review, test bench, QA, release. |
 | `09-visual-reference` | `qa-review` | `reference-analysis.md`, `design-brief.md`, `screens.md`, `frontend-result.md`, `reference_url`, `local_url`, `screenshots` | `visual-reference-review.md` | Test bench и QA в reference profile. |
 | `10-test-bench` | `test-bench` | `recursive-brief.md`, `research-summary.md`, `scenario-user-flows.md`, `prd.md`, `ia-brief.md`, `prototype-report.md`, `frontend-result.md`; для reference profile также `visual-reference-review.md` | `test-bench-result.md` | QA и release. |
-| `11-qa` | `qa-review` | `recursive-brief.md`, полный research pack, `prd.md`, `ia-brief.md`, `design-brief.md`, `screens.md`, `copy-deck.md`, `prototype-report.md`, `frontend-result.md`, `test-bench-result.md`, `stage-gate-ledger.md`, `handoff-bundle.md`; для reference profile также `visual-reference-review.md` | `qa-report.md` | Release и финальный ответ оркестратора. |
+| `11-qa` | `qa-review` | `recursive-brief.md`, полный research pack, `prd.md`, `ia-brief.md`, `design-brief.md`, `screens.md`, `copy-deck.md`, `prototype-report.md`, `frontend-result.md`, `test-bench-result.md`, `stage-gate-ledger.md`, `handoff-bundle.md`; для Figma surface также `figma-layout-ir.json`, `figma-handoff-bundle.md`, `figma-visual-qa.json`; для reference profile также `visual-reference-review.md` | `qa-report.md` | Release и финальный ответ оркестратора. |
 | `12-release` | `release` | `qa-report.md`, `frontend-result.md`, `test-bench-result.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, `artifact-manifest.json`, `run-index.md`, `changed_files`, `validation` | `release-notes.md` | Финальный пакет и handoff пользователю. |
 
 ## Передача research
@@ -56,10 +56,10 @@ Research больше не передает downstream только кратку
 ## Передача Figma ↔ frontend
 
 - Design выбирает `reuse|extend|product_specific|bespoke`; новая система под продукт является штатным результатом.
-- Screens передает visual calibration verdict, Component Contract Matrix и frame/state mapping.
-- Figma handoff передает exact nodes/screenshots, variables/instances/resizing evidence и Code Connect/fallback status.
+- Screens передает visual calibration verdict, `figma-layout-ir.json`, Component Contract Matrix и frame/state mapping.
+- Figma handoff передает exact nodes/screenshots, variables/instances/resizing evidence, Code Connect/fallback status и `figma-visual-qa.json` после write.
 - Frontend не создает параллельный primitive без `gap_reason` и возвращает React prop/state/test mapping.
-- QA сравнивает не только pixels, но и properties, states, instances, bindings, behavior и accepted deviations.
+- QA сравнивает не только pixels, но и IR route/zones/copy-fit, visual QA checks, properties, states, instances, bindings, behavior и accepted deviations.
 
 ## Передача во внешние поверхности
 

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { optimizedImageSources } from "./optimized-images";
 import "./styles.css";
 
 type CompanyId = "a3" | "rtk" | "smlt";
@@ -53,16 +54,19 @@ type Company = {
   index: string;
   name: string;
   industry: string;
-  years: string;
+  years?: string;
   description: string;
   cases: CaseStudy[];
 };
 
 const pageTransition = {
-  duration: 0.42,
+  duration: 0.28,
   ease: [0.22, 1, 0.36, 1] as const,
 };
-const loaderMinimumMs = 260;
+const revealTransition = {
+  duration: 0.24,
+  ease: [0.22, 1, 0.36, 1] as const,
+};
 const contacts = [
   { label: "tg", href: "https://t.me/innitv", external: true },
   { label: "email", href: "mailto:ignatov@a-3.ru", external: false },
@@ -79,7 +83,7 @@ const companies: Company[] = [
     index: "I",
     name: "А3",
     industry: "B2B-платежи",
-    years: "2022—2024",
+    years: "2025—н.в.",
     description:
       "Платежные сценарии для бизнеса: главный экран кабинета, регистрация, дизайн-система, токены и AI-эксперименты для landing/research.",
     cases: [
@@ -451,7 +455,7 @@ const companies: Company[] = [
     index: "II",
     name: "РТК",
     industry: "B2C-сервисы",
-    years: "2020—2022",
+    years: "2024—2025",
     description:
       "Подписки, управление услугами, web-сценарии и onboarding: интерфейсы для массового пользователя, где важно быстро понять состояние услуги.",
     cases: [
@@ -717,7 +721,7 @@ const companies: Company[] = [
     index: "III",
     name: "Самолет",
     industry: "Proptech",
-    years: "2018—2020",
+    years: "2023—2024",
     description:
       "B2B/B2E-инструменты для стройки и недвижимости: планирование, цифровые двойники, карта опций и контроль соответствия.",
     cases: [
@@ -865,6 +869,10 @@ function portfolioPath(path = "") {
   return `${portfolioBasePath}${suffix}` || "/";
 }
 
+function companyKicker(company: Company) {
+  return [company.industry, company.years].filter(Boolean).join(" · ");
+}
+
 function getRoute() {
   const parts = getRouteParts();
   const companyId = parts[0] as CompanyId | undefined;
@@ -879,11 +887,6 @@ function push(path: string) {
 
 export function PortfolioView() {
   const [route, setRoute] = React.useState(getRoute);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const lastRouteKey = React.useRef<string | null>(null);
-  const loadingStartedAt = React.useRef(Date.now());
-  const activeRouteKey = React.useRef("home-index");
-  const loaderTimeout = React.useRef<number | undefined>(undefined);
 
   React.useEffect(() => {
     const handleRoute = () => setRoute(getRoute());
@@ -894,38 +897,6 @@ export function PortfolioView() {
   const company = companies.find((item) => item.id === route.companyId);
   const caseStudy = company?.cases.find((item) => item.id === route.caseId);
   const routeKey = `${route.companyId ?? "home"}-${route.caseId ?? "index"}`;
-
-  React.useEffect(() => {
-    activeRouteKey.current = routeKey;
-    window.clearTimeout(loaderTimeout.current);
-
-    if (lastRouteKey.current === null || lastRouteKey.current === routeKey) {
-      lastRouteKey.current = routeKey;
-      setIsLoading(false);
-      return () => window.clearTimeout(loaderTimeout.current);
-    }
-
-    lastRouteKey.current = routeKey;
-    loadingStartedAt.current = Date.now();
-    setIsLoading(true);
-
-    return () => window.clearTimeout(loaderTimeout.current);
-  }, [routeKey]);
-
-  const handlePageReady = React.useCallback((readyRouteKey: string) => {
-    if (readyRouteKey !== activeRouteKey.current) {
-      return;
-    }
-
-    const elapsed = Date.now() - loadingStartedAt.current;
-    const delay = Math.max(0, loaderMinimumMs - elapsed);
-    window.clearTimeout(loaderTimeout.current);
-    loaderTimeout.current = window.setTimeout(() => {
-      if (readyRouteKey === activeRouteKey.current) {
-        setIsLoading(false);
-      }
-    }, delay);
-  }, []);
 
   const page = (() => {
     if (company && caseStudy) {
@@ -942,32 +913,9 @@ export function PortfolioView() {
   return (
     <div className="portfolio-stage">
       <AnimatePresence initial={false}>
-        {React.cloneElement(page, { key: routeKey, onReady: () => handlePageReady(routeKey) })}
+        {React.cloneElement(page, { key: routeKey })}
       </AnimatePresence>
-      <AnimatePresence>{isLoading && <PortfolioLoader key="portfolio-loader" />}</AnimatePresence>
     </div>
-  );
-}
-
-function PortfolioLoader() {
-  return (
-    <motion.div
-      className="portfolio-loader"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.18 }}
-      aria-live="polite"
-      aria-label="Загрузка страницы портфолио"
-    >
-      <motion.div
-        className="portfolio-loader-line"
-        initial={{ scaleX: 0, transformOrigin: "0% 50%" }}
-        animate={{ scaleX: 1 }}
-        transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
-      />
-      <span>Загрузка</span>
-    </motion.div>
   );
 }
 
@@ -985,9 +933,9 @@ function MotionPage({
   return (
     <motion.main
       className={className}
-      initial={prefersReducedMotion ? false : { opacity: 0, y: 18, filter: "blur(8px)" }}
-      animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, filter: "blur(0px)" }}
-      exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -12, filter: "blur(4px)" }}
+      initial={prefersReducedMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       transition={pageTransition}
       onAnimationComplete={onReady}
     >
@@ -1010,10 +958,10 @@ function MotionReveal({
   return (
     <motion.div
       className={className}
-      initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
-      whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+      initial={prefersReducedMotion ? false : { opacity: 0 }}
+      whileInView={{ opacity: 1 }}
       viewport={{ once: true, margin: "-12% 0px -12% 0px" }}
-      transition={{ ...pageTransition, delay }}
+      transition={{ ...revealTransition, delay }}
     >
       {children}
     </motion.div>
@@ -1030,10 +978,10 @@ function PortfolioHome({ onReady }: { onReady?: () => void }) {
         animate="visible"
         variants={{
           hidden: {},
-          visible: { transition: { staggerChildren: 0.08, delayChildren: 0.08 } },
+          visible: { transition: { staggerChildren: 0.04, delayChildren: 0.04 } },
         }}
       >
-        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={pageTransition}>
+        <motion.div variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }} transition={revealTransition}>
           <p className="portfolio-kicker">Портфолио</p>
           <h1 aria-label="Дизайнер сложных продуктов">
             Дизайнер
@@ -1041,7 +989,7 @@ function PortfolioHome({ onReady }: { onReady?: () => void }) {
             <em>сложных продуктов</em>
           </h1>
         </motion.div>
-        <motion.div className="portfolio-hero-copy" variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={pageTransition}>
+        <motion.div className="portfolio-hero-copy" variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }} transition={revealTransition}>
           <p>
             Проектирую B2B-платежи, сервисные кабинеты, подписки и proptech-инструменты,
             где важны сценарии, статусы, данные и понятные действия.
@@ -1057,9 +1005,9 @@ function PortfolioHome({ onReady }: { onReady?: () => void }) {
             aria-label={`Открыть компанию ${company.name}, ${company.cases.length} кейсов`}
             onClick={() => push(portfolioPath(company.id))}
             type="button"
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...pageTransition, delay: 0.12 + index * 0.08 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ ...revealTransition, delay: 0.08 + index * 0.04 }}
           >
             <span className="portfolio-tile-top">
               <span className="portfolio-row-index">{company.index}</span>
@@ -1071,7 +1019,7 @@ function PortfolioHome({ onReady }: { onReady?: () => void }) {
             </span>
             <span className="portfolio-tile-footer">
               <span className="portfolio-tile-meta-row">
-                <span className="portfolio-row-meta">{company.years}</span>
+                <span className="portfolio-row-meta">{company.years ?? company.industry}</span>
                 <span className="portfolio-row-count">
                   {company.cases.length}
                   <span>кейса</span>
@@ -1102,14 +1050,20 @@ function CompanyPage({ company, onReady }: { company: Company; onReady?: () => v
       <section className="portfolio-company-hero">
         <MotionReveal delay={0.04}>
           <p className="portfolio-kicker">
-            {company.industry} · {company.years}
+            {companyKicker(company)}
           </p>
           <h1>{company.name}</h1>
         </MotionReveal>
         <MotionReveal delay={0.1}>
-          <p>{company.description}</p>
+          <p className="portfolio-company-lead">{company.description}</p>
         </MotionReveal>
       </section>
+      <div className="portfolio-case-section-head" aria-hidden="true">
+        <span>Кейсы</span>
+        <strong>
+          {company.cases.length} {company.cases.length === 1 ? "проект" : "проекта"}
+        </strong>
+      </div>
       <section className="portfolio-case-tiles" aria-label={`Кейсы компании ${company.name}`}>
         {company.cases.map((caseStudy, index) => (
           <motion.button
@@ -1118,9 +1072,9 @@ function CompanyPage({ company, onReady }: { company: Company; onReady?: () => v
             aria-label={`Открыть кейс ${caseStudy.title}`}
             onClick={() => push(portfolioPath(`${company.id}/case/${caseStudy.id}`))}
             type="button"
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...pageTransition, delay: 0.12 + index * 0.07 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ ...revealTransition, delay: 0.08 + index * 0.04 }}
           >
             <span className="portfolio-tile-top">
               <span className="portfolio-row-index">{caseStudy.index}</span>
@@ -1133,8 +1087,7 @@ function CompanyPage({ company, onReady }: { company: Company; onReady?: () => v
             <span className="portfolio-row-description">{caseStudy.summary}</span>
             <span className="portfolio-tile-footer">
               <span className="portfolio-tile-meta-row">
-                <span className="portfolio-row-meta">{caseStudy.year}</span>
-                <span className="portfolio-case-impact">{caseStudy.impact}</span>
+                <span className="portfolio-row-meta portfolio-row-meta--impact">{caseStudy.impact}</span>
               </span>
               <span className="portfolio-tile-cta">
                 Читать кейс <span>→</span>
@@ -1252,12 +1205,10 @@ function CasePage({
       </div>
       <section className="portfolio-article-hero">
         <MotionReveal delay={0.04}>
-          <h1 aria-label={`${caseStudy.title}. ${caseStudy.subtitle}`}>
-            {caseStudy.title}
-            <br />
-            <em>{caseStudy.subtitle}</em>
-          </h1>
-          <p>{caseStudy.summary}</p>
+          <h1 aria-label={`${caseStudy.title}. ${caseStudy.subtitle}`}>{caseStudy.title}</h1>
+          <p>
+            <strong>{caseStudy.subtitle}.</strong> {caseStudy.summary}
+          </p>
         </MotionReveal>
       </section>
       <div className="portfolio-article-layout">
@@ -1396,10 +1347,10 @@ function ArticleSection({
     <motion.section
       className="portfolio-article-section"
       id={id}
-      initial={{ opacity: 0, y: 26 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
       viewport={{ once: true, margin: "-18% 0px -18% 0px" }}
-      transition={pageTransition}
+      transition={revealTransition}
     >
       <h2>
         <span>{index}</span>
@@ -1443,12 +1394,12 @@ function CaseSectionContent({ section }: { section: CaseDetailSection }) {
             <motion.figure
               className="portfolio-source-slide"
               key={video.src}
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               viewport={{ once: true, margin: "-10% 0px" }}
-              transition={pageTransition}
+              transition={revealTransition}
             >
-              <video controls playsInline preload="metadata" src={video.src} />
+              <LazyVideo src={video.src} />
               <figcaption>{video.caption}</figcaption>
             </motion.figure>
           ))}
@@ -1458,22 +1409,87 @@ function CaseSectionContent({ section }: { section: CaseDetailSection }) {
   );
 }
 
+function useNearViewport<T extends HTMLElement>(rootMargin = "420px 0px") {
+  const ref = React.useRef<T | null>(null);
+  const [isNearViewport, setIsNearViewport] = React.useState(false);
+
+  React.useEffect(() => {
+    const node = ref.current;
+
+    if (!node || isNearViewport) {
+      return;
+    }
+
+    if (!("IntersectionObserver" in window)) {
+      setIsNearViewport(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsNearViewport(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin },
+    );
+
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, [isNearViewport, rootMargin]);
+
+  return [ref, isNearViewport] as const;
+}
+
 function MediaImage({ alt, src }: { alt: string; src: string }) {
   const [isLoaded, setIsLoaded] = React.useState(false);
+  const [frameRef, shouldLoad] = useNearViewport<HTMLSpanElement>();
+  const optimizedSource = optimizedImageSources[src];
+
+  React.useEffect(() => {
+    setIsLoaded(false);
+  }, [src]);
 
   return (
-    <span className={`portfolio-media-frame ${isLoaded ? "is-loaded" : ""}`}>
-      <motion.img
-        alt={alt}
-        src={src}
-        loading="lazy"
-        decoding="async"
-        initial={{ opacity: 0, scale: 0.985 }}
-        animate={isLoaded ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.985 }}
-        transition={pageTransition}
-        onLoad={() => setIsLoaded(true)}
-      />
+    <span ref={frameRef} className={`portfolio-media-frame ${isLoaded ? "is-loaded" : ""}`}>
+      {shouldLoad && (
+        <picture>
+          {optimizedSource && (
+            <source
+              sizes={optimizedSource.sizes}
+              srcSet={optimizedSource.srcSet}
+              type={optimizedSource.type}
+            />
+          )}
+          <motion.img
+            alt={alt}
+            src={src}
+            loading="lazy"
+            decoding="async"
+            initial={{ opacity: 0, scale: 0.985 }}
+            animate={isLoaded ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.985 }}
+            transition={pageTransition}
+            onLoad={() => setIsLoaded(true)}
+          />
+        </picture>
+      )}
     </span>
+  );
+}
+
+function LazyVideo({ src }: { src: string }) {
+  const [frameRef, shouldLoad] = useNearViewport<HTMLVideoElement>("260px 0px");
+
+  return (
+    <video
+      ref={frameRef}
+      controls
+      playsInline
+      preload={shouldLoad ? "metadata" : "none"}
+      src={shouldLoad ? src : undefined}
+    />
   );
 }
 

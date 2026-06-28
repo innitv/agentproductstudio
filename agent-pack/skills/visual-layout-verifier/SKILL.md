@@ -11,6 +11,7 @@ mcp_servers:
 strictness_profile: strict
 owner_stage_ids:
   - 06-screens
+  - 08-frontend
   - 11-qa
 required_inputs:
   - figma_layout_ir

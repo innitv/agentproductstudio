@@ -43,6 +43,17 @@
 | Figma frame/state | Node/screenshot | Frontend route/story/component | Paired screenshot | Behavior evidence | Status |
 |---|---|---|---|---|---|
 
+### Figma Visual QA Gate Summary
+
+| Field | Value |
+|---|---|
+| `figma-layout-ir.json` input | present / missing / not_applicable |
+| `figma-visual-qa.json` input | present / missing / not_applicable |
+| Visual QA verdict | passed / passed_with_notes / blocked / not_applicable |
+| `ready_allowed` | true / false / not_applicable |
+| Blocked checks |  |
+| Frontend deviations accepted |  |
+
 ## Surface Output Summary
 
 | Field | Value |

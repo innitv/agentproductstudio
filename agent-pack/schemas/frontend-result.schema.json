@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Frontend Result",
   "type": "object",
-  "required": ["status", "inputs_used", "changed_files", "implementation_notes", "design_system_implementation", "component_contract_implementation", "frame_state_implementation_map", "commands_run", "known_limitations", "figma_roundtrip_deviations"],
+  "required": ["status", "inputs_used", "changed_files", "implementation_notes", "design_system_implementation", "component_contract_implementation", "frame_state_implementation_map", "figma_visual_qa_gate_summary", "commands_run", "known_limitations", "figma_roundtrip_deviations"],
   "properties": {
     "status": { "enum": ["success", "partial", "blocked"] },
     "inputs_used": { "type": "array", "items": { "type": "string" } },
@@ -48,6 +48,18 @@
           "paired_screenshot_status": { "enum": ["pass", "partial", "blocked", "not_applicable"] },
           "behavior_status": { "enum": ["pass", "partial", "blocked", "not_applicable"] }
         }
+      }
+    },
+    "figma_visual_qa_gate_summary": {
+      "type": "object",
+      "required": ["layout_ir_input", "visual_qa_input", "verdict", "ready_allowed"],
+      "properties": {
+        "layout_ir_input": { "enum": ["present", "missing", "not_applicable"] },
+        "visual_qa_input": { "enum": ["present", "missing", "not_applicable"] },
+        "verdict": { "enum": ["passed", "passed_with_notes", "blocked", "not_applicable"] },
+        "ready_allowed": { "type": "boolean" },
+        "blocked_checks": { "type": "array", "items": { "type": "string" } },
+        "deviations_accepted": { "type": "array", "items": { "type": "string" } }
       }
     },
     "commands_run": { "type": "array", "items": { "type": "object" } },

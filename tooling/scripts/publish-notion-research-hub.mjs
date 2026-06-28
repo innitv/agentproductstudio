@@ -23,6 +23,12 @@ if (!existsSync(exportPath)) {
 }
 
 const markdown = readFileSync(exportPath, "utf8");
+const notionRequestStats = {
+  requests: 0,
+  retries: 0,
+  rate_limit_retries: 0,
+  overload_retries: 0,
+};
 const parsed = splitResearchMarkdown(markdown);
 const publishUnits = groupResearchSections(parsed.sections);
 const hubTitle = titleArg?.trim() || parsed.title || "Пакет исследования";
@@ -117,7 +123,7 @@ await appendChildren(hubId, hubBlocks);
 console.log(`Created Notion research hub ${hubId} under parent ${parentPageId}.`);
 console.log(`Created ${childResults.length} child pages.`);
 console.log(`Published ${childResults.reduce((sum, item) => sum + item.blocks, 0) + hubBlocks.length} human-readable Russian blocks across hub and child pages.`);
-console.log(JSON.stringify({ hub_id: hubId, child_pages: childResults, notion_data_shape_plan: dataShapePlan }, null, 2));
+console.log(JSON.stringify({ hub_id: hubId, child_pages: childResults, notion_request_stats: notionRequestStats, notion_data_shape_plan: dataShapePlan }, null, 2));
 
 function getPublicationBlockers({ shapeGate, completenessGate, crossLinkGate, antiSlopGate, editorGate, skipPublicationShapeGate }) {
   return [
@@ -335,7 +341,7 @@ function validatePublicationShape(sections) {
       label: "CJM должен быть таблицей или схемой",
       markers: ["cjm"],
       sectionMatch: /^(CJM и сценарии|Общая модель CJM|Матрица сценариев CJM|P\d CJM:.*|Сценарий \d+:.*)$/i,
-      requiredHeaderGroups: [["этап", "шаг"], ["боль", "трен", "ломается", "вопрос"]],
+      requiredHeaderGroups: [["этап", "шаг"], ["бол", "трен", "ломается", "вопрос"]],
       hint: "Добавь таблицу с колонками: Этап / Цель / Действия / Участники / Боли / Возможность.",
     },
     {
@@ -350,7 +356,7 @@ function validatePublicationShape(sections) {
       id: "scoring_table",
       label: "ICE/RICE должен содержать таблицу scoring",
       markers: ["scoring"],
-      sectionMatch: /^(ICE\/RICE backlog|ICE\/RICE бэклог|Детализация backlog|Детализация бэклога)$/i,
+      sectionMatch: /^(ICE\/RICE backlog|ICE\/RICE бэклог|ICE\/RICE бэклог и инициативы|Детализация backlog|Детализация бэклога|Opportunity Roadmap)$/i,
       requiredHeaderGroups: [["сценарий", "инициатива"]],
       hint: "Добавь таблицу ICE/RICE с колонками scoring.",
     },
@@ -1166,7 +1172,7 @@ function richJoin(parts) {
 }
 
 async function createChildPage(parentPageId, title) {
-  const response = await fetch("https://api.notion.com/v1/pages", {
+  const response = await fetchNotion("https://api.notion.com/v1/pages", {
     method: "POST",
     headers: notionHeaders(),
     body: JSON.stringify({
@@ -1463,7 +1469,7 @@ function chunkText(text, size) {
 
 async function appendChildren(blockId, blocks) {
   for (let index = 0; index < blocks.length; index += 80) {
-    const response = await fetch(`https://api.notion.com/v1/blocks/${blockId}/children`, {
+    const response = await fetchNotion(`https://api.notion.com/v1/blocks/${blockId}/children`, {
       method: "PATCH",
       headers: notionHeaders(),
       body: JSON.stringify({ children: blocks.slice(index, index + 80) }),
@@ -1474,4 +1480,31 @@ async function appendChildren(blockId, blocks) {
       throw new Error(`Notion append failed (${response.status}): ${body}`);
     }
   }
+}
+
+async function fetchNotion(url, options, attempt = 0) {
+  notionRequestStats.requests += 1;
+  const response = await fetch(url, options);
+  if (![429, 529, 500, 502, 503, 504].includes(response.status) || attempt >= 5) {
+    return response;
+  }
+
+  notionRequestStats.retries += 1;
+  if (response.status === 429) {
+    notionRequestStats.rate_limit_retries += 1;
+  }
+  if (response.status === 529) {
+    notionRequestStats.overload_retries += 1;
+  }
+
+  const retryAfter = Number(response.headers.get("Retry-After"));
+  const delayMs = Number.isFinite(retryAfter) && retryAfter > 0
+    ? retryAfter * 1000
+    : Math.min(1000 * 2 ** attempt, 8000);
+  await sleep(delayMs);
+  return fetchNotion(url, options, attempt + 1);
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

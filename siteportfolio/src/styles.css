@@ -2,6 +2,22 @@
    Ivan Ignatov Portfolio Prototype
    ========================================================================== */
 
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+html,
+body {
+  background: #edebe4;
+}
+
+body {
+  overflow-x: hidden;
+}
+
 .portfolio-shell {
   --portfolio-bg: #edebe4;
   --portfolio-fg: #0d0c0a;
@@ -43,43 +59,6 @@
 .portfolio-stage {
   min-height: 100vh;
   background: #edebe4;
-}
-
-.portfolio-loader {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  z-index: 20;
-  display: grid;
-  grid-template-columns: 96px max-content 96px;
-  align-items: center;
-  gap: 18px;
-  width: min(420px, calc(100vw - 48px));
-  color: #0d0c0a;
-  background: transparent;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-.portfolio-loader-line {
-  width: 100%;
-  height: 1px;
-  background: #0d0c0a;
-}
-
-.portfolio-loader::after {
-  width: 100%;
-  height: 1px;
-  background: rgba(13, 12, 10, 0.22);
-  content: "";
-}
-
-.portfolio-loader span {
-  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  white-space: nowrap;
 }
 
 .portfolio-home-shell,
@@ -276,6 +255,10 @@
   margin-left: calc((var(--portfolio-measure) / 3 * 2) + 40px);
 }
 
+.portfolio-company-lead {
+  max-width: 520px;
+}
+
 .portfolio-home-shell .portfolio-hero h1 {
   font-size: clamp(54px, 7vw, 88px);
 }
@@ -293,6 +276,11 @@
   line-height: 1.6;
 }
 
+.portfolio-article-hero p strong {
+  color: var(--portfolio-fg);
+  font-weight: 500;
+}
+
 .portfolio-hero-copy p,
 .portfolio-company-hero p,
 .portfolio-article-hero p,
@@ -301,6 +289,10 @@
   color: var(--portfolio-muted);
   font-size: 15px;
   line-height: 1.75;
+}
+
+.portfolio-company-hero .portfolio-company-lead {
+  color: var(--portfolio-fg);
 }
 
 .portfolio-hero-copy dl,
@@ -372,6 +364,25 @@
 
 .portfolio-case-head {
   grid-template-columns: var(--portfolio-grid-case);
+}
+
+.portfolio-case-section-head {
+  display: none;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 16px var(--portfolio-page-pad);
+  color: var(--portfolio-muted);
+  font-family: var(--portfolio-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--portfolio-border);
+}
+
+.portfolio-case-section-head strong {
+  color: var(--portfolio-fg);
+  font-weight: 400;
 }
 
 .portfolio-company-tiles,
@@ -489,17 +500,6 @@
   text-transform: uppercase;
 }
 
-.portfolio-case-impact {
-  max-width: 170px;
-  color: var(--portfolio-fg);
-  font-family: var(--portfolio-mono);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  line-height: 1.4;
-  text-align: right;
-  text-transform: uppercase;
-}
-
 .portfolio-tile-cta {
   display: inline-flex;
   align-items: baseline;
@@ -602,6 +602,12 @@
   color: var(--portfolio-muted);
   font-size: 12px;
   line-height: 1.5;
+}
+
+.portfolio-row-meta--impact {
+  max-width: 240px;
+  color: var(--portfolio-fg);
+  line-height: 1.45;
 }
 
 .portfolio-row-count {
@@ -801,6 +807,7 @@
 
 .portfolio-article-section {
   margin-bottom: 72px;
+  min-width: 0;
 }
 
 .portfolio-article-section h2 {
@@ -857,6 +864,11 @@
   min-height: 0;
   background: transparent;
   animation: none;
+}
+
+.portfolio-media-frame picture {
+  display: block;
+  width: 100%;
 }
 
 .portfolio-media-frame::after {
@@ -954,19 +966,32 @@
 }
 
 .portfolio-numbered-list {
-  border-top: 1px solid var(--portfolio-border);
+  display: grid;
+  gap: 18px;
+  margin-top: 24px;
 }
 
 .portfolio-numbered-list div {
   display: grid;
-  grid-template-columns: 42px 1fr;
-  gap: 20px;
-  padding: 20px 0;
-  border-bottom: 1px solid var(--portfolio-border);
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.portfolio-numbered-list span {
+  padding-top: 5px;
+  color: rgba(13, 12, 10, 0.38);
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .portfolio-numbered-list p {
+  max-width: 760px;
   margin: 0;
+  color: rgba(13, 12, 10, 0.78);
+  font-size: 16px;
+  line-height: 1.72;
+  overflow-wrap: anywhere;
 }
 
 .portfolio-next {
@@ -1215,6 +1240,20 @@
     margin-left: 0;
   }
 
+  .portfolio-company-shell .portfolio-company-hero {
+    flex: 0 0 auto;
+    gap: 30px;
+    padding-top: 56px;
+    padding-bottom: 52px;
+  }
+
+  .portfolio-company-lead {
+    max-width: 620px;
+    color: var(--portfolio-fg);
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
   .portfolio-company-shell .portfolio-company-hero > div:first-child {
     grid-row: auto;
   }
@@ -1229,6 +1268,10 @@
   .portfolio-table-head,
   .portfolio-case-head {
     display: none;
+  }
+
+  .portfolio-case-section-head {
+    display: flex;
   }
 
   .portfolio-company-tiles,
@@ -1257,7 +1300,8 @@
   }
 
   .portfolio-case-tile .portfolio-case-title {
-    font-size: clamp(38px, 12vw, 64px);
+    font-size: clamp(36px, 7vw, 52px);
+    line-height: 1;
   }
 
   .portfolio-company-row,
@@ -1324,12 +1368,14 @@
     grid-row: auto;
     grid-column: auto;
     height: auto;
-    width: auto;
+    width: 100vw;
     max-width: 100%;
     min-width: 0;
     padding: 24px 28px;
+    overflow: hidden;
     border-right: 0;
     border-bottom: 1px solid var(--portfolio-border);
+    box-sizing: border-box;
   }
 
   .portfolio-article-layout article {
@@ -1341,6 +1387,14 @@
     padding: 56px var(--portfolio-page-pad) 80px;
   }
 
+  .portfolio-article-section h2 {
+    font-size: 23px;
+  }
+
+  .portfolio-article-section h2 span {
+    font-size: 15px;
+  }
+
   .portfolio-article-layout aside a {
     display: inline-flex;
     flex: 0 0 auto;
@@ -1350,10 +1404,17 @@
   .portfolio-article-toc-nav {
     flex-direction: row;
     gap: 16px;
+    width: 100%;
     max-width: 100%;
+    min-width: 0;
+    padding-bottom: 8px;
     overflow-x: auto;
+    overflow-y: hidden;
     overscroll-behavior-x: contain;
+    scroll-padding-inline: 0 28px;
     scrollbar-width: none;
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
   }
 
   .portfolio-article-toc-nav::-webkit-scrollbar {
@@ -1398,6 +1459,13 @@
     padding-bottom: 52px;
   }
 
+  .portfolio-company-shell .portfolio-company-hero {
+    flex: 0 0 auto;
+    gap: 28px;
+    padding-top: 46px;
+    padding-bottom: 44px;
+  }
+
   .portfolio-home-shell .portfolio-hero > .portfolio-hero-copy {
     justify-self: start;
     max-width: 100%;
@@ -1408,8 +1476,74 @@
     font-size: clamp(44px, 13vw, 60px);
   }
 
+  .portfolio-company-lead {
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .portfolio-case-section-head {
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  .portfolio-case-tile .portfolio-case-title {
+    font-size: clamp(30px, 9vw, 38px);
+    line-height: 1.04;
+  }
+
   .portfolio-article-hero h1 {
+    font-size: clamp(34px, 9.8vw, 42px);
     line-height: 1.02;
+  }
+
+  .portfolio-article-hero em {
+    font-size: clamp(21px, 6.2vw, 24px);
+    line-height: 1.16;
+  }
+
+  .portfolio-article-hero p,
+  .portfolio-article-section p,
+  .portfolio-article-section blockquote {
+    font-size: 15px;
+    line-height: 1.68;
+  }
+
+  .portfolio-article-section {
+    margin-bottom: 56px;
+  }
+
+  .portfolio-article-section h2 {
+    gap: 10px;
+    margin-bottom: 20px;
+    font-size: 21px;
+    line-height: 1.18;
+    letter-spacing: -0.01em;
+  }
+
+  .portfolio-article-section h2 span {
+    flex: 0 0 auto;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .portfolio-numbered-list {
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  .portfolio-numbered-list div {
+    grid-template-columns: 26px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .portfolio-numbered-list span {
+    padding-top: 3px;
+    font-size: 11px;
+  }
+
+  .portfolio-numbered-list p {
+    font-size: 15px;
+    line-height: 1.68;
   }
 
   .portfolio-row-title {

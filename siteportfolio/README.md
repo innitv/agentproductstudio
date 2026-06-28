@@ -41,3 +41,38 @@
 ## Текущий статус
 
 Активный продуктовый run: `siteportfolio/runs/2026-06-14/`.
+
+## Деплой на Reg.ru
+
+Production-сборка портфолио — статический сайт из `apps/portfolio/` с source в `siteportfolio/src/`.
+
+1. Скопировать пример настроек:
+
+```bash
+cp apps/portfolio/deploy.regru.env.example .env.portfolio-deploy
+```
+
+2. Заполнить в `.env.portfolio-deploy` FTP/FTPS-доступы из панели Reg.ru:
+
+- `PORTFOLIO_FTP_PROTOCOL`
+- `PORTFOLIO_FTP_HOST`
+- `PORTFOLIO_FTP_PORT`
+- `PORTFOLIO_FTP_USER`
+- `PORTFOLIO_FTP_PASSWORD`
+- `PORTFOLIO_FTP_REMOTE_DIR`
+
+Файл `.env.portfolio-deploy` игнорируется git и не должен попадать в commit.
+
+3. Проверить список файлов без загрузки:
+
+```bash
+yarn deploy:portfolio:dry-run
+```
+
+4. Собрать и залить сайт:
+
+```bash
+yarn deploy:portfolio
+```
+
+Скрипт загружает содержимое `dist/portfolio`: `.htaccess`, `index.html` и `assets/`. `.htaccess` нужен для прямых ссылок на внутренние страницы вроде `/smlt/case/mdg`.
