@@ -11,12 +11,6 @@ const appConfigs = {
     viteConfig: "apps/frontend/vite.config.ts",
     env: {},
   },
-  portfolio: {
-    viteConfig: "apps/portfolio/vite.config.ts",
-    env: {
-      PORTFOLIO_BASE_PATH: "/",
-    },
-  },
 };
 
 if (!appConfigs[appName]) {

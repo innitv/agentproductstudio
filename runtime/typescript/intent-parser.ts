@@ -38,18 +38,6 @@ const commandPatterns = {
   ],
 };
 
-const siteportfolioPatterns = [
-  /мой\s+сайт/i,
-  /мой\s+сайт\s+портфолио/i,
-  /сайт\s+портфолио/i,
-  /портфолио/i,
-  /portfolio/i,
-  /siteportfolio/i,
-  /персональн(?:ый|ого)\s+сайт/i,
-  /сайт\s+ивана/i,
-  /\/portfolio/i,
-];
-
 // Семантические паттерны для сопоставления с этапами (stages)
 const stagePatterns: Record<string, RegExp[]> = {
   "01-research": [
@@ -145,7 +133,6 @@ const stagePatterns: Record<string, RegExp[]> = {
     /create\s+ui\s+code/i,
     /build\s+frontend/i,
     /update\s+ui/i,
-    ...siteportfolioPatterns,
   ],
   "09-visual-reference": [
     /сравни\s+с\s+референсом/i,
@@ -196,15 +183,6 @@ export function parseUserIntent(prompt: string): ParsedIntent | null {
   const trimmed = prompt.trim();
   if (!trimmed) {
     return null;
-  }
-
-  if (siteportfolioPatterns.some((pattern) => pattern.test(trimmed))) {
-    return {
-      command: "run-stage",
-      stageId: "08-frontend",
-      args: ["siteportfolio"],
-      confidence: "high",
-    };
   }
 
   // 1. Проверяем локальные триггеры конкретных стадий (run-stage)
