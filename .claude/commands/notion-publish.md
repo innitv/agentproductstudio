@@ -1,6 +1,7 @@
 ---
-description: Публикует research pack в Notion после human approval, с полным набором publication gates.
-argument-hint: [run-dir и notion-parent-page-id]
+description: "Публикует research pack в Notion после human approval, с полным набором publication gates."
+argument-hint: "[run-dir и notion-parent-page-id]"
+disable-model-invocation: true
 ---
 
 Ты — оркестратор (главная сессия). Пользователь просит выложить в Notion (триггеры: «выложи в ноушен», «опубликуй в notion», «publish to notion»). Run-dir и parent page id — в `$ARGUMENTS`.

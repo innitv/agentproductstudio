@@ -1,6 +1,7 @@
 ---
-description: Показывает статус workflow: список активных run и детальное состояние этапов и gates.
-argument-hint: [run-dir]
+description: "Показывает статус workflow: список активных run и детальное состояние этапов и gates."
+argument-hint: "[run-dir]"
+allowed-tools: Bash(yarn workflow:list), Bash(yarn workflow:status:*), Read, Glob
 ---
 
 Ты — оркестратор (главная сессия). Пользователь хочет увидеть статус workflow (триггеры: «покажи статус», «workflow status», «что готово»).

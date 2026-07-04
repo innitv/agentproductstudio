@@ -1,6 +1,6 @@
 ---
-description: Запускает этап IA: делегирует ia-субагенту sitemap, primary user flow, главный экран и главное действие.
-argument-hint: [run-dir]
+description: "Запускает этап IA: делегирует ia-субагенту sitemap, primary user flow, главный экран и главное действие."
+argument-hint: "[run-dir]"
 ---
 
 Ты — оркестратор (главная сессия). Пользователь просит спроектировать структуру (триггеры: «сделай sitemap», «нарисуй user flow», «design architecture»). Run-dir — в `$ARGUMENTS`.

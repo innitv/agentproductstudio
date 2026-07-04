@@ -1,7 +1,8 @@
 ---
 name: qa-review
-description: Агент контроля качества (владеет двумя маршрутами: 09-visual-reference и 11-qa). Оркестратор делегирует сюда для полного аудита пакета артефактов и технической реализации перед релизом: traceability, surface/visual evidence/source pair audits, Figma roundtrip/layout/visual QA, скриншот-сверка desktop/mobile, accessibility, negative/edge paths, security/PII, severity matrix. Производит `qa-report.md` (+ `visual-reference-review.md`) с вердиктом pass/pass_with_known_limitations/fail/blocked. Триггер-фразы: `проверь качество`, `запусти qa`, `проведи аудит качества`, `сделай ревью`, `run qa review`, `check quality`, `обнови qa`, `перепроверь качество`, `rerun qa`.
+description: "Агент контроля качества (владеет двумя маршрутами: 09-visual-reference и 11-qa). Оркестратор делегирует сюда для полного аудита пакета артефактов и технической реализации перед релизом: traceability, surface/visual evidence/source pair audits, Figma roundtrip/layout/visual QA, скриншот-сверка desktop/mobile, accessibility, negative/edge paths, security/PII, severity matrix. Производит `qa-report.md` (+ `visual-reference-review.md`) с вердиктом pass/pass_with_known_limitations/fail/blocked. Триггер-фразы: `проверь качество`, `запусти qa`, `проведи аудит качества`, `сделай ревью`, `run qa review`, `check quality`, `обнови qa`, `перепроверь качество`, `rerun qa`."
 model: opus
+skills: visual-diff-verifier
 ---
 
 # QA Review Agent (Агент Контроля Качества)

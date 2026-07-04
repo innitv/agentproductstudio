@@ -1,6 +1,6 @@
 ---
-description: Запускает этап copywriting: делегирует copywriting-субагенту hero, CTA, секции, FAQ, SEO и claims to validate.
-argument-hint: [run-dir]
+description: "Запускает этап copywriting: делегирует copywriting-субагенту hero, CTA, секции, FAQ, SEO и claims to validate."
+argument-hint: "[run-dir]"
 ---
 
 Ты — оркестратор (главная сессия). Пользователь просит тексты (триггеры: «напиши тексты», «сделай copy deck», «write landing copy»). Run-dir — в `$ARGUMENTS`.

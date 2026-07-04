@@ -1,6 +1,6 @@
 ---
-description: Запускает этап QA review: делегирует qa-review-субагенту аудит PRD fit, UX, a11y, responsive и secrets.
-argument-hint: [run-dir]
+description: "Запускает этап QA review: делегирует qa-review-субагенту аудит PRD fit, UX, a11y, responsive и secrets."
+argument-hint: "[run-dir]"
 ---
 
 Ты — оркестратор (главная сессия). Пользователь просит проверить качество (триггеры: «проверь качество», «запусти qa», «run qa review»). Run-dir — в `$ARGUMENTS`.

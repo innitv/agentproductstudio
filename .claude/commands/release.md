@@ -1,6 +1,6 @@
 ---
-description: Запускает этап release: делегирует release-субагенту release-notes, validation и deployment/rollback notes.
-argument-hint: [run-dir]
+description: "Запускает этап release: делегирует release-субагенту release-notes, validation и deployment/rollback notes."
+argument-hint: "[run-dir]"
 ---
 
 Ты — оркестратор (главная сессия). Пользователь просит подготовить релиз (триггеры: «подготовь релиз», «создай релиз-ноутс», «release now»). Run-dir — в `$ARGUMENTS`.

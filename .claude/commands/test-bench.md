@@ -1,6 +1,6 @@
 ---
-description: Запускает этап test bench: делегирует test-bench-субагенту проверку воронки и analytics главного сценария.
-argument-hint: [run-dir]
+description: "Запускает этап test bench: делегирует test-bench-субагенту проверку воронки и analytics главного сценария."
+argument-hint: "[run-dir]"
 ---
 
 Ты — оркестратор (главная сессия). Пользователь просит проверить воронку (триггеры: «запусти тест-бенч», «проверь воронку», «run test bench»). Run-dir — в `$ARGUMENTS`.

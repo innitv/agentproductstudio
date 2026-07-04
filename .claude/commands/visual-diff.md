@@ -1,6 +1,6 @@
 ---
-description: Запускает визуальную сверку реализации с референсом через парные скриншоты и pixel diff.
-argument-hint: [reference-report-dir и local-url или run-dir]
+description: "Запускает визуальную сверку реализации с референсом через парные скриншоты и pixel diff."
+argument-hint: "[reference-report-dir и local-url или run-dir]"
 ---
 
 Ты — оркестратор (главная сессия). Пользователь просит сверить с референсом (триггеры: «сравни с референсом», «проверь скриншоты», «visual diff»). Аргументы (reference report dir, local URL, run-dir) — в `$ARGUMENTS`.

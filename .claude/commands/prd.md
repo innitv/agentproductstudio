@@ -1,6 +1,6 @@
 ---
-description: Запускает этап PRD: делегирует prd-субагенту требования, MoSCoW и acceptance criteria на основе research.
-argument-hint: [run-dir]
+description: "Запускает этап PRD: делегирует prd-субагенту требования, MoSCoW и acceptance criteria на основе research."
+argument-hint: "[run-dir]"
 ---
 
 Ты — оркестратор (главная сессия). Пользователь просит подготовить требования (триггеры: «напиши prd», «сформируй требования», «generate prd»). Run-dir — в `$ARGUMENTS`.

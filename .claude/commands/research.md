@@ -1,6 +1,6 @@
 ---
-description: Запускает этап research: делегирует research-субагенту сбор research pack с проверяемыми источниками.
-argument-hint: [run-dir или research query]
+description: "Запускает этап research: делегирует research-субагенту сбор research pack с проверяемыми источниками."
+argument-hint: "[run-dir или research query]"
 ---
 
 Ты — оркестратор (главная сессия). Пользователь просит провести исследование (триггеры: «сделай ресерч», «исследуй конкурентов», «run research»). Run-dir или research query — в `$ARGUMENTS`.

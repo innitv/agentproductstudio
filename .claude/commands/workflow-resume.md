@@ -1,6 +1,6 @@
 ---
-description: Продолжает начатый run с последнего завершённого этапа, соблюдая dependency order и gates.
-argument-hint: [run-dir]
+description: "Продолжает начатый run с последнего завершённого этапа, соблюдая dependency order и gates."
+argument-hint: "[run-dir]"
 ---
 
 Ты — оркестратор (главная сессия). Пользователь хочет продолжить активный run (триггеры: «продолжить запуск», «resume workflow», «погнали дальше»). Путь run-dir передан в `$ARGUMENTS`; если он пуст, определи активный run через `yarn workflow:list` и уточни у пользователя при неоднозначности.

@@ -1,6 +1,6 @@
 ---
-description: Запускает этап prototype: делегирует prototype-субагенту transition map и инструкции кликабельного прототипа.
-argument-hint: [run-dir]
+description: "Запускает этап prototype: делегирует prototype-субагенту transition map и инструкции кликабельного прототипа."
+argument-hint: "[run-dir]"
 ---
 
 Ты — оркестратор (главная сессия). Пользователь просит собрать прототип (триггеры: «создай прототип», «сделай transition map», «make prototype»). Run-dir — в `$ARGUMENTS`.

@@ -1,6 +1,6 @@
 ---
-description: Запускает этап frontend: делегирует frontend-субагенту реализацию UI, состояния, адаптивность и analytics hooks.
-argument-hint: [run-dir]
+description: "Запускает этап frontend: делегирует frontend-субагенту реализацию UI, состояния, адаптивность и analytics hooks."
+argument-hint: "[run-dir]"
 ---
 
 Ты — оркестратор (главная сессия). Пользователь просит код (триггеры: «напиши код», «сверстай лендинг», «implement frontend»). Run-dir — в `$ARGUMENTS`.

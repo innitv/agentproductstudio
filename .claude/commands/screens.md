@@ -1,6 +1,6 @@
 ---
-description: Запускает этап screens: делегирует design-generator-субагенту спецификацию экранов на основе design и copy.
-argument-hint: [run-dir]
+description: "Запускает этап screens: делегирует design-generator-субагенту спецификацию экранов на основе design и copy."
+argument-hint: "[run-dir]"
 ---
 
 Ты — оркестратор (главная сессия). Пользователь просит сгенерировать экраны (триггеры: «сгенерируй спецификацию экранов», «создай экраны», «generate screens»). Run-dir — в `$ARGUMENTS`.

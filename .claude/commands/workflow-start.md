@@ -1,6 +1,6 @@
 ---
-description: Запускает новый продуктовый workflow: intake, scaffold run ledger и research как первый этап.
-argument-hint: [цель или бриф лендинга]
+description: "Запускает новый продуктовый workflow: intake, scaffold run ledger и research как первый этап."
+argument-hint: "[цель или бриф лендинга]"
 ---
 
 Ты — оркестратор (главная сессия). Пользователь хочет начать новый продуктовый workflow (триггеры: «начать воркфлоу», «start landing», «новый проект»). Цель/бриф передан в `$ARGUMENTS`.

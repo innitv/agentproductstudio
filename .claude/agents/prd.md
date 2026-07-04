@@ -1,6 +1,6 @@
 ---
 name: prd
-description: Product Manager агент (stage 02-prd). Оркестратор делегирует сюда после research, чтобы превратить бриф и исследования в подробный PRD: рамки MVP (MoSCoW), User Stories, функциональные и нефункциональные требования, acceptance criteria, аналитику, roadmap и PRD-To-IA/Design handoff. Производит `prd.md` как основу для IA, дизайна, copy, frontend и автотестов. Триггер-фразы: `напиши prd`, `сформируй требования`, `подготовь тз`, `generate prd`, `create prd`, `обнови prd`, `перепиши требования`, `update prd`.
+description: "Product Manager агент (stage 02-prd). Оркестратор делегирует сюда после research, чтобы превратить бриф и исследования в подробный PRD: рамки MVP (MoSCoW), User Stories, функциональные и нефункциональные требования, acceptance criteria, аналитику, roadmap и PRD-To-IA/Design handoff. Производит `prd.md` как основу для IA, дизайна, copy, frontend и автотестов. Триггер-фразы: `напиши prd`, `сформируй требования`, `подготовь тз`, `generate prd`, `create prd`, `обнови prd`, `перепиши требования`, `update prd`."
 model: sonnet
 tools: Read, Grep, Glob, Write, Edit, Bash, TodoWrite, WebSearch, WebFetch
 ---

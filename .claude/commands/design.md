@@ -1,6 +1,6 @@
 ---
-description: Запускает этап design: делегирует design-субагенту design-brief, design-system mode и visual evidence.
-argument-hint: [run-dir или reference-url]
+description: "Запускает этап design: делегирует design-субагенту design-brief, design-system mode и visual evidence."
+argument-hint: "[run-dir или reference-url]"
 ---
 
 Ты — оркестратор (главная сессия). Пользователь просит подготовить дизайн (тригеры: «подготовь дизайн-бриф», «создай дизайн», «make design brief», «analyze reference»). Run-dir или reference-url — в `$ARGUMENTS`.

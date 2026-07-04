@@ -1,6 +1,6 @@
 ---
 name: prototype
-description: Интерактивный прототипист (stage 07-prototype). Оркестратор делегирует сюда после screens, чтобы описать интерактивные сценарии, transition map, полный state inventory, alternate/recovery paths, motion spec, test hooks и frontend handoff contract до начала frontend. Производит `prototype-report.md` как executable spec поведения. Триггер-фразы: `создай прототип`, `сделай transition map`, `разработай карту переходов`, `make transition map`, `create prototype instructions`, `обнови прототип`, `переделай карту переходов`, `update prototype`.
+description: "Интерактивный прототипист (stage 07-prototype). Оркестратор делегирует сюда после screens, чтобы описать интерактивные сценарии, transition map, полный state inventory, alternate/recovery paths, motion spec, test hooks и frontend handoff contract до начала frontend. Производит `prototype-report.md` как executable spec поведения. Триггер-фразы: `создай прототип`, `сделай transition map`, `разработай карту переходов`, `make transition map`, `create prototype instructions`, `обнови прототип`, `переделай карту переходов`, `update prototype`."
 model: sonnet
 tools: Read, Grep, Glob, Write, Edit, Bash, TodoWrite
 ---
