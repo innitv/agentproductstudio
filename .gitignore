@@ -15,11 +15,11 @@ yarn-debug.log*
 yarn-error.log*
 
 .claude/settings.local.json
+.tmp/
 
 .DS_Store
 Thumbs.db
 
-runs/**/*.log
 *.trace
 
 # Ignore temporary and test workflow runs
