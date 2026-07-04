@@ -39,7 +39,6 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - `agent-pack/workflows/ds-baseline.workflow.md`
 - `runtime/typescript/workflow-stages.ts`
 - `outputs/registry.json`
-- `siteportfolio/README.md`, `docs/architecture/repo-map.md`, `docs/architecture/git-workflow.md` и `siteportfolio/runs/2026-06-14/handoff-bundle.md`, если запрос относится к личному сайту-портфолио пользователя
 - `agent-pack/artifacts/brief/recursive-brief.template.md`
 - Существующие артефакты в `outputs/<project-slug>/<YYYY-MM-DD>/` (при наличии)
 
@@ -78,7 +77,6 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 | `limited engineering task` | task-scoped ExecPlan | узкий scope, локальные проверки, без полного product pipeline |
 | `cleanup/sorting` | cleanup commands / staging plan | не смешивать с feature work; не удалять без явного target |
 | `external write` | approval-gated action | exact target, dry-run/preview, publication/deploy/commit record |
-| `siteportfolio update` | targeted product update для `siteportfolio`, preview route `/portfolio` или production app `apps/portfolio` | читать `siteportfolio/README.md` и `docs/architecture/**`, не создавать новый `outputs` run без явного запроса |
 
 ## Delegation Packet Contract
 
@@ -132,7 +130,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - **Кастомная разработка (Bespoke UI by Default):** Оркестратор обязан следить, чтобы дизайн и фронтенд не использовали шаблонные решения или сторонние библиотеки. Весь интерфейс разрабатывается строго с нуля как Bespoke UI на чистом кастомном Tailwind CSS / HTML и чистых независимых React-компонентах.
 - **Design enhancement sync:** Если создан `STYLE_GUIDE.md`, `design-loop-report.md`, `figma-layout-ir.json`, `figma-handoff-bundle.md`, `figma-visual-qa.json` или `storybook-result.md`, оркестратор обязан передать эти артефакты downstream-агентам через `handoff-bundle.md` и следить, чтобы deviations фиксировались явно, а не терялись между этапами.
 - **Figma compile/verify loop:** Для `figma_board`, `product_ui` и `prototype` surfaces оркестратор не должен разрешать Figma write без `figma-layout-ir.json`, а после write не должен передавать frontend/QA статус `ready`, если отсутствует `figma-visual-qa.json` или `gate_result.ready_allowed=false`.
-- **Изоляция представлений (Modular Views Architecture):** Оркестратор обязан координировать субагента фронтенда так, чтобы заказная верстка жила в отдельном presentation view внутри `apps/frontend/src/views/` или в отдельном app boundary внутри `apps/<surface>/`, если поверхность имеет собственный домен/build. Для обновления существующего лендинга используй `LandingView.tsx`; для нового самостоятельного продукта допустим отдельный `<ProductName>View.tsx` с тонким подключением в `App.tsx`. Для production-портфолио использовать `apps/portfolio` + `siteportfolio/src`. Файл [ConsoleView.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/views/ConsoleView.tsx) является внутренней панелью управления и не должен модифицироваться кодом лендинга. `App.tsx` должен оставаться легким роутером без содержательной логики представлений.
+- **Изоляция представлений (Modular Views Architecture):** Оркестратор обязан координировать субагента фронтенда так, чтобы заказная верстка жила в отдельном presentation view внутри `apps/frontend/src/views/` или в отдельном app boundary внутри `apps/<surface>/`, если поверхность имеет собственный домен/build. Для обновления существующего лендинга используй `LandingView.tsx`; для нового самостоятельного продукта допустим отдельный `<ProductName>View.tsx` с тонким подключением в `App.tsx`. Файл [ConsoleView.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/views/ConsoleView.tsx) является внутренней панелью управления и не должен модифицироваться кодом лендинга. `App.tsx` должен оставаться легким роутером без содержательной логики представлений.
 - Никогда не публиковать данные во внешние системы (включая Notion) без явного одобрения пользователя.
 - Не отдавать финальный ответ напрямую от специализированного субагента без консолидированного синтеза Оркестратором.
 - **Правило State Truncation Gate:** Категорически запрещено передавать субагентам поздних стадий разработки (начиная с `08-frontend`) полную переписку брифинга или логов исследований. Передавайте строго текущее состояние `handoff-bundle.md` и конкретные файлы входов (inputs), прописанные в `workflow-stages.ts`.
@@ -163,7 +161,6 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 Этот агент активируется и обрабатывает следующие фразы пользователя (намерения):
 - **Старт нового проекта/вокфлоу**: `начать воркфлоу`, `новый лендинг`, `новый проект`, `start landing`, `create project`.
-- **Личный сайт-портфолио / siteportfolio**: `мой сайт`, `мой сайт портфолио`, `портфолио`, `portfolio`, `siteportfolio`, `персональный сайт`, `сайт Ивана`, `страница портфолио`, `/portfolio`.
 - **Продолжение воркфлоу**: `продолжить запуск`, `resume workflow`, `поехали дальше`, `погнали дальше`.
 - **Статус выполнения**: `покажи статус`, `workflow status`, `что готово`, `status check`.
 

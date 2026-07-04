@@ -26,7 +26,8 @@
 - `limited engineering task`: узкая правка кода, документации, runtime или rules; можно использовать task-scoped ExecPlan вместо полного product workflow.
 - `cleanup/sorting`: очистка `outputs/temp`, `outputs/products`, `research/temp`, архивов или грязного дерева; не смешивать с feature work.
 - `external write`: Notion, Figma, deploy, изменение секретов, удаление данных и git write без текущего явного запроса требуют exact approval. Model-provider calls требуют approval, кроме явно включенных non-blocking DeepSeek/Gemini advisory checks на `01-research`, описанных в разделе Research.
-- `siteportfolio update`: правки личного сайта-портфолио пользователя. Триггеры: `мой сайт`, `мой сайт портфолио`, `портфолио`, `portfolio`, `siteportfolio`, `персональный сайт`, `сайт Ивана`, `/portfolio`. Это отдельный продуктовый каталог `siteportfolio/`, а не обычный `outputs` run; по умолчанию читать `siteportfolio/README.md`, `docs/architecture/repo-map.md`, `docs/architecture/git-workflow.md` и `siteportfolio/runs/2026-06-14/handoff-bundle.md`.
+
+> Личный сайт-портфолио вынесен в отдельный репозиторий и в этой студии больше не живёт. Запросы про портфолио обслуживаются в том репозитории, а не через этот проект.
 
 Для selective commit/push используй `agent-pack/templates/selective-commit-sop.md`: сначала выписать include/exclude scope, staged делать только явными путями, затем выполнить `yarn git:check-staged`. Agentic handoff исполняется через runtime-контракты (Delegation Packet + Agent Output Critic). Agent Capability Registry — `runtime/typescript/agent-capability-registry.ts`; при изменении агента/маршрута/skill/approval проверяй `yarn workflow:test-agent-capabilities`. Перед началом полного workflow запусти `yarn workflow:doctor`; для поздних handoff от `08-frontend` используй сжатый `handoff-bundle.md`.
 
@@ -81,11 +82,10 @@ Source of truth:
 
 - Продуктовые workflow runtime: `outputs/<project-slug>/<YYYY-MM-DD>/`.
 - Исследовательские workflow, CJM, market research, Notion-ready research exports: `research/projects/<research-slug>/<YYYY-MM-DD>/`. Реестр — `research/registry.json`.
-- Личное портфолио: `siteportfolio/` + `apps/portfolio/` (активный ledger в `siteportfolio/runs/2026-06-14/`, shared source `siteportfolio/src/`).
 - Тестовые запуски: `outputs/temp/`. Архивные: `outputs/archive/<project-slug>/<YYYY-MM-DD>/`. `outputs/products/` — legacy/archive.
 - `outputs/registry.json` и `research/registry.json` — навигационные индексы; прошлые run artifacts не являются нормативным источником для изменения правил.
 
-Если запрос относится к `siteportfolio`, не создавай новый `outputs/<project-slug>/...`: работай с `siteportfolio/src/PortfolioView.tsx`, `siteportfolio/src/styles.css` и актуальным ledger. Если запрос — standalone research/CJM без frontend delivery, используй `research/projects/<research-slug>/<YYYY-MM-DD>/`.
+Если запрос — standalone research/CJM без frontend delivery, используй `research/projects/<research-slug>/<YYYY-MM-DD>/`.
 
 Run ledger (обязательные файлы до первых стадий): `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, `run-state.json`, `run-meta.json`, `artifact-manifest.json`, `run-index.md`. После каждого этапа обновляй `handoff-bundle.md` (completed artifacts, decisions, risks, next artifact) и `stage-gate-ledger.md` (stage status, gate notes, validation). Каждый этап читает предыдущие артефакты и фиксирует `inputs_used`. После ручной правки — `yarn workflow:sync <run-dir>`; обзор — `yarn workflow:list`/`yarn workflow:inspect <run-dir>`/`yarn workflow:outputs <run-dir>`.
 

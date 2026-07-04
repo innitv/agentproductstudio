@@ -2,15 +2,10 @@ import * as React from "react";
 import { ComponentsPlayground } from "./components-playground";
 import { LandingView } from "./views/LandingView";
 import { ConsoleView } from "./views/ConsoleView";
-import { PortfolioView } from "@siteportfolio/PortfolioView";
 
 export function App() {
   if (window.location.pathname === "/components") {
     return <ComponentsPlayground />;
-  }
-
-  if (window.location.pathname.startsWith("/portfolio")) {
-    return <PortfolioView />;
   }
 
   const [view, setView] = React.useState<"landing" | "console">(() => {

@@ -26,7 +26,6 @@ Claude начинает с классификации задачи и выбир
 | `reference-driven workflow` | Есть URL, screenshot, Figma, Dribbble или просьба "как этот сайт" | Добавляется reference scan, visual spec и `visual-reference-review.md`. |
 | `limited engineering task` | Нужна узкая правка кода, docs, runtime или rules | Делается scoped-правка без полного продуктового pipeline. |
 | `cleanup/sorting` | Нужно разобрать outputs, research, архивы или dirty tree | Выполняется отдельно от feature work. |
-| `siteportfolio update` | Запрос про личный сайт, портфолио или `/portfolio` | Работа идет в `siteportfolio/` и `apps/portfolio/`, а не в новом `outputs` run. |
 
 Базовый маршрут полного workflow:
 
@@ -110,8 +109,6 @@ yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
 | `agent-pack/quality/` | Quality gates, Anti-AI-Slop, visual evidence и review rules. |
 | `runtime/typescript/` | Исполняемый слой: workflow engine, validators, approval CLI, sync, research/reference tooling. |
 | `apps/frontend/` | Studio/AgentFlow frontend. |
-| `apps/portfolio/` | Production app shell личного сайта-портфолио. |
-| `siteportfolio/` | Исходники, стили и ledger личного сайта-портфолио. |
 | `outputs/` | Product workflow runs, temp runs и archives. |
 | `research/projects/` | Standalone research, CJM, market research и Notion-ready exports. |
 | `design/figma/` | Design-system context, Figma maps, component contracts и design artifacts. |
@@ -129,10 +126,11 @@ yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
 - структура репозитория: `docs/architecture/repo-map.md`;
 - команды и ручные операции: `COMMANDS.md`;
 - product runs: `outputs/<project-slug>/<YYYY-MM-DD>/`;
-- standalone research: `research/projects/<research-slug>/<YYYY-MM-DD>/`;
-- портфолио: `siteportfolio/` и `apps/portfolio/`.
+- standalone research: `research/projects/<research-slug>/<YYYY-MM-DD>/`.
 
-Если README и детальный contract расходятся, сначала проверяй `AGENTS.md`, `workflow.manifest.ts`, workflow docs и runtime validators. Исторические файлы в `outputs/**`, `research/projects/**` и `siteportfolio/runs/**` описывают состояние на дату запуска, а не новые правила проекта.
+Личный сайт-портфолио вынесен в отдельный репозиторий и в этой студии больше не живёт.
+
+Если README и детальный contract расходятся, сначала проверяй `AGENTS.md`, `workflow.manifest.ts`, workflow docs и runtime validators. Исторические файлы в `outputs/**` и `research/projects/**` описывают состояние на дату запуска, а не новые правила проекта.
 
 ## Run ledger
 
@@ -250,9 +248,7 @@ yarn workflow:doctor
 yarn validate:config
 yarn typecheck
 yarn build
-yarn build:portfolio
 yarn qa:studio
-yarn qa:portfolio
 yarn qa:playwright
 yarn docs:audit
 ```
@@ -276,4 +272,3 @@ yarn workflow:test-skill-usage
 - [runtime/typescript/README.md](runtime/typescript/README.md) — детали исполняемого слоя.
 - [outputs/README.md](outputs/README.md) — lifecycle product workflow outputs.
 - [research/README.md](research/README.md) — standalone research runs.
-- [siteportfolio/README.md](siteportfolio/README.md) — личный сайт-портфолио как отдельный продукт.
