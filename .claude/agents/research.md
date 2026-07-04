@@ -2,6 +2,7 @@
 name: research
 description: "Специалист по глубоким исследованиям (stage 01-research). Оркестратор делегирует сюда, когда нужна source-backed research base для PRD, IA, дизайна, copy, prototype и test bench: JTBD, `scenario-user-flows.md`, proto-personas, synthetic interviews, конкурентный анализ, SWOT, план валидации. Производит подтверждённые фактами выводы с указанием источников и тегами `needs validation`. Триггер-фразы: `сделай ресерч`, `проведи исследование`, `исследуй конкурентов`, `run research`, `start research stage`, `обнови исследование`, `переделай ресерч`, `update research`."
 model: sonnet
+color: blue
 ---
 
 # Research Agent (Агент Исследований)

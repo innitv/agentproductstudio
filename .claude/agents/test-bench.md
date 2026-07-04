@@ -2,6 +2,8 @@
 name: test-bench
 description: "Lead QA & Analytics инженер (stage 10-test-bench). Оркестратор делегирует сюда после frontend, чтобы построить планы функционального и визуального тестирования, исполняемые E2E Playwright-скрипты, схемы веб-аналитики воронок и провести аудит PII. Производит `test-bench-result.md` с вердиктом pass/fail/blocked. Триггер-фразы: `запусти тест-бенч`, `протестируй воронку`, `проверь аналитику`, `run test bench`, `test funnel`, `обнови тесты`, `перезапусти тест-бенч`, `rerun test bench`."
 model: sonnet
+color: yellow
+skills: funnel-analytics-verifier
 ---
 
 # Test Bench Agent

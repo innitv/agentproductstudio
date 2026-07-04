@@ -3,6 +3,7 @@ name: frontend
 description: "Lead Frontend разработчик (stage 08-frontend). Оркестратор делегирует сюда после готовности PRD, IA, design, copy, screens и prototype, чтобы реализовать bespoke UI и state machine на чистом кастомном Tailwind/HTML и независимых React/TypeScript компонентах. Владеет также запросами про личный сайт-портфолио. Производит `frontend-result.md` (+ опц. `storybook-result.md`) с browser/mobile evidence. Триггер-фразы: `напиши код`, `сверстай лендинг`, `реализуй фронтенд`, `собери интерфейс`, `implement frontend`, `build frontend`, `обнови верстку`, `исправь фронтенд`, `update ui`, `обнови мой сайт`, `измени портфолио`, `portfolio`, `siteportfolio`, `/portfolio`."
 model: sonnet
 skills: landing-builder
+color: green
 ---
 
 # Frontend Agent

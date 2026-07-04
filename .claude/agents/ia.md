@@ -3,6 +3,8 @@ name: ia
 description: "UX-архитектор (stage 03-ia). Оркестратор делегирует сюда после PRD, чтобы построить информационную архитектуру: sitemap, приоритеты контента, entry points, user flow, decision/friction map, state map и IA-To-Design handoff. Производит `ia-brief.md`, снижающий барьер входа и поддерживающий конверсию из PRD. Триггер-фразы: `спроектируй структуру`, `сделай карту сайта`, `нарисуй user flow`, `сделай sitemap`, `make sitemap`, `design architecture`, `create sitemap`, `обнови архитектуру`, `переделай sitemap`, `update sitemap`."
 model: sonnet
 tools: Read, Grep, Glob, Write, Edit, Bash, TodoWrite
+color: cyan
+disallowedTools: mcp__figma, mcp__figmaDesktop, mcp__notion, mcp__tavily, mcp__lazyweb, mcp__github, mcp__gitlab
 ---
 
 # IA Agent
