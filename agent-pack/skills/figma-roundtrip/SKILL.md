@@ -5,6 +5,7 @@ title: "Figma Roundtrip Quality"
 description: "Использовать для выбора reuse/extend/product-specific/bespoke стратегии, создания или обновления Figma design system, Figma canvas write, Figma-to-frontend и frontend-to-Figma передачи. Обеспечивает visual calibration до systemization, Component Contract Matrix, Code Connect/fallback mapping и paired verification."
 platforms:
   - codex
+  - claude
 mcp_servers:
   - figma
   - playwright

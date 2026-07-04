@@ -1,0 +1,12 @@
+{
+  "approvals": [
+    {
+      "action": "notion_research_publish",
+      "approved": true,
+      "approved_by": "human",
+      "target": "3696473174e58006af5fd367ef89d978",
+      "notes": "Пользователь написал: запись в ноушщен делай; публикация A3 + Алиса research в тот же A3 Notion parent",
+      "approved_at": "2026-06-30T09:16:05.341Z"
+    }
+  ]
+}

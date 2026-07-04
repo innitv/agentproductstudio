@@ -5,6 +5,7 @@ title: "Figma Screen Compiler"
 description: "Use when a Figma/product UI/prototype surface must be built or updated from screens/design context: compile screen specs into figma-layout-ir.json, enforce route/component/layout constraints, and block Figma write readiness when IR, DS honesty, copy-fit, or visual QA requirements are missing."
 platforms:
   - codex
+  - claude
 mcp_servers:
   - figma
 strictness_profile: strict
@@ -51,7 +52,7 @@ Skill превращает `screens.md` и дизайн-контекст в `fig
 3a. Если выбранная DS содержит подходящий компонент, но IR предлагает локальный wrapper вместо DS component instance, ставь `reuse_honesty=blocked`, а не `local_components_with_deviation`.
 3b. `local_components_with_deviation` допустим только когда в IR уже есть реальные `design_system_component` sources и локальный компонент является wrapper/composition вокруг DS instances или закрывает явно отсутствующую молекулу.
 4. Скомпилируй P0 route: каждый step обязан иметь `screen_id`, `primary_action`, `next_state`, `completion_evidence` и recovery path по применимости.
-5. Для каждого screen запиши zones, priorities, max text lines, overflow behavior, min row height, touch target, bottom nav behavior, no-clip/no-overlap constraints и `ui_fidelity_target`: какой реальный app pattern должен получиться на screenshot.
+5. Для каждого screen запиши zones, priorities, max text lines, overflow behavior, min row height, touch target, bottom nav behavior, no-clip/no-overlap constraints и `ui_fidelity_target`: какой реальный app pattern должен получиться на screenshot, какие evidence/reference его калибруют и какие prohibited patterns (`technical_board`, `audit_board`, `wireframe`, `component_inventory`, `metadata_panel`, `route_map`, `generic_card_grid`, `empty_ui_shell`) сразу блокируют readiness.
 6. Для каждого повторяемого component запиши `stable_id`, source, resize contract, required states и deviation.
 7. Запиши `verification_contract`: обязательные screenshots, object inventory, route walkthrough и visual QA.
 8. Если IR не может быть собран без выдумывания product logic или copy, верни `partial|blocked`; не переходи к Figma write.
@@ -71,6 +72,7 @@ Skill превращает `screens.md` и дизайн-контекст в `fig
 - screen zones не отражают user question, primary action и next state.
 - `ui_fidelity_target` отсутствует или допускает технический board вместо product screen;
 - IR может пройти `screen_count`/copy-fit, но screenshot результата не будет похож на реальное приложение.
+- app-likeness нельзя доказать будущим обещанием: нужен screenshot acceptance criterion до write и `app_likeness_review` после write.
 
 ## 5. Validation gates
 

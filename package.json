@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "packageManager": "yarn@1.22.22",
-  "description": "Manager-style product landing workflow pack for Codex and OpenAI Agents SDK.",
+  "description": "Artifact-driven product workflow studio for Codex.",
   "scripts": {
     "agents:inspect": "tsx runtime/typescript/agents.sdk.ts",
     "dev": "node node_modules/vite/bin/vite.js --config apps/frontend/vite.config.ts --host 127.0.0.1",

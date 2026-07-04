@@ -6,6 +6,7 @@ description: "Use when implementing stage 08-frontend for a landing, console, or
 platforms:
   - codex
   - open-code
+  - claude
 mcp_servers:
   - playwright
 strictness_profile: strict

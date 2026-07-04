@@ -73,7 +73,7 @@ async function runDiagnostics(): Promise<DiagnosticResult[]> {
         level: missingKeys.length === 0 ? "pass" : "warning",
         message: missingKeys.length === 0 
           ? "Все optional provider keys из примера присутствуют." 
-          : `В .env отсутствуют optional keys из примера: ${missingKeys.join(", ")}. Это блокирует только соответствующие optional provider actions, но не работу через Codex/IDE и не local workflow.`,
+          : `В .env отсутствуют optional keys из примера: ${missingKeys.join(", ")}. Это блокирует только соответствующие optional provider actions, но не работу через Claude Code/IDE и не local workflow.`,
         canRepair: false
       });
     } catch (e) {

@@ -27,6 +27,14 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 Создает базу глубоких исследований (deep research base) для принятия решений по продукту (product), информационной архитектуре (IA), дизайну (design), копирайту (copy), интерактивному прототипу (prototype) и тест-бенчу (test bench). Агент не должен выдавать поверхностные заметки: он отвечает за выявление подтвержденных фактов на основе источников, определение Jobs To Be Done (JTBD), отдельную страницу пользовательских флоу (`scenario-user-flows.md`), профайлы протоперсон (proto-personas), симулированные интервью (simulated_interviews, synthetic interviews), конкурентный анализ (competitive analysis), SWOT, план валидации и определение неизвестных (unknowns).
 
+## Universal Execution Discipline (Общее правило тщательности)
+
+Тщательность, source-of-truth checks и порядок gates важнее скорости видимого результата. Агент не трактует запрос как просьбу сделать быстро, если пользователь явно не сказал `quick draft`, «быстрый набросок», `demo only` или аналогичный режим.
+
+До генерации, записи, публикации, Figma write, frontend implementation или передачи downstream агент обязан выполнить context/source inventory, проверить существующие assets/components/templates/artifacts и зафиксировать reuse decisions plus gap list. Новое создается только для доказанного gap; если подходящий источник уже есть, его нужно использовать или расширить минимально.
+
+Если агент нарушил уже существующее правило, это фиксируется как `process_deviation`; запрещено называть такое исправление "поправкой пользователя".
+
 ## Inputs (Входные данные)
 
 ### Required (Обязательные)

@@ -29,6 +29,14 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 Преобразует информационную архитектуру (IA), направление дизайна, требования PRD и копирайт в детальные спецификации экранов, которые можно использовать как проверяемый контракт для Figma canvas, prototype, frontend и QA.
 
+## Universal Execution Discipline (Общее правило тщательности)
+
+Тщательность, source-of-truth checks и порядок gates важнее скорости видимого результата. Агент не трактует запрос как просьбу сделать быстро, если пользователь явно не сказал `quick draft`, «быстрый набросок», `demo only` или аналогичный режим.
+
+До генерации, записи, публикации, Figma write, frontend implementation или передачи downstream агент обязан выполнить context/source inventory, проверить существующие assets/components/templates/artifacts и зафиксировать reuse decisions plus gap list. Новое создается только для доказанного gap; если подходящий источник уже есть, его нужно использовать или расширить минимально.
+
+Если агент нарушил уже существующее правило, это фиксируется как `process_deviation`; запрещено называть такое исправление "поправкой пользователя".
+
 ## Inputs (Входные данные)
 
 - `ia-brief.md`
@@ -62,7 +70,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 11. Для reference-driven/high-visual-risk и `extend|product_specific` задач провести `visual_calibration` на 2-3 экранах: сравнить с `STYLE_GUIDE.md`, visual reference cards и real-world references; зафиксировать style drift, composition/density/rhythm/copy-fit issues и revision block в `design-loop-report.md`.
 12. Если `design-loop-report.md` содержит unresolved style drift, вернуть `partial` или `blocked`; не передавать frontend как `ready`.
 13. Если пользователь запросил Figma canvas write или Figma handoff, вызвать skill `figma-handoff` после `screens.md` и `design-loop-report.md`. Сформировать `figma-handoff-bundle.md` с foundation, variables/styles/components/screens и explicit target.
-13a. Для `figma_board`, `product_ui` и `prototype` surface вызвать skill `figma-screen-compiler` до любого Figma write. Создать `figma-layout-ir.json` с route, screen zones, copy-fit, component sources, resize constraints, DS honesty и verification contract. Если IR не создан или имеет `status=blocked`, Figma write запрещен.
+13a. Для `figma_board`, `product_ui` и `prototype` surface вызвать skill `figma-screen-compiler` до любого Figma write. Создать `figma-layout-ir.json` с route, screen zones, copy-fit, component sources, resize constraints, DS honesty, `ui_fidelity_target` для каждого screen и verification contract. Если IR не создан или имеет `status=blocked`, Figma write запрещен.
 14. Перед Figma write проверить:
    - remote Figma MCP `use_figma` доступен;
    - пользователь дал Figma file URL или target node;
@@ -70,7 +78,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
    - `search_design_system` проверил existing libraries/components;
    - write plan не пытается вписать всю доску в один frame, если удобнее создать отдельные frames на canvas.
 15. Запись в Figma выполняется через `use_figma` маленькими проверяемыми шагами: inspect -> calibration screens -> visual verdict -> variables/components/instances -> screenshot before/after systemization -> visual polish -> update `figma-handoff-bundle.md`.
-16. После Figma write вызвать skill `visual-layout-verifier` и создать `figma-visual-qa.json`. Статус `ready_for_review|ready` запрещен, если `figma-visual-qa.json.gate_result.ready_allowed=false` или отсутствуют screenshot/object inventory checks для required screens.
+16. После Figma write вызвать skill `visual-layout-verifier` и создать `figma-visual-qa.json`. Статус `ready_for_review|ready` запрещен, если `figma-visual-qa.json.gate_result.ready_allowed=false`, отсутствуют screenshot/object inventory checks для required screens или `app_likeness_review.verdict` не `passed`.
 
 ## Screen-To-Canvas Order (Порядок От Экранов К Canvas)
 
@@ -95,7 +103,8 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - `screens.md` не может быть `ready` для app/prototype/Figma/frontend surface, если экраны являются набором страниц без Primary App Flow Gate, route/transition map, next states и acceptance walkthrough.
 - `screens.md` не может быть `ready` для Figma/frontend handoff, если отсутствует Source Pair Plan с required/evidence/owner по обязательным парам.
 - Figma-ready surface не может быть `ready`, если отсутствует `figma-layout-ir.json` с route, zones, layout constraints, component sources и verification contract.
-- Figma canvas result не может быть `ready_for_review|ready`, если отсутствует `figma-visual-qa.json` или gate запрещает readiness из-за clipped text, overlap, unsafe safe area, route incoherence, DS dishonesty или systemization regression.
+- Figma-ready surface не может быть `ready`, если в `figma-layout-ir.json` у каждого screen нет `ui_fidelity_target`: real app pattern, forbidden patterns, evidence reference и screenshot acceptance.
+- Figma canvas result не может быть `ready_for_review|ready`, если отсутствует `figma-visual-qa.json` или gate запрещает readiness из-за clipped text, overlap, unsafe safe area, route incoherence, app-likeness failure, DS dishonesty или systemization regression.
 - Для Figma-ready задач обязательно описывать Auto Layout intent, variables/styles/components, component sets/variants и canvas strategy.
 - Следовать выбранному `design_system_mode`; доступная система является кандидатом, а не обязательным foundation. Новые/расширенные компоненты допускаются с reason/gap и Component Contract Matrix.
 - Нельзя считать макет `ready`, если systemization улучшила структуру, но ухудшила утвержденную композицию; такой результат — visual regression.

@@ -4,8 +4,10 @@ import { join } from "node:path";
 const root = process.cwd();
 
 const requiredFiles = [
+  "CLAUDE.md",
   "AGENTS.md",
-  ".codex/config.example.toml",
+  ".mcp.json",
+  ".claude/settings.json",
   "integrations/mcp/mcp-servers.example.json",
   "integrations/mcp/lazyweb.md",
   "integrations/mcp/notion-local-token.mcp.example.json",
@@ -42,19 +44,21 @@ const requiredFiles = [
 ];
 
 const scannedFiles = [
-  ".codex/config.example.toml",
+  ".mcp.json",
+  ".claude/settings.json",
   "integrations/mcp/mcp-servers.example.json",
   "integrations/mcp/notion-local-token.mcp.example.json",
   ".env.example",
 ];
 
 const projectTextFilesForPackageManagerPolicy = [
+  "CLAUDE.md",
   "AGENTS.md",
   "README.md",
   "archive/project-plans/PROJECT_CONNECTION_WORK_PLAN.md",
   "integrations/mcp/mcp-servers.example.json",
-  ".codex/config.example.toml",
-  ".codex/rules/safe-commands.example.toml",
+  ".mcp.json",
+  ".claude/settings.json",
   ".gitignore",
   ".idea/workspace.xml",
   "integrations/mcp/repository-and-browser-mcp.md",
@@ -125,7 +129,7 @@ const researchEnforcementFiles = [
     requiredSnippets: ["research-only child page publication is mandatory", "separate Notion child page", "notion-research-export-ru.md", "Publication Cross-Link Gate", "Publication Editor Pass", "Цепочка решений", "Publication Anti-AI-Slop Gate", "Research Content Lint", "publication_editor_gate", "notion_data_shape_plan", "database_index_candidates", "integrated_hybrid", "embedded_database_views", "stage-gate-ledger.md", "release-notes.md", "Surface Output Contract", "surface_output"],
   },
   {
-    file: "AGENTS.md",
+    file: "CLAUDE.md",
     requiredSnippets: ["публикация research в Notion обязательна", "Universal Visual Evidence Grounding", "visual_evidence_plan", "visual_reference_card", "Lazyweb Evidence Gate", "section-by-section visual spec", "шаблонный стиль", "Не заменяй требуемый источник", "Не обходи approval", "человекочитаемый research pack", "отдельную child page", "Publication Cross-Link Gate", "Publication Editor Pass", "Карта связей исследования", "Anti-AI-Slop Gate", "Research Content Lint", "notion_data_shape_plan", "integrated_hybrid", "Combined Notion Workspace Gate", "Notion research page publication record", "Surface-Aware Output Framework", "Surface Type Gate", "Write -> Verify -> Fix Gate", "Design System Strategy Gate", "Two-Pass Figma Build Gate", "Component Contract и Roundtrip Gate", "product_specific", "figma-roundtrip", "design/figma/registry.json", "selected_design_system_slug"],
   },
   {
@@ -237,8 +241,12 @@ const researchEnforcementFiles = [
     requiredSnippets: ["Lazyweb MCP", "lazyweb_get_workflows", "lazyweb_search", "human approval", "reload/restart"],
   },
   {
-    file: ".codex/config.example.toml",
-    requiredSnippets: ["mcp_servers.lazyweb", "LAZYWEB_MCP_TOKEN"],
+    file: ".mcp.json",
+    requiredSnippets: ["lazyweb", "LAZYWEB_MCP_TOKEN"],
+  },
+  {
+    file: ".claude/settings.json",
+    requiredSnippets: ["permissions", "enableAllProjectMcpServers"],
   },
   {
     file: "runtime/typescript/research.config.ts",
@@ -393,11 +401,11 @@ for (const { file, requiredSnippets } of researchEnforcementFiles) {
   }
 }
 
-const configPath = join(root, ".codex/config.example.toml");
-if (existsSync(configPath)) {
-  const config = readFileSync(configPath, "utf8");
+const mcpConfigPath = join(root, ".mcp.json");
+if (existsSync(mcpConfigPath)) {
+  const config = readFileSync(mcpConfigPath, "utf8");
   if (!config.includes("https://mcp.tavily.com/mcp/?tavilyApiKey=${TAVILY_API_KEY}")) {
-    errors.push(".codex/config.example.toml: Tavily MCP URL must be https://mcp.tavily.com/mcp/?tavilyApiKey=${TAVILY_API_KEY}.");
+    errors.push(".mcp.json: Tavily MCP URL must be https://mcp.tavily.com/mcp/?tavilyApiKey=${TAVILY_API_KEY}.");
   }
 }
 

@@ -60,6 +60,13 @@ const layoutIrSample = {
         bottom_nav_pinned: true,
         min_row_height: 64,
       },
+      ui_fidelity_target: {
+        real_app_pattern: "Mobile bill payment detail screen",
+        must_look_like: "A real banking app screen for paying a utility bill",
+        forbidden_patterns: ["technical_board", "audit_board", "component_inventory"],
+        evidence_reference: "Figma maker reference screen",
+        screenshot_acceptance: "Screenshot shows a usable app screen with clear hierarchy and CTA",
+      },
       components: [
         {
           stable_id: "primary_button",
@@ -102,9 +109,16 @@ const visualQaSample = {
       review_status: "passed",
     },
   ],
+  app_likeness_review: {
+    verdict: "passed",
+    evidence: "Screenshot reads as a real mobile app screen, not a technical board.",
+    checked_against: ["Mobile bill payment detail screen"],
+    prohibited_patterns_observed: [],
+  },
   checks: [
     { check: "text_height", result: "passed", evidence: "No suspicious 10px text nodes" },
     { check: "route_coherence", result: "passed", evidence: "Primary action leads to next screen" },
+    { check: "app_likeness", result: "passed", evidence: "Real app screen screenshot review passed" },
   ],
   repair_actions: [
     { action: "Increase safe area top padding", status: "applied", node_ids: ["3013:28"] },
@@ -114,9 +128,11 @@ const visualQaSample = {
 
 assert.equal(layoutIrSample.verification_contract.visual_qa_required, true);
 assert.equal(layoutIrSample.screens[0].layout_constraints.no_clip, true);
+assert.equal(layoutIrSample.screens[0].ui_fidelity_target.forbidden_patterns.includes("technical_board"), true);
 assert.equal(layoutIrSample.component_sources[0].instance_required, true);
 assert.equal(visualQaSample.gate_result.ready_allowed, true);
 assert.ok(visualQaSample.checks.some((check) => check.check === "text_height"));
 assert.ok(visualQaSample.checks.some((check) => check.check === "route_coherence"));
+assert.ok(visualQaSample.checks.some((check) => check.check === "app_likeness"));
 
 console.log("figma layout contract tests passed");

@@ -6,6 +6,9 @@
 - Recursive brief содержит expansion, deepening, consolidation, assumptions и open questions.
 - Routing Classification Pass выполнен: work type, workflow profile, approvals, active run directory и next allowed stage зафиксированы.
 - Context Inventory Pass выполнен: перечислены нормативные инструкции, пользовательские inputs, артефакты и references, которые реально используются.
+- Thoroughness-First Gate выполнен: скорость не выбрана как неявная цель; `quick draft` включен только по явной фразе пользователя; перед генерацией/записью/публикацией/handoff проверены существующие instructions, artifacts, templates, design-system assets, components, runtime contracts и references.
+- Reuse/Gaps Pass выполнен: новое создается только для доказанного gap; если существующий источник подходит, он переиспользован или расширен минимально.
+- Если агент нарушил уже существующее правило, это записано как `process_deviation`; запрещено оформлять такое исправление как "поправку пользователя".
 - Surface-Aware Output Gate выполнен для каждого stage, который создает пользовательскую поверхность (`research_report`, `notion_wiki`, `figma_board`, `product_ui`, `dashboard_console`, `landing`, `prototype`, `frontend`, `presentation`, `handoff`): есть Surface Output Contract, coverage gate, evidence-to-output map и verification plan.
 - Для каждого запущенного specialist stage есть delegation packet: objective, required inputs, allowed outputs, forbidden actions, quality gate, expected envelope и handoff consumer.
 - Если были противоречия между специалистами/источниками/вводными, Consensus & Conflict Pass записан в ledger/handoff.
@@ -121,6 +124,7 @@
 - Если создается Figma board или Figma-ready handoff, Surface Output Contract содержит список expected frames/sections/entities, карту данных к фреймам и критерии screenshot verification. Неполная доска без coverage rationale блокирует `ready`.
 - Если Figma write выполнен, bundle содержит node/frame evidence, screenshot verification и известные visual gaps.
 - Если Figma write выполнен в reference-driven или high-visual-risk задаче, `figma-handoff-bundle.md` содержит Source Pair Plan и evidence/status для `reference_to_figma` либо blocker/deviation. Frontend handoff содержит план `figma_to_frontend`.
+- Для `figma_board|product_ui|prototype` surface каждый screen в `figma-layout-ir.json` содержит `ui_fidelity_target`, а `figma-visual-qa.json` содержит `app_likeness_review`. Если screenshot выглядит как technical board, audit board, wireframe, component inventory, route map, generic card grid или empty UI shell, gate = `blocked` независимо от Auto Layout/component/metadata статуса.
 - Copy содержит hero, CTA, sections, FAQ, SEO и claims to validate.
 - Copy содержит Message Source Map: важные секции связаны с research/JTBD/PRD/design inputs и evidence status.
 - Copy содержит Voice & Terminology: tone rules, terms to use/avoid, customer language и trust language.

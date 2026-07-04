@@ -10,6 +10,7 @@ type CheckName =
   | "safe_area"
   | "density"
   | "hierarchy"
+  | "app_likeness"
   | "route_coherence"
   | "ds_instance_honesty"
   | "systemization_regression";
@@ -56,6 +57,13 @@ interface LayoutIr {
       min_touch_target: number;
       bottom_nav_pinned: boolean;
       min_row_height?: number;
+    };
+    ui_fidelity_target?: {
+      real_app_pattern: string;
+      must_look_like: string;
+      forbidden_patterns: string[];
+      evidence_reference: string;
+      screenshot_acceptance: string;
     };
     components: Array<{
       stable_id: string;
@@ -120,6 +128,13 @@ interface FigmaInventory {
   screens: InventoryScreen[];
   nodes: InventoryNode[];
   precomputed_checks?: VisualQaCheck[];
+  app_likeness_review?: {
+    verdict: "passed" | "needs_repair" | "blocked";
+    evidence: string;
+    checked_against: string[];
+    prohibited_patterns_observed: string[];
+    repair?: string;
+  };
 }
 
 interface VisualQaCheck {
@@ -142,6 +157,7 @@ interface VisualQaResult {
     review_status: "passed" | "needs_repair" | "blocked";
     notes?: string;
   }>;
+  app_likeness_review: NonNullable<FigmaInventory["app_likeness_review"]>;
   checks: VisualQaCheck[];
   repair_actions: Array<{
     action: string;
@@ -192,6 +208,7 @@ export async function runFigmaLayoutVerifier(options: {
     target: inventory.target,
     inputs_used: [normalizeDisplayPath(options.irPath), normalizeDisplayPath(options.inventoryPath)],
     screenshot_evidence: normalizeScreenshotEvidence(ir, inventory),
+    app_likeness_review: normalizeAppLikenessReview(ir, inventory),
     checks,
     repair_actions: repairActions,
     gate_result: {
@@ -237,6 +254,7 @@ function runChecks(ir: LayoutIr, inventory: FigmaInventory): VisualQaCheck[] {
     checkClipping(ir, inventory),
     checkSafeArea(ir, inventory),
     checkDsInstanceHonesty(ir, inventory),
+    checkAppLikeness(ir, inventory),
     {
       check: "density",
       result: "not_applicable",
@@ -258,6 +276,20 @@ function runChecks(ir: LayoutIr, inventory: FigmaInventory): VisualQaCheck[] {
     byName.set(precomputed.check, precomputed);
   }
   return [...byName.values()];
+}
+
+function normalizeAppLikenessReview(ir: LayoutIr, inventory: FigmaInventory): VisualQaResult["app_likeness_review"] {
+  const expectedTargets = ir.screens
+    .map((screen) => screen.ui_fidelity_target?.must_look_like)
+    .filter((value): value is string => Boolean(value));
+
+  return inventory.app_likeness_review ?? {
+    verdict: "blocked",
+    evidence: "Missing human-visible app-likeness screenshot review.",
+    checked_against: expectedTargets.length ? expectedTargets : ["figma-layout-ir.json ui_fidelity_target"],
+    prohibited_patterns_observed: [],
+    repair: "Review required screenshots against ui_fidelity_target before marking the Figma surface ready.",
+  };
 }
 
 function checkRouteCoherence(ir: LayoutIr, inventory: FigmaInventory): VisualQaCheck {
@@ -515,6 +547,54 @@ function checkDsInstanceHonesty(ir: LayoutIr, inventory: FigmaInventory): Visual
     repair: ir.design_system.reuse_honesty === "local_components_with_deviation"
       ? "Review local component deviations and confirm they are true product gaps, not replacements for selected DS components."
       : undefined,
+  };
+}
+
+function checkAppLikeness(ir: LayoutIr, inventory: FigmaInventory): VisualQaCheck {
+  const missingTargets = ir.screens
+    .filter((screen) => {
+      const target = screen.ui_fidelity_target;
+      return !target
+        || !target.real_app_pattern
+        || !target.must_look_like
+        || !target.evidence_reference
+        || !target.screenshot_acceptance
+        || !target.forbidden_patterns?.length;
+    })
+    .map((screen) => screen.id);
+
+  if (missingTargets.length) {
+    return {
+      check: "app_likeness",
+      result: "blocked",
+      evidence: `Missing ui_fidelity_target for screens: ${missingTargets.join(", ")}`,
+      repair: "Add real app pattern, forbidden patterns, evidence reference and screenshot acceptance to figma-layout-ir.json before Figma write.",
+    };
+  }
+
+  const review = normalizeAppLikenessReview(ir, inventory);
+  if (review.verdict === "blocked") {
+    return {
+      check: "app_likeness",
+      result: "blocked",
+      evidence: review.evidence,
+      repair: review.repair ?? "Redesign the surface until screenshots read as real product UI, not a technical board.",
+    };
+  }
+
+  if (review.verdict === "needs_repair" || review.prohibited_patterns_observed.length) {
+    return {
+      check: "app_likeness",
+      result: "needs_repair",
+      evidence: `${review.evidence}; prohibited=${review.prohibited_patterns_observed.join(", ") || "none"}`,
+      repair: review.repair ?? "Repair visual composition and repeat screenshot review.",
+    };
+  }
+
+  return {
+    check: "app_likeness",
+    result: "passed",
+    evidence: review.evidence,
   };
 }
 

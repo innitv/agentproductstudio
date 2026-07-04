@@ -16,6 +16,7 @@
     "component_contract_matrix",
     "frame_state_implementation_map",
     "state_inventory",
+    "app_likeness_gate",
     "responsive_constraints",
     "accessibility_notes",
     "layout_compiler_contract",
@@ -174,6 +175,43 @@
           "success": { "type": "string" },
           "disabled_permission": { "type": "string" }
         }
+      }
+    },
+    "app_likeness_gate": {
+      "type": "object",
+      "required": [
+        "required",
+        "target",
+        "visual_evidence",
+        "forbidden_patterns",
+        "screenshot_review_required",
+        "status"
+      ],
+      "properties": {
+        "required": { "type": "boolean" },
+        "target": { "type": "string" },
+        "visual_evidence": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "forbidden_patterns": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "technical_board",
+              "audit_board",
+              "wireframe",
+              "component_inventory",
+              "metadata_panel",
+              "route_map",
+              "generic_card_grid",
+              "empty_ui_shell"
+            ]
+          }
+        },
+        "screenshot_review_required": { "type": "boolean" },
+        "status": { "enum": ["passed", "needs_work", "blocked", "not_applicable"] },
+        "blocker_deviation": { "type": "string" }
       }
     },
     "layout_compiler_contract": {

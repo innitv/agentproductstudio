@@ -49,6 +49,14 @@ Lazyweb для frontend используется как benchmark/critique layer
 
 Если upstream visual evidence отсутствует, но задача требует market-realistic UI, frontend возвращает `partial`/`blocked` и запрашивает design evidence либо фиксирует explicit waiver/deviation. Если пользователь явно запросил quick draft, frontend может продолжить только со статусом `partial/draft` и обязан записать risk: визуальная реалистичность не подтверждена реальными примерами.
 
+## Universal Execution Discipline (Общее правило тщательности)
+
+Тщательность, source-of-truth checks и порядок gates важнее скорости видимого результата. Агент не трактует запрос как просьбу сделать быстро, если пользователь явно не сказал `quick draft`, «быстрый набросок», `demo only` или аналогичный режим.
+
+До генерации, записи, публикации, Figma write, frontend implementation или передачи downstream агент обязан выполнить context/source inventory, проверить существующие assets/components/templates/artifacts и зафиксировать reuse decisions plus gap list. Новое создается только для доказанного gap; если подходящий источник уже есть, его нужно использовать или расширить минимально.
+
+Если агент нарушил уже существующее правило, это фиксируется как `process_deviation`; запрещено называть такое исправление "поправкой пользователя".
+
 ## Inputs
 
 - `handoff-bundle.md` (сжатый в рамках **State Truncation Gate**, содержащий только YAML/JSON payloads предыдущих стадий)

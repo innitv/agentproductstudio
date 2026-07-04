@@ -58,7 +58,7 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "title", "zones", "layout_constraints", "components"],
+        "required": ["id", "title", "zones", "layout_constraints", "ui_fidelity_target", "components"],
         "properties": {
           "id": { "type": "string", "minLength": 1 },
           "title": { "type": "string", "minLength": 1 },
@@ -92,6 +92,38 @@
               "min_touch_target": { "type": "number", "minimum": 24 },
               "bottom_nav_pinned": { "type": "boolean" },
               "min_row_height": { "type": "number", "minimum": 1 }
+            }
+          },
+          "ui_fidelity_target": {
+            "type": "object",
+            "required": [
+              "real_app_pattern",
+              "must_look_like",
+              "forbidden_patterns",
+              "evidence_reference",
+              "screenshot_acceptance"
+            ],
+            "properties": {
+              "real_app_pattern": { "type": "string", "minLength": 1 },
+              "must_look_like": { "type": "string", "minLength": 1 },
+              "forbidden_patterns": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "enum": [
+                    "technical_board",
+                    "audit_board",
+                    "wireframe",
+                    "component_inventory",
+                    "metadata_panel",
+                    "route_map",
+                    "generic_card_grid",
+                    "empty_ui_shell"
+                  ]
+                }
+              },
+              "evidence_reference": { "type": "string", "minLength": 1 },
+              "screenshot_acceptance": { "type": "string", "minLength": 1 }
             }
           },
           "components": {

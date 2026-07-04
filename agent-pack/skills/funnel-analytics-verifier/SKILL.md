@@ -6,6 +6,7 @@ description: "Use when stage 10-test-bench or 11-qa must verify PRD analytics ev
 platforms:
   - codex
   - open-code
+  - claude
 mcp_servers:
   - playwright
 strictness_profile: strict

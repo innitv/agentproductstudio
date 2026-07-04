@@ -116,7 +116,7 @@ export function createOrchestratorAgent(
 
 export async function runStandaloneAgentsSdkWorkflow(goal: string): Promise<StandaloneRunResult> {
   if (!process.env.OPENAI_API_KEY) {
-    throw new Error("Standalone Agents SDK mode requires OPENAI_API_KEY. Use Codex agent pack mode when no API key is available.");
+    throw new Error("Standalone Agents SDK mode requires OPENAI_API_KEY. Use Claude Code agent pack mode when no API key is available.");
   }
 
   const { orchestrator } = await createAgentsSdkLayer(detectRouteProfile(goal));

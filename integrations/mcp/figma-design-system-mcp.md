@@ -27,7 +27,7 @@ Desktop fallback требует:
 - Dev Mode.
 - Включенный desktop MCP server в inspect panel.
 
-## Codex CLI
+## Claude Code CLI
 
 ```powershell
 codex mcp add figma --url https://mcp.figma.com/mcp

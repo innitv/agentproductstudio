@@ -5,6 +5,7 @@ title: "Visual Layout Verifier"
 description: "Use after Figma screen creation or systemization to verify screenshots/object inventory against figma-layout-ir.json: detect clipped text, overlap, unsafe top/bottom areas, density/hierarchy problems, DS instance dishonesty, route incoherence, and systemization regressions before marking a mockup ready."
 platforms:
   - codex
+  - claude
 mcp_servers:
   - figma
   - playwright
@@ -55,6 +56,7 @@ contract_schema: agent-pack/templates/skill.template.md
    - overlap amount/subtitle/button/list rows;
    - bottom nav position;
    - visual hierarchy and density;
+   - app-likeness: экран должен выглядеть как реальный product UI, а не technical board/audit board/wireframe/component inventory/route map/generic card grid;
    - route coherence across screens.
 5. Запиши `repair_actions`; если repair применялся, повтори screenshot evidence.
 6. Сравни calibration/systemized screenshots. Если systemization ухудшила композицию, gate блокируется.
@@ -71,11 +73,13 @@ contract_schema: agent-pack/templates/skill.template.md
 - DS reuse/extend заявлен без real instances/imports/component mapping выбранной DS;
 - `local_components_with_deviation` используется как замена выбранной DS, а не как wrapper/gap вокруг подтвержденных DS instances;
 - route walkthrough не читается из board/screens;
+- отсутствует `app_likeness_review` или screenshot выглядит как technical board, wireframe, component inventory, route map, generic card grid или empty UI shell;
 - visual regression после systemization не исправлен.
 
 ## 5. Validation gates
 
 - [ ] Screenshot evidence есть для board и required screens.
 - [ ] Checks cover text height, overflow, overlap, clipping, safe area, hierarchy, route coherence and DS honesty.
+- [ ] Checks include `app_likeness`, backed by screenshot review against `ui_fidelity_target`.
 - [ ] Repair actions записаны.
 - [ ] `gate_result.ready_allowed=true` только при `verdict=passed|passed_with_notes`.

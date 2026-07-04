@@ -1,8 +1,8 @@
 # Каркас TypeScript Runtime
 
-Эта папка содержит вспомогательный runtime для работы через Codex в IDE: локальные проверки, scaffold, persisted workflow state, validation, research/reference adapters и QA-команды.
+Эта папка содержит вспомогательный runtime для работы через Claude Code в IDE: локальные проверки, scaffold, persisted workflow state, validation, research/reference adapters и QA-команды.
 
-Пользовательский сценарий проекта один: запросы выполняются через Codex внутри IDE/чата. Runtime не является отдельным способом работы.
+Пользовательский сценарий проекта один: запросы выполняются через Claude Code внутри IDE/чата. Runtime не является отдельным способом работы.
 
 ## Основные файлы
 
@@ -29,7 +29,7 @@
 
 ## Runtime Contract
 
-- Codex остаётся главным исполнителем и оркестратором в IDE.
+- Claude остаётся главным исполнителем и оркестратором в IDE.
 - Runtime помогает сохранять артефакты, проверять структуру, вести state и запускать локальные проверки.
 - Каждый persisted run синхронизирует `run-meta.json`, `artifact-manifest.json` и `run-index.md`; `outputs/registry.json` остаётся навигационным индексом, а не source of truth.
 - `workflow:validate` считает missing `run-meta.json`/`artifact-manifest.json`/`run-index.md` ошибкой для полного persisted run и warning для промежуточного `--through`.

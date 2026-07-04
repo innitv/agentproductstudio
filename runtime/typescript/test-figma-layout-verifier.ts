@@ -42,6 +42,13 @@ const baseIr = {
         bottom_nav_pinned: true,
         min_row_height: 64,
       },
+      ui_fidelity_target: {
+        real_app_pattern: "Mobile home services payment flow",
+        must_look_like: "A real mobile banking app screen with product hierarchy, navigation and CTA",
+        forbidden_patterns: ["technical_board", "audit_board", "component_inventory"],
+        evidence_reference: "Figma maker app-flow reference",
+        screenshot_acceptance: "Screenshot reads as a usable app screen, not a QA board or component catalog",
+      },
       components: [
         {
           stable_id: "primary_button",
@@ -78,6 +85,12 @@ const passingInventory = {
     { screen_or_board: "board", node_id: "board", asset_id: "board-shot", review_status: "passed" },
     { screen_or_board: "home", node_id: "screen-home", asset_id: "home-shot", review_status: "passed" },
   ],
+  app_likeness_review: {
+    verdict: "passed",
+    evidence: "Screenshot reads as a real mobile banking app screen with clear hierarchy and primary CTA.",
+    checked_against: ["Mobile home services payment flow"],
+    prohibited_patterns_observed: [],
+  },
   screens: [
     { id: "screen-home", screen_id: "home", name: "screen / home", x: 0, y: 0, width: 390, height: 844 },
   ],
@@ -165,6 +178,7 @@ await withFixture(async (root) => {
   assert.equal(result.ds_instance_summary.local_component_sources, 0);
   assert.equal(result.ds_instance_summary.visible_selected_ds_instances, 1);
   assert.ok(result.checks.some((check) => check.check === "text_height" && check.result === "passed"));
+  assert.ok(result.checks.some((check) => check.check === "app_likeness" && check.result === "passed"));
   assert.ok(readFileSync(outputPath, "utf8").includes("\"ready_allowed\": true"));
 });
 
@@ -197,6 +211,29 @@ await withFixture(async (root) => {
   assert.equal(result.gate_result.verdict, "blocked");
   assert.ok(result.checks.some((check) => check.check === "text_height" && check.result === "blocked"));
   assert.ok(result.checks.some((check) => check.check === "safe_area" && check.result === "blocked"));
+});
+
+await withFixture(async (root) => {
+  const irPath = join(root, "figma-layout-ir.json");
+  const inventoryPath = join(root, "inventory-technical-board.json");
+  const outputPath = join(root, "figma-visual-qa.json");
+  writeFileSync(irPath, JSON.stringify(baseIr, null, 2), "utf8");
+  writeFileSync(inventoryPath, JSON.stringify({
+    ...passingInventory,
+    app_likeness_review: {
+      verdict: "blocked",
+      evidence: "Screenshot looks like an audit board with metadata panels, not an app screen.",
+      checked_against: ["Mobile home services payment flow"],
+      prohibited_patterns_observed: ["technical_board", "metadata_panel"],
+      repair: "Rebuild as product screens in mobile viewport before systemization.",
+    },
+  }, null, 2), "utf8");
+
+  const result = await runFigmaLayoutVerifier({ irPath, inventoryPath, outputPath });
+  assert.equal(result.gate_result.ready_allowed, false);
+  assert.equal(result.gate_result.verdict, "blocked");
+  assert.ok(result.checks.some((check) => check.check === "app_likeness" && check.result === "blocked"));
+  assert.ok(readFileSync(outputPath, "utf8").includes("audit board"));
 });
 
 console.log("figma layout verifier tests passed");

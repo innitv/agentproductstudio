@@ -51,7 +51,7 @@ Retired aliases (`lazyweb-design-research`, `lazyweb-quick-references`, `lazyweb
 curl -fsSL https://www.lazyweb.com/install.sh | bash
 ```
 
-В Windows-среде Codex может потребоваться заменить `command = "sh"` на абсолютный путь к Git Bash:
+В Windows-среде Claude Code может потребоваться заменить `command = "sh"` на абсолютный путь к Git Bash:
 
 ```toml
 [mcp_servers.lazyweb]
@@ -59,7 +59,7 @@ command = "C:\\Program Files\\Git\\bin\\bash.exe"
 args = ["-lc", "TOKEN=\"${LAZYWEB_MCP_TOKEN:-}\"; if [ -z \"$TOKEN\" ] && [ -f \"$HOME/.lazyweb/lazyweb_mcp_token\" ]; then TOKEN=\"$(cat \"$HOME/.lazyweb/lazyweb_mcp_token\")\"; fi; exec yarn dlx mcp-remote https://www.lazyweb.com/mcp --header \"Authorization: Bearer $TOKEN\" --transport http-first"]
 ```
 
-После установки нужен reload/restart Codex-клиента, чтобы новые `lazyweb_*` tools появились в текущей сессии.
+После установки нужен reload/restart Claude Code-клиента, чтобы новые `lazyweb_*` tools появились в текущей сессии.
 
 First-run проверка после reload:
 

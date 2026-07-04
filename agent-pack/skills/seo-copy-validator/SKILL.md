@@ -6,6 +6,7 @@ description: "Use when stage 05-copy or 11-qa must validate landing copy, SEO me
 platforms:
   - codex
   - open-code
+  - claude
 mcp_servers:
   - web_search
 strictness_profile: strict

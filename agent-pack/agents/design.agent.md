@@ -62,6 +62,14 @@ Retired aliases (`lazyweb-design-research`, `lazyweb-quick-references`, `lazyweb
 
 UI Kit и дизайн-система используются только как grounding для consistency/reuse. Они не отвечают на вопрос, как реальные продукты решают похожий сценарий, плотность, иерархию, states, доверие, onboarding, checkout, dashboard или handoff.
 
+## Universal Execution Discipline (Общее правило тщательности)
+
+Тщательность, source-of-truth checks и порядок gates важнее скорости видимого результата. Агент не трактует запрос как просьбу сделать быстро, если пользователь явно не сказал `quick draft`, «быстрый набросок», `demo only` или аналогичный режим.
+
+До генерации, записи, публикации, Figma write, frontend implementation или передачи downstream агент обязан выполнить context/source inventory, проверить существующие assets/components/templates/artifacts и зафиксировать reuse decisions plus gap list. Новое создается только для доказанного gap; если подходящий источник уже есть, его нужно использовать или расширить минимально.
+
+Если агент нарушил уже существующее правило, это фиксируется как `process_deviation`; запрещено называть такое исправление "поправкой пользователя".
+
 ## Inputs (Входные данные)
 
 - `prd.md`

@@ -41,6 +41,8 @@
 | Copy-fit constraints compiled | yes / no |
 | Component sources compiled | yes / no |
 | Verification contract compiled | yes / no |
+| `ui_fidelity_target` compiled for every screen | yes / no |
+| App-likeness screenshot review required | yes / no |
 | Blocker / deviation |  |
 
 ## Design System Strategy
@@ -60,6 +62,19 @@
 |---|---|---|---|
 | `visual_calibration` | 2-3 key screens; composition, density, hierarchy, rhythm, copy fit, responsive direction | screenshots / visual review | `passed|passed_with_notes|blocked` |
 | `systemization` | variables, styles, component sets/properties, instances, Auto Layout/resizing, prototype | object inventory + before/after screenshot | `passed|regression_found|blocked` |
+
+## App-Likeness Review
+
+Макет не может быть `ready_for_review`, если screenshot выглядит как техническая доска, wireframe, component inventory, route map или generic card grid. Структурные проверки не заменяют этот gate.
+
+| Field | Value |
+|---|---|
+| Verdict | `passed|needs_repair|blocked` |
+| Checked screenshots |  |
+| Checked against | real app references / Figma maker benchmark / Lazyweb evidence |
+| Prohibited patterns observed |  |
+| Evidence |  |
+| Repair action |  |
 
 ## Surface Output Contract
 
@@ -199,6 +214,7 @@ Required for `design_system_mode=reuse|extend`.
 - Resize / long-copy audit:
 - Text height / clipping audit:
 - Overlap / safe area audit:
+- App-likeness screenshot review:
 - Route walkthrough audit:
 - Systemization visual regression check:
 - Paired Figma/browser screenshot status:

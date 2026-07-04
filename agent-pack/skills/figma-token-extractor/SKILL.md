@@ -6,6 +6,7 @@ description: "Use when design/frontend work must extract source-backed visual to
 platforms:
   - codex
   - open-code
+  - claude
 mcp_servers:
   - figma
 strictness_profile: strict

@@ -6,6 +6,7 @@ description: "Use when a task is reference-driven or stage 09-visual-reference/1
 platforms:
   - codex
   - open-code
+  - claude
 mcp_servers:
   - playwright
 strictness_profile: strict

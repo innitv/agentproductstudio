@@ -28,7 +28,7 @@ yarn notion:mcp
 integrations/mcp/notion-local-token.mcp.example.json
 ```
 
-Для Codex config уже есть блок `[mcp_servers.notion]` в `.codex/config.example.toml`.
+Для Claude Code уже есть блок `notion` в `.mcp.json` (пример — `integrations/mcp/mcp-servers.example.json`).
 
 ## Safety
 

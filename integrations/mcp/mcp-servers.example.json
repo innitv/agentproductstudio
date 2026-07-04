@@ -1,11 +1,11 @@
 {
   "mcpServers": {
-    "openaiDeveloperDocs": {
-      "url": "https://developers.openai.com/mcp"
-    },
-    "codex": {
-      "command": "codex",
-      "args": ["mcp-server"]
+    "lazyweb": {
+      "type": "http",
+      "url": "https://www.lazyweb.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${LAZYWEB_MCP_TOKEN}"
+      }
     },
     "browser": {
       "command": "yarn",

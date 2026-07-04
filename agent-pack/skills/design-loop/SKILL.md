@@ -5,6 +5,7 @@ title: "Design Prompt И Цикл Критики"
 description: "Использовать на 06-screens, когда есть STYLE_GUIDE.md или высокий риск визуального качества. Создает design-generator-prompt.md и design-loop-report.md с конкретной критикой и revision blocks."
 platforms:
   - codex
+  - claude
 mcp_servers: []
 strictness_profile: strict
 owner_stage_ids:

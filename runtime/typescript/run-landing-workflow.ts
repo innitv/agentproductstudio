@@ -8,7 +8,7 @@ import { createAgentsSdkLayer } from "./agents.sdk";
 import { pathToFileURL } from "node:url";
 import { artifactFiles, getRequiredArtifactsForStage, workflowStages } from "./workflow-stages";
 
-// Local no-API-key runner for Codex agent pack mode.
+// Local no-API-key runner for Claude Code agent pack mode.
 // It validates the workflow structure and creates an output scaffold without
 // calling OpenAI APIs. A future standalone Agents SDK mode can reuse the same
 // route config and artifact conventions.
@@ -56,7 +56,7 @@ export async function runLandingWorkflow(input: LandingWorkflowInput): Promise<s
     `Date: ${date}`,
     `Profile: ${profile}`,
     "",
-    "Mode: no-api-key Codex agent pack scaffold.",
+    "Mode: no-api-key Claude Code agent pack scaffold.",
     "",
     "Route plan:",
     ...routePlan.map((step, index) => `${index + 1}. ${step}`),
@@ -80,7 +80,7 @@ export async function runLandingWorkflow(input: LandingWorkflowInput): Promise<s
     `- yarn workflow:validate outputs/${slug}/${date} --through 00-intake`,
     `- yarn workflow:validate outputs/${slug}/${date}`,
     "",
-    "Next step: run the workflow through Codex using AGENTS.md and the specialist instructions.",
+    "Next step: run the workflow through Claude Code using CLAUDE.md and the specialist instructions.",
     "",
   ].join("\n");
 

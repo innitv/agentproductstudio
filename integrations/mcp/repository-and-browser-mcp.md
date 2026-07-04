@@ -20,45 +20,43 @@
 - GitLab: OAuth через официальный GitLab MCP endpoint, без сохранения токенов в проекте.
 - Browser: Playwright MCP без `browser_run_code_unsafe` для недоверенных страниц.
 
-## Codex Config Example
+## Claude Code Config Example
 
-Фрагмент для пользовательского `~/.codex/config.toml` или клиентского MCP config. Не коммить реальные токены.
+Серверы проекта объявлены в `.mcp.json` в корне репозитория (полный пример — `integrations/mcp/mcp-servers.example.json`). Не коммить реальные токены — секреты через env из `.env`.
 
-```toml
-[features]
-"rmcp_client" = true
-
-[mcp_servers.playwright]
-command = "yarn"
-args = ["dlx", "@playwright/mcp@latest"]
-
-[mcp_servers.github]
-command = "docker"
-args = [
-  "run",
-  "-i",
-  "--rm",
-  "-e",
-  "GITHUB_PERSONAL_ACCESS_TOKEN",
-  "-e",
-  "GITHUB_READ_ONLY=1",
-  "ghcr.io/github/github-mcp-server"
-]
-
-[mcp_servers.github.env]
-GITHUB_PERSONAL_ACCESS_TOKEN = "${GITHUB_PERSONAL_ACCESS_TOKEN}"
-GITHUB_READ_ONLY = "1"
-
-[mcp_servers.GitLab]
-url = "https://gitlab.com/api/v4/mcp"
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "yarn",
+      "args": ["dlx", "@playwright/mcp@latest"]
+    },
+    "github": {
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "-e", "GITHUB_READ_ONLY=1",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}",
+        "GITHUB_READ_ONLY": "1"
+      }
+    },
+    "gitlab": {
+      "type": "http",
+      "url": "https://gitlab.com/api/v4/mcp"
+    }
+  }
+}
 ```
 
 ## CLI Flow
 
 ```powershell
-codex mcp add playwright yarn dlx @playwright/mcp@latest
-codex mcp add --url "https://gitlab.com/api/v4/mcp" GitLab
-codex mcp login GitLab
+claude mcp add playwright -- yarn dlx @playwright/mcp@latest
+claude mcp add --transport http gitlab https://gitlab.com/api/v4/mcp
 ```
 
 GitHub официальный MCP server обычно запускается через Docker image `ghcr.io/github/github-mcp-server`; токен передается через env.

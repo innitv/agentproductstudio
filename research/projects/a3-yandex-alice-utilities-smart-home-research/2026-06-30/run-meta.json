@@ -1,0 +1,12 @@
+{
+  "run_id": "2026-06-30-a3-yandex-alice-utilities-smart-home",
+  "slug": "a3-yandex-alice-utilities-smart-home-research",
+  "date": "2026-06-30",
+  "goal": "Исследовать интеграцию A3-платежей ЖКУ и домовых сценариев в Яндекс Алису / умный дом.",
+  "profile": "research",
+  "execution_mode": "local",
+  "output_dir": "research/projects/a3-yandex-alice-utilities-smart-home-research/2026-06-30",
+  "language": "ru",
+  "created_by": "codex"
+}
+

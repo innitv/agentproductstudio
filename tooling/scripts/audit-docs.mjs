@@ -2,9 +2,9 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const root = process.cwd();
-const markdownFiles = ["README.md", "AGENTS.md"];
+const markdownFiles = ["README.md", "CLAUDE.md", "AGENTS.md"];
 const pathLikePrefixes = [
-  ".codex/",
+  ".claude/",
   "agent-pack/",
   "apps/",
   "design/",
@@ -17,7 +17,9 @@ const pathLikePrefixes = [
 const rootFiles = new Set([
   ".env.example",
   ".gitignore",
+  ".mcp.json",
   "AGENTS.md",
+  "CLAUDE.md",
   "README.md",
   "components.json",
   "package.json",

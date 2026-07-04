@@ -106,4 +106,4 @@ RESEARCH_PROVIDER_ORDER=tavily,deepseek,gemini
 FIRECRAWL_API_KEY=fc-your-key-here
 ```
 
-Для Codex-сессии без локального standalone runtime это остается opt-in конфигурацией проекта. Реальные ключи хранятся только в локальном `.env`, не в `.env.example`, outputs или traces.
+Для Claude Code-сессии без локального standalone runtime это остается opt-in конфигурацией проекта. Реальные ключи хранятся только в локальном `.env`, не в `.env.example`, outputs или traces.

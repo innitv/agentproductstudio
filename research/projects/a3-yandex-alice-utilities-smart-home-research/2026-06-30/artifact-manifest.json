@@ -1,0 +1,64 @@
+{
+  "artifacts": [
+    {
+      "file": "run-plan.md",
+      "type": "run_plan",
+      "status": "completed",
+      "safe_to_publish": false
+    },
+    {
+      "file": "handoff-bundle.md",
+      "type": "handoff_bundle",
+      "status": "completed",
+      "safe_to_publish": false
+    },
+    {
+      "file": "stage-gate-ledger.md",
+      "type": "stage_gate_ledger",
+      "status": "completed",
+      "safe_to_publish": false
+    },
+    {
+      "file": "research-summary.md",
+      "type": "research_summary",
+      "status": "completed",
+      "safe_to_publish": true
+    },
+    {
+      "file": "scenario-user-flows.md",
+      "type": "scenario_user_flows",
+      "status": "completed",
+      "safe_to_publish": true
+    },
+    {
+      "file": "competitive-analysis.md",
+      "type": "competitive_analysis",
+      "status": "completed",
+      "safe_to_publish": true
+    },
+    {
+      "file": "source-log.md",
+      "type": "source_log",
+      "status": "completed",
+      "safe_to_publish": true
+    },
+    {
+      "file": "notion-research-export-ru.md",
+      "type": "notion_research_export",
+      "status": "completed",
+      "safe_to_publish": true
+    },
+    {
+      "file": "approval-state.json",
+      "type": "approval_state",
+      "status": "completed",
+      "safe_to_publish": false
+    },
+    {
+      "file": "notion-publication-result.md",
+      "type": "notion_publication_result",
+      "status": "completed",
+      "safe_to_publish": false
+    }
+  ]
+}

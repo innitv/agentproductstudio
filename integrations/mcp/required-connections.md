@@ -2,11 +2,11 @@
 
 Дата: 2026-05-22
 
-Документ фиксирует минимальные подключения для работы проекта как Codex agent pack и opt-in providers, которые требуют отдельного approval.
+Документ фиксирует минимальные подключения для работы проекта как Claude Code agent pack и opt-in providers, которые требуют отдельного approval.
 
 ## Baseline Without API Key
 
-Основной режим: папка проекта используется как agent pack внутри Codex. В этом режиме отдельный `OPENAI_API_KEY` не нужен, потому что выполнение модели обеспечивает Codex-среда.
+Основной режим: папка проекта используется как agent pack внутри Claude Code. В этом режиме отдельный `OPENAI_API_KEY` не нужен, потому что выполнение модели обеспечивает Claude Code-среда.
 
 Обязательные подключения для этого режима:
 
@@ -17,7 +17,7 @@
 
 ## Optional Standalone Runtime
 
-`OPENAI_API_KEY` нужен только если проект запускается как отдельное локальное приложение через OpenAI Agents SDK, например `yarn landing:run "<goal>"` должен сам вызывать модель без Codex-интерфейса.
+`OPENAI_API_KEY` нужен только если проект запускается как отдельное локальное приложение через OpenAI Agents SDK, например `yarn landing:run "<goal>"` должен сам вызывать модель без Claude Code-интерфейса.
 
 | Connection | Purpose | Required secret | Default mode |
 |---|---|---:|---|
@@ -39,7 +39,7 @@
 ## Rules
 
 - Реальные tokens не сохраняются в репозиторий, outputs, traces или AGENTS.md.
-- `OPENAI_API_KEY` не является обязательным для Codex agent pack режима.
+- `OPENAI_API_KEY` не является обязательным для Claude Code agent pack режима.
 - Firecrawl используется для публичных reference/competitor URLs; локальный preview проверяется Playwright, если нет публичного tunnel.
 - Write-действия во внешних системах требуют human approval.
 - Если provider недоступен, agent возвращает `partial` с `needs_validation` или использует разрешённый fallback из `runtime/typescript/research.config.ts`.

@@ -6,6 +6,7 @@ description: "Use when 01-research or 12-release needs human-approved Notion pub
 platforms:
   - codex
   - open-code
+  - claude
 mcp_servers:
   - notion
 strictness_profile: strict

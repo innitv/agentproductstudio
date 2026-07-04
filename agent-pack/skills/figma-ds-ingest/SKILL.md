@@ -5,6 +5,7 @@ title: "Figma DS Ingest"
 description: "Использовать, когда нужно внести большую или новую Figma дизайн-систему в локальный индекс design/figma/<slug>/, чтобы дальше собирать макеты и frontend по Node ID без постоянного чтения всего Figma-файла."
 platforms:
   - codex
+  - claude
 mcp_servers:
   - figma
 strictness_profile: strict

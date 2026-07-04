@@ -102,6 +102,20 @@
 |---|---|---|---|---|---|
 | 1 |  |  |  |  |  |
 
+### App-Likeness Gate
+
+Этот gate обязателен для `figma_board`, `product_ui`, `prototype` и mobile/web app screens. Он проверяет не количество экранов и не Auto Layout, а то, что screenshot читается как реальный экран приложения.
+
+| Field | Value |
+|---|---|
+| Required | yes / no |
+| Target | real app screen / app flow, not a technical board |
+| Visual evidence | Lazyweb / Figma maker / product screenshots / user reference |
+| Forbidden patterns | `technical_board`, `audit_board`, `wireframe`, `component_inventory`, `metadata_panel`, `route_map`, `generic_card_grid`, `empty_ui_shell` |
+| Screenshot review required | yes / no |
+| Status | `passed` / `needs_work` / `blocked` / `not_applicable` |
+| Blocker / deviation |  |
+
 ## Screen List
 
 | Screen | Purpose | Entry Point | Primary Action | Next State | Completion Evidence | PRD Requirement | IA Node | Status |
@@ -172,6 +186,8 @@
 | Verification contract requires screenshots | yes / no |
 | Verification contract requires object inventory | yes / no |
 | Verification contract requires visual QA | yes / no |
+| Each screen has `ui_fidelity_target` | yes / no |
+| App-likeness screenshot review required | yes / no |
 | Blocker / deviation |  |
 
 ## State Inventory

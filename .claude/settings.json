@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "model": "opus",
+  "enableAllProjectMcpServers": true,
+  "permissions": {
+    "allow": [
+      "Read",
+      "Grep",
+      "Glob",
+      "Bash(yarn workflow:doctor)",
+      "Bash(yarn workflow:list)",
+      "Bash(yarn workflow:status:*)",
+      "Bash(yarn workflow:inspect:*)",
+      "Bash(yarn workflow:outputs:*)",
+      "Bash(yarn workflow:validate:*)",
+      "Bash(yarn workflow:sync:*)",
+      "Bash(yarn workflow:skills)",
+      "Bash(yarn workflow:approvals:*)",
+      "Bash(yarn workflow:test-*)",
+      "Bash(yarn validate:config)",
+      "Bash(yarn typecheck)",
+      "Bash(yarn build:*)",
+      "Bash(yarn qa:*)",
+      "Bash(yarn docs:audit)",
+      "Bash(yarn research:lint:*)",
+      "Bash(yarn reference:scan:*)",
+      "Bash(yarn reference:diff:*)",
+      "Bash(yarn agents:inspect:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)"
+    ],
+    "ask": [
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git add:*)",
+      "Bash(yarn deploy:*)",
+      "Bash(yarn notion:*)",
+      "Bash(yarn figma:*)",
+      "Bash(yarn workflow:approve:*)",
+      "Bash(yarn workflow:deny:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/.env)",
+      "Bash(rm -rf:*)"
+    ]
+  }
+}

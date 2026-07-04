@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-28T13:55:44.469Z",
+  "generated_at": "2026-06-28T14:32:28.539Z",
   "run_id": "2026-06-26-1782455072271",
   "workflow_profile": "standard",
   "artifacts": [
@@ -11,7 +11,9 @@
       "stage_title": "Intake and Recursive Brief",
       "producer_stage": "00-intake",
       "producer_agent": "orchestrator",
-      "consumers": [],
+      "consumers": [
+        "01-research"
+      ],
       "status": "completed",
       "exists": true,
       "human_readable": true,
@@ -30,7 +32,12 @@
       "producer_stage": "00-intake",
       "producer_agent": "orchestrator",
       "consumers": [
+        "01-research",
+        "02-prd",
+        "03-ia",
+        "05-copy",
         "07-prototype",
+        "08-frontend",
         "11-qa",
         "12-release"
       ],
@@ -52,6 +59,8 @@
       "producer_stage": "00-intake",
       "producer_agent": "orchestrator",
       "consumers": [
+        "01-research",
+        "notion-publisher",
         "11-qa",
         "12-release"
       ],
@@ -76,6 +85,8 @@
         "01-research",
         "02-prd",
         "notion-publisher",
+        "03-ia",
+        "05-copy",
         "10-test-bench",
         "11-qa"
       ],
@@ -125,6 +136,7 @@
       "producer_agent": "research",
       "consumers": [
         "02-prd",
+        "notion-publisher",
         "03-ia",
         "04-design",
         "05-copy",
@@ -149,6 +161,10 @@
       "producer_stage": "01-research",
       "producer_agent": "research",
       "consumers": [
+        "02-prd",
+        "notion-publisher",
+        "03-ia",
+        "05-copy",
         "11-qa"
       ],
       "status": "completed",
@@ -169,6 +185,10 @@
       "producer_stage": "01-research",
       "producer_agent": "research",
       "consumers": [
+        "02-prd",
+        "notion-publisher",
+        "03-ia",
+        "05-copy",
         "11-qa"
       ],
       "status": "completed",
@@ -189,6 +209,8 @@
       "producer_stage": "01-research",
       "producer_agent": "research",
       "consumers": [
+        "02-prd",
+        "notion-publisher",
         "11-qa"
       ],
       "status": "completed",
@@ -209,6 +231,8 @@
       "producer_stage": "01-research",
       "producer_agent": "research",
       "consumers": [
+        "02-prd",
+        "notion-publisher",
         "11-qa"
       ],
       "status": "completed",
@@ -455,7 +479,6 @@
       "producer_stage": "06-screens",
       "producer_agent": "design-generator",
       "consumers": [
-        "08-frontend",
         "11-qa"
       ],
       "status": "completed",
@@ -477,7 +500,6 @@
       "producer_stage": "06-screens",
       "producer_agent": "design-generator",
       "consumers": [
-        "08-frontend",
         "11-qa"
       ],
       "status": "completed",
