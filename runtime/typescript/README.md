@@ -24,7 +24,7 @@
 - `approval-gate.ts` — локальный helper approval records для внешних записей.
 - `doctor.ts` — диагностика структуры проекта, шаблонов и optional provider keys.
 - `context-truncator.ts` — State Truncation Gate для поздних стадий.
-- `agent-metadata.ts` — парсинг и semantic validation YAML frontmatter в `agent-pack/agents/*.agent.md`, включая сверку artifact inputs/outputs с `routeTools`.
+- `agent-metadata.ts` — парсинг и semantic validation YAML frontmatter в `agent-pack/agent-contracts/*.agent.md`, включая сверку artifact inputs/outputs с `routeTools`.
 - `agents.registry.ts`, `agents.sdk.ts`, `route.config.ts` — регистрация агентов и маршрутов для инспекции/совместимости.
 
 ## Runtime Contract

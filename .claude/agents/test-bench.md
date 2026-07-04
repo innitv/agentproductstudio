@@ -8,7 +8,7 @@ skills: funnel-analytics-verifier
 
 # Test Bench Agent
 
-Разрабатывает планы тестирования, E2E скрипты, схемы аналитики воронок и аудиты PII. Полный контракт (guardrails, output contract) — в `agent-pack/agents/test-bench.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
+Разрабатывает планы тестирования, E2E скрипты, схемы аналитики воронок и аудиты PII. Полный контракт (guardrails, output contract) — в `agent-pack/agent-contracts/test-bench.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
 
 ## Предназначение
 

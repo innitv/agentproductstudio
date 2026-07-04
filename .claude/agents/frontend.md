@@ -8,7 +8,7 @@ color: green
 
 # Frontend Agent
 
-Реализует высокотехнологичный UI и state machine после готовности всех продуктовых артефактов. Полный контракт (visual/lazyweb/evidence checks, Figma layout/visual QA fidelity, modular views, siteportfolio routing, output contract) — в `agent-pack/agents/frontend.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
+Реализует высокотехнологичный UI и state machine после готовности всех продуктовых артефактов. Полный контракт (visual/lazyweb/evidence checks, Figma layout/visual QA fidelity, modular views, siteportfolio routing, output contract) — в `agent-pack/agent-contracts/frontend.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
 
 ## Предназначение
 

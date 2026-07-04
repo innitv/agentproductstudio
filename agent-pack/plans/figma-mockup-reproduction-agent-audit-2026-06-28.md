@@ -19,8 +19,8 @@
 | Layer | Current Assets | What Works | Gap |
 |---|---|---|---|
 | Product/research context | `research-summary.md`, `scenario-user-flows.md`, `handoff-bundle.md` | Сценарии, риски и trust requirements есть | Нет machine-readable UI intent, который напрямую компилируется в экран |
-| Design agent | `agent-pack/agents/design.agent.md` | Есть Visual Evidence, Lazyweb, Primary App Flow Gate, Design System Strategy | Gate текстовый; агент может пройти в Figma без фактической visual calibration |
-| Screen generator | `agent-pack/agents/design-generator.agent.md`, `screens.template.md`, `screens.schema.json` | Требует screen traceability, state inventory, component matrix | Schema не требует layout IR, geometry constraints, измеримых screenshot checks |
+| Design agent | `agent-pack/agent-contracts/design.agent.md` | Есть Visual Evidence, Lazyweb, Primary App Flow Gate, Design System Strategy | Gate текстовый; агент может пройти в Figma без фактической visual calibration |
+| Screen generator | `agent-pack/agent-contracts/design-generator.agent.md`, `screens.template.md`, `screens.schema.json` | Требует screen traceability, state inventory, component matrix | Schema не требует layout IR, geometry constraints, измеримых screenshot checks |
 | Figma SOP | `integrations/mcp/figma-canvas-write-guide.md` | Правильно описывает two-pass build, visual calibration, systemization, screenshot QA | Не исполняется автоматически; не блокирует большой write технически |
 | DS ingest | `figma-ds-ingest.workflow.md`, `design/figma/registry.json`, shadcn index | Можно читать локальный индекс DS вместо всего файла | `shadcn-ui-components-2026` пока `partial`; reuse не превращен в импорт/инстансы компонентов |
 | Roundtrip skill | `agent-pack/skills/figma-roundtrip/SKILL.md` | Хорошо формулирует Component Contract Matrix и regression check | Skill не является runtime executor/verifier |

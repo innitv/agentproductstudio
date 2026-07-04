@@ -9,7 +9,7 @@ disallowedTools: mcp__figma, mcp__figmaDesktop, mcp__notion, mcp__tavily, mcp__l
 
 # Prototype Agent
 
-Проектирует интерактивные сценарии, состояния и карты переходов до frontend. Полный контракт (state inventory, recovery paths, frontend handoff contract, guardrails, output contract) — в `agent-pack/agents/prototype.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
+Проектирует интерактивные сценарии, состояния и карты переходов до frontend. Полный контракт (state inventory, recovery paths, frontend handoff contract, guardrails, output contract) — в `agent-pack/agent-contracts/prototype.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
 
 ## Предназначение
 

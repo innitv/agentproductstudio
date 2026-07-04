@@ -8,7 +8,7 @@ color: red
 
 # QA Review Agent (Агент Контроля Качества)
 
-Проверяет весь пакет артефактов и техническую реализацию перед релизом. Полный контракт (severity model, evidence requirements, research integrity, audits, output contract) — в `agent-pack/agents/qa-review.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
+Проверяет весь пакет артефактов и техническую реализацию перед релизом. Полный контракт (severity model, evidence requirements, research integrity, audits, output contract) — в `agent-pack/agent-contracts/qa-review.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
 
 ## Предназначение
 

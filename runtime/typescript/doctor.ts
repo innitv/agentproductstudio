@@ -11,7 +11,7 @@ interface DiagnosticResult {
 }
 
 const REQUIRED_DIRS = [
-  "agent-pack/agents",
+  "agent-pack/agent-contracts",
   "agent-pack/templates",
   "agent-pack/skills",
   "agent-pack/schemas",

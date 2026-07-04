@@ -2,7 +2,7 @@
 
 Эта папка предназначена для исполняемого слоя системы продуктовой оркестрации.
 
-Документы в `agent-pack/agents/`, `agent-pack/workflows/`, `agent-pack/artifacts/`, `agent-pack/templates/`, `agent-pack/guardrails/` и `agent-pack/schemas/` задают продуктовую и архитектурную спецификацию. Runtime должен реализовать эти правила через OpenAI Agents SDK или другой совместимый агентный слой.
+Документы в `agent-pack/agent-contracts/`, `agent-pack/workflows/`, `agent-pack/artifacts/`, `agent-pack/templates/`, `agent-pack/guardrails/` и `agent-pack/schemas/` задают продуктовую и архитектурную спецификацию. Runtime должен реализовать эти правила через OpenAI Agents SDK или другой совместимый агентный слой.
 
 ## Рекомендуемый старт
 

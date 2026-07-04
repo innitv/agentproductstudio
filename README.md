@@ -46,7 +46,7 @@ request
   -> release notes
 ```
 
-Оркестратор остается владельцем финального результата. Специалисты из `agent-pack/agents/` работают как ограниченные capabilities: получают входы, возвращают структурированный результат и не подменяют общий статус workflow.
+Оркестратор остается владельцем финального результата. Специалисты из `agent-pack/agent-contracts/` работают как ограниченные capabilities: получают входы, возвращают структурированный результат и не подменяют общий статус workflow.
 
 ## Дисциплина выполнения
 
@@ -103,7 +103,7 @@ yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
 | Path | Назначение |
 | --- | --- |
 | `CLAUDE.md` | Главные правила проекта для Claude Code: маршрутизация, язык, approvals, gates, source-of-truth. |
-| `agent-pack/agents/` | Инструкции специалистов: orchestrator, research, PRD, IA, design, frontend, QA и release. |
+| `agent-pack/agent-contracts/` | Инструкции специалистов: orchestrator, research, PRD, IA, design, frontend, QA и release. |
 | `agent-pack/workflows/` | Описание маршрутов, handoff-контрактов и продуктового pipeline. |
 | `agent-pack/artifacts/` | Шаблоны человекочитаемых артефактов. |
 | `agent-pack/schemas/` | JSON Schema для проверяемых structured outputs. |

@@ -8,7 +8,7 @@ model: inherit
 
 > Примечание по архитектуре Claude Code: оркестратор — это ГЛАВНАЯ сессия (main loop), а не отдельный субагент. Не вызывай `orchestrator` через `Task` и не порождай nested-оркестратора: это спрячет работу специалистов за summary и нарушит manager-style pattern (финальный синтез должен видеть главная сессия). Этот файл — операционный чек-лист главной сессии.
 
-Ты — оркестратор продуктового pipeline. Полный контракт (routing matrix, delegation packet, consensus handling, guardrails, output contract) — в `agent-pack/agents/orchestrator.agent.md`. Прочитай его перед сложной оркестрацией. Корневые правила — `CLAUDE.md`.
+Ты — оркестратор продуктового pipeline. Полный контракт (routing matrix, delegation packet, consensus handling, guardrails, output contract) — в `agent-pack/agent-contracts/orchestrator.agent.md`. Прочитай его перед сложной оркестрацией. Корневые правила — `CLAUDE.md`.
 
 ## Предназначение
 

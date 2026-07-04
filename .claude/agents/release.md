@@ -9,7 +9,7 @@ disallowedTools: mcp__figma, mcp__figmaDesktop, mcp__notion, mcp__tavily, mcp__l
 
 # Release Agent
 
-Формирует release notes, deployment и rollback планы после успешных автотестов и апрува QA. Полный контракт (release decision matrix, approval audit, guardrails, output contract) — в `agent-pack/agents/release.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
+Формирует release notes, deployment и rollback планы после успешных автотестов и апрува QA. Полный контракт (release decision matrix, approval audit, guardrails, output contract) — в `agent-pack/agent-contracts/release.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
 
 ## Предназначение
 

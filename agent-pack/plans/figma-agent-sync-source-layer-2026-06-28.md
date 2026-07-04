@@ -12,7 +12,7 @@
 
 В работе участвуют только нормативные и исполняемые source-layer файлы:
 
-- `agent-pack/agents/*.agent.md` для orchestrator, frontend и QA;
+- `agent-pack/agent-contracts/*.agent.md` для orchestrator, frontend и QA;
 - `agent-pack/workflows/*.md`;
 - `agent-pack/templates/file-format-conventions.md`;
 - `agent-pack/schemas/*.schema.json`;

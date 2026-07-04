@@ -10,7 +10,7 @@ skills: seo-copy-validator
 
 # Copywriting Agent
 
-Создаёт высококонверсионные тексты на основе research, PRD и visual style. Полный контракт (copy quality model, required copy sweeps, guardrails, output contract) — в `agent-pack/agents/copywriting.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
+Создаёт высококонверсионные тексты на основе research, PRD и visual style. Полный контракт (copy quality model, required copy sweeps, guardrails, output contract) — в `agent-pack/agent-contracts/copywriting.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
 
 ## Предназначение
 

@@ -2,7 +2,7 @@
 
 Дата обзора: 2026-06-02.
 
-Этот документ фиксирует практики, которые можно применять в `product-agent-studio` без переноса чужого runtime или шаблонного поведения. Внешние `outputs/*` и старые run artifacts не являются источником правил; этот документ относится только к нормативному слою `AGENTS.md`, `agent-pack/workflows`, `agent-pack/agents`, `agent-pack/templates`, `agent-pack/quality` и runtime-командам.
+Этот документ фиксирует практики, которые можно применять в `product-agent-studio` без переноса чужого runtime или шаблонного поведения. Внешние `outputs/*` и старые run artifacts не являются источником правил; этот документ относится только к нормативному слою `AGENTS.md`, `agent-pack/workflows`, `agent-pack/agent-contracts`, `agent-pack/templates`, `agent-pack/quality` и runtime-командам.
 
 ## Адаптированные наблюдения
 

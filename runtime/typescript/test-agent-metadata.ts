@@ -9,7 +9,7 @@ function withAgentDocFixture(assertion: (root: string) => void): void {
   const root = mkdtempSync(join(tmpdir(), "agent-metadata-"));
   try {
     mkdirSync(join(root, "agent-pack"), { recursive: true });
-    cpSync("agent-pack/agents", join(root, "agent-pack/agents"), { recursive: true });
+    cpSync("agent-pack/agent-contracts", join(root, "agent-pack/agent-contracts"), { recursive: true });
     assertion(root);
   } finally {
     rmSync(root, { recursive: true, force: true });
@@ -17,7 +17,7 @@ function withAgentDocFixture(assertion: (root: string) => void): void {
 }
 
 function overwriteAgent(root: string, fileName: string, transform: (content: string) => string): void {
-  const path = join(root, "agent-pack/agents", fileName);
+  const path = join(root, "agent-pack/agent-contracts", fileName);
   writeFileSync(path, transform(readFileSync(path, "utf8")), "utf8");
 }
 

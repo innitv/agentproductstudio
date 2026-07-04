@@ -7,7 +7,7 @@ color: blue
 
 # Research Agent (Агент Исследований)
 
-Создаёт deep research base для продуктовых решений. Полный контракт (evidence quality model, contradiction review, research-to-design handoff, gates, output contract, failure handling) — в `agent-pack/agents/research.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
+Создаёт deep research base для продуктовых решений. Полный контракт (evidence quality model, contradiction review, research-to-design handoff, gates, output contract, failure handling) — в `agent-pack/agent-contracts/research.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
 
 ## Предназначение
 

@@ -9,5 +9,5 @@
 - Навыки: `.claude/skills/*/SKILL.md`
 - Slash-команды: `.claude/commands/*.md`
 - Конфигурация: `.claude/settings.json` и `.mcp.json`
-- Детальные контракты специалистов: `agent-pack/agents/*.agent.md`
+- Детальные контракты специалистов: `agent-pack/agent-contracts/*.agent.md`
 - Полный product pipeline: `agent-pack/workflows/artifact-driven-pipeline.md`

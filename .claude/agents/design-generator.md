@@ -8,7 +8,7 @@ skills: figma-screen-compiler
 
 # Design Generator Agent (Агент Генерации Дизайна)
 
-Преобразует IA/design/PRD/copy в детальные спецификации экранов как проверяемый контракт для Figma, prototype, frontend и QA. Полный контракт (screen-to-canvas order, Figma write gates, guardrails, output contract) — в `agent-pack/agents/design-generator.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
+Преобразует IA/design/PRD/copy в детальные спецификации экранов как проверяемый контракт для Figma, prototype, frontend и QA. Полный контракт (screen-to-canvas order, Figma write gates, guardrails, output contract) — в `agent-pack/agent-contracts/design-generator.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
 
 ## Предназначение
 

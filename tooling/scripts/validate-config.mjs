@@ -65,12 +65,12 @@ const projectTextFilesForPackageManagerPolicy = [
   "integrations/mcp/repository-and-browser-mcp.md",
   "integrations/mcp/lazyweb.md",
   "runtime/typescript/README.md",
-  "agent-pack/agents/frontend.agent.md",
+  "agent-pack/agent-contracts/frontend.agent.md",
 ];
 
 const researchEnforcementFiles = [
   {
-    file: "agent-pack/agents/research.agent.md",
+    file: "agent-pack/agent-contracts/research.agent.md",
     requiredSnippets: ["proto_personas", "simulated_interviews", "synthetic", "tavily", "deepseek", "gemini", "providers", "browser scan", "Required provider skipped", "lazyweb_evidence_need", "Publication Cross-Link Gate", "Research Content Lint", "Notion Data Shape Plan", "database_index_candidates"],
   },
   {
@@ -98,7 +98,7 @@ const researchEnforcementFiles = [
     requiredSnippets: ["прото-персоны", "synthetic interviews", "validation plan", "Provider Coverage", "Tavily", "DeepSeek", "Gemini", "Surface-Aware Output Gate", "Visual Evidence Grounding", "visual_reference_card", "Write -> Verify -> Fix Gate", "Anti-AI-Slop Gate", "CJM Depth Gate", "Roadmap Trace Gate", "Publication Editor Pass", "Research Content Lint", "notion_data_shape_plan", "publication_editor_gate", "integrated_hybrid", "embedded_database_views"],
   },
   {
-    file: "agent-pack/agents/qa-review.agent.md",
+    file: "agent-pack/agent-contracts/qa-review.agent.md",
     requiredSnippets: ["Research integrity", "proto-personas", "synthetic interviews", "synthetic-as-fact", "Surface-Aware Output Audit", "Visual Evidence Grounding Audit", "Surface Output Contract"],
   },
   {
@@ -118,15 +118,15 @@ const researchEnforcementFiles = [
     requiredSnippets: ["Notion Research Publication Gate", "Reference-Driven Visual Spec Gate", "section-by-section visual spec", "research-only human-readable", "Publication Cross-Link Gate", "Карта связей исследования", "publish-notion-research-page", "stage-gate-ledger.md", "release-notes.md"],
   },
   {
-    file: "agent-pack/agents/design.agent.md",
+    file: "agent-pack/agent-contracts/design.agent.md",
     requiredSnippets: ["Visual Reference Rule", "Lazyweb Evidence Rule", "Universal Visual Evidence Rule", "visual_evidence_plan", "visual_reference_card", "lazyweb_evidence", "section-by-section visual spec", "frontend stage is blocked", "Surface Output Contract Pass", "Design System Strategy Gate", "design_system_mode=reuse|extend|product_specific|bespoke", "Two-Pass Figma Build", "surface_output"],
   },
   {
-    file: "agent-pack/agents/frontend.agent.md",
+    file: "agent-pack/agent-contracts/frontend.agent.md",
     requiredSnippets: ["Visual Reference Rule", "Lazyweb Implementation Check", "Visual Evidence Implementation Check", "visual_evidence_plan", "visual_reference_cards", "lazyweb_evidence", "section-by-section structural mapping", "generic landing template", "Surface Output Contract Pass", "Surface Output Summary", "Design System Mode Pass", "Component Contract Pass", "figma-roundtrip", "surface_output"],
   },
   {
-    file: "agent-pack/agents/notion-publisher.agent.md",
+    file: "agent-pack/agent-contracts/notion-publisher.agent.md",
     requiredSnippets: ["research-only child page publication is mandatory", "separate Notion child page", "notion-research-export-ru.md", "Publication Cross-Link Gate", "Publication Editor Pass", "Цепочка решений", "Publication Anti-AI-Slop Gate", "Research Content Lint", "publication_editor_gate", "notion_data_shape_plan", "database_index_candidates", "integrated_hybrid", "embedded_database_views", "stage-gate-ledger.md", "release-notes.md", "Surface Output Contract", "surface_output"],
   },
   {

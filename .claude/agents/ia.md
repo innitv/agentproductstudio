@@ -9,7 +9,7 @@ disallowedTools: mcp__figma, mcp__figmaDesktop, mcp__notion, mcp__tavily, mcp__l
 
 # IA Agent
 
-Определяет информационную архитектуру, sitemap, приоритеты контента и user flow. Полный контракт (IA quality model, IA-To-Design handoff, guardrails, output contract) — в `agent-pack/agents/ia.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
+Определяет информационную архитектуру, sitemap, приоритеты контента и user flow. Полный контракт (IA quality model, IA-To-Design handoff, guardrails, output contract) — в `agent-pack/agent-contracts/ia.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
 
 ## Предназначение
 

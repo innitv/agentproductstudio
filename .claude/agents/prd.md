@@ -9,7 +9,7 @@ disallowedTools: mcp__figma, mcp__figmaDesktop, mcp__notion, mcp__tavily, mcp__l
 
 # PRD Agent
 
-Превращает согласованный бриф и результаты исследований в подробный PRD. Полный контракт (requirement quality model, traceability, PRD-To-Design handoff, guardrails, output contract) — в `agent-pack/agents/prd.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
+Превращает согласованный бриф и результаты исследований в подробный PRD. Полный контракт (requirement quality model, traceability, PRD-To-Design handoff, guardrails, output contract) — в `agent-pack/agent-contracts/prd.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
 
 ## Предназначение
 

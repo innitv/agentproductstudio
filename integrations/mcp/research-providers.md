@@ -21,7 +21,7 @@ Research layer должен выбирать режим исследования
 |---|---|---|---|
 | `file_search` | Локальные документы, брендбук, прошлые артефакты. | local file tools | `needs_validation` |
 | `user_sources` | Ссылки и файлы из prompt. | file/browser tools | ask user |
-| `openai_docs` | OpenAI API/Codex/agent-pack/agents/MCP docs. | OpenAI Docs MCP | official OpenAI web docs |
+| `openai_docs` | OpenAI API/Codex/agent-pack/agent-contracts/MCP docs. | OpenAI Docs MCP | official OpenAI web docs |
 | `web_search` | Быстрый поиск актуальных источников. | web/search tool | `needs_validation` |
 | `browser` | Проверка страниц, UX, competitor pages. | browser/Playwright MCP | text-only notes |
 | `firecrawl` | Scrape/crawl/reference scan: markdown, metadata, links, screenshots for competitor/reference pages. | `FIRECRAWL_API_KEY`, `runtime/typescript/firecrawl.ts`, `runtime/typescript/reference-scan.ts` | browser/web_search |

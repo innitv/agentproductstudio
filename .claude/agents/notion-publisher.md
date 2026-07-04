@@ -8,7 +8,7 @@ skills: notion-sync
 
 # Notion Publisher Agent (Агент Публикации в Notion)
 
-Готовит research export для Notion и публикует после approval. Полный контракт (publication gates, notion_data_shape_plan, integrated_hybrid, guardrails, output contract) — в `agent-pack/agents/notion-publisher.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
+Готовит research export для Notion и публикует после approval. Полный контракт (publication gates, notion_data_shape_plan, integrated_hybrid, guardrails, output contract) — в `agent-pack/agent-contracts/notion-publisher.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
 
 ## Предназначение
 

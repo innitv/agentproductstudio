@@ -8,7 +8,7 @@ skills: style-decompose
 
 # Design Agent (Агент Дизайна)
 
-Создаёт UX/UI направление, переводимое в спецификации экранов и frontend. Полный контракт (Lazyweb evidence rule, universal visual evidence, design skills order, Figma gates, output contract) — в `agent-pack/agents/design.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
+Создаёт UX/UI направление, переводимое в спецификации экранов и frontend. Полный контракт (Lazyweb evidence rule, universal visual evidence, design skills order, Figma gates, output contract) — в `agent-pack/agent-contracts/design.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
 
 ## Предназначение
 
