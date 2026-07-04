@@ -7,6 +7,8 @@
       "Read",
       "Grep",
       "Glob",
+      "WebSearch",
+      "WebFetch",
       "Bash(yarn workflow:doctor)",
       "Bash(yarn workflow:list)",
       "Bash(yarn workflow:status:*)",
@@ -30,7 +32,10 @@
       "Bash(git diff:*)",
       "Bash(git log:*)",
       "Bash(git show:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(git remote -v)",
+      "Bash(git ls-files:*)",
+      "Bash(git ls-remote:*)"
     ],
     "ask": [
       "Bash(git commit:*)",
@@ -40,13 +45,54 @@
       "Bash(yarn notion:*)",
       "Bash(yarn figma:*)",
       "Bash(yarn workflow:approve:*)",
-      "Bash(yarn workflow:deny:*)"
+      "Bash(yarn workflow:deny:*)",
+      "mcp__notion",
+      "mcp__figma",
+      "mcp__figmaDesktop"
     ],
     "deny": [
       "Read(./.env)",
       "Read(./.env.*)",
       "Read(./**/.env)",
       "Bash(rm -rf:*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node .claude/hooks/session-start.mjs" }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node .claude/hooks/orchestrator-reminder.mjs" }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "node .claude/hooks/guard-write.mjs" }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "node .claude/hooks/guard-bash.mjs" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "node .claude/hooks/post-edit-sync.mjs" }
+        ]
+      }
     ]
   }
 }

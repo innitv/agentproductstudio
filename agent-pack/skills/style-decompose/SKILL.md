@@ -4,7 +4,6 @@ name: style-decompose
 title: "Декомпозиция Стиля Референса"
 description: "Использовать на 04-design для reference-driven или visually risky задач, чтобы превратить визуальный референс в STYLE_GUIDE.md со слоем подачи/рендера, UI-структурой, явными токенами, композиционными метриками и анти-паттернами."
 platforms:
-  - codex
   - claude
 mcp_servers:
   - playwright

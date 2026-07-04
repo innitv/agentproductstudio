@@ -11,7 +11,7 @@
 | Branch pattern | Назначение | Время жизни | Merge target |
 |---|---|---|---|
 | `main` | Стабильная интеграционная ветка. | Постоянная | - |
-| `codex/<task>` | Рабочие ветки Claude Code для ограниченных задач, реорганизаций, feature work. | Короткая, до PR/merge. | `main` |
+| `claude/<task>` | Рабочие ветки Claude Code для ограниченных задач, реорганизаций, feature work. | Короткая, до PR/merge. | `main` |
 | `feature/<task>` | Ручные продуктовые ветки, если нужно отделить работу человека. | Короткая или средняя. | `main` |
 | `release/<version>` | Только при реальном release process. | До релиза/patch window. | `main` |
 | `deploy/<surface>` или `gh-pages` | Build/deployment branch, если hosting требует branch source. | Может быть долгой, но не является source branch для разработки. | Не мержить обратно как feature source. |
@@ -30,7 +30,7 @@
 
 ## Правила для Claude Code branches
 
-1. Имя ветки: `codex/<short-task-slug>`.
+1. Имя ветки: `claude/<short-task-slug>`.
 2. Перед работой проверить `git status --short`.
 3. Для selective commit:
    - выписать include/exclude scope;

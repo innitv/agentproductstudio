@@ -4,7 +4,6 @@ name: ds-to-storybook
 title: "Design System To Storybook"
 description: "Использовать для component library, Storybook/state catalog или Figma-driven frontend handoff. Создает storybook-result.md с variant/state coverage, Component Contract Matrix mapping и validation evidence."
 platforms:
-  - codex
   - claude
 mcp_servers:
   - playwright

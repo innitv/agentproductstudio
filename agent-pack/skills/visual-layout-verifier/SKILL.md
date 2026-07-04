@@ -4,7 +4,6 @@ name: visual-layout-verifier
 title: "Visual Layout Verifier"
 description: "Use after Figma screen creation or systemization to verify screenshots/object inventory against figma-layout-ir.json: detect clipped text, overlap, unsafe top/bottom areas, density/hierarchy problems, DS instance dishonesty, route incoherence, and systemization regressions before marking a mockup ready."
 platforms:
-  - codex
   - claude
 mcp_servers:
   - figma

@@ -22,8 +22,8 @@
 - IA, screens, prototype report и test bench result являются частью базового продуктового pipeline;
 - route tools описаны в `runtime/typescript/route.config.ts`;
 - adaptive research layer описан в `runtime/typescript/research.config.ts` и `integrations/mcp/research-providers.md`;
-- lifecycle hooks описаны в `runtime/typescript/hooks.ts` и `.codex/hooks/README.md`;
-- command/action rules описаны в `.codex/rules/safe-commands.example.toml`;
+- lifecycle hooks описаны в `runtime/typescript/hooks.ts`; Claude Code hooks — в `.claude/settings.json` и `.claude/hooks/` (legacy `.codex/hooks/` в `archive/legacy-codex/`);
+- command/action rules описаны в `.claude/settings.json` permissions (legacy `.codex/rules/` в `archive/legacy-codex/`);
 - handoff используется только по правилам `agent-pack/workflows/landing-agent-orchestration.workflow.md`;
 - outputs валидируются по схемам из `agent-pack/schemas/`;
 - рискованные действия проходят approval matrix;

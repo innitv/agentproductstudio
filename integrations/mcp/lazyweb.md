@@ -63,7 +63,7 @@ args = ["-lc", "TOKEN=\"${LAZYWEB_MCP_TOKEN:-}\"; if [ -z \"$TOKEN\" ] && [ -f \
 
 First-run проверка после reload:
 
-1. Проверить `codex mcp list`.
+1. Проверить `claude mcp list`.
 2. Убедиться, что `lazyweb` включен.
 3. Убедиться, что `lazyweb_get_workflows` появился в live tool list.
 4. Вызвать `lazyweb_get_workflows` с `operation=list` и `task_context="first run Lazyweb capabilities"`.

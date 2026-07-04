@@ -4,7 +4,7 @@ name: skill-id-placeholder
 title: "Название Навыка"
 description: "Use when <stage/task trigger> needs <capability>. State required context, expected evidence/output, and any blocker/approval behavior in one trigger-oriented sentence."
 platforms:
-  - codex
+  - claude
   - open-code
 mcp_servers:
   - optional-mcp-server-name

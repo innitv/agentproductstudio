@@ -4,7 +4,6 @@ name: visual-diff-verifier
 title: "Visual Reference Screenshot Verifier"
 description: "Use when a task is reference-driven or stage 09-visual-reference/11-qa must compare implementation against a screenshot or URL reference. Requires technical reference scan, paired reference/local section screenshots, visual diff artifacts, and visual_reference_review evidence before success."
 platforms:
-  - codex
   - open-code
   - claude
 mcp_servers:

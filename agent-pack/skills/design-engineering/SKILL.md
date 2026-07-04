@@ -4,7 +4,6 @@ name: design-engineering
 title: "Motion И Interaction Polish"
 description: "Использовать на 08-frontend и 11-qa для проверки UI motion, interaction states, easing, reduced motion, focus и hover behavior."
 platforms:
-  - codex
   - claude
 mcp_servers:
   - playwright

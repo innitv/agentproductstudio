@@ -4,7 +4,6 @@ name: funnel-analytics-verifier
 title: "Funnel Analytics & PII Verifier"
 description: "Use when stage 10-test-bench or 11-qa must verify PRD analytics events, CTA/form funnel behavior, and absence of PII in analytics payloads through Playwright interception or dataLayer checks. Writes test_bench_result and qa_report evidence."
 platforms:
-  - codex
   - open-code
   - claude
 mcp_servers:

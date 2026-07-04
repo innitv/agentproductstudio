@@ -34,7 +34,7 @@ const parsed = parseSkillInstructionDocument([
   "title: Fixture",
   "description: Fixture skill",
   "platforms:",
-  "  - codex",
+  "  - claude",
   "mcp_servers: []",
   "strictness_profile: strict",
   "owner_stage_ids: []",

@@ -4,7 +4,6 @@ name: landing-builder
 title: "Bespoke UI Landing Builder"
 description: "Use when implementing stage 08-frontend for a landing, console, or product UI from approved PRD/IA/design/copy/screens/prototype artifacts. Builds bespoke React/Vite/Tailwind UI, derives style from design artifacts or reference-analysis, preserves workflow gates, and writes frontend_result evidence."
 platforms:
-  - codex
   - open-code
   - claude
 mcp_servers:

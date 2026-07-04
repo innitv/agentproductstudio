@@ -30,7 +30,7 @@ Desktop fallback требует:
 ## Claude Code CLI
 
 ```powershell
-codex mcp add figma --url https://mcp.figma.com/mcp
+claude mcp add --transport http figma https://mcp.figma.com/mcp
 ```
 
 После команды нужен OAuth flow в Figma. Не сохраняй OAuth-секреты или session data в репозитории.

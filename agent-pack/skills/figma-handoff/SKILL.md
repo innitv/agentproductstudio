@@ -4,7 +4,6 @@ name: figma-handoff
 title: "Figma Handoff Bundle"
 description: "Использовать, когда пользователь просит Figma design system или canvas write. Создает figma-handoff-bundle.md перед любым approval-gated Figma MCP write."
 platforms:
-  - codex
   - claude
 mcp_servers:
   - figma
