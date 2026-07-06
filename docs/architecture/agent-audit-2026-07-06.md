@@ -247,6 +247,16 @@
 
 Проверки: `typecheck`, `test-skill-metadata`, `test-agent-capabilities`, `validate:config`, `doctor` — все passed.
 
-### Осознанно НЕ сделано (риск изменения runtime-семантики)
-- **`mcp_servers` cleanup** (убрать неиспользуемый `playwright` у `style-decompose`/`ds-to-storybook`) — не уверен на 100%, что MCP не нужен (ds-to-storybook мог бы снимать state-evidence через playwright); удаление capability рискованно без подтверждения.
-- **`required_outputs` разделение «производит vs требует»** (`figma-handoff`→`figma_layout_ir`, `figma-roundtrip`→`frontend_result`/`qa_report`) — меняет семантику капабилити; `skill-usage.ts`/`agent-metadata.ts` читают `required_outputs`, эффект не до конца ясен. Требует отдельного анализа маршрутизации.
+### 6.6 Четвёртая волна — доделаны отложенные (после анализа runtime)
+
+Проверка использования полей в `runtime/typescript/` сняла неопределённость: `mcp_servers` используется только для type-валидации (не влияет на логику); `required_outputs` у навыков валидируется лишь на «known artifact» (route-consistency проверяется только у агентов). Поэтому доделано безопасно:
+
+| Правка | Обоснование |
+|---|---|
+| `style-decompose`: `mcp_servers: [playwright]` → `[]` | Чисто текстовый навык (референс уже отсканирован upstream), Playwright не вызывает. **ds-to-storybook оставлен с playwright** — state-evidence правдоподобно требует браузер, убирать рискованнее. |
+| `figma-handoff`: `figma_layout_ir` из `required_outputs` → в `required_inputs` | Владелец артефакта — `figma-screen-compiler`; handoff его потребляет как precondition, а не производит. |
+| `figma-roundtrip`: убраны `frontend_result`, `qa_report` из `required_outputs` | Их владельцы — frontend-агент и qa-review; навык их не производит. Оставлены Figma-артефакты (`figma_handoff_bundle`, `figma_layout_ir`, `figma_visual_qa`), которые roundtrip координирует в рамках Figma-цикла. |
+
+Проверки: `test-skill-metadata`, `test-agent-capabilities`, `validate:config`, `typecheck`, `doctor` — все passed (ничего не было жёстко завязано на убранные поля, что подтвердило анализ).
+
+**Аудит полностью закрыт** — все находки реализованы или обоснованно отсеяны.

@@ -15,9 +15,9 @@ required_inputs:
   - style_guide
   - design_brief
   - screens
+  - figma_layout_ir
 required_outputs:
   - figma_handoff_bundle
-  - figma_layout_ir
 approval_actions:
   - figma_write
 validation_commands:

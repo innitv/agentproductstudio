@@ -21,8 +21,6 @@ required_outputs:
   - figma_handoff_bundle
   - figma_layout_ir
   - figma_visual_qa
-  - frontend_result
-  - qa_report
 approval_actions:
   - figma_write
 validation_commands:
