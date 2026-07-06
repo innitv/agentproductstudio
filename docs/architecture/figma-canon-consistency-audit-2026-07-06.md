@@ -1,0 +1,47 @@
+# Аудит: консистентность и enforcement Figma/DS-правил — 2026-07-06
+
+## Цель
+Убедиться, что правила сборки дизайн-системы применяются **всегда**, и убрать «наслоения» в `integrations/mcp/figma-canvas-write-guide.md` после инкрементального добавления §10/§11/§12.
+
+## Метод
+- Полное чтение guide (оркестратором).
+- Параллельная инвентаризация enforcement субагентом (агенты/скиллы/команды/гейты, ссылки на guide/roundtrip, дубли).
+- **Верификация находок субагента по факту** до любых правок (рабочее правило аудитов).
+
+## Верификация находок субагента (агент переусердствовал)
+| Находка субагента | Вердикт после проверки |
+|---|---|
+| figma-token-extractor не ссылается на guide | **Ложь.** §5 строка 65: «После approval следуй `figma-canvas-write-guide.md`». |
+| figma-ds-ingest не ссылается на roundtrip/guide | **Ложь.** строка 42: write «через `figma-handoff`/`figma-roundtrip`». §4 уже требует «primitive, semantic aliases, **component tokens**» (3 тиера заложены). |
+| figma-screen-compiler не ссылается на guide | **Верно (минор).** Гейты сильные, но явного пути к guide не было. |
+| orchestrator: roundtrip не в enhancement-порядке | **Не bypass.** roundtrip — umbrella-skill, жёстко требуется в operating-rules §5 (STRONG). |
+| runtime manifest не валидирует required skills | Верно, но это design-решение (manifest валидирует артефакты; skill-enforcement — в operating-rules/quality-gates). Не дыра. |
+
+## Подтверждённые наслоения (внутри guide) — ИСПРАВЛЕНО
+1. **Тиеры токенов, противоречие:** §10.1 «двухуровневая архитектура» ↔ §12.1 «три уровня» (и ↔ ds-ingest §4). → §10.1 выровнен на 3 тиера, помечен как «реализация канона §12.1».
+2. **Дубль порядка доков компонента:** §11 vs §12.4 — два разных порядка секций. → §11 переименован в «визуальная подача», содержание/порядок отдан §12.4.
+3. **Слоты неполно в §10.2:** не упоминался настоящий SLOT. → добавлен пойнтер на §12.2 (выбор property/SLOT).
+4. **Омоним «mode»:** §1 `design_system_mode` vs §12.1 Figma modes. → добавлено разъяснение в §12.1.
+5. **Состояния §4 ↔ §12.2:** два списка. → §12.2 сослан на §4 (Required states).
+6. **Профилактика:** в «Назначение» добавлена карта границ §1–§9 / §10 / §11 / §12 (§10/§11 не переопределяют §12); §3.B выровнен на три тиера.
+
+## Enforcement — состояние
+**Сильный слой подтверждён:** `claude-operating-rules.md` §5 (Component Contract и Roundtrip Gate явно требует skill `figma-roundtrip`), `quality-gates.md` (Universal Gate: Figma Roundtrip Quality), `approval-matrix.md` (`figma_write` — exact target). Агенты design/frontend/qa-review имеют roundtrip в skills.
+
+**Единственная реальная дыра (минор) — ИСПРАВЛЕНО:** figma-screen-compiler (обе копии) не ссылался на guide → добавлен пойнтер на §3/§4/§12 + указание, что write идёт через roundtrip/handoff.
+
+## Осознанно НЕ менял (обоснование)
+- Оркестратор enhancement-порядок — roundtrip управляет через operating-rules §5, не bypass.
+- CLI-команды `/design`,`/screens` — делегируют в агентов, у которых roundtrip уже в skills; отдельная ссылка избыточна.
+- runtime manifest skill-validation — отдельное архитектурное решение, не правится точечно.
+
+## Изменённые файлы
+- `integrations/mcp/figma-canvas-write-guide.md` — Назначение (границы), §3.B, §10.1, §10.2, §11, §12.1, §12.2.
+- `agent-pack/skills/figma-screen-compiler/SKILL.md` + `.claude/skills/figma-screen-compiler/SKILL.md` — пойнтер на guide.
+
+## Валидация
+- `yarn validate:config` — passed.
+- `yarn workflow:test-skill-metadata` — passed.
+
+## Не закоммичено
+Все правки — в рабочем дереве; git write требует явного approval пользователя.

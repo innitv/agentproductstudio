@@ -20,6 +20,7 @@ Skill управляет полным циклом работы с Figma: выб
 - Выбери `design_system_mode`: reuse/extend/product_specific/bespoke (не reuse только из-за доступности библиотеки).
 - Для reuse/extend выбери slug из `design/figma/registry.json`; если DS нет или индекс partial/blocked — сначала `figma-ds-ingest`.
 - Проведи visual calibration до systemization; собери Component Contract Matrix и Code Connect/fallback mapping.
+- Соблюдай практику Plugin API (guide §10) и оформи presentation-слой (guide §11): cover-страница, page-интро, документация ключевых компонентов.
 - Выполни paired verification; результаты в handoff bundle, IR, visual QA, frontend-result, qa-report.
 
 ## Обязательные проверки

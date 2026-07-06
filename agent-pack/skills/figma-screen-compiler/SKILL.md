@@ -31,6 +31,8 @@ contract_schema: agent-pack/templates/skill.template.md
 
 Применяй этот skill перед любым Figma canvas write для `figma_board`, `product_ui` или `prototype`, если результат должен быть похож на приложение, а не на набор декоративных страниц.
 
+Нормативный источник — `integrations/mcp/figma-canvas-write-guide.md`: §3 (Two-Pass Build), §4 (Component Contract Matrix / DS Instance Enforcement) и §12 (textbook-канон: тиеры токенов, component API/slots/states, a11y). IR обязан отражать эти требования; сам write выполняется через `figma-roundtrip`/`figma-handoff`.
+
 Skill превращает `screens.md` и дизайн-контекст в `figma-layout-ir.json`: компактный machine-readable контракт для route, screens, zones, layout constraints, component sources, copy-fit и verification contract. IR — внутренний guardrail, а не макет и не canvas deliverable.
 
 Если пользователь просит макеты/use cases/flow, этот skill обязан поддержать Figma Make-like результат: приближенные product UI screens в реальном viewport. Запрещено превращать IR в видимую техническую доску, таблицу зон, node inventory или набор мелких карточек.

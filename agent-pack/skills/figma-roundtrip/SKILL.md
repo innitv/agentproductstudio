@@ -50,6 +50,8 @@ contract_schema: agent-pack/templates/skill.template.md
 7. Используй Code Connect, если доступен; иначе запиши полный fallback mapping и причину недоступности.
 8. Для Figma write проверь exact target/approval, загрузи обязательный skill текущего `use_figma` tool и пиши небольшими idempotent patches: сначала настоящие product screens, затем только недостающие component gaps.
 8a. После write запусти `visual-layout-verifier` и создай `figma-visual-qa.json`; readiness запрещен без passed/passed_with_notes gate. Passed structural QA не дает readiness, если human-visible screenshot выглядит как technical board, wireframe или audit artifact.
+8b. Соблюдай textbook-канон (guide §12): три тиера токенов (primitive→semantic→component), role-based naming, modes на semantic, покрытие типов; component API (variant/boolean/text/instance-swap/slot); a11y (контраст AA≥4.5:1/non-text≥3:1, видимый focus, target ≥24px); versioning/статусы. Реализация в Plugin API — guide §10.
+8c. Оформи presentation-слой (guide §11): cover-страница (name/version/meta/оглавление), page-интро на каждой странице, документация ключевых компонентов (свойства/состояния/примеры). DS-deliverable без него — presentation не выше `passed_with_notes`.
 9. Для Figma → frontend передай exact nodes/screenshots, state inventory, contracts и frame/state mapping.
 10. Для frontend → Figma классифицируй patch как `token_change|component_api_change|screen_composition_change`; DOM/screenshot import считай только draft/evidence.
 11. Проверь structural, visual и behavioral evidence. Visual regression после systemization блокирует `ready`.
@@ -66,6 +68,7 @@ contract_schema: agent-pack/templates/skill.template.md
 - Code Connect/fallback status;
 - frame/state → route/story/component mapping;
 - `figma-visual-qa.json` gate result and paired screenshot status;
+- presentation-слой: cover-страница, page-интро, документация ключевых компонентов — или presentation blocker;
 - deviations с owner/follow-up.
 
 Failure mode: если результат можно описать как "техническая картинка", "маленькие экраны на доске", "компонентная матрица" или "схема use cases", статус должен быть `rejected_needs_redesign`, даже при корректных node IDs и отсутствии clipping.
