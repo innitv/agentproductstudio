@@ -2,7 +2,7 @@
 id: visual-diff-verifier
 name: visual-diff-verifier
 title: "Visual Reference Screenshot Verifier"
-description: "Use when a task is reference-driven or stage 09-visual-reference/11-qa must compare implementation against a screenshot or URL reference. Requires technical reference scan, paired reference/local section screenshots, visual diff artifacts, and visual_reference_review evidence before success."
+description: "Использовать, когда задача reference-driven или на этапе 09-visual-reference/11-qa нужно сравнить реализацию со screenshot или URL референса. Skill требует технический scan референса, поблочные paired reference/local screenshots, visual diff артефакты и visual_reference_review evidence до success."
 platforms:
   - open-code
   - claude
@@ -54,7 +54,7 @@ contract_schema: agent-pack/templates/skill.template.md
    - `reference-mobile-section-<name>.png`
    - `local-desktop-section-<name>.png`
    - `local-mobile-section-<name>.png`
-6. Запусти `yarn reference:diff <reference-report-dir> <local-report-dir> [output-dir]` и, если доступны URL обеих сторон, `yarn reference:section-diff`.
+6. Перед захватом снизь ложные срабатывания: **отключи CSS-анимации/переходы** и **замаскируй динамический контент** (таймстемпы, аватары, счётчики, случайные данные), которые не относятся к сверке. Затем запусти `yarn reference:diff <reference-report-dir> <local-report-dir> [output-dir]` и, если доступны URL обеих сторон, `yarn reference:section-diff`. Применяй **per-section tolerance** (например `maxDiffPixelRatio ~0.01`) против anti-aliasing и различий шрифтового рендера между машинами — иначе валидная реализация даёт ложный `fail`.
 7. Прочитай `visual-diff-result.json` перед вердиктом. Не заменяй diff фразой "похоже".
 8. Запиши `visual-reference-review.md` с таблицей: section, reference screenshot, Figma screenshot при наличии, frontend screenshot, diff result, status, corrections.
 

@@ -2,7 +2,7 @@
 id: seo-copy-validator
 name: seo-copy-validator
 title: "SEO & Copywriting Validator"
-description: "Use when stage 05-copy or 11-qa must validate landing copy, SEO metadata, semantic heading hierarchy, and marketing claims against source-backed research. Produces copy_deck/qa_report evidence and marks unsupported claims as needs_validation."
+description: "Использовать, когда на этапе 05-copy или 11-qa нужно проверить landing copy, SEO metadata, семантическую иерархию заголовков и marketing claims против source-backed research. Skill создаёт copy_deck/qa_report evidence и помечает неподтверждённые claims как needs_validation."
 platforms:
   - open-code
   - claude

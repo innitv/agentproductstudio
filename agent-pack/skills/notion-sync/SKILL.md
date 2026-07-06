@@ -2,7 +2,7 @@
 id: notion-sync
 name: notion-sync
 title: "Notion Research & PRD Sync"
-description: "Use when 01-research or 12-release needs human-approved Notion publication/export of research-only or PRD artifacts. Prepares readable notion_research_export_ru, asks approval in chat, publishes only allowed content, and records blocked/partial states when approval, token, parent page, or permissions are missing."
+description: "Использовать, когда на этапе 01-research или 12-release нужна одобренная человеком публикация/экспорт research-only или PRD артефактов в Notion. Skill готовит читаемый notion_research_export_ru, запрашивает approval в чате, публикует только разрешённый контент и фиксирует blocked/partial состояния при отсутствии approval, token, parent page или permissions."
 platforms:
   - open-code
   - claude

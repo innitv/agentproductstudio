@@ -2,7 +2,7 @@
 id: funnel-analytics-verifier
 name: funnel-analytics-verifier
 title: "Funnel Analytics & PII Verifier"
-description: "Use when stage 10-test-bench or 11-qa must verify PRD analytics events, CTA/form funnel behavior, and absence of PII in analytics payloads through Playwright interception or dataLayer checks. Writes test_bench_result and qa_report evidence."
+description: "Использовать, когда на этапе 10-test-bench или 11-qa нужно проверить PRD analytics events, CTA/form funnel поведение и отсутствие PII в analytics payloads через Playwright interception или dataLayer checks. Skill пишет test_bench_result и qa_report evidence."
 platforms:
   - open-code
   - claude
@@ -42,7 +42,7 @@ contract_schema: agent-pack/templates/skill.template.md
 1. Извлеки event contract из PRD: event name, trigger, required properties, allowed properties, prohibited properties, expected destination.
 2. Если PRD не задает allowlist, создай минимальную allowlist в `test-bench-result.md` как assumption и пометь проверку `needs_validation`.
 3. Покрой Playwright-тестом главный путь: landing view, primary CTA, form open/fill/submit, success/error state.
-4. Перехватывай analytics через network interception, mock endpoint или `window.dataLayer`, в зависимости от фактической реализации.
+4. Перехватывай analytics через network interception, mock endpoint или `window.dataLayer`, в зависимости от фактической реализации. Анти-флейки: фильтруй перехват **предикатом по method+URL+query** (не broad `waitForResponse` по подстроке), корректно обрабатывай многократные вызовы одного endpoint (retry/polling), **изолируй стороннюю аналитику** (GA `/g/collect` и т.п.) через `route.abort()`/stub, чтобы шум не ловился как событие воронки, и очищай routes/listeners между проверками.
 5. Для каждого event проверь:
    - name соответствует PRD;
    - trigger произошел один раз или в ожидаемом количестве;

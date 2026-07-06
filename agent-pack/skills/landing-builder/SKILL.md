@@ -2,7 +2,7 @@
 id: landing-builder
 name: landing-builder
 title: "Bespoke UI Landing Builder"
-description: "Use when implementing stage 08-frontend for a landing, console, or product UI from approved PRD/IA/design/copy/screens/prototype artifacts. Builds bespoke React/Vite/Tailwind UI, derives style from design artifacts or reference-analysis, preserves workflow gates, and writes frontend_result evidence."
+description: "Использовать при реализации этапа 08-frontend для landing, console или product UI из одобренных PRD/IA/design/copy/screens/prototype артефактов. Skill собирает bespoke React/Vite/Tailwind UI, выводит стиль из design-артефактов или reference-analysis, сохраняет workflow gates и пишет frontend_result evidence."
 platforms:
   - open-code
   - claude

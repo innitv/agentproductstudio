@@ -116,6 +116,52 @@ export function validateSkillMetadata(root = process.cwd()): string[] {
   return errors;
 }
 
+/**
+ * Проверяет нативные обёртки `.claude/skills/<id>/SKILL.md`: для каждого детального
+ * навыка (`agent-pack/skills`) обёртка должна существовать, иметь frontmatter с
+ * `name === id` и непустой `description`. Не требует равенства description с детальной
+ * версией — обёртка намеренно короче. Graceful skip, если `.claude/skills` отсутствует
+ * (например во временных фикстурах, где копируется только `agent-pack/skills`).
+ */
+export function validateSkillWrappers(root = process.cwd()): string[] {
+  const errors: string[] = [];
+  const wrapperDir = join(root, ".claude", "skills");
+  const skillsDir = join(root, "agent-pack", "skills");
+  if (!existsSync(wrapperDir) || !existsSync(skillsDir)) {
+    return errors;
+  }
+
+  for (const file of listSkillFiles(root)) {
+    const id = file.split(/[\\/]/).at(-2);
+    const wrapper = join(wrapperDir, id ?? "", "SKILL.md");
+    const relativeWrapper = `.claude/skills/${id}/SKILL.md`;
+    if (!existsSync(wrapper)) {
+      errors.push(`${relativeWrapper}: missing native wrapper for skill '${id}'.`);
+      continue;
+    }
+
+    const match = readFileSync(wrapper, "utf8").match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (!match) {
+      errors.push(`${relativeWrapper}: missing YAML frontmatter.`);
+      continue;
+    }
+
+    // Построчное извлечение (не полный YAML): обёртки намеренно держат
+    // незакавыченные description с ": " внутри, на которых строгий парсер падает.
+    const frontmatter = match[1];
+    const name = frontmatter.match(/^name:\s*(.+?)\s*$/m)?.[1]?.replace(/^["']|["']$/g, "");
+    const description = frontmatter.match(/^description:\s*(.+?)\s*$/m)?.[1]?.trim();
+    if (name !== id) {
+      errors.push(`${relativeWrapper}: name '${String(name)}' must match skill id '${id}'.`);
+    }
+    if (!description || description.length === 0) {
+      errors.push(`${relativeWrapper}: description must be a non-empty string.`);
+    }
+  }
+
+  return errors;
+}
+
 export function loadSkillMetadataRecords(root = process.cwd()): SkillMetadataRecord[] {
   return listSkillFiles(root).flatMap((file) => {
     const content = readFileSync(file, "utf8");

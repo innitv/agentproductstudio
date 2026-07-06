@@ -25,7 +25,7 @@ import {
 } from "./workflow-stages";
 import { approvalActions } from "./approval-gate";
 import { validateAgentMetadata } from "./agent-metadata";
-import { validateSkillMetadata } from "./skill-metadata";
+import { validateSkillMetadata, validateSkillWrappers } from "./skill-metadata";
 
 export function validateConfigSemantics(root = process.cwd()): string[] {
   const errors: string[] = [];
@@ -101,6 +101,7 @@ export function validateConfigSemantics(root = process.cwd()): string[] {
   validateApprovalMatrix(root, errors);
   errors.push(...validateAgentMetadata(root));
   errors.push(...validateSkillMetadata(root));
+  errors.push(...validateSkillWrappers(root));
 
   return errors;
 }

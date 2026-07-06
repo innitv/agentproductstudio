@@ -237,6 +237,16 @@
 
 Проверки второй волны: `doctor`, `validate:config`, `test-skill-metadata` — passed; битых путей 0; рассинхронов шаблонов 0; settings.json — валидный JSON.
 
-### Ещё не сделано (P1, отдельная задача)
-- Валидация обёрток `.claude/skills/*` в `test-skill-metadata` (сверка name/description с `agent-pack/skills`).
-- Skills P1: `mcp_servers` cleanup, `required_outputs` разделение «производит vs требует», разграничение write-навыков, visual-diff пороги.
+### 6.5 Третья волна — закрытие P1
+
+| Улучшение | Как сделано |
+|---|---|
+| **Валидатор обёрток skills** (закрыта системная дыра) | Новая `validateSkillWrappers()` в `skill-metadata.ts`: для каждого детального навыка проверяет наличие обёртки `.claude/skills/<id>/SKILL.md`, `name===id`, непустой `description`. Построчный парс (не полный YAML — обёртки держат незакавыченные `description` с `": "`, на которых `js-yaml` падает). Graceful skip в фикстурах. Подключена в `validate-config-semantics.ts` (pre-commit) + тест (позитивный + негативный фикстур). |
+| **8 англоязычных `description` переведены на русский** | `figma-screen-compiler`, `figma-token-extractor` (2-я волна) + `funnel-analytics-verifier`, `landing-builder`, `notion-sync`, `seo-copy-validator`, `visual-diff-verifier`, `visual-layout-verifier` (3-я волна). Синхронизированы с русскими обёртками. Нарушение CLAUDE.md §1 устранено. |
+| **Анти-флейки в Playwright-навыках** | `funnel-analytics-verifier`: предикат-фильтрация перехвата (method+URL+query), изоляция сторонней аналитики (`route.abort()`), очистка listeners. `visual-diff-verifier`: disable animations + mask dynamic content + per-section tolerance (`maxDiffPixelRatio ~0.01`). |
+
+Проверки: `typecheck`, `test-skill-metadata`, `test-agent-capabilities`, `validate:config`, `doctor` — все passed.
+
+### Осознанно НЕ сделано (риск изменения runtime-семантики)
+- **`mcp_servers` cleanup** (убрать неиспользуемый `playwright` у `style-decompose`/`ds-to-storybook`) — не уверен на 100%, что MCP не нужен (ds-to-storybook мог бы снимать state-evidence через playwright); удаление capability рискованно без подтверждения.
+- **`required_outputs` разделение «производит vs требует»** (`figma-handoff`→`figma_layout_ir`, `figma-roundtrip`→`frontend_result`/`qa_report`) — меняет семантику капабилити; `skill-usage.ts`/`agent-metadata.ts` читают `required_outputs`, эффект не до конца ясен. Требует отдельного анализа маршрутизации.

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { parseSkillInstructionDocument, validateSkillMetadata } from "./skill-metadata";
+import { parseSkillInstructionDocument, validateSkillMetadata, validateSkillWrappers } from "./skill-metadata";
 
 function withSkillFixture(assertion: (root: string) => void): void {
   const root = mkdtempSync(join(tmpdir(), "skill-metadata-"));
@@ -78,6 +78,29 @@ withSkillFixture((root) => {
 withSkillFixture((root) => {
   overwriteSkill(root, "landing-builder", (content) => content.replace("name: landing-builder", "name: wrong-name"));
   assertMetadataError(validateSkillMetadata(root), /name 'wrong-name' must match id 'landing-builder'/);
+});
+
+// Обёртки `.claude/skills/*` реального репозитория должны быть согласованы.
+assert.deepEqual(validateSkillWrappers(), []);
+
+// Фикстура с обеими директориями: ловим рассинхрон name в обёртке.
+function withWrapperFixture(assertion: (root: string) => void): void {
+  const root = mkdtempSync(join(tmpdir(), "skill-wrapper-"));
+  try {
+    mkdirSync(join(root, "agent-pack"), { recursive: true });
+    mkdirSync(join(root, ".claude"), { recursive: true });
+    cpSync("agent-pack/skills", join(root, "agent-pack/skills"), { recursive: true });
+    cpSync(".claude/skills", join(root, ".claude/skills"), { recursive: true });
+    assertion(root);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+}
+
+withWrapperFixture((root) => {
+  const wrapper = join(root, ".claude/skills/landing-builder/SKILL.md");
+  writeFileSync(wrapper, readFileSync(wrapper, "utf8").replace("name: landing-builder", "name: wrong-name"), "utf8");
+  assertMetadataError(validateSkillWrappers(root), /landing-builder\/SKILL\.md: name 'wrong-name' must match skill id 'landing-builder'/);
 });
 
 console.log("skill metadata regression tests passed");
