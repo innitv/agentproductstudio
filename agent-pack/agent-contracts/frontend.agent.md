@@ -51,11 +51,7 @@ Lazyweb для frontend используется как benchmark/critique layer
 
 ## Universal Execution Discipline (Общее правило тщательности)
 
-Тщательность, source-of-truth checks и порядок gates важнее скорости видимого результата. Агент не трактует запрос как просьбу сделать быстро, если пользователь явно не сказал `quick draft`, «быстрый набросок», `demo only` или аналогичный режим.
-
-До генерации, записи, публикации, Figma write, frontend implementation или передачи downstream агент обязан выполнить context/source inventory, проверить существующие assets/components/templates/artifacts и зафиксировать reuse decisions plus gap list. Новое создается только для доказанного gap; если подходящий источник уже есть, его нужно использовать или расширить минимально.
-
-Если агент нарушил уже существующее правило, это фиксируется как `process_deviation`; запрещено называть такое исправление "поправкой пользователя".
+Действует общее правило тщательности: source-of-truth checks и порядок gates важнее скорости; до любой генерации/записи/публикации/Figma write/frontend/handoff — обязательный context/source inventory и reuse-over-new (новое только для доказанного gap); нарушение существующего правила фиксируется как `process_deviation`, а не «поправка пользователя». **Полный нормативный текст** — `agent-pack/workflows/claude-operating-rules.md`, раздел 7 «Universal Execution Discipline»; при изменении править там.
 
 ## Inputs
 
@@ -83,7 +79,7 @@ Lazyweb для frontend используется как benchmark/critique layer
 3d. **Design System Mode Pass**: прочитать `design_system_mode`. Для `reuse` не дублировать primitives; для `extend` реализовать только подтвержденные gaps; для `product_specific` использовать локальные product tokens/components; для `bespoke` выносить компонент только при доказанном повторе.
 3e. **Component Contract Pass**: сопоставить Figma component/property/value → React component/prop → semantic CSS token → state story/route → test locator. Любой gap имеет reason/deviation. Если Code Connect недоступен, использовать matrix из handoff как обязательный fallback.
 4. **Surface Routing**: Определить тип поверхности: `marketing/landing`, `app/dashboard/console` или blended. Для blended задач разделить presentation view и operational view вместо смешивания hero-композиции с dashboard-интерфейсом.
-5. **Применение Навыков**: Использовать навык [landing-builder/SKILL.md](file:///c:/Project/product-agent-studio/agent-pack/skills/landing-builder/SKILL.md) для сборки премиальных кастомных интерфейсов с нуля на чистом Tailwind и React без готовых библиотек.
+5. **Применение Навыков**: Использовать навык [landing-builder/SKILL.md](agent-pack/skills/landing-builder/SKILL.md) для сборки премиальных кастомных интерфейсов с нуля на чистом Tailwind и React без готовых библиотек.
 6. **Синхронизация С Figma Handoff**: Если есть `figma-handoff-bundle.md`, сопоставить Figma variables/component inventory/component states с frontend tokens/components. Не игнорировать `Auto Layout intent`: он переводится в Flex/Grid, min/max constraints, stable dimensions и text wrapping rules. Если есть `figma-layout-ir.json`, его route/zones/copy-fit/resize constraints имеют приоритет над визуальным угадыванием по screenshot. Если есть `figma-visual-qa.json`, перенести gate verdict и unresolved deviations в `frontend-result.md`.
 7. **Component Architecture**: Написать модульные семантические React/TypeScript компоненты по Component Contract Matrix. Предпочитать composition over configuration, отделять view-level композицию от переиспользуемых компонентов и не строить over-configured config-object UI.
 8. **Машина состояний и симулятор**: Создать интерактивные состояния (hover, active, modal, overlays), формы ввода и полнофункциональный симулятор (например, окно чата, Switch-переключатели) со скелетон-загрузчиками.
@@ -98,7 +94,7 @@ Lazyweb для frontend используется как benchmark/critique layer
 ## Guardrails
 
 - **Безопасность секретов**: Запрещено жестко прописывать (hardcode) API-ключи, токены или пароли в коде. Использовать переменные окружения.
-- **Кастомная верстка с нуля (Bespoke UI by Default):** Использование любых шаблонных библиотек компонентов и заготовок полностью исключено из процессов верстки. Запрещено верстать целевые страницы по стандартным шаблонам. Вся верстка производится строго с нуля как Bespoke UI с применением чистого кастомного Tailwind CSS / HTML и независимых React-компонентов, детально воспроизводящих дизайн-бриф и утвержденные макеты Figma на основе [landing-builder/SKILL.md](file:///c:/Project/product-agent-studio/agent-pack/skills/landing-builder/SKILL.md).
+- **Кастомная верстка с нуля (Bespoke UI by Default):** Использование любых шаблонных библиотек компонентов и заготовок полностью исключено из процессов верстки. Запрещено верстать целевые страницы по стандартным шаблонам. Вся верстка производится строго с нуля как Bespoke UI с применением чистого кастомного Tailwind CSS / HTML и независимых React-компонентов, детально воспроизводящих дизайн-бриф и утвержденные макеты Figma на основе [landing-builder/SKILL.md](agent-pack/skills/landing-builder/SKILL.md).
 - **Минимизация зависимостей**: Не добавлять сторонние Yarn-зависимости без крайней необходимости. Максимально использовать существующие токены дизайн-системы.
 - **Motion hygiene**: Не использовать `transition: all`, не начинать UI entry с `scale(0)`, не применять `ease-in` для responsive UI entry, не анимировать часто повторяемые keyboard actions, не делать hover-анимации на touch без media query, поддерживать `prefers-reduced-motion`.
 - **Figma handoff fidelity**: Если `figma-handoff-bundle.md` содержит variables, component sets, variants или Auto Layout rules, frontend должен либо реализовать их эквиваленты в коде, либо явно записать deviation в `frontend-result.md`.
@@ -114,7 +110,7 @@ Lazyweb для frontend используется как benchmark/critique layer
 - **Primary app flow first**: Нельзя закрывать app/product UI как `success`, если основной сценарий не проходит от entry point до completion evidence или у экранов нет next states/error recovery.
 - **Lazyweb evidence fidelity**: Если upstream artifacts содержат `lazyweb_evidence`, frontend должен либо реализовать релевантные паттерны, либо явно записать deviation в `frontend-result.md`. Запрещено использовать Lazyweb screenshots как шаблон для прямого копирования брендинга, композиции один-в-один или чужого trade dress.
 - **Целостность состояний**: Строго следовать карте переходов прототипа. Не создавать компоненты, у которых не описаны состояния загрузки, ошибок и пустых экранов.
-- **Изоляция представлений (Modular Views Architecture):** Целевая верстка презентационных страниц, промо-лендингов и калькуляторов должна жить в отдельном presentation view внутри `apps/frontend/src/views/`. Для обновления существующего лендинга используй [LandingView.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/views/LandingView.tsx); для нового самостоятельного продукта допустим отдельный `<ProductName>View.tsx`. Файл [ConsoleView.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/views/ConsoleView.tsx) является защищенной внутренней B2B-консолью управления оркестрацией и не должен модифицироваться кодом лендингов. Файл [App.tsx](file:///c:/Project/product-agent-studio/apps/frontend/src/App.tsx) должен оставаться легким роутером и может меняться только для подключения/выбора view. Все общие типы выносятся в [types.ts](file:///c:/Project/product-agent-studio/apps/frontend/src/types.ts).
+- **Изоляция представлений (Modular Views Architecture):** Целевая верстка презентационных страниц, промо-лендингов и калькуляторов должна жить в отдельном presentation view внутри `apps/frontend/src/views/`. Для обновления существующего лендинга используй [LandingView.tsx](apps/frontend/src/views/LandingView.tsx); для нового самостоятельного продукта допустим отдельный `<ProductName>View.tsx`. Файл [ConsoleView.tsx](apps/frontend/src/views/ConsoleView.tsx) является защищенной внутренней B2B-консолью управления оркестрацией и не должен модифицироваться кодом лендингов. Файл [App.tsx](apps/frontend/src/App.tsx) должен оставаться легким роутером и может меняться только для подключения/выбора view. Все общие типы выносятся в [types.ts](apps/frontend/src/types.ts).
 - **Сохранение кода пользователя**: Не перезаписывать и не портить файлы кода пользователя без явного согласования.
 
 ## Required Output
@@ -148,6 +144,22 @@ outputs:
 
     ...
 
+    ## Design System Implementation
+
+    ...
+
+    ## Component Contract Implementation
+
+    ...
+
+    ## Frame / State Implementation Map
+
+    ...
+
+    ## Figma Visual QA Gate Summary
+
+    ...
+
     ## Commands Run
 
     ...
@@ -155,4 +167,10 @@ outputs:
     ## Known Limitations
 
     ...
+
+    ## Figma Roundtrip Deviations
+
+    ...
 ```
+
+> Секции синхронизированы с `requiredSectionsByArtifact` для стадии `08-frontend` в `runtime/typescript/workflow.manifest.ts`. Для не-Figma задач секции `Design System Implementation`, `Component Contract Implementation`, `Frame / State Implementation Map`, `Figma Visual QA Gate Summary`, `Figma Roundtrip Deviations` заполняются как `not_applicable` с причиной, но не удаляются — иначе section-gate валидатора не пройдёт.

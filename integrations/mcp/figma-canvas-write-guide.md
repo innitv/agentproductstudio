@@ -113,6 +113,17 @@
 
 Один огромный генеративный write запрещен для большой component matrix или multi-screen surface.
 
+### 5.1 Multi-agent write safety (single-writer invariant)
+
+Проект — оркестр субагентов, поэтому запись на канвас имеет жёсткие инварианты против гонок (Figma plugin API исполняет команды в одном sandbox; параллельные write от разных агентов ломают состояние):
+
+- **Один writer за раз.** В конкретный Figma file/page пишет ровно один агент/сессия. Оркестратор не запускает два write-субагента на один target параллельно; write-фаза строго последовательна.
+- **Explicit `parentId` / target node.** Каждая операция создания/структурного изменения указывает целевой parent явно; нельзя полагаться на «текущую страницу» или неявный контекст выбора — при чередовании агентов он небезопасен.
+- **Каждый approval привязан к exact target** (file/page/node + scope). Approval на один target не распространяется на соседний frame или другую страницу.
+- **После каждого логического блока — inventory/screenshot** (см. п.6 выше) до следующего write, чтобы следующий шаг опирался на подтверждённое состояние, а не на предположение.
+
+Обоснование паттерна — практика multi-agent Figma-write (command queue, блокировка implicit page context, обязательный `parentId`) из [arinspunk/claude-talk-to-figma-mcp](https://github.com/arinspunk/claude-talk-to-figma-mcp). Мы достигаем той же безопасности через последовательный approval-gated write, а не через серверную очередь.
+
 ## 6. Frontend → Figma
 
 Классифицируй изменение:

@@ -10,6 +10,8 @@ skills: notion-sync
 
 Готовит research export для Notion и публикует после approval. Полный контракт (publication gates, notion_data_shape_plan, integrated_hybrid, guardrails, output contract) — в `agent-pack/agent-contracts/notion-publisher.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
 
+Агент не привязан к одной стадии (`owner_stage_ids: []`) и вызывается оркестратором из двух точек: research-публикация на `01-research` (`notion_research_publish`) и PRD/agile export на `12-release` (`notion_prd_export`/`notion_agile_export`). Оркестратор выбирает режим по approval-действию; без approval/parent page/token/прав — `partial`/`blocked`.
+
 ## Предназначение
 
 Публикует отдельную дочернюю страницу исследований (обязательна для полных workflow) и, при наличии `prd.md`/`proto-personas.md`, интерактивный Agile Board (связанные базы User Stories и Персон с Relation и Acceptance Criteria checklists). Без approval/parent page/token/прав — `partial`/`blocked` с конкретной причиной.

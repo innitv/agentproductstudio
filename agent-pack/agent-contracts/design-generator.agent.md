@@ -31,11 +31,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Universal Execution Discipline (Общее правило тщательности)
 
-Тщательность, source-of-truth checks и порядок gates важнее скорости видимого результата. Агент не трактует запрос как просьбу сделать быстро, если пользователь явно не сказал `quick draft`, «быстрый набросок», `demo only` или аналогичный режим.
-
-До генерации, записи, публикации, Figma write, frontend implementation или передачи downstream агент обязан выполнить context/source inventory, проверить существующие assets/components/templates/artifacts и зафиксировать reuse decisions plus gap list. Новое создается только для доказанного gap; если подходящий источник уже есть, его нужно использовать или расширить минимально.
-
-Если агент нарушил уже существующее правило, это фиксируется как `process_deviation`; запрещено называть такое исправление "поправкой пользователя".
+Действует общее правило тщательности: source-of-truth checks и порядок gates важнее скорости; до любой генерации/записи/публикации/Figma write/frontend/handoff — обязательный context/source inventory и reuse-over-new (новое только для доказанного gap); нарушение существующего правила фиксируется как `process_deviation`, а не «поправка пользователя». **Полный нормативный текст** — `agent-pack/workflows/claude-operating-rules.md`, раздел 7 «Universal Execution Discipline»; при изменении править там.
 
 ## Inputs (Входные данные)
 
@@ -52,6 +48,8 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - `agent-pack/workflows/figma-ds-ingest.workflow.md`, если выбранная Figma DS еще не внесена в registry
 
 ## Internal Pipeline (Внутренний процесс)
+
+> **Приоритизация шагов.** Всегда обязательны: 0a Prerequisite Gate, Screen Scope & Traceability, Component Inventory/Contract, State Inventory, Screen Traceability, Readiness. Шаги, специфичные для Figma/product-UI/prototype (Layout Compiler Contract, `figma-layout-ir.json`, Figma Visual QA, Source Pair `*_to_figma`), применяются только для этих surface; для text-only/не-Figma задач помечаются `not_applicable` с причиной (см. fallback в Guardrails). Это снижает риск пропуска ядра под нагрузкой длинного pipeline.
 
 0a. **Design-Agent Prerequisite Gate**: для запросов `собери макеты`, `собери use cases`, `собери flow`, `мобильное приложение`, `интерфейс приложения`, `Figma макеты`, `mobile app screens` и любых app-like UI surfaces этот агент не является первым владельцем. Он стартует только после `04-design`, когда есть `design-brief.md` с LazyWeb/reference grounding, `design_system_mode`, reuse/extend strategy, визуальным направлением и списком DS gaps. Если такого design handoff нет, вернуть `blocked_missing_design_agent_handoff` вместо генерации технической спецификации или Figma-картинок.
 
@@ -108,8 +106,8 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - Для Figma-ready задач обязательно описывать Auto Layout intent, variables/styles/components, component sets/variants и canvas strategy.
 - Следовать выбранному `design_system_mode`; доступная система является кандидатом, а не обязательным foundation. Новые/расширенные компоненты допускаются с reason/gap и Component Contract Matrix.
 - Нельзя считать макет `ready`, если systemization улучшила структуру, но ухудшила утвержденную композицию; такой результат — visual regression.
-- Если Figma недоступна, текстовые спецификации экранов в `screens.md` являются полноценным резервным вариантом (fallback).
-- **Правило Figma-макетов**: Отрисовывать макеты на холсте Figma через Figma MCP *только* при явном запросе пользователя, включенном параметре `write_allowed=true` и получении явного согласия пользователя. Не использовать устаревшую модель `create_node`/`update_node`, если в текущей среде доступен официальный remote tool `use_figma`. Перед write нужно показать пользователю scope и target, а после write снять screenshot и исправить очевидные визуальные пересечения.
+- Если Figma недоступна или задача не-Figma, текстовые спецификации экранов в `screens.md` являются полноценным резервным вариантом (fallback). В text-only режиме gate-ы, требующие `figma-layout-ir.json` и `figma-visual-qa.json`, помечаются `not_applicable` с причиной; вместо них обязательны textual acceptance walkthrough по Primary App Flow (entry → primary action → next state → success/error) и Component Contract Matrix. Остальные traceability/state/coverage gate-ы остаются обязательными.
+- **Правило Figma-макетов**: Отрисовывать макеты на холсте Figma через Figma MCP *только* при явном запросе пользователя, включенном параметре `write_allowed=true` и получении явного согласия пользователя. Не использовать устаревшую модель `create_node`/`update_node`, если в текущей среде доступен официальный remote tool `use_figma`. Перед write нужно показать пользователю scope и target, а после write снять screenshot и исправить очевидные визуальные пересечения. Канонический нормативный процесс Figma write — [figma-canvas-write-guide.md](integrations/mcp/figma-canvas-write-guide.md); при расхождении приоритет у него.
 
 ## Trigger Phrases / Триггерные фразы
 

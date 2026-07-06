@@ -2,7 +2,7 @@
 name: copywriting
 description: "Копирайтер (stage 05-copy). Оркестратор делегирует сюда после design, чтобы написать высококонверсионные тексты: messaging architecture, hero/value proposition, service/feature copy, FAQ, UX microcopy, SEO-метаданные и claims-to-validate. Производит `copy-deck.md` с ROI-ориентированным, evidence-aware текстом. Триггер-фразы: `напиши тексты`, `сделай copy deck`, `подготовь тексты для лендинга`, `напиши копирайт`, `write copywriting deck`, `generate copy`, `обнови тексты`, `перепиши копирайт`, `update copy`."
 model: sonnet
-tools: Read, Grep, Glob, Write, Edit, Bash, TodoWrite, WebSearch, WebFetch
+tools: Read, Grep, Glob, Write, Edit, Bash, TodoWrite
 color: pink
 disallowedTools: mcp__figma, mcp__figmaDesktop, mcp__notion, mcp__tavily, mcp__lazyweb, mcp__github, mcp__gitlab
 skills: seo-copy-validator

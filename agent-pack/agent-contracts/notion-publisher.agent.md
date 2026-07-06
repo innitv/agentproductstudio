@@ -32,11 +32,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Universal Execution Discipline (Общее правило тщательности)
 
-Тщательность, source-of-truth checks и порядок gates важнее скорости видимого результата. Агент не трактует запрос как просьбу сделать быстро, если пользователь явно не сказал `quick draft`, «быстрый набросок», `demo only` или аналогичный режим.
-
-До генерации, записи, публикации, Figma write, frontend implementation или передачи downstream агент обязан выполнить context/source inventory, проверить существующие assets/components/templates/artifacts и зафиксировать reuse decisions plus gap list. Новое создается только для доказанного gap; если подходящий источник уже есть, его нужно использовать или расширить минимально.
-
-Если агент нарушил уже существующее правило, это фиксируется как `process_deviation`; запрещено называть такое исправление "поправкой пользователя".
+Действует общее правило тщательности: source-of-truth checks и порядок gates важнее скорости; до любой генерации/записи/публикации/Figma write/frontend/handoff — обязательный context/source inventory и reuse-over-new (новое только для доказанного gap); нарушение существующего правила фиксируется как `process_deviation`, а не «поправка пользователя». **Полный нормативный текст** — `agent-pack/workflows/claude-operating-rules.md`, раздел 7 «Universal Execution Discipline»; при изменении править там.
 
 ## Inputs (Входные данные)
 
@@ -85,7 +81,12 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - Подробный Notion hub должен связывать разделы между собой: `Карта связей исследования` и `Цепочка решений` обязательны, а текстовые отсылки к персонам, CJM, ICE/RICE, roadmap/SWOT, validation и sources должны быть кликабельными Markdown links или Notion page mentions. Запрещено оставлять важные переходы только как текст `см. файл`/`см. раздел`.
 - Notion export не может считаться готовым, если он звучит как тезисная AI-выжимка: для ключевых решений нужны реальные кейсы, user flow под CJM и связь с проверкой гипотез.
 - Не создавай микространицы: для подробного research pack целевой диапазон 6-12 child pages; короткие блоки меньше 8-10 Notion blocks или одиночные служебные секции должны оставаться внутри крупной страницы. Toggle/drawer используй выборочно: короткие блоки до 15 blocks оставляй inline; сворачивай длинные reference lists, validation details и повторяемые карточки инициатив/задач.
-- Для Notion API соблюдай лимиты: append children чанками до 100 blocks, обрабатывай `429` через `Retry-After`/backoff, фиксируй retry count.
+- Для Notion API соблюдай лимиты запросов и полей (офиц. `developers.notion.com/reference/request-limits`):
+  - обрабатывай **и `429`, и `529` (`service_overload`)** через `Retry-After`/backoff, фиксируй retry count;
+  - payload ≤ **1000 blocks / 500KB**; создавай страницу с первыми ≤100 blocks, остальное добавляй через **Append Block Children** чанками ≤100;
+  - размерные лимиты полей: rich text `text.content` ≤ **2000 символов**, вложенность блоков ≤ **2 уровня**, `relation`/`people`/`multi_select` ≤ **100** элементов;
+  - до отправки разбивай абзацы > 2000 символов и списки глубже 2 уровней; иначе `partial/needs_revision`;
+  - **сериализуй запросы** (token-bucket/очередь), не запускай параллельные всплески `Promise.all()` на записи.
 - Повторная публикация должна иметь idempotency strategy: existing child page/database search, source checksum/export marker или явно выбранная versioning strategy.
 - Не публиковать технические схемы, JSON-данные, свойства frontmatter, технические файлы релиза или фронтенда, а также машинные кодовые блоки.
 - Не отправлять секреты, API-ключи или конфиденциальные данные в Notion.

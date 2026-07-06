@@ -64,11 +64,7 @@ UI Kit и дизайн-система используются только ка
 
 ## Universal Execution Discipline (Общее правило тщательности)
 
-Тщательность, source-of-truth checks и порядок gates важнее скорости видимого результата. Агент не трактует запрос как просьбу сделать быстро, если пользователь явно не сказал `quick draft`, «быстрый набросок», `demo only` или аналогичный режим.
-
-До генерации, записи, публикации, Figma write, frontend implementation или передачи downstream агент обязан выполнить context/source inventory, проверить существующие assets/components/templates/artifacts и зафиксировать reuse decisions plus gap list. Новое создается только для доказанного gap; если подходящий источник уже есть, его нужно использовать или расширить минимально.
-
-Если агент нарушил уже существующее правило, это фиксируется как `process_deviation`; запрещено называть такое исправление "поправкой пользователя".
+Действует общее правило тщательности: source-of-truth checks и порядок gates важнее скорости; до любой генерации/записи/публикации/Figma write/frontend/handoff — обязательный context/source inventory и reuse-over-new (новое только для доказанного gap); нарушение существующего правила фиксируется как `process_deviation`, а не «поправка пользователя». **Полный нормативный текст** — `agent-pack/workflows/claude-operating-rules.md`, раздел 7 «Universal Execution Discipline»; при изменении править там.
 
 ## Inputs (Входные данные)
 
@@ -91,6 +87,7 @@ UI Kit и дизайн-система используются только ка
 
 1. Проверить product context: `prd.md`, `research-summary.md`, `scenario-user-flows.md`, `ia-brief.md`, `copy-deck.md` при наличии, constraints, целевое действие, user journey, возражения пользователей, статусы/исключения и trust requirements.
 1a. Выполнить **Design System Strategy Gate** и записать `design_system_mode=reuse|extend|product_specific|bespoke`, rationale, rejected alternatives и maintenance impact. Наличие A3/другой библиотеки не обязывает выбирать `reuse`; новая продуктовая система является штатным маршрутом.
+1b. **Token Precedence Rule**: при выборе значений токенов соблюдать явный порядок источников: (1) явная спецификация из PRD/reference-analysis/STYLE_GUIDE → (2) bound variables выбранной DS (`design/figma/<slug>/foundation.md`) → (3) документация/дефолты. Если источники токенов противоречат друг другу (например reference-цвет ≠ DS-variable) — **не выбирать молча**, а зафиксировать конфликт и эскалировать пользователю/оркестратору как открытый вопрос.
 2. Если задача reference-driven, убедиться, что технический scan референса уже выполнен и evidence сохранен. Без scan evidence не создавать финальный `reference-analysis.md`.
 3. Выполнить **Universal Visual Evidence Grounding** для любой визуальной/интерактивной поверхности: собрать или явно отклонить same-domain, adjacent high-quality, interaction/state references и design-system grounding; сформировать `visual_evidence_plan` и `visual_reference_cards`.
 4. Если задача UI-heavy/high-visual-risk или research handoff содержит `lazyweb_evidence_need`, выбрать один Lazyweb mode, получить реальные product screenshots/flows/patterns и записать применимость. Не отправлять приватные скриншоты, макеты или код в `lazyweb_compare_image` без отдельного approval.
@@ -125,7 +122,8 @@ UI Kit и дизайн-система используются только ка
 - Figma/product UI/prototype не может считаться `ready`, если экраны не связаны в P0 route/transition map с primary action, next state, completion evidence и error/recovery path.
 - Избегать декоративной сложности, которая снижает удобство выполнения целевых задач пользователя.
 - Доступность (A11y) и адаптивное поведение обязательны, а не опциональны.
-- **Правило Figma-макетов**: Не создавать и не изменять макеты на холсте Figma без явного запроса пользователя, включенного параметра `write_allowed=true` и получения явного согласия пользователя. Перед write нужно проверить доступность remote Figma MCP `use_figma`, целевой `fileKey`/`nodeId`, права на edit и применимость существующих libraries/components через `design/figma/registry.json`, локальный индекс выбранной ДС и `search_design_system`. В случае включения строго следовать инструкциям [figma-canvas-write-guide.md](file:///c:/Project/product-agent-studio/integrations/mcp/figma-canvas-write-guide.md), [figma-ds-ingest.workflow.md](file:///c:/Project/product-agent-studio/agent-pack/workflows/figma-ds-ingest.workflow.md) для новой/большой ДС и [ds-baseline.workflow.md](file:///c:/Project/product-agent-studio/agent-pack/workflows/ds-baseline.workflow.md) для `product_specific`.
+- **Правило Figma-макетов**: Не создавать и не изменять макеты на холсте Figma без явного запроса пользователя, включенного параметра `write_allowed=true` и получения явного согласия пользователя. Перед write нужно проверить доступность remote Figma MCP `use_figma`, целевой `fileKey`/`nodeId`, права на edit и применимость существующих libraries/components через `design/figma/registry.json`, локальный индекс выбранной ДС и `search_design_system`. В случае включения строго следовать инструкциям [figma-canvas-write-guide.md](integrations/mcp/figma-canvas-write-guide.md), [figma-ds-ingest.workflow.md](agent-pack/workflows/figma-ds-ingest.workflow.md) для новой/большой ДС и [ds-baseline.workflow.md](agent-pack/workflows/ds-baseline.workflow.md) для `product_specific`.
+- **AI-first UI (условно)**: Если продукт содержит conversational/генеративную поверхность, зафиксировать в visual direction паттерны для неё: визуализация `thinking/streaming` (не голый спиннер), citation/source affordance, editable AI-output, regenerate/undo, honesty о неопределённости и разграничение AI- и пользовательского контента. Не применять к продуктам без AI-поверхности.
 
 ## Required Outputs (Обязательные результаты)
 

@@ -3,7 +3,7 @@ name: design-generator
 description: "Агент генерации экранов (stage 06-screens). Оркестратор делегирует сюда ТОЛЬКО после `04-design`: превращает IA, design direction, PRD и copy в проверяемый screen contract (`screens.md`), Component Contract Matrix, Visual Evidence-To-Screen Map, а для Figma/product UI/prototype — `figma-layout-ir.json` и после write `figma-visual-qa.json`. Без свежего design handoff возвращает `blocked_missing_design_agent_handoff`. Триггер-фразы: `сгенерируй спецификацию экранов`, `создай экраны`, `опиши экраны`, `generate screens`, `create screens spec`, `собери макеты`/`собери flow`/`mobile app screens` (только при наличии свежего `design-brief.md`), `обнови экраны`, `update screens`."
 model: sonnet
 color: purple
-skills: figma-screen-compiler
+skills: [design-loop, figma-screen-compiler, visual-layout-verifier, figma-roundtrip, figma-handoff]
 ---
 
 # Design Generator Agent (Агент Генерации Дизайна)

@@ -199,6 +199,13 @@ Guardrail: synthetic interviews are used only for hypothesis generation, intervi
 | Source | Provider | Type | URL/path | Used for | Retrieved at | Confidence |
 |---|---|---|---|---|---|---|
 
+## Evidence Ledger
+
+> Машиночитаемый реестр трассировки: стабильный `evidence_id` связывает каждый значимый claim/finding с источником и downstream-потреблением. PRD/IA/copy ссылаются на `EV-XXX`, а не ищут источник заново. `evidence_status` — из enum: `source-backed | proto | synthetic | hypothesis | needs validation`.
+
+| evidence_id | Claim / finding | Source(s) | evidence_status | Confidence | Used for (downstream) |
+|---|---|---|---|---|---|
+
 ## Research-To-Design Handoff
 
 | Handoff field | Notes |

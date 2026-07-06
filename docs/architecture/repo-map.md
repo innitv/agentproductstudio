@@ -20,6 +20,7 @@
 | Path | Статус | Назначение | Правило изменения |
 |---|---|---|---|
 | `CLAUDE.md`, `.mcp.json`, `AGENTS.md` | Claude канон | Корневые правила проекта (лёгкий индекс), MCP-серверы, `AGENTS.md` — pointer на `CLAUDE.md` для сторонних агентов. | `CLAUDE.md` держать лёгким; детали — в referenced-файлах. |
+| `README.md`, `COMMANDS.md` | doc | Человекочитаемый обзор проекта (`README.md`) и справочник команд проекта — локальные `yarn`-команды и slash/триггеры (`COMMANDS.md`). | Обновлять при изменении onboarding-обзора или списка команд. |
 | `.claude/` | Claude канон | Нативный слой Claude Code: `agents/` (субагенты), `skills/`, `commands/`, `hooks/`, `settings.json`. | Менять по правилам Claude Code; синхронизировать с `agent-pack/agent-contracts`. |
 | `apps/` | active | Runnable frontend apps и app shells. Главный app target: `apps/frontend` для studio. | Менять через product/frontend tasks, проверять build и relevant QA target. |
 | `agent-pack/` | active | Агентная система (проектный слой): `agent-contracts/`, `skills/`, `workflows/`, `artifacts/`, `templates/`, `schemas/`, `guardrails/`, `quality/`. | При изменении правил синхронизировать `CLAUDE.md`, agent docs и validators/tests. |
@@ -40,7 +41,7 @@
 
 | Surface | Код | Route | QA target |
 |---|---|---|---|
-| Studio/AgentFlow console | `apps/frontend/src/views/ConsoleView.tsx`, `LandingView.tsx`, `App.tsx` | `/`, `/console`, `/#console`, `/components` | `yarn qa:studio` |
+| Studio/AgentFlow console | `apps/frontend/src/App.tsx` (роутер), `apps/frontend/src/views/ConsoleView.tsx`, `views/LandingView.tsx` | `/`, `/console`, `/#console`, `/components` | `yarn qa:studio` |
 | A3Pay demo | product-specific branch/code until promoted | demo routes by branch context | future `apps/a3pay-demo`, if retained |
 
 ## Ledger Boundaries

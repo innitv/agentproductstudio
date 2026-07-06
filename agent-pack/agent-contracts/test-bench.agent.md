@@ -26,11 +26,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Universal Execution Discipline (Общее правило тщательности)
 
-Тщательность, source-of-truth checks и порядок gates важнее скорости видимого результата. Агент не трактует запрос как просьбу сделать быстро, если пользователь явно не сказал `quick draft`, «быстрый набросок», `demo only` или аналогичный режим.
-
-До генерации, записи, публикации, Figma write, frontend implementation или передачи downstream агент обязан выполнить context/source inventory, проверить существующие assets/components/templates/artifacts и зафиксировать reuse decisions plus gap list. Новое создается только для доказанного gap; если подходящий источник уже есть, его нужно использовать или расширить минимально.
-
-Если агент нарушил уже существующее правило, это фиксируется как `process_deviation`; запрещено называть такое исправление "поправкой пользователя".
+Действует общее правило тщательности: source-of-truth checks и порядок gates важнее скорости; до любой генерации/записи/публикации/Figma write/frontend/handoff — обязательный context/source inventory и reuse-over-new (новое только для доказанного gap); нарушение существующего правила фиксируется как `process_deviation`, а не «поправка пользователя». **Полный нормативный текст** — `agent-pack/workflows/claude-operating-rules.md`, раздел 7 «Universal Execution Discipline»; при изменении править там.
 
 ## Inputs
 
@@ -56,6 +52,9 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - **Запрет сбора PII**: Аналитика не должна собирать конфиденциальные данные клиентов. События должны быть анонимными (например, `agent_switched_on`, `tab_clicked`).
 - **Фокус на ключевом действии**: Тестовый стенд должен измерять успешность прохождения основного сценария, а не отвлекаться на второстепенные метрики.
 - **Тестирование динамических переменных**: Исполняемые скрипты должны эмулировать задержки сети и динамические вычисления (индикаторы печати `typing...`, калькуляторы окупаемости) для предотвращения ложных падений тестов.
+- **Стабильные локаторы и web-first assertions**: E2E используют user-facing или `data-testid` локаторы и web-first assertions Playwright (`await expect(locator).toBeVisible()`), которые авто-ждут. Запрещены как основная проверка: `isVisible()`-стиль без await-expect, хрупкие CSS/XPath-цепочки и фиксированные `waitForTimeout`. Это прямая защита от флаки-тестов.
+- **Trace-on-failure как evidence**: Прогон включает Playwright trace + screenshot (и video для сложных флоу) при падении; пути к артефактам фиксируются в `test-bench-result.md`. Расплывчатых «логов сбоев» недостаточно.
+- **Consent/analytics gate**: Проверить через network interception, что analytics-события не отправляются до согласия на cookie/consent-banner. Таблица «событие / URL / число запросов / статус до-и-после согласия».
 - **Вердикт Fail при ошибках**: Если автотесты падают или хотя бы одно обязательное требование из PRD (Must-требование) не покрыто проверками, итоговый вердикт тест-бенча должен оставаться `fail` или `blocked`.
 
 ## Required Output

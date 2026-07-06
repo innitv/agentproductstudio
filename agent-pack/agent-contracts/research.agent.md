@@ -29,11 +29,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Universal Execution Discipline (Общее правило тщательности)
 
-Тщательность, source-of-truth checks и порядок gates важнее скорости видимого результата. Агент не трактует запрос как просьбу сделать быстро, если пользователь явно не сказал `quick draft`, «быстрый набросок», `demo only` или аналогичный режим.
-
-До генерации, записи, публикации, Figma write, frontend implementation или передачи downstream агент обязан выполнить context/source inventory, проверить существующие assets/components/templates/artifacts и зафиксировать reuse decisions plus gap list. Новое создается только для доказанного gap; если подходящий источник уже есть, его нужно использовать или расширить минимально.
-
-Если агент нарушил уже существующее правило, это фиксируется как `process_deviation`; запрещено называть такое исправление "поправкой пользователя".
+Действует общее правило тщательности: source-of-truth checks и порядок gates важнее скорости; до любой генерации/записи/публикации/Figma write/frontend/handoff — обязательный context/source inventory и reuse-over-new (новое только для доказанного gap); нарушение существующего правила фиксируется как `process_deviation`, а не «поправка пользователя». **Полный нормативный текст** — `agent-pack/workflows/claude-operating-rules.md`, раздел 7 «Universal Execution Discipline»; при изменении править там.
 
 ## Inputs (Входные данные)
 
@@ -154,6 +150,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - Для глубоких исследований (`deep_research`) успешный статус требует usable source-backed evidence: `tavily`, primary/user sources или другой проверяемый источник. DeepSeek/Gemini failures не блокируют `ready`, если source-backed coverage, source quality pass, claims-to-validate и Research Content Lint проходят.
 - Использование DeepSeek и Gemini допустимо для перекрестных проверок и стратегического анализа, но их собственные рассуждения не считаются подтвержденными источниками (source-backed evidence). Их выводы используются только для поиска противоречий, рисков, гипотез и формирования `claims_to_validate`.
 - **Правило Contradiction Review:** При интеграции результатов поиска агент обязан составить таблицу перекрёстного анализа противоречий между source-backed evidence и advisory outputs. Любые расхождения в данных, конкурентных заявлениях или условиях должны быть явно задокументированы в подразделе `## Contradiction Review` файла `research-summary.md` и помечены как `needs_validation`. Запрещено молча игнорировать или сглаживать расхождения.
+- **Правило Evidence Ledger:** Каждый значимый claim/finding обязан получить стабильный `evidence_id` (`EV-001`, `EV-002`…) в обязательной секции `## Evidence Ledger` файла `research-summary.md`, со связкой `claim → source(s) → evidence_status → confidence → used_for`. Downstream-артефакты (PRD, IA, copy) ссылаются на `EV-XXX`, а не ищут источник заново. Claim без записи в ledger не может использоваться как факт в Findings/handoff — только как `needs validation`.
 - **Lazyweb как UI-evidence, не market source:** Lazyweb references считаются evidence для visual patterns, screen composition, flows и interaction examples. Они не заменяют source-backed market facts, pricing claims, legal/compliance facts или реальные пользовательские интервью.
 - **Anti-AI-Slop Gate:** Research artifacts не должны подменять объяснение наборами паттерных слов или универсальными фразами. Проверяй весь текст по slop-сигналам: утверждение можно вставить в любой продукт; нет конкретного пользователя/ситуации; нет механизма влияния; нет ограничения или trade-off; метрика не выражена как действие; строки таблицы повторяют один шаблон; roadmap не объясняет порядок. Минимальная приемка: `кто платит/покупает -> что пытается сделать -> где сомневается -> что делает продукт -> почему это должно сработать -> как проверяем`.
 - **CJM Depth Gate:** CJM не считается готовой, если содержит только stage table. Для каждого основного сценария нужны ключевые кейсы, user flow, вопрос пользователя, боль, решение продукта, метрика и связь с roadmap.

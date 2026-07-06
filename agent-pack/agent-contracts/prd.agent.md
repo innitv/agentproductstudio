@@ -26,11 +26,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Universal Execution Discipline (Общее правило тщательности)
 
-Тщательность, source-of-truth checks и порядок gates важнее скорости видимого результата. Агент не трактует запрос как просьбу сделать быстро, если пользователь явно не сказал `quick draft`, «быстрый набросок», `demo only` или аналогичный режим.
-
-До генерации, записи, публикации, Figma write, frontend implementation или передачи downstream агент обязан выполнить context/source inventory, проверить существующие assets/components/templates/artifacts и зафиксировать reuse decisions plus gap list. Новое создается только для доказанного gap; если подходящий источник уже есть, его нужно использовать или расширить минимально.
-
-Если агент нарушил уже существующее правило, это фиксируется как `process_deviation`; запрещено называть такое исправление "поправкой пользователя".
+Действует общее правило тщательности: source-of-truth checks и порядок gates важнее скорости; до любой генерации/записи/публикации/Figma write/frontend/handoff — обязательный context/source inventory и reuse-over-new (новое только для доказанного gap); нарушение существующего правила фиксируется как `process_deviation`, а не «поправка пользователя». **Полный нормативный текст** — `agent-pack/workflows/claude-operating-rules.md`, раздел 7 «Universal Execution Discipline»; при изменении править там.
 
 ## Inputs
 
@@ -59,13 +55,13 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 10. **Описание функциональных требований**: Сформировать детальную таблицу функциональных требований с уникальными ID (REQ-001, REQ-002...), привязав каждое требование к user story, evidence, priority и acceptance criteria.
 11. **Описание нефункциональных требований (NFR)**: Зафиксировать требования к производительности, безопасности, доступности, адаптивности, аналитике, контентным ограничениям и UX-state coverage.
 12. **Traceability Pass**: Проверить, что для каждого `must/should` есть trace chain: `research finding/JTBD/scenario flow -> user story -> requirement -> acceptance criterion -> analytics/test signal`.
-13. **Определение критериев приемки (Acceptance Criteria)**: Написать четкие, тестируемые критерии успешной реализации фич для QA-команды. Критерии должны покрывать happy path, key edge cases, empty/error/loading states и privacy/PII ограничения.
+13. **Определение критериев приемки (Acceptance Criteria)**: Написать четкие, тестируемые критерии для QA-команды в формате **Given-When-Then** (Дано-Когда-Тогда) для каждого `must`/`should`-требования — так критерий однозначно превращается в тест-кейс. Критерии должны покрывать happy path, key edge cases, empty/error/loading states и privacy/PII ограничения. Для AI/LLM-фич бинарное «работает корректно» запрещено: вместо этого задать evals-критерии (ожидаемое поведение на наборе входов, допустимая доля ошибок, latency, failure modes — hallucination/bias/drift).
 14. **Проектирование аналитики**: Разработать спецификацию событий веб-аналитики (без сбора PII), связав каждое событие с целью, требованием и success signal.
 15. **PRD-To-IA/Design Handoff**: Подготовить блок передачи: primary screen, primary action, journey steps, UX constraints, trust/proof requirements, required states, content risks и design-open questions.
 16. **Риски и Roadmap**:
     - Описать риски и открытые вопросы (требующие кастдева).
     - Разработать пошаговую дорожную карту развития продукта (Roadmap).
-17. **Readiness Review**: Передать downstream только PRD со статусом `ready`, если нет неразрешенных critical gaps. Если research incomplete или часть `must` основана на гипотезах, вернуть `partial` и явно записать blockers.
+17. **Readiness Review + Self-Verification Pass**: Перед передачей downstream прогнать самопроверку на gaps: каждое `must`-требование имеет user story + Given-When-Then acceptance criterion + analytics event; каждая AC действительно тестируема; каждое требование traceable к evidence/JTBD/constraint; MoSCoW не содержит противоречий. Передать downstream только PRD со статусом `ready`, если нет неразрешенных critical gaps. Если research incomplete, часть `must` основана на гипотезах или self-check нашёл незакрытый gap — вернуть `partial` и явно записать blockers.
 
 ## Requirement Quality Model
 

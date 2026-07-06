@@ -24,11 +24,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Universal Execution Discipline (Общее правило тщательности)
 
-Тщательность, source-of-truth checks и порядок gates важнее скорости видимого результата. Агент не трактует запрос как просьбу сделать быстро, если пользователь явно не сказал `quick draft`, «быстрый набросок», `demo only` или аналогичный режим.
-
-До генерации, записи, публикации, Figma write, frontend implementation или передачи downstream агент обязан выполнить context/source inventory, проверить существующие assets/components/templates/artifacts и зафиксировать reuse decisions plus gap list. Новое создается только для доказанного gap; если подходящий источник уже есть, его нужно использовать или расширить минимально.
-
-Если агент нарушил уже существующее правило, это фиксируется как `process_deviation`; запрещено называть такое исправление "поправкой пользователя".
+Действует общее правило тщательности: source-of-truth checks и порядок gates важнее скорости; до любой генерации/записи/публикации/Figma write/frontend/handoff — обязательный context/source inventory и reuse-over-new (новое только для доказанного gap); нарушение существующего правила фиксируется как `process_deviation`, а не «поправка пользователя». **Полный нормативный текст** — `agent-pack/workflows/claude-operating-rules.md`, раздел 7 «Universal Execution Discipline»; при изменении править там.
 
 ## Inputs
 
@@ -47,7 +43,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 3. **Диагностика сценариев**: Определить точные entry points, стартовые состояния, контрольные точки, decision points, recovery points и критерии успешного завершения пути.
 4. **Transition Map**: Сформировать детальную схему переходов для действий пользователя, кликов по вкладкам, состояний наведения (hover), active/focus/disabled элементов и системных событий.
 5. **State Inventory**: Описать default, empty, loading, skeleton, validation, error, success, permission/denied, offline/timeout и disabled states для каждого интерактивного узла, если они применимы к PRD/IA.
-6. **Alternate & Recovery Paths**: Зафиксировать альтернативные ветки: отмена, возврат назад, повторная отправка, исправление ошибки, потеря соединения, длинный ввод, отсутствие данных, отказ от CTA.
+6. **Alternate & Recovery Paths (named edge-case map)**: Оформить как таблицу `trigger → expected result → recovery`, а не плоский список. Обязательно покрыть: отмену, возврат назад, повторную отправку, исправление ошибки, потерю соединения, длинный ввод, отсутствие данных, отказ от CTA, permission denied, timeout. Каждая ветка — с явным ожидаемым результатом и путём восстановления, чтобы frontend и test-bench могли проверить её как отдельный кейс.
 7. **Microinteraction & Motion Spec**: Описать только нужные интеракции: trigger, target, duration/easing, reduced-motion fallback, focus retention, touch/keyboard equivalence. Запрещено предлагать motion ради украшения.
 8. **Instrumentation & Test Hooks**: Связать ключевые переходы с analytics/test signals из PRD/test bench: event name, trigger, payload notes, PII risk и expected assertion.
 9. **Prototype Format Decision**: Определить формат создания прототипа: Figma interaction map, code prototype или текстовая interactive spec. Figma write требует human approval и `write_allowed=true`; без approval описывать только handoff-ready spec.
@@ -87,15 +83,19 @@ outputs:
   prototype_report: |
     # Prototype
 
+    ## Input Readiness Pass
+
+    ...
+
     ## Prototype Type
 
     ...
 
-    ## Start Screen
+    ## Flow Goal
 
     ...
 
-    ## Flow Goal
+    ## Start Screen
 
     ...
 
@@ -111,7 +111,13 @@ outputs:
 
     ...
 
+    ## Frontend Handoff Contract
+
+    ...
+
     ## Missing Interactions
 
     ...
 ```
+
+> Порядок и состав секций синхронизированы с `requiredSectionsByArtifact` для стадии `07-prototype` в `runtime/typescript/workflow.manifest.ts`. При изменении манифеста обнови этот скелет.

@@ -141,6 +141,7 @@ export const workflowStages: readonly WorkflowStage[] = [
         "## Research Validation Plan",
         "## Findings",
         "## Sources",
+        "## Evidence Ledger",
       ],
       [artifactNames.scenarioUserFlows]: [
         "## Индекс флоу и покрытие сценариев",

@@ -25,11 +25,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Universal Execution Discipline (Общее правило тщательности)
 
-Тщательность, source-of-truth checks и порядок gates важнее скорости видимого результата. Агент не трактует запрос как просьбу сделать быстро, если пользователь явно не сказал `quick draft`, «быстрый набросок», `demo only` или аналогичный режим.
-
-До генерации, записи, публикации, Figma write, frontend implementation или передачи downstream агент обязан выполнить context/source inventory, проверить существующие assets/components/templates/artifacts и зафиксировать reuse decisions plus gap list. Новое создается только для доказанного gap; если подходящий источник уже есть, его нужно использовать или расширить минимально.
-
-Если агент нарушил уже существующее правило, это фиксируется как `process_deviation`; запрещено называть такое исправление "поправкой пользователя".
+Действует общее правило тщательности: source-of-truth checks и порядок gates важнее скорости; до любой генерации/записи/публикации/Figma write/frontend/handoff — обязательный context/source inventory и reuse-over-new (новое только для доказанного gap); нарушение существующего правила фиксируется как `process_deviation`, а не «поправка пользователя». **Полный нормативный текст** — `agent-pack/workflows/claude-operating-rules.md`, раздел 7 «Universal Execution Discipline»; при изменении править там.
 
 ## Inputs
 
@@ -48,12 +44,12 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 3. **Определение ключевого действия**: Идентифицировать основного пользователя, его главный JTBD, главный экран, целевое действие и completion step для завершения сценария.
 4. **Entry Points & Intent Map**: Описать основные точки входа: прямой визит, поиск, референс/реклама, внутренний переход, повторный визит. Для каждой точки указать мотивацию, первый вопрос пользователя и нужный первый блок.
 5. **Проектирование карты сайта и секций**: Разработать логическую sitemap (иерархию страниц/модулей) и распределить возражения, функции, trust/proof и CTA по конкретным блокам экрана. Не проектировать навигацию вокруг внутренних команд или пожеланий владельца продукта.
-6. **Content Model & Taxonomy**: Определить reusable content objects: страницы, секции, карточки, статусы, proof blocks, FAQ, forms, filters/tabs, empty states. Указать trigger words, labels, short/long title needs и relationship между объектами.
-7. **Разработка пользовательских сценариев (User Flow)**: Перенести P0/P1 сценарии из `scenario-user-flows.md` в IA-структуру: entry point, шаг пользователя, системный ответ, UI state, next decision, exception path и completion step. Для сложных сценариев использовать flow tree: `User action -> System response -> UI state -> Next decision`.
+6. **Content Model & Taxonomy**: Определить reusable content objects: страницы, секции, карточки, статусы, proof blocks, FAQ, forms, filters/tabs, empty states. Указать trigger words, labels, short/long title needs и relationship между объектами. **Labels и taxonomy привязывать к language patterns из `research-summary.md`** (как реально говорит целевая аудитория), а не придумывать из головы; label без опоры на research помечать `needs_validation` (кандидат на card sorting).
+7. **Разработка пользовательских сценариев (User Flow)**: IA **не переписывает** сценарии — источником остаётся `scenario-user-flows.md` (research). IA **накладывает на них структуру**: привязку каждого шага к sitemap-узлу/секции, UI state, next decision, exception path и completion step. Для сложных сценариев использовать flow tree: `User action -> System response -> UI state -> Next decision`. Если сценарий из research неполон — вернуть gap в research, а не досочинять поведение здесь.
 8. **Decision & Friction Map**: Зафиксировать моменты, где пользователь сомневается, сравнивает, вводит данные, доверяет, отказывается или просит помощь. Для каждого момента указать нужный контент, proof, state или microcopy.
 9. **State Map**: Описать обязательные состояния: default, hover/focus, loading, empty, error, validation, success, disabled, mobile collapsed. Эти состояния должны быть переданы в design/screens/prototype.
 10. **Матрица приоритета контента**: Установить точный порядок визуального и смыслового приоритета информационных блоков. Primary content должен быть выше supporting content; secondary navigation допустима только при реальной необходимости.
-11. **Правила навигации**: Спроектировать элементы управления навигацией (сайдбар, хлебные крошки, контекстные вкладки) и их адаптивное поведение на мобильных устройствах. Главная навигация должна быть сканируемой, предсказуемой и не глубже 2-3 уровней без причины.
+11. **Правила навигации**: Спроектировать элементы управления навигацией (сайдбар, хлебные крошки, контекстные вкладки) и их адаптивное поведение на мобильных устройствах. Главная навигация должна быть сканируемой, предсказуемой и не глубже 2-3 уровней без причины. **Findability gate**: до primary action пользователь доходит не более чем за 3 клика/шага от любой точки входа; если сценарий требует больше — зафиксировать причину или пересобрать структуру.
 12. **Accessibility & Semantics Pass**: Зафиксировать H1/H2/H3, landmark regions, form labels, error associations, focus order и keyboard path для основного сценария.
 13. **Маппинг критериев валидации**: Связать каждый узел архитектуры с бизнес-метрикой, acceptance criterion, analytics event или контрольной точкой конверсии.
 14. **IA-To-Design Handoff**: Подготовить downstream block для design/copy/screens/prototype: primary screen, section order, navigation model, key states, content constraints, proof needs, mobile behavior и open questions.
@@ -93,6 +89,7 @@ IA считается готовой, когда она:
 - **Content before chrome**: Сначала определить user questions, content objects and flow, затем navigation/chrome. Запрещено начинать IA с декоративных layout-решений.
 - **No owner-centric IA**: Не строить sitemap вокруг внутренней структуры бизнеса, если она не совпадает с пользовательскими задачами.
 - **State completeness**: Нельзя передавать IA downstream без empty/error/loading/success/validation states, если они применимы к главному сценарию.
+- **AI-first IA (условно)**: Если продукт содержит conversational/AI-поверхность (чат, ассистент, генеративный ввод), дополнительно спроектировать: conversational entry point и его место в sitemap, constrained/federated search вместо голого свободного ввода, состояния `thinking/streaming/partial-result/regenerate/citation`, fallback при отказе модели и переход между AI- и классической навигацией. Не применять к продуктам без AI-поверхности.
 
 ## Required Output
 

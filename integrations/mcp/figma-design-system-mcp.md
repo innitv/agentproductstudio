@@ -35,6 +35,29 @@ claude mcp add --transport http figma https://mcp.figma.com/mcp
 
 После команды нужен OAuth flow в Figma. Не сохраняй OAuth-секреты или session data в репозитории.
 
+## Rate Limits (важно для выбора seat)
+
+Официальный Figma MCP лимитирует **read**-инструменты по типу seat/плана. Это прямое обоснование нашего census-first / local-index-first подхода: чем меньше повторных reads, тем дальше от лимита.
+
+| Seat / план | Лимит read-инструментов |
+|---|---|
+| Starter plan или View/Collab seat на платных планах | **до 6 tool calls в месяц** |
+| Dev или Full seat (Professional/Organization/Enterprise) | per-minute лимиты, как Tier 1 Figma REST API |
+
+- **Write-инструменты (`use_figma` и т.п.) от rate limit освобождены.** Лимит бьёт именно по чтению.
+- Практическое следствие: на View/Collab seat полноценный ingest большого файла невозможен «в лоб» — 6 reads/месяц кончатся на census. Поэтому для больших/чужих библиотек сначала `figma-ds-ingest` в локальный индекс, затем читать только `design/figma/<slug>/**`, а в Figma ходить лишь за missing nodes / screenshot / approved write.
+- Если seat недостаточен для read — см. Read Fallback ниже, не выжигай лимит на исследовательские reads.
+
+Источник: официальный [figma/mcp-server-guide](https://github.com/figma/mcp-server-guide) (beta, лимиты Figma может менять).
+
+## Read Fallback для чужих/community файлов
+
+Для **read** чужих или community-файлов, где у нас нет Dev/Full seat и официальный MCP упрётся в лимит 6 calls/месяц, допустим open-source fallback [Framelink `figma-developer-mcp`](https://github.com/glips/figma-context-mcp): работает по личному Figma API-token, упрощает ответ Figma API до layout/styling (меньше контекста) и не требует платного seat.
+
+- Область fallback — **только read** (design-to-context, tokens, layout). Write на канвас — всегда официальный `use_figma` с approval, Framelink для write не используем.
+- Framelink **не имеет Code Connect** — для нашей DS (`reuse|extend`) он не заменяет официальный путь, только дополняет его для внешних референсов.
+- Итог любого read-fallback — локальный артефакт в `design/figma/<slug>/**` или `outputs/<slug>/<date>/`, как и для официального MCP.
+
 ## Intake Contract
 
 Для прогона design system по ссылке нужны:
