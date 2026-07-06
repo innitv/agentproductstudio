@@ -31,6 +31,10 @@
 | Decision | Trigger from SWOT | CJM / user case | Validation method | Owner / next artifact |
 |---|---|---|---|---|
 
+## Strategic Notes
+
+- Стратегические заметки поверх SWOT: приоритетные направления, что усиливать, чего избегать, какие allocation/timing-решения следуют из матрицы.
+
 ## Risks
 
 | Risk | User/business situation | Impact | Mitigation | Validation need |

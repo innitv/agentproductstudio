@@ -203,3 +203,40 @@
 - **P1-форматы** (Given-When-Then для PRD, WCAG-привязка для qa, именованный AI-slop для copy, флаки-локаторы для test-bench) — это изменения поведения агентов, требуют отдельного согласования, не внесены как «механический P0».
 - **Дублирование (паттерн D)** — вынести общие блоки (`Universal Execution Discipline`, Figma-gates, Surface Output Contract Pass) в shared includes и подключать ссылкой; зафиксировать границы research↔ia и test-bench↔qa-review в `stage-handoff-contract.md`.
 - **tools-allowlist** для research и frontend — зафиксировать явный список вместо `All tools`.
+
+---
+
+## 6. Вторая волна — расширенный аудит (skills, паттернами, config)
+
+Проверены 4 зоны за пределами агентов.
+
+### 6.1 Устаревшие пути `product-agent-studio` — по всему репо
+Из 54 файлов большинство легитимны (`package.json` name, schema `$id` namespace, имя студии в прозе, archive/reports/research ledger). **Реальные битые `file:///` пути дочищены** в 5 активных файлах: `integrations/mcp/figma-design-system-mcp.md` (пропущенное вхождение) + `design/figma/a3-design-system/*` (4). Остаток в активных доках — **0**.
+
+### 6.2 Schemas ↔ templates ↔ manifest
+Автосверка (валидатор использует строгий `content.includes`) выявила **5 шаблонов**, где отсутствовали required-секции manifest (тот же класс, что frontend/prototype) — подтверждено нестабильностью реальных run-артефактов (`## Takeaways` был в 1 из 3 прошлых competitive-analysis). **Исправлено:**
+| Шаблон | Добавлено |
+|---|---|
+| `competitive-analysis.template.md` | `## Takeaways` |
+| `swot.template.md` | `## Strategic Notes` |
+| `qa-report.template.md` | `## Status` |
+| `release-notes.template.md` | `## Status` |
+| `recursive-brief.template.md` | Phase-заголовки → manifest-совместимые + `## Assumptions`, `## Open Questions` |
+Повторная сверка: **0 рассинхронов**. (run-plan/handoff-bundle/stage-gate-ledger генерируются scaffold, не по шаблону — норма.)
+
+### 6.3 Аудит 15 skills (3 субагента)
+Скв­озные находки:
+- **P0 notion-sync отставал** от обновлённого `notion-publisher.agent.md` по лимитам Notion (нет 529/size-limits). **Исправлено** — синхронизирован (skill — исполнитель записи, лимиты критичны там).
+- **P0 языковой рассинхрон:** `figma-screen-compiler` и `figma-token-extractor` имели англоязычные descriptions при русских обёртках (нарушение CLAUDE.md §1). **Исправлено** — переведены.
+- **Устаревших путей в skills нет** (проверено).
+- **P1 (в отчёт, не внесено):** обёртки `.claude/skills/*` не валидируются runtime (`test-skill-metadata` читает только `agent-pack/skills`) — системная дыра; `mcp_servers: playwright` объявлен, но не используется у `style-decompose`/`ds-to-storybook`; `required_outputs` объявляет чужие артефакты (`figma-handoff`→`figma_layout_ir`, `figma-roundtrip`→`frontend_result`/`qa_report`); дублирование между write-навыками (compiler/handoff/roundtrip); visual-diff без diff-порога и disable-animations; hardcoded `a3-design-system` в token-extractor.
+
+### 6.4 Config / security
+- **Несогласованность найдена и исправлена:** `approval-matrix` требует approval для repo write (`git_write`/`external_write`, покрывает GitHub/GitLab), но `.claude/settings.json` не имел `mcp__github`/`mcp__gitlab` в `ask` (в отличие от notion/figma). **Добавлены в `ask`** — внешние repo-записи теперь под подтверждением.
+- `.mcp.json`: 8 серверов; `figma`/`gitlab` требуют OAuth (в неинтерактивной сессии недоступны — задокументировано).
+
+Проверки второй волны: `doctor`, `validate:config`, `test-skill-metadata` — passed; битых путей 0; рассинхронов шаблонов 0; settings.json — валидный JSON.
+
+### Ещё не сделано (P1, отдельная задача)
+- Валидация обёрток `.claude/skills/*` в `test-skill-metadata` (сверка name/description с `agent-pack/skills`).
+- Skills P1: `mcp_servers` cleanup, `required_outputs` разделение «производит vs требует», разграничение write-навыков, visual-diff пороги.

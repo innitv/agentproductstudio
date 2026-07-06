@@ -46,6 +46,10 @@
 | Opportunity | User situation | Competitor gap | Product decision | Validation method |
 |---|---|---|---|---|
 
+## Takeaways
+
+- Ключевые выводы конкурентного анализа: где мы выигрываем, где отстаём, какие паттерны обязательны, а какие — anti-pattern. Каждый вывод — с привязкой к user scenario / CJM friction.
+
 ## Readiness Checklist
 - [ ] 5 competitors analyzed.
 - [ ] Competitor comparison is tied to user scenarios and CJM frictions.

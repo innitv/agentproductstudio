@@ -12,7 +12,7 @@
 - Нода Figma `16:203`
 - Нода Figma `16:292`
 - Пользовательские экспорты из Figma для токенов типографики, эффектов, скруглений, отступов и размеров компонентов
-- [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css)
+- [apps/frontend/src/styles.css](apps/frontend/src/styles.css)
 
 ## Примечания (Notes)
 
@@ -108,7 +108,7 @@
 
 Источник: предоставленный пользователем экспорт стилей текста из Figma.
 
-Все служебные классы типографики реализованы в [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css) с правилами `font-family: var(--font-family-mont)`, `font-style: normal`, `text-decoration: none` и `text-transform: none`.
+Все служебные классы типографики реализованы в [apps/frontend/src/styles.css](apps/frontend/src/styles.css) с правилами `font-family: var(--font-family-mont)`, `font-style: normal`, `text-decoration: none` и `text-transform: none`.
 
 | Класс (Class) | Размер (Size) | Высота строки (Line height) | Насыщенность (Weight) | CSS-переменные |
 |---|---:|---:|---:|---|
@@ -221,12 +221,12 @@
 
 ## Реализация (Implementation)
 
-- Добавлены канонические базовые переменные цвета Figma в [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css) в формате RGBA.
-- Добавлены канонические переменные палитры цветов Figma в [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css) в формате RGBA.
-- Добавлены переменные типографики и служебные классы в [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css).
-- Добавлены переменные эффектов/теней и служебные классы в [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css).
-- Добавлены переменные скругления границ в [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css).
-- Добавлены переменные отступов и размеров компонентов в [apps/frontend/src/styles.css](file:///c:/Project/product-agent-studio/apps/frontend/src/styles.css).
+- Добавлены канонические базовые переменные цвета Figma в [apps/frontend/src/styles.css](apps/frontend/src/styles.css) в формате RGBA.
+- Добавлены канонические переменные палитры цветов Figma в [apps/frontend/src/styles.css](apps/frontend/src/styles.css) в формате RGBA.
+- Добавлены переменные типографики и служебные классы в [apps/frontend/src/styles.css](apps/frontend/src/styles.css).
+- Добавлены переменные эффектов/теней и служебные классы в [apps/frontend/src/styles.css](apps/frontend/src/styles.css).
+- Добавлены переменные скругления границ в [apps/frontend/src/styles.css](apps/frontend/src/styles.css).
+- Добавлены переменные отступов и размеров компонентов в [apps/frontend/src/styles.css](apps/frontend/src/styles.css).
 - Сохранены совместимые алиасы `--a3-*` для существующих стилей фронтенда.
 - Заменены общие жестко закодированные цвета интерфейса семантическими CSS-переменными там, где это безопасно.
 - Добавлен `FIGMA_API_TOKEN` в `.env.example`.

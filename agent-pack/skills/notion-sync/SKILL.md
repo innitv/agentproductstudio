@@ -105,7 +105,12 @@ contract_schema: agent-pack/templates/skill.template.md
    - не передавай token как bare CLI argument, не печатай token в логах, не сохраняй token в outputs.
 10. Публикуй только research pack. Для подробного research pack используй `tooling/scripts/publish-notion-research-hub.mjs <parent-page> <research-export-md> "<hub-title>"`; для коротких документов допустим `tooling/scripts/publish-notion-research-page.mjs`.
 11. Для повторной публикации используй idempotency rule: ищи existing hub/child page/export marker по title/source checksum и обновляй/создавай новую версию только по явно выбранной стратегии.
-12. Если используется Notion API, соблюдай request limits: append children чанками до 100 blocks, обрабатывай `429` через `Retry-After`/backoff, фиксируй retry count.
+12. Если используется Notion API, соблюдай request limits и size-limits (офиц. `developers.notion.com/reference/request-limits`):
+    - обрабатывай **и `429`, и `529` (`service_overload`)** через `Retry-After`/backoff, фиксируй retry count;
+    - payload ≤ **1000 blocks / 500KB**; создавай страницу с первыми ≤100 blocks, остальное — через **Append Block Children** чанками ≤100;
+    - размерные лимиты полей: rich text `text.content` ≤ **2000 символов**, вложенность блоков ≤ **2 уровня**, `relation`/`people`/`multi_select` ≤ **100** элементов;
+    - до отправки разбивай абзацы > 2000 символов и списки глубже 2 уровней; иначе `partial/needs_revision`;
+    - **сериализуй запросы** (token-bucket/очередь), не запускай параллельные всплески `Promise.all()` на записи.
 13. Запиши publication URL/page id в `stage-gate-ledger.md`, `handoff-bundle.md` и, если workflow дошел до release, `release-notes.md`.
 14. Если Notion write был выполнен без интерактивного approval request или отдельного заметного вопроса в чате, не исправляй историю задним числом. Запиши `process_deviation` в `stage-gate-ledger.md`, `handoff-bundle.md` и `release-notes.md`: action, target, что было опубликовано, какой approval step пропущен, как предотвращать повторение.
 
@@ -173,6 +178,6 @@ Evidence записи должна включать:
 - [ ] Если approval flow нарушен, создан `process_deviation` record.
 - [ ] Published content не содержит raw/schema/machine payloads.
 - [ ] Markdown опубликован как Notion blocks, а не как единый raw code block.
-- [ ] Для API/MCP записи учтены chunking/rate-limit/retry.
+- [ ] Для API/MCP записи учтены: 429+529 retry, chunking ≤100 blocks, size-limits (rich text ≤2000, payload ≤1000 blocks/500KB, вложенность ≤2, relation/people/multi_select ≤100), сериализация запросов.
 - [ ] Повторная публикация имеет idempotency strategy.
 - [ ] Publication URL или blocker записан в workflow artifacts.

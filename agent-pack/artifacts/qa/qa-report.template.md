@@ -8,6 +8,10 @@
 | Owner | qa-review |
 | QA Scope | product pipeline / reference-driven / frontend / publication / release |
 
+## Status
+
+`pass` / `pass_with_known_limitations` / `fail` / `blocked` — итоговый вердикт QA с одной строкой обоснования.
+
 ## Inputs Used
 
 - `recursive-brief.md`

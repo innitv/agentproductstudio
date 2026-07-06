@@ -48,7 +48,9 @@
       "Bash(yarn workflow:deny:*)",
       "mcp__notion",
       "mcp__figma",
-      "mcp__figmaDesktop"
+      "mcp__figmaDesktop",
+      "mcp__github",
+      "mcp__gitlab"
     ],
     "deny": [
       "Read(./.env)",

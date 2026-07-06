@@ -7,6 +7,10 @@
 | Status | ready / blocked / released |
 | Owner | release |
 
+## Status
+
+`ready` / `blocked` / `released` — итоговое решение по релизу с одной строкой обоснования.
+
 ## Inputs Used
 
 - `qa-report.md`

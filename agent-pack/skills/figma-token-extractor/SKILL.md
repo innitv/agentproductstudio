@@ -2,7 +2,7 @@
 id: figma-token-extractor
 name: figma-token-extractor
 title: "Figma Design Token Extractor"
-description: "Use when design/frontend work must extract source-backed visual tokens from a Figma file or node into design_brief. Separates read-only token extraction from approval-gated Figma canvas writes, records token evidence, and maps values to CSS variables only when implementation stage allows it."
+description: "Использовать, когда design/frontend работа должна извлечь source-backed visual tokens из Figma-файла или node в design-brief. Skill отделяет read-only извлечение токенов от approval-gated Figma canvas writes, фиксирует token evidence и маппит значения в CSS variables только на этапе реализации."
 platforms:
   - open-code
   - claude

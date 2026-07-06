@@ -6,9 +6,9 @@
 
 ## Использованные исходные данные (Inputs Used)
 
-- [design/figma/a3-design-system/README.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/README.md)
-- [design/figma/a3-design-system/token-map.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/token-map.md)
-- [design/figma/a3-design-system/design-system-audit.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/design-system-audit.md)
+- [design/figma/a3-design-system/README.md](design/figma/a3-design-system/README.md)
+- [design/figma/a3-design-system/token-map.md](design/figma/a3-design-system/token-map.md)
+- [design/figma/a3-design-system/design-system-audit.md](design/figma/a3-design-system/design-system-audit.md)
 - Нода Figma `396:1320` для `DropdownMenu`
 - Нода Figma `387:1282` для `Elements / Item`
 - Нода Figma `234:38` для `Chips`
@@ -1116,4 +1116,4 @@ Elements / Segment:
 
 ## Правила миграции фронтенда (Frontend Migration Rule)
 
-Не производите массовое автоматическое обновление стилей существующих компонентов фронтенда, пока для каждого компонента не будет извлечен подтвержденный контракт Figma. Используйте утвержденные токены из [token-map.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/token-map.md) в рамках контролируемой последовательной миграции, контролируя результат сборкой и визуальными автотестами QA.
+Не производите массовое автоматическое обновление стилей существующих компонентов фронтенда, пока для каждого компонента не будет извлечен подтвержденный контракт Figma. Используйте утвержденные токены из [token-map.md](design/figma/a3-design-system/token-map.md) в рамках контролируемой последовательной миграции, контролируя результат сборкой и визуальными автотестами QA.

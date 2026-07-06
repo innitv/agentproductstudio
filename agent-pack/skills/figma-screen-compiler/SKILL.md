@@ -2,7 +2,7 @@
 id: figma-screen-compiler
 name: figma-screen-compiler
 title: "Figma Screen Compiler"
-description: "Use when a Figma/product UI/prototype surface must be built or updated from screens/design context: compile screen specs into figma-layout-ir.json, enforce route/component/layout constraints, and block Figma write readiness when IR, DS honesty, copy-fit, or visual QA requirements are missing."
+description: "Использовать, когда Figma/product UI/prototype surface нужно собрать или обновить из screens и design-контекста: компилирует спецификации экранов в figma-layout-ir.json, применяет route/component/layout constraints и блокирует готовность к Figma write, если отсутствуют IR, DS honesty, copy-fit или visual QA требования."
 platforms:
   - claude
 mcp_servers:

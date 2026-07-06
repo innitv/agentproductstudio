@@ -68,10 +68,10 @@
 ### Шаг 5: Обновление локальной документации (Синхронизация)
 
 После успешного выполнения вызова в Figma API агент обязан зафиксировать изменения локально:
-1. **Обновление `ds/components.md`** ([component-map.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/component-map.md)):
+1. **Обновление `ds/components.md`** ([component-map.md](design/figma/a3-design-system/component-map.md)):
    - В строку/таблицу компонента записывается актуальная обновленная матрица свойств Figma Contract.
    - Обновляется статус компонента на `completed`.
-2. **Обновление `ds/foundation.md`** ([token-map.md](file:///c:/Project/product-agent-studio/design/figma/a3-design-system/token-map.md)):
+2. **Обновление `ds/foundation.md`** ([token-map.md](design/figma/a3-design-system/token-map.md)):
    - Если для нового состояния потребовался уникальный семантический цвет (например, `--a3-input-focus-ring`), он добавляется в таблицу как семантический алиас, ссылающийся на базовый примитивный токен (например, `rgba(83, 151, 235, 0.1)`), **без использования жестко закодированных HEX-значений в коде**.
 
 ### Шаг 6: Контроль качества и Guardrails

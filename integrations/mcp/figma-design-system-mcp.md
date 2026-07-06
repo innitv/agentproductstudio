@@ -166,7 +166,7 @@ claude mcp add --transport http figma https://mcp.figma.com/mcp
 
 Для создания и редактирования макетов на холсте Figma используется официальный plugin-context **`use_figma`** или эквивалентный доступный write tool. Нормативный процесс выбора дизайн-системы, двухпроходной сборки, component contracts и roundtrip описан здесь:
 
-- [figma-canvas-write-guide.md](file:///c:/Project/product-agent-studio/integrations/mcp/figma-canvas-write-guide.md)
+- [figma-canvas-write-guide.md](integrations/mcp/figma-canvas-write-guide.md)
 
 При использовании записи на холст:
 
@@ -182,7 +182,7 @@ claude mcp add --transport http figma https://mcp.figma.com/mcp
 - Активация режима записи требует `write_allowed: true` во входном контракте и явного подтверждения от пользователя перед каждым MCP-запросом.
 - `write to canvas`, `create file`, `update components`, редактирование переменных и добавление комментариев требуют отдельной `figma_write` авторизации (human approval).
 - Запрещается несанкционированно перезаписывать или удалять существующие элементы дизайна вне области макета, предоставленной пользователем.
-- При записи строго следовать руководству [figma-canvas-write-guide.md](file:///c:/Project/product-agent-studio/integrations/mcp/figma-canvas-write-guide.md); pseudo-REST `action/create_node/payload` не использовать.
+- При записи строго следовать руководству [figma-canvas-write-guide.md](integrations/mcp/figma-canvas-write-guide.md); pseudo-REST `action/create_node/payload` не использовать.
 - Не прогоняй весь тяжелый файл целиком, если достаточно frame/node link.
 - Не сохраняй private file dumps в публичные artifacts.
 - Claims из Figma не считаются research evidence без отдельной проверки.
