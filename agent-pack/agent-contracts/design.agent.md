@@ -19,6 +19,7 @@ skills:
   - figma-token-extractor
   - style-decompose
   - ds-baseline
+  - figma-ds-ingest
   - approval-gate
   - figma-screen-compiler
   - figma-roundtrip

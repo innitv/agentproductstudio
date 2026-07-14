@@ -332,6 +332,12 @@ function renderMinimalResearchSummary(): string {
     "",
     "- Local runtime test artifacts.",
     "",
+    "## Evidence Ledger",
+    "",
+    "| Evidence source | Decision | Output location | Status |",
+    "|---|---|---|---|",
+    "| Local runtime test artifacts | Default rollout требует PRD и IA | `## Findings` | applied |",
+    "",
   ].join("\n");
 }
 

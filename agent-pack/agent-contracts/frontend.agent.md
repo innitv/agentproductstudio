@@ -22,6 +22,7 @@ skills:
   - visual-layout-verifier
   - design-engineering
   - ds-to-storybook
+  - figma-ds-ingest
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 

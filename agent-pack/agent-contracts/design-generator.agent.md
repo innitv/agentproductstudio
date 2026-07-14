@@ -18,6 +18,7 @@ skills:
   - design-loop
   - figma-screen-compiler
   - ds-baseline
+  - figma-ds-ingest
   - approval-gate
   - visual-layout-verifier
   - figma-roundtrip

@@ -36,6 +36,7 @@ skills:
   - figma-roundtrip
   - visual-layout-verifier
   - design-engineering
+  - figma-ds-ingest
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 
