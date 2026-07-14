@@ -32,6 +32,7 @@ skills:
   - visual-diff-verifier
   - funnel-analytics-verifier
   - seo-copy-validator
+  - anti-ai-slop
   - figma-roundtrip
   - visual-layout-verifier
   - design-engineering

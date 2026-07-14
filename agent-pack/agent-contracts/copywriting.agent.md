@@ -16,6 +16,7 @@ required_outputs:
 approval_actions: []
 skills:
   - seo-copy-validator
+  - anti-ai-slop
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 

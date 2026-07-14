@@ -17,6 +17,9 @@ required_outputs:
 approval_actions:
   - external_research_provider_call
 skills:
+  - research-pack
+  - anti-ai-slop
+  - approval-gate
   - notion-sync
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---

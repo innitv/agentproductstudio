@@ -20,6 +20,10 @@ approval_actions:
   - deploy
 skills:
   - notion-sync
+  - approval-gate
+  - run-ledger
+  - selective-commit
+  - outputs-cleanup
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 

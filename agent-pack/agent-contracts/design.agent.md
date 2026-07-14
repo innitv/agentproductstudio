@@ -18,6 +18,8 @@ approval_actions:
 skills:
   - figma-token-extractor
   - style-decompose
+  - ds-baseline
+  - approval-gate
   - figma-screen-compiler
   - figma-roundtrip
   - figma-handoff

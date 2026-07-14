@@ -17,6 +17,8 @@ approval_actions:
 skills:
   - design-loop
   - figma-screen-compiler
+  - ds-baseline
+  - approval-gate
   - visual-layout-verifier
   - figma-roundtrip
   - figma-handoff

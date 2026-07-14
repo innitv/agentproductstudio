@@ -12,7 +12,11 @@ required_outputs:
   - stage_gate_ledger
   - recursive_brief
 approval_actions: []
-skills: []
+skills:
+  - recursive-brief
+  - run-ledger
+  - approval-gate
+  - outputs-cleanup
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 

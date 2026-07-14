@@ -12,7 +12,8 @@ required_inputs:
 required_outputs:
   - prototype_report
 approval_actions: []
-skills: []
+skills:
+  - prototype-state-map
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 
