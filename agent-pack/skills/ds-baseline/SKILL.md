@@ -34,7 +34,7 @@ contract_schema: agent-pack/templates/skill.template.md
 
 ## 1. Назначение
 
-Skill применяется, когда `design_system_mode = product_specific` или подтверждённый `extend` требует нового foundation. Нормативный процесс — [`agent-pack/workflows/ds-baseline.workflow.md`](../../workflows/ds-baseline.workflow.md); техника записи в Figma — [`figma-ds-build`](../figma-ds-build/SKILL.md); выбор самого режима — [`figma-roundtrip`](../figma-roundtrip/SKILL.md).
+Skill применяется, когда `design_system_mode = product_specific` или подтверждённый `extend` требует нового foundation. Нормативный процесс — [`agent-pack/workflows/ds-baseline.workflow.md`](../../workflows/ds-baseline.workflow.md); техника записи в Figma — user-level skill `figma-ds-build` (живёт в `~/.claude/skills/`, самодостаточен и доступен во всех проектах); выбор самого режима — [`figma-roundtrip`](../figma-roundtrip/SKILL.md).
 
 Skill защищает от главной ошибки: **сборки foundation до того, как появился хотя бы один хороший экран.** Токены, палитра и «семь обязательных компонентов» не выводятся из отраслевого preset — они извлекаются из утверждённых экранов. Наличие A3 или другой готовой системы не обязывает её наследовать, и не наследуется автоматически ни палитра, ни Inter/Slate, ни стандартные радиусы.
 

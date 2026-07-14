@@ -4,6 +4,32 @@
 
 Рабочий сценарий проекта — запросы внутри Claude Code. Claude использует `CLAUDE.md`, инструкции специалистов, workflow-документы и шаблоны как правила работы, а локальные команды нужны для scaffold, проверок и сохранения артефактов.
 
+## Slash-команды Claude Code
+
+Основной способ запускать этапы. Живут в `.claude/commands/`. Каждой соответствуют триггер-фразы в свободном чате (см. раздел «Trigger Phrases»).
+
+| Команда | Что делает |
+| --- | --- |
+| `/workflow-start` | Новый продуктовый workflow: intake, scaffold run ledger, research первым этапом. |
+| `/workflow-resume` | Продолжает начатый run с последнего завершённого этапа, соблюдая dependency order и gates. |
+| `/workflow-status` | Список активных run и детальное состояние стадий и gates. |
+| `/doctor` | Self-check окружения, ключей и целостности шаблонов артефактов. |
+| `/research` | `01-research`: research pack с проверяемыми источниками. |
+| `/prd` | `02-prd`: требования, MoSCoW, acceptance criteria. |
+| `/ia` | `03-ia`: sitemap, primary user flow, главный экран и главное действие. |
+| `/design` | `04-design`: design-brief, design-system mode, visual evidence. |
+| `/copy` | `05-copy`: hero, CTA, секции, FAQ, SEO, claims to validate. |
+| `/screens` | `06-screens`: спецификация экранов на основе design и copy. |
+| `/prototype` | `07-prototype`: transition map и инструкции кликабельного прототипа. |
+| `/frontend` | `08-frontend`: реализация UI, состояния, адаптивность, analytics hooks. |
+| `/visual-diff` | `09-visual-reference`: парные скриншоты и pixel diff против референса. |
+| `/test-bench` | `10-test-bench`: проверка воронки и analytics главного сценария. |
+| `/qa` | `11-qa`: аудит PRD fit, UX, a11y, responsive, secrets. |
+| `/release` | `12-release`: release notes, validation, deployment/rollback notes. |
+| `/notion-publish` | Публикация research pack в Notion после human approval. |
+
+Skills (`.claude/skills/`, детально — `agent-pack/skills/`) slash-команд не имеют: Claude Code подключает их автоматически по описанию. Покрытие стадий: `yarn workflow:skills`.
+
 ## Локальные команды
 
 Проверить staged-файлы перед selective commit:
@@ -14,10 +40,16 @@ yarn git:check-staged
 
 Команда блокирует случайно staged `outputs/**`, `.lazyweb/**`, logs, build/test artifacts и media/evidence файлы. Если пользователь явно просит коммитить такой target, используй allow-флаг из `tooling/scripts/check-staged-scope.mjs --help`.
 
-Проверить executable handoff/output contracts для agentic stages:
+Проверить executable handoff/output contracts для agentic stages (frontmatter контрактов: `required_inputs`, `required_outputs`, `skills`, approval actions):
 
 ```bash
-yarn workflow:test-agent-contracts
+yarn workflow:test-agent-metadata
+```
+
+Весь набор runtime-тестов сразу (agent/skill metadata, capability registry, approval gate, figma layout, output lifecycle, agentic engine):
+
+```bash
+yarn workflow:test-agentic
 ```
 
 Проверить Agent Capability Registry:
@@ -165,6 +197,16 @@ Research runner создает:
 - `handoff-bundle.md`
 - `stage-gate-ledger.md`
 
+Проверить содержательность research/CJM/PRD/copy перед записью и любой внешней публикацией (Anti-AI-Slop Gate, Rules 1-6):
+
+```bash
+yarn research:lint research/projects/<research-slug>/<YYYY-MM-DD>
+yarn research:lint outputs/<project-slug>/<YYYY-MM-DD>
+yarn research:lint <research-export-md>
+```
+
+Lint проверяет: не тезисная выжимка, глубина CJM/user-flow, связь roadmap с CJM и валидацией, claims с механизмом, неуниверсальные формулировки, неповторяющиеся строки таблиц. **Если lint падает, Notion/Figma/external write запрещён** до исправления источников или export.
+
 ## Визуальный референс
 
 Собрать Firecrawl + Playwright reference pack:
@@ -241,6 +283,23 @@ yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
 
 ```bash
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
+```
+
+Посмотреть, какие skills покрывают какие стадии (таблица stage → agent → skills):
+
+```bash
+yarn workflow:skills
+```
+
+## Уборка и архивация
+
+Для задач типа `cleanup/sorting`. Инвентаризация выполняется до удаления; необратимое удаление требует approval `delete_data` (см. skill `outputs-cleanup`).
+
+```bash
+yarn workflow:list                                  # что вообще есть и в каком статусе
+yarn workflow:archive outputs/<project-slug>/<YYYY-MM-DD>   # переместить завершённый run в архив
+yarn workflow:cleanup-temp                          # очистить outputs/temp
+yarn outputs:cleanup                                # уборка outputs по правилам lifecycle
 ```
 
 ## QA

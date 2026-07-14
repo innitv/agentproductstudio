@@ -24,8 +24,10 @@ Claude начинает с классификации задачи и выбир
 | --- | --- | --- |
 | `full product workflow` | Нужно провести продукт от идеи до реализации | Intake, research, PRD, IA, design, copy, screens, prototype, frontend, QA, release. |
 | `reference-driven workflow` | Есть URL, screenshot, Figma, Dribbble или просьба "как этот сайт" | Добавляется reference scan, visual spec и `visual-reference-review.md`. |
+| `quick draft` | Только по явной фразе пользователя ("быстрый набросок", "demo only") | Маршрут сокращается, результат помечается `partial`/`draft`, а не `success`. Запрещён для reference-driven задач и внешних публикаций. |
 | `limited engineering task` | Нужна узкая правка кода, docs, runtime или rules | Делается scoped-правка без полного продуктового pipeline. |
 | `cleanup/sorting` | Нужно разобрать outputs, research, архивы или dirty tree | Выполняется отдельно от feature work. |
+| `external write` | Notion, Figma, deploy, секреты, удаление данных, git write | Требует exact approval до действия (см. «Публикации и внешние действия»). |
 
 Базовый маршрут полного workflow:
 
@@ -47,9 +49,23 @@ request
 
 Оркестратор остается владельцем финального результата. Специалисты из `agent-pack/agent-contracts/` работают как ограниченные capabilities: получают входы, возвращают структурированный результат и не подменяют общий статус workflow.
 
+## Как это запускать
+
+Оркестратор — это главная сессия Claude Code. Стадии запускаются slash-командами из `.claude/commands/` или соответствующими триггер-фразами в свободном чате:
+
+| Команда | Этап |
+| --- | --- |
+| `/workflow-start`, `/workflow-resume`, `/workflow-status` | Управление запуском: intake и scaffold, продолжение с последнего этапа, статус стадий и gates. |
+| `/doctor` | Self-check окружения, ключей и шаблонов. |
+| `/research` → `/prd` → `/ia` → `/design` → `/copy` → `/screens` → `/prototype` | Стадии `01`-`07`: от research pack до transition map. |
+| `/frontend` → `/visual-diff` → `/test-bench` → `/qa` → `/release` | Стадии `08`-`12`: реализация, сверка с референсом, воронка, аудит, release notes. |
+| `/notion-publish` | Публикация research pack в Notion после approval. |
+
+Кроме команд Claude Code автоматически подключает **skills** (`.claude/skills/`, детально — `agent-pack/skills/`) по их описанию. Кросс-стадийные skills действуют независимо от этапа: `approval-gate` (любое внешнее действие), `recursive-brief` (intake), `run-ledger` (ведение журнала запуска), `anti-ai-slop` (перед записью research/PRD/copy и публикацией), `selective-commit`, `outputs-cleanup`. Текущее покрытие стадий: `yarn workflow:skills`.
+
 ## Дисциплина выполнения
 
-Последние правила проекта усиливают не скорость, а качество прохождения gates. Перед генерацией артефакта, Figma/Notion write, frontend implementation, публикацией, handoff или финальным статусом действует `Thoroughness-First Gate`:
+Правила проекта усиливают не скорость, а качество прохождения gates. Перед генерацией артефакта, Figma/Notion write, frontend implementation, публикацией, handoff или финальным статусом действует `Thoroughness-First Gate`:
 
 - `quick draft` включается только по явной фразе пользователя;
 - сначала выполняется context/source inventory: какие инструкции, artifacts, references, templates, design-system assets, components и runtime contracts реально являются источником решения;
@@ -58,7 +74,7 @@ request
 - reuse decisions и gap list фиксируются в stage artifacts;
 - нарушение уже существующего правила записывается как `process_deviation`, а не как "поправка пользователя".
 
-Это правило продублировано в `AGENTS.md`, `agent-pack/quality/quality-gates.md`, `agent-pack/workflows/artifact-driven-pipeline.md` и agent docs, поэтому README остается входной картой, а не единственным нормативным слоем.
+Это правило продублировано в `CLAUDE.md`, `agent-pack/quality/quality-gates.md`, `agent-pack/workflows/artifact-driven-pipeline.md` и agent docs, поэтому README остается входной картой, а не единственным нормативным слоем.
 
 ## Быстрый старт
 
@@ -102,11 +118,19 @@ yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
 | Path | Назначение |
 | --- | --- |
 | `CLAUDE.md` | Главные правила проекта для Claude Code: маршрутизация, язык, approvals, gates, source-of-truth. |
-| `agent-pack/agent-contracts/` | Инструкции специалистов: orchestrator, research, PRD, IA, design, frontend, QA и release. |
-| `agent-pack/workflows/` | Описание маршрутов, handoff-контрактов и продуктового pipeline. |
+| `.claude/agents/` | Нативные обёртки 13 субагентов (вызываются главной сессией через `Task`, `subagent_type` = имя). |
+| `.claude/skills/` | Нативные обёртки skills; полные процедуры — в `agent-pack/skills/`. |
+| `.claude/commands/` | Slash-команды этапов и управления workflow. |
+| `.claude/hooks/` | Hooks сессии: session-start, orchestrator-reminder, guard-write, guard-bash, post-edit-sync. |
+| `.claude/settings.json` | Модель, permissions, разрешённые команды, hooks. |
+| `.mcp.json` | MCP-серверы (figma, notion, tavily, playwright, github, gitlab, lazyweb); пример — `integrations/mcp/mcp-servers.example.json`. |
+| `agent-pack/agent-contracts/` | Детальные контракты специалистов: orchestrator, research, prd, ia, design, design-generator, copywriting, prototype, frontend, test-bench, qa-review, release, notion-publisher. |
+| `agent-pack/skills/` | Детальные процедуры skills: approval-gate, research-pack, anti-ai-slop, run-ledger, figma-*, visual-*, landing-builder и другие. |
+| `agent-pack/workflows/` | Описание маршрутов, handoff-контрактов, детальных gates (`claude-operating-rules.md`) и продуктового pipeline. |
 | `agent-pack/artifacts/` | Шаблоны человекочитаемых артефактов. |
 | `agent-pack/schemas/` | JSON Schema для проверяемых structured outputs. |
 | `agent-pack/quality/` | Quality gates, Anti-AI-Slop, visual evidence и review rules. |
+| `agent-pack/guardrails/` | Approval matrix, sensitive data policy, guardrails policy. |
 | `runtime/typescript/` | Исполняемый слой: workflow engine, validators, approval CLI, sync, research/reference tooling. |
 | `apps/frontend/` | Studio/AgentFlow frontend. |
 | `outputs/` | Product workflow runs, temp runs и archives. |
@@ -130,7 +154,7 @@ yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
 
 Личный сайт-портфолио вынесен в отдельный репозиторий и в этой студии больше не живёт.
 
-Если README и детальный contract расходятся, сначала проверяй `AGENTS.md`, `workflow.manifest.ts`, workflow docs и runtime validators. Исторические файлы в `outputs/**` и `research/projects/**` описывают состояние на дату запуска, а не новые правила проекта.
+Если README и детальный contract расходятся, сначала проверяй `CLAUDE.md`, `workflow.manifest.ts`, workflow docs и runtime validators. `AGENTS.md` — только указатель на `CLAUDE.md` для сторонних агентов (Codex, OpenCode), а не источник правил. Исторические файлы в `outputs/**` и `research/projects/**` описывают состояние на дату запуска, а не новые правила проекта.
 
 ## Run ledger
 
@@ -188,14 +212,14 @@ yarn reference:scan <reference-url> [slug]
 
 ### Figma App-Likeness Contract
 
-Свежий Figma-контракт закрывает проблему "структурно прошло, но выглядит как техническая доска". Для `figma_board`, `product_ui` и `prototype` теперь обязательны два исполняемых артефакта:
+Figma-контракт закрывает проблему "структурно прошло, но выглядит как техническая доска". Для `figma_board`, `product_ui` и `prototype` обязательны два исполняемых артефакта:
 
 - до Figma write: `figma-layout-ir.json` с route, zones, copy-fit, component sources, resize constraints, DS honesty, verification contract и `ui_fidelity_target` для каждого screen;
 - после Figma write: `figma-visual-qa.json` со screenshot/object inventory checks, `app_likeness_review` и `gate_result.ready_allowed=true`.
 
 `ready_for_review|ready` запрещен, если `app_likeness_review.verdict != passed` или screenshot выглядит как `technical_board`, `audit_board`, `wireframe`, `component_inventory`, `metadata_panel`, `route_map`, `generic_card_grid` или `empty_ui_shell`. Auto Layout, node inventory и наличие DS instances больше не считаются достаточными сами по себе.
 
-Для DS-first задач действует практический принцип: существующие компоненты использовать как реальные Figma `INSTANCE`, а недостающие product-specific блоки создавать отдельно и тоже вставлять как instances. Такой `instance-first` подход зафиксирован в свежих A3 Home Services Figma flow artifacts в `research/projects/a3-home-services-bank-apps-deep-research/2026-06-26/`.
+Для DS-first задач действует практический принцип: существующие компоненты использовать как реальные Figma `INSTANCE`, а недостающие product-specific блоки создавать отдельно и тоже вставлять как instances. Пример `instance-first` подхода — A3 Home Services Figma flow artifacts в `research/projects/a3-home-services-bank-apps-deep-research/2026-06-26/` (это пример работы, а не нормативный источник).
 
 Для Figma roundtrip смотри:
 
