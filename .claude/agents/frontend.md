@@ -4,7 +4,7 @@ description: "Lead Frontend разработчик (stage 08-frontend). Орке
 model: sonnet
 skills: [landing-builder, figma-token-extractor, figma-roundtrip, visual-layout-verifier, design-engineering, ds-to-storybook]
 color: green
-disallowedTools: mcp__notion, mcp__github, mcp__gitlab
+disallowedTools: mcp__notion, mcp__github, mcp__gitlab, Task, Agent
 ---
 
 # Frontend Agent

@@ -4,6 +4,7 @@ description: "Lead QA & Analytics инженер (stage 10-test-bench). Орке
 model: sonnet
 color: yellow
 skills: funnel-analytics-verifier
+disallowedTools: Task, Agent, mcp__figma, mcp__figmaDesktop, mcp__notion, mcp__github, mcp__gitlab
 ---
 
 # Test Bench Agent

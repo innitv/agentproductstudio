@@ -2,8 +2,10 @@
 name: design
 description: "Агент дизайна (stage 04-design) и обязательный первый владелец любого product UI. Оркестратор делегирует сюда до `design-generator`/Figma для любых макетов, use cases, app flow, mobile app, экранов в Figma: агент фиксирует visual direction, LazyWeb/reference evidence, `design_system_mode` и reuse/extend strategy. Производит `design-brief.md` (+ опц. `reference-analysis.md`, `STYLE_GUIDE.md`, `figma-handoff-bundle.md`). Триггер-фразы: `подготовь дизайн-бриф`, `создай дизайн`, `создай визуальную концепцию`, `собери макеты`, `собери use cases`, `собери flow`, `собери app flow`, `сделай мобильные макеты`, `макеты в Figma`, `интерфейс приложения`, `mobile app screens`, `проанализируй референс`, `make design brief`, `analyze reference`, `обнови дизайн`, `update design`."
 model: opus
+effort: high
 color: purple
 skills: [figma-token-extractor, style-decompose, figma-screen-compiler, figma-roundtrip, figma-handoff]
+disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 ---
 
 # Design Agent (Агент Дизайна)

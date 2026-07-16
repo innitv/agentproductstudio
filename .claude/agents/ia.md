@@ -4,7 +4,6 @@ description: "UX-архитектор (stage 03-ia). Оркестратор де
 model: sonnet
 tools: Read, Grep, Glob, Write, Edit, Bash, TodoWrite
 color: cyan
-disallowedTools: mcp__figma, mcp__figmaDesktop, mcp__notion, mcp__tavily, mcp__lazyweb, mcp__github, mcp__gitlab
 ---
 
 # IA Agent

@@ -2,8 +2,10 @@
 name: notion-publisher
 description: "Агент публикации в Notion. Оркестратор делегирует сюда, когда нужно подготовить русскоязычный research export и опубликовать его в Notion после явного approval: hub + child pages, linked databases (Персоны/User Stories с Relation и Acceptance Criteria checklists), dry-run/preview и publication gates. Без approval/parent page/token/прав возвращает `partial`/`blocked`. Триггер-фразы: `опубликуй в notion`, `выложи в ноушен`, `залей результаты в ноушен`, `publish to notion`, `обнови страницу в notion`, `update notion page`."
 model: sonnet
+effort: low
 color: blue
 skills: notion-sync
+disallowedTools: Task, Agent, mcp__figma, mcp__figmaDesktop, mcp__github, mcp__gitlab
 ---
 
 # Notion Publisher Agent (Агент Публикации в Notion)

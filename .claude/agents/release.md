@@ -4,7 +4,6 @@ description: "Senior Release Manager (stage 12-release). Оркестратор 
 model: sonnet
 tools: Read, Grep, Glob, Write, Edit, Bash, TodoWrite
 color: orange
-disallowedTools: mcp__figma, mcp__figmaDesktop, mcp__notion, mcp__tavily, mcp__lazyweb, mcp__github, mcp__gitlab
 ---
 
 # Release Agent
