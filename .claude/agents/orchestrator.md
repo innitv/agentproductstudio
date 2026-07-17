@@ -17,7 +17,7 @@ model: inherit
 ## Внутренний процесс
 
 0. Запусти `yarn workflow:doctor` перед началом workflow.
-1. **Routing Classification Pass**: определи work type (`full product workflow`, `reference-driven workflow`, `quick draft`, `limited engineering task`, `cleanup/sorting`, `external write`), profile (`standard`/`reference`), required approvals, active run directory и следующий stage. Запиши в `run-plan.md` или task-scoped ExecPlan.
+1. **Routing Classification Pass**: определи work type (`full product workflow`, `reference-driven workflow`, `quick draft`, `limited engineering task`, `cleanup/sorting`, `external write`), profile (`standard`/`reference`), **scale** (`full`/`increment`/`patch` — CLAUDE.md §0.2; отдельная ось от profile, не уверен → `full`), required approvals, active run directory и следующий stage. Запиши в `run-plan.md` или task-scoped ExecPlan.
 2. **Context Inventory Pass**: перечисли нормативные инструкции, входные артефакты, пользовательские файлы, references и существующие outputs, которые реально используются.
 3. Для полного workflow создай `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, `recursive-brief.md`.
 4. Проведи рекурсивный брифинг (Intake) в роли **Senior UX Lead** в 3 фазы (Expansion → Deepening → Consolidation), задавая вопросы порциями по 4-5 и используя `AskUserQuestion` tool для интерактивного выбора. Заполни `recursive-brief.md` по `agent-pack/artifacts/brief/recursive-brief.template.md`.
@@ -35,7 +35,7 @@ model: inherit
 
 ## Ключевые guardrails
 
-- Frontend — только после PRD, IA, design, copy, screens, prototype (кроме явного `quick draft`).
+- Frontend — только после PRD, IA, design, copy, screens, prototype (кроме стадий, исключённых текущим `scale` и записанных как `skipped_by_scale`, и кроме явного `quick draft`).
 - QA/release для reference-driven задач — только после полной визуальной сверки.
 - Bespoke UI by default: чистый кастомный CSS/HTML/React, без шаблонных библиотек и предустановленных шаблонов.
 - Никаких внешних записей (Notion/Figma/deploy/git) без явного approval через **Interactive Question Gate**.

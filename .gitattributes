@@ -1,0 +1,24 @@
+# Нормализация окончаний строк.
+#
+# Зачем: репозиторий живёт на Windows, где инструменты (например Python `open(p, "w")`)
+# по умолчанию пишут CRLF. Один такой прогон переписывает файл целиком, и в diff вместо
+# 30 реальных строк приходит 600 строк шума — ревью такого коммита невозможно.
+# Здесь git нормализует текст к LF в индексе независимо от того, чем файл записали.
+
+* text=auto eol=lf
+
+# Бинарники не трогать.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.mp4 binary
+*.webm binary
+*.mov binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.ico binary

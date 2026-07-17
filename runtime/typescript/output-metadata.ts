@@ -4,7 +4,14 @@ import { readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join, relative, resolve } from "node:path";
 import { approvalStateFileName } from "./approval-gate";
 import { artifactNames, routeTools } from "./route.config";
-import { artifactFiles, artifactSchemas, getRequiredArtifactsForStage, getWorkflowStagesForProfile } from "./workflow-stages";
+import {
+  artifactFiles,
+  artifactSchemas,
+  defaultWorkflowScale,
+  getRequiredArtifactsForStage,
+  getWorkflowStagesForProfile,
+  type WorkflowScale,
+} from "./workflow-stages";
 import { artifactStatusToStageStatus, readMarkdownStatus } from "./status-resolver";
 import { runStateFileName, type WorkflowRunState, type WorkflowStageStatus } from "./workflow-state";
 
@@ -22,6 +29,8 @@ export interface RunMeta {
   created_at: string;
   updated_at: string;
   workflow_profile: "standard" | "reference";
+  // Масштаб run. Отсутствие поля читается как "full" — старые run-meta.json остаются валидными.
+  workflow_scale?: WorkflowScale;
   execution_mode: "local" | "agentic";
   status: WorkflowStageStatus;
   current_stage?: string;
@@ -56,6 +65,7 @@ export interface ArtifactManifest {
   generated_at: string;
   run_id: string;
   workflow_profile: "standard" | "reference";
+  workflow_scale?: WorkflowScale;
   artifacts: ArtifactManifestEntry[];
 }
 
@@ -67,6 +77,7 @@ export interface WorkflowRunListItem {
   run_id: string;
   status: WorkflowStageStatus;
   profile: "standard" | "reference";
+  scale: WorkflowScale;
   execution_mode: "local" | "agentic";
   updated_at: string;
   current_stage?: string;
@@ -100,6 +111,7 @@ export function createRunMeta(state: WorkflowRunState): RunMeta {
     created_at: state.created_at,
     updated_at: state.updated_at,
     workflow_profile: state.profile,
+    workflow_scale: state.scale ?? defaultWorkflowScale,
     execution_mode: state.execution_mode ?? "local",
     status: state.status,
     current_stage: state.current_stage,
@@ -115,7 +127,9 @@ export async function createArtifactManifest(state: WorkflowRunState): Promise<A
   const entries: ArtifactManifestEntry[] = [];
   const seenFiles = new Set<string>();
 
-  for (const stage of getWorkflowStagesForProfile(state.profile)) {
+  // Манифест обязан отражать масштаб run: иначе стадии, легитимно исключённые scale,
+  // попадают в `## Missing Artifacts` и выглядят как забытые.
+  for (const stage of getWorkflowStagesForProfile(state.profile, state.scale ?? defaultWorkflowScale)) {
     for (const artifactName of getRequiredArtifactsForStage(stage, state.profile)) {
       const file = artifactFiles[artifactName];
       const path = join(state.output_dir, file);
@@ -151,6 +165,7 @@ export async function createArtifactManifest(state: WorkflowRunState): Promise<A
     generated_at: new Date().toISOString(),
     run_id: state.run_id,
     workflow_profile: state.profile,
+    workflow_scale: state.scale ?? defaultWorkflowScale,
     artifacts: entries,
   };
 }
@@ -173,12 +188,13 @@ export function formatWorkflowRunList(items: WorkflowRunListItem[]): string {
   }
 
   return [
-    "| Updated | Status | Profile | Mode | Run | Current stage | Goal |",
-    "|---|---|---|---|---|---|---|",
+    "| Updated | Status | Profile | Scale | Mode | Run | Current stage | Goal |",
+    "|---|---|---|---|---|---|---|---|",
     ...items.map((item) => [
       item.updated_at,
       item.status,
       item.profile,
+      item.scale,
       item.execution_mode,
       item.relative_output_dir,
       item.current_stage ?? "",
@@ -238,6 +254,7 @@ export function formatWorkflowRunInspection(inspection: WorkflowRunInspection): 
   const manifest = inspection.manifest;
   const status = meta?.status ?? state?.status ?? "unknown";
   const profile = meta?.workflow_profile ?? state?.profile ?? "unknown";
+  const scale = meta?.workflow_scale ?? state?.scale ?? defaultWorkflowScale;
   const mode = meta?.execution_mode ?? state?.execution_mode ?? "unknown";
   const goal = meta?.source_request ?? state?.goal ?? "unknown";
   const currentStage = meta?.current_stage ?? state?.current_stage ?? "";
@@ -248,6 +265,7 @@ export function formatWorkflowRunInspection(inspection: WorkflowRunInspection): 
     `- Run: ${inspection.relative_output_dir}`,
     `- Status: ${status}`,
     `- Profile: ${profile}`,
+    `- Scale: ${scale}`,
     `- Execution mode: ${mode}`,
     `- Current stage: ${currentStage || "none"}`,
     `- Updated: ${meta?.updated_at ?? state?.updated_at ?? "unknown"}`,
@@ -359,6 +377,7 @@ async function readRunListItem(outputDir: string): Promise<WorkflowRunListItem |
     run_id: meta?.run_id ?? state?.run_id ?? basename(normalizedOutputDir),
     status: meta?.status ?? state?.status ?? "pending",
     profile: meta?.workflow_profile ?? state?.profile ?? "standard",
+    scale: meta?.workflow_scale ?? state?.scale ?? defaultWorkflowScale,
     execution_mode: meta?.execution_mode ?? state?.execution_mode ?? "local",
     updated_at: meta?.updated_at ?? state?.updated_at ?? "",
     current_stage: meta?.current_stage ?? state?.current_stage,
@@ -376,7 +395,8 @@ async function createArtifactManifestFromInspectionState(
   }
 
   const profile = meta?.workflow_profile ?? "standard";
-  return getWorkflowStagesForProfile(profile).flatMap((stage) =>
+  const scale = meta?.workflow_scale ?? defaultWorkflowScale;
+  return getWorkflowStagesForProfile(profile, scale).flatMap((stage) =>
     getRequiredArtifactsForStage(stage, profile).map((artifactName) => ({
       artifact_name: artifactName,
       file: artifactFiles[artifactName],

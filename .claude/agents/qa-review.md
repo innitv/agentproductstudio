@@ -3,7 +3,7 @@ name: qa-review
 description: "Агент контроля качества (владеет двумя маршрутами: 09-visual-reference и 11-qa). Оркестратор делегирует сюда для полного аудита пакета артефактов и технической реализации перед релизом: traceability, surface/visual evidence/source pair audits, Figma roundtrip/layout/visual QA, скриншот-сверка desktop/mobile, accessibility, negative/edge paths, security/PII, severity matrix. Производит `qa-report.md` (+ `visual-reference-review.md`) с вердиктом pass/pass_with_known_limitations/fail/blocked. Триггер-фразы: `проверь качество`, `запусти qa`, `проведи аудит качества`, `сделай ревью`, `run qa review`, `check quality`, `обнови qa`, `перепроверь качество`, `rerun qa`."
 model: opus
 effort: high
-skills: [visual-diff-verifier, funnel-analytics-verifier, seo-copy-validator, figma-roundtrip, visual-layout-verifier, design-engineering]
+skills: [visual-diff-verifier, funnel-analytics-verifier, seo-copy-validator, anti-ai-slop, figma-roundtrip, visual-layout-verifier, design-engineering, figma-ds-ingest]
 color: red
 disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 ---

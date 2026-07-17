@@ -12,7 +12,21 @@
 
 Матрица владельцев, входов и выходов этапов находится в `agent-pack/workflows/stage-handoff-contract.md`. При изменении `runtime/typescript/workflow.manifest.ts` нужно синхронно обновить эту матрицу, `.agent.md`, шаблоны артефактов и regression tests, чтобы downstream агенты понимали, какие файлы они обязаны прочитать и какие outputs передать дальше.
 
-## Обязательная последовательность этапов
+## Масштаб (scale): какая часть последовательности обязательна
+
+Последовательность ниже описывает масштаб **`full`** — новый продукт. Для меньших масштабов часть стадий исключается легитимно (CLAUDE.md §0.2), и это фиксируется в `stage-gate-ledger.md` как `skipped_by_scale`:
+
+| Scale | Исключаются | Остаются |
+|---|---|---|
+| `full` (дефолт) | — | вся последовательность |
+| `increment` | `01-research` (research pack), `02-prd`, `03-ia`, `07-prototype`, `10-test-bench` | intake, design, copy, screens, frontend, qa, release |
+| `patch` | то же + `05-copy`, `06-screens`, `12-release` | intake, design, frontend, qa |
+
+Правила: масштаб режет **только глубину** — run ledger, approval gates, `00-intake` и `11-qa` обязательны на любом уровне; `09-visual-reference` определяется профилем, а не масштабом, и остаётся при reference-driven задаче любого размера. Не уверен в масштабе — `full`. Понижать масштаб после того, как стадия отработала, нельзя.
+
+Машинный источник: `getWorkflowStagesForProfile(profile, scale)` и `getStagesSkippedByScale(profile, scale)` в `runtime/typescript/workflow.manifest.ts`. Проверка — `yarn workflow:validate <run-dir> --scale <scale>`. Этот документ описывает порядок; какие стадии обязательны в конкретном run — решает манифест, а не текст ниже.
+
+## Обязательная последовательность этапов (масштаб `full`)
 
 ```text
 исходный запрос
