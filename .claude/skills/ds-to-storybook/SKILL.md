@@ -20,6 +20,7 @@ Skill готовит Storybook или эквивалентный component state
 - Сопоставь Figma component/property/value -> frontend component/prop -> Storybook story/state -> test locator; зафиксируй gaps.
 - Опиши stories по категориям: forms, async buttons, tabs/toggles, overlays, search/pagination, data visualization.
 - Проверь states: default, hover, focus, disabled, loading, error, empty, selected, active.
+- Канон типов property (variant/boolean/text/instance-swap/slot) и матрицы состояний — `/figma-ds:standard`; сверяйся с ним, а не выводи из фактической структуры Figma-файла.
 - Примени motion/a11y checklist из `design-engineering`; запиши `storybook-result.md`.
 
 ## Обязательные проверки

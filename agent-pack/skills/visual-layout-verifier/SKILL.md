@@ -57,9 +57,10 @@ contract_schema: agent-pack/templates/skill.template.md
    - visual hierarchy and density;
    - app-likeness: экран должен выглядеть как реальный product UI, а не technical board/audit board/wireframe/component inventory/route map/generic card grid;
    - route coherence across screens.
-5. Запиши `repair_actions`; если repair применялся, повтори screenshot evidence.
-6. Сравни calibration/systemized screenshots. Если systemization ухудшила композицию, gate блокируется.
-7. Запиши `figma-visual-qa.json`.
+5. Прогони post-write чек-лист гигиены сборки — skill `/figma-ds:build` (`plugins/figma-ds/skills/build/SKILL.md`, раздел «После КАЖДОГО write»): мастер внутри своей панели, хвосты клона, ничего не вылезает за витрину, ноль сырых заливок, слот ↔ семья семантики (`icon/*` vs `text/*`), дубли effect/style по подписи, оси вариантов, рукописные подписи значений против фактических. Этот чек-лист ловит класс дефектов, который IR-сверка не видит.
+6. Запиши `repair_actions`; если repair применялся, повтори screenshot evidence.
+7. Сравни calibration/systemized screenshots. Если systemization ухудшила композицию, gate блокируется.
+8. Запиши `figma-visual-qa.json`.
 
 ## 4. Evidence и failure modes
 

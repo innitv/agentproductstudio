@@ -34,7 +34,7 @@ contract_schema: agent-pack/templates/skill.template.md
 1. Собери inventory компонентов из frontend source, `design-brief.md`, `screens.md`, `STYLE_GUIDE.md` и `figma-handoff-bundle.md` при наличии.
 2. Если есть `figma-handoff-bundle.md`, сопоставь Figma component/property/value -> frontend component/prop -> Storybook story/state -> test locator. Зафиксируй gaps и accepted deviations.
 3. Опиши stories по категориям: forms, async buttons, tabs/toggles, overlays, search/pagination, data visualization.
-4. Проверь states: default, hover, focus, disabled, loading, error, empty, selected, active.
+4. Проверь states: default, hover, focus, disabled, loading, error, empty, selected, active. Канон типов property (variant/boolean/text/instance-swap/slot) и матрицы состояний — skill `/figma-ds:standard` (`plugins/figma-ds/skills/standard/SKILL.md`); сверяйся с ним, а не выводи ожидаемый набор из фактической структуры Figma-файла.
 5. Проверь, что tokens/variables из handoff имеют frontend equivalents или deviations.
 6. Применяй motion/a11y checklist из `design-engineering`.
 7. Запиши `storybook-result.md` по `agent-pack/artifacts/frontend/storybook-result.template.md`.

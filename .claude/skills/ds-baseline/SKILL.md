@@ -13,7 +13,7 @@ Skill защищает от главной ошибки: сборки foundation
 - `design_system_mode = product_specific`, либо `extend`, требующий нового foundation.
 - Продукту нужен самостоятельный визуальный язык (brand separation, другая плотность, другая платформа).
 
-Не использовать для: выбора самого режима (`figma-roundtrip`), техники записи в Figma (`figma-ds-build`), reuse существующей DS.
+Не использовать для: выбора самого режима (`figma-roundtrip`), техники записи в Figma (`/figma-ds:build`), reuse существующей DS.
 
 ## Ключевые шаги
 - Strategy: подтвердить режим, записать rationale и отклонённые системы.

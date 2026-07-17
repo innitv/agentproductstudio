@@ -34,7 +34,7 @@ contract_schema: agent-pack/templates/skill.template.md
 
 ## 1. Назначение
 
-Skill применяется, когда `design_system_mode = product_specific` или подтверждённый `extend` требует нового foundation. Нормативный процесс — [`agent-pack/workflows/ds-baseline.workflow.md`](../../workflows/ds-baseline.workflow.md); техника записи в Figma — user-level skill `figma-ds-build` (живёт в `~/.claude/skills/`, самодостаточен и доступен во всех проектах); выбор самого режима — [`figma-roundtrip`](../figma-roundtrip/SKILL.md).
+Skill применяется, когда `design_system_mode = product_specific` или подтверждённый `extend` требует нового foundation. Нормативный процесс — [`agent-pack/workflows/ds-baseline.workflow.md`](../../workflows/ds-baseline.workflow.md); техника записи в Figma — skill `/figma-ds:build`, канон DS — `/figma-ds:standard` (плагин `figma-ds`, `plugins/figma-ds/`, раздаётся всем проектам); выбор самого режима — [`figma-roundtrip`](../figma-roundtrip/SKILL.md).
 
 Skill защищает от главной ошибки: **сборки foundation до того, как появился хотя бы один хороший экран.** Токены, палитра и «семь обязательных компонентов» не выводятся из отраслевого preset — они извлекаются из утверждённых экранов. Наличие A3 или другой готовой системы не обязывает её наследовать, и не наследуется автоматически ни палитра, ни Inter/Slate, ни стандартные радиусы.
 
@@ -55,7 +55,7 @@ Skill защищает от главной ошибки: **сборки foundati
 3. **Visual verdict.** Вынеси вердикт: `passed | passed_with_notes | blocked`. При `blocked` foundation и компоненты **не строятся** — сначала чинится композиция.
 4. **Foundation extraction.** Из утверждённых экранов извлеки primitive и semantic токены, typography roles, spacing/radius/effect решения. Не генерируй их из отраслевого preset.
 5. **Pattern inventory.** Отметь реальные повторы. Уникальные блоки остаются bespoke — «универсальный набор компонентов» не создаётся, если экранам он не нужен.
-6. **Systemization.** Создай variables/styles, component sets и properties, nested instances, Auto Layout/resizing и prototype links. Техника — по `figma-ds-build` (три уровня токенов, консолидация через properties).
+6. **Systemization.** Создай variables/styles, component sets и properties, nested instances, Auto Layout/resizing и prototype links. Техника — по `/figma-ds:build` (три уровня токенов, консолидация через properties), канон — `/figma-ds:standard`.
 7. **Component Contract Matrix.** Свяжи Figma properties/values с semantic variables, React props, состояниями, stories/tests и deviations.
 8. **Regression check.** Сравни screenshots calibration и systemized версий. Systemization не имеет права ухудшить композицию; если изменила — нужен screenshot comparison и deviation record.
 9. **Roundtrip handoff.** Запиши Code Connect/fallback status и mapping `frame/state → route/story/component`.
