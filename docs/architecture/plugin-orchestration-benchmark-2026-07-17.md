@@ -93,7 +93,7 @@
 
 1. **Убран `"version": "1.0.0"`** из `plugin.json` — по рекомендации Anthropic для internal-плагинов под активной разработкой. Манифест остаётся валидным: `name` — единственное обязательное поле.
 2. **Дозаполнен `skills:`** у `research` (`research-pack`, `anti-ai-slop`, `approval-gate`, `notion-sync`), `prd` (`anti-ai-slop`), `prototype` (`prototype-state-map`), `release` (`notion-sync`, `approval-gate`, `run-ledger`, `selective-commit`, `outputs-cleanup`). Состав взят из контрактов (`yarn workflow:skills`), не придуман. `ia` пропущен: по манифесту у него skills нет.
-3. **`memory: project`** у `qa-review` и `design`.
+3. ~~**`memory: project`** у `qa-review` и `design`~~ — **внедрено и в тот же день откачено.** Аудит 2026-07-15 (`agent-tooling-update-2026-07-15.md`) уже отклонял `memory: project` с причиной «размывает source of truth — есть MEMORY.md + run ledger + реестры»; при внедрении этот список не был перечитан, и отклонённое решение вернулось под видом «официальной рекомендации Anthropic». Решение пользователя: откатить — «официальная рекомендация» слабее конкретного аргумента про четвёртый расходящийся слой памяти. **Урок: сверять «дешёвые улучшения» из внешнего ресёрча со списком уже отклонённого.**
 4. **`yarn plugin:link`** (`tooling/scripts/link-plugin.mjs`) — ставит ссылку `~/.claude/skills/<name>` → `plugins/<name>`, путь вычисляет через `git rev-parse --show-toplevel`. Снимает минус «junction завязан на абсолютный путь»: перенёс репо — перезапустил. Идемпотентен, есть `--check` для диагностики, отказывается трогать путь, если там настоящая копия (это признак дрейфа, разбирать вручную). Проверен на живом junction.
 
 ## Отклонено по фактам: относительный симлинк в git

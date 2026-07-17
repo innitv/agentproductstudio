@@ -5,7 +5,6 @@ model: opus
 effort: high
 color: purple
 skills: [figma-token-extractor, style-decompose, figma-screen-compiler, figma-roundtrip, figma-handoff]
-memory: project
 disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 ---
 

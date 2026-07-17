@@ -49,6 +49,25 @@ yarn workflow:doctor
 | `/frontend` → `/visual-diff` → `/test-bench` → `/qa` → `/release` | Стадии `08`-`12`: реализация, сверка с референсом, воронка, аудит, релиз |
 | `/notion-publish` | Публикация research pack в Notion после approval |
 
+### Масштаб: не каждая задача стоит 13 стадий
+
+Глубина запуска выбирается на intake отдельной осью — `scale`. Она не связана с типом задачи: reference-driven бывает любого размера.
+
+| Scale | Когда | Стадии |
+| --- | --- | --- |
+| `full` (дефолт) | Новый продукт или существенная фича | Весь pipeline `00`→`12` |
+| `increment` | Новая секция/экран, продуктовые решения уже приняты | intake, design, copy, screens, frontend, qa, release |
+| `patch` | Правка готового: текст, стиль, состояние, баг | intake, design, frontend, qa |
+
+Режется **только глубина проработки**. Approval gates, run ledger и статусы работают на любом уровне, `00-intake` и `11-qa` входят во все три, а понижение масштаба задним числом валидатор отклоняет. Не уверен в масштабе — берётся `full`.
+
+`scale` и `quick draft` — разные вещи: `scale` означает «задача мелкая, делаем аккуратно» (возможен `success`), `quick draft` — «осознанно срезаем качество» (всегда `partial`). Правила — CLAUDE.md §0.2.
+
+```bash
+yarn workflow:start "цель" --scale increment
+yarn workflow:validate outputs/<slug>/<date> --scale increment
+```
+
 Skills подключаются автоматически по описанию — своих команд у них нет. Кросс-стадийные: `approval-gate` (любое внешнее действие), `recursive-brief` (intake), `run-ledger` (журнал запуска), `anti-ai-slop` (перед записью research/PRD/copy и публикацией), `selective-commit`, `outputs-cleanup`. Покрытие стадий: `yarn workflow:skills`.
 
 Отдельно от проектных skills живёт плагин **`figma-ds`** (`plugins/figma-ds/`): `/figma-ds:build` — механика Figma Plugin API и чек-лист после каждого write, `/figma-ds:standard` — textbook-канон дизайн-систем. Граница простая: всё, что верно про Figma безотносительно нашего процесса, — в плагине; гейты, стадии и статусы — в `integrations/mcp/figma-canvas-write-guide.md`. Копий не заводить.

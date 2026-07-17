@@ -94,6 +94,19 @@ yarn workflow:start "цель лендинга"
 По умолчанию engine работает в `local` mode: research запускается через configured providers,
 а downstream stages создаются детерминированным локальным executor.
 
+Выбрать глубину запуска (ось `scale`, см. CLAUDE.md §0.2). Без флага — `full`, то есть весь
+pipeline:
+
+```bash
+yarn workflow:start "новая секция тарифов" --scale increment
+yarn workflow:start "поправить copy в hero" --scale patch
+```
+
+`full` — весь pipeline `00`→`12`; `increment` — intake, design, copy, screens, frontend, qa,
+release; `patch` — intake, design, frontend, qa. Масштаб режет только глубину: approval gates,
+run ledger, `00-intake` и `11-qa` остаются на любом уровне. Масштаб пишется в `run-state.json`
+и не может быть понижен задним числом.
+
 Запустить persisted workflow engine в agentic mode для staged rollout специалистов:
 
 ```bash
@@ -277,6 +290,13 @@ yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through 01-research
 
 ```bash
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
+```
+
+Проверить run, запущенный не на полном масштабе (флаг не нужен, если `scale` уже записан в
+`run-state.json` — валидатор прочитает его сам):
+
+```bash
+yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard --scale increment
 ```
 
 Проверить полный reference workflow:
