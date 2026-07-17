@@ -114,7 +114,8 @@ Frontend нельзя начинать до PRD, IA, design, copy, screens и pr
 
 - **research, Notion-публикация, visual reference, Figma canvas write, product UI, approval** → `agent-pack/workflows/claude-operating-rules.md`. Там полный текст: Surface-Aware Output Framework, Universal Visual Evidence Grounding, Anti-AI-Slop Gate, Research и Notion (все publication gates), Visual Reference и Figma (Design System Strategy Gate, Two-Pass Figma Build Gate, Figma Make-like Product UI Gate, Primary App Flow Gate, Component Contract и Roundtrip Gate, порядок reference-scan, «Запрещено»), детальные Approval rules (Interactive Question Gate, Process Deviation Record, КРИТИЧЕСКИ ВАЖНО).
 - **полный pipeline, run ledger, optional design layers** → `agent-pack/workflows/artifact-driven-pipeline.md`.
-- **Figma canvas write SOP** → `integrations/mcp/figma-canvas-write-guide.md`; skill `figma-roundtrip` обязателен для Figma/roundtrip задач.
+- **Figma canvas write SOP** → `integrations/mcp/figma-canvas-write-guide.md` (только процесс студии: гейты, стадии, Contract Matrix, статусы); skill `figma-roundtrip` обязателен для Figma/roundtrip задач.
+- **Механика Figma и канон дизайн-систем** → плагин `figma-ds` (`plugins/figma-ds/`): `/figma-ds:build` — как собирать в Plugin API, грабли, обязательный чек-лист после каждого write; `/figma-ds:standard` — что правильно по канону (тиеры токенов, DTCG, modes, slots, WCAG 2.2, versioning). Канон нормативен наравне с guide; отклонения фиксируются как `deviation` с reason. Правило границы: про Figma вообще → плагин, про процесс студии → guide, про конкретный продукт → `design/figma/<slug>/`. Копий не заводить.
 
 Эти указатели — не декоративные: `claude-operating-rules.md` является нормативным при research/Notion/Figma/product-UI/approval работе, и статусы `ready/success` в этих поверхностях недействительны без его gates.
 

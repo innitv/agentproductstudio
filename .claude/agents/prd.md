@@ -4,6 +4,7 @@ description: "Product Manager агент (stage 02-prd). Оркестратор 
 model: sonnet
 effort: high
 tools: Read, Grep, Glob, Write, Edit, Bash, TodoWrite, WebSearch, WebFetch
+skills: [anti-ai-slop]
 color: cyan
 ---
 

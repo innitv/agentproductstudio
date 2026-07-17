@@ -7,6 +7,7 @@
 - Полные правила: `CLAUDE.md`
 - Нативные субагенты Claude Code: `.claude/agents/*.md`
 - Навыки: `.claude/skills/*/SKILL.md`
+- Плагин Figma-знания: `plugins/figma-ds/` (`/figma-ds:build`, `/figma-ds:standard`)
 - Slash-команды: `.claude/commands/*.md`
 - Конфигурация: `.claude/settings.json` и `.mcp.json`
 - Детальные контракты специалистов: `agent-pack/agent-contracts/*.agent.md`

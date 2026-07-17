@@ -3,6 +3,7 @@ name: research
 description: "Специалист по глубоким исследованиям (stage 01-research). Оркестратор делегирует сюда, когда нужна source-backed research base для PRD, IA, дизайна, copy, prototype и test bench: JTBD, `scenario-user-flows.md`, proto-personas, synthetic interviews, конкурентный анализ, SWOT, план валидации. Производит подтверждённые фактами выводы с указанием источников и тегами `needs validation`. Триггер-фразы: `сделай ресерч`, `проведи исследование`, `исследуй конкурентов`, `run research`, `start research stage`, `обнови исследование`, `переделай ресерч`, `update research`."
 model: sonnet
 effort: high
+skills: [research-pack, anti-ai-slop, approval-gate, notion-sync]
 color: blue
 disallowedTools: mcp__figma, mcp__figmaDesktop, mcp__notion, mcp__github, mcp__gitlab, Task, Agent
 ---

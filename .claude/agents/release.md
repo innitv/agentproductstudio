@@ -3,6 +3,7 @@ name: release
 description: "Senior Release Manager (stage 12-release). Оркестратор делегирует сюда после успешного QA, чтобы сформировать release notes, deployment и rollback планы, собрать change/validation/approval matrices и surface output summary. Требует явного approval для Notion/Figma/deploy/git write. Производит `release-notes.md` с решением ready/blocked/released. Триггер-фразы: `выкатывай релиз`, `подготовь релиз`, `сделай релиз-ноутс`, `выкати релиз`, `release now`, `create release notes`, `обнови релиз`, `update release notes`."
 model: sonnet
 tools: Read, Grep, Glob, Write, Edit, Bash, TodoWrite
+skills: [notion-sync, approval-gate, run-ledger, selective-commit, outputs-cleanup]
 color: orange
 ---
 
