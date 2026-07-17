@@ -6,9 +6,13 @@ import { artifactManifestFileName, runIndexFileName, runMetaFileName } from "./o
 import {
   artifactFiles,
   artifactSchemas,
+  defaultWorkflowScale,
   getRequiredArtifactsForStage,
+  getStagesSkippedByScale,
   getWorkflowStagesForProfile,
+  workflowScales,
   type WorkflowProfile,
+  type WorkflowScale,
 } from "./workflow-stages";
 import { canReleaseFromQaStatus, isIncompleteArtifactStatus, isStageIncomplete } from "./status-resolver";
 
@@ -28,6 +32,7 @@ type StageStateStatus = "pending" | "running" | "completed" | "partial" | "block
 interface RunStateLike {
   status?: StageStateStatus;
   profile?: WorkflowProfile;
+  scale?: WorkflowScale;
   stages?: Record<string, { status?: StageStateStatus; artifacts?: string[] }>;
 }
 
@@ -39,6 +44,7 @@ export function validateWorkflowRun(
   outputDirInput: string,
   throughStageId?: string,
   profileInput?: WorkflowProfile | "auto",
+  scaleInput?: WorkflowScale,
 ): Finding[] {
   const outputDir = resolve(process.cwd(), outputDirInput);
   const findings: Finding[] = [];
@@ -52,7 +58,11 @@ export function validateWorkflowRun(
   const profile = profileInput && profileInput !== "auto"
     ? profileInput
     : detectWorkflowProfile(outputDir, handoff);
-  const stages = getWorkflowStagesForProfile(profile);
+  // Масштаб берётся из run-state, а не угадывается по содержимому: иначе неполный run
+  // выглядел бы как честный маленький.
+  const persistedScale = readJsonIfExists<RunStateLike>(join(outputDir, runStateFileName))?.scale;
+  const scale = scaleInput ?? persistedScale ?? defaultWorkflowScale;
+  const stages = getWorkflowStagesForProfile(profile, scale);
 
   const stageLimit = throughStageId
     ? stages.findIndex((stage) => stage.id === throughStageId)
@@ -166,6 +176,7 @@ export function validateWorkflowRun(
     stages,
     stageLimit,
     profile,
+    scale,
     throughStageId,
     artifactPayloads,
     artifactContents,
@@ -179,6 +190,7 @@ function validateGateSemantics(options: {
   stages: ReturnType<typeof getWorkflowStagesForProfile>;
   stageLimit: number;
   profile: WorkflowProfile;
+  scale: WorkflowScale;
   throughStageId?: string;
   artifactPayloads: Map<string, unknown>;
   artifactContents: Map<string, string>;
@@ -206,6 +218,32 @@ function validateGateSemantics(options: {
         level: "warning",
         message: `run-state.json profile is '${runState.profile}', but validation profile is '${options.profile}'`,
       });
+    }
+
+    if (runState.scale && runState.scale !== options.scale) {
+      findings.push({
+        level: "warning",
+        message: `run-state.json scale is '${runState.scale}', but validation scale is '${options.scale}'`,
+      });
+    }
+
+    // Занижение масштаба задним числом — единственный способ превратить неполный run в
+    // «успешный маленький». Ловим по факту: run, где стадии вне масштаба уже работали,
+    // не является run этого масштаба.
+    if (options.scale !== defaultWorkflowScale) {
+      const skipped = getStagesSkippedByScale(options.profile, options.scale);
+      const workedStatuses = new Set<StageStateStatus>(["running", "completed", "partial", "failed"]);
+      for (const stage of skipped) {
+        const state = runState.stages?.[stage.id];
+        if (state?.status && workedStatuses.has(state.status)) {
+          findings.push({
+            level: "error",
+            message:
+              `scale '${options.scale}' excludes ${stage.id} ${stage.title}, but run-state.json records it as '${state.status}'. ` +
+              "Scale cannot be lowered after stages have run — raise the scale or record a process_deviation.",
+          });
+        }
+      }
     }
 
     if (!options.throughStageId && runState.status && isStageIncomplete(runState.status)) {
@@ -518,7 +556,21 @@ async function main(): Promise<void> {
     throw new Error("--profile must be one of: auto, standard, reference");
   }
 
-  const findings = validateWorkflowRun(outputDir, throughStageId, profile as WorkflowProfile | "auto");
+  const scaleIndex = args.indexOf("--scale");
+  const scale = scaleIndex >= 0 ? args[scaleIndex + 1] : undefined;
+  if (scaleIndex >= 0 && !scale) {
+    throw new Error(`--scale requires a value: ${workflowScales.join(" | ")}`);
+  }
+  if (scale && !workflowScales.includes(scale as WorkflowScale)) {
+    throw new Error(`--scale must be one of: ${workflowScales.join(", ")}`);
+  }
+
+  const findings = validateWorkflowRun(
+    outputDir,
+    throughStageId,
+    profile as WorkflowProfile | "auto",
+    scale as WorkflowScale | undefined,
+  );
   for (const finding of findings) {
     const prefix = finding.level === "error" ? "ERROR" : "WARN";
     console.log(`${prefix}: ${finding.message}`);

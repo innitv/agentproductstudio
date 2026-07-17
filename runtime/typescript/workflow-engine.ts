@@ -4,7 +4,13 @@ import { runLandingWorkflow } from "./run-landing-workflow";
 import { validateWorkflowRun } from "./validate-workflow-run";
 import { truncateContextForSpecialist } from "./context-truncator";
 import { executeWorkflowStage } from "./workflow-stage-executors";
-import { artifactFiles, getWorkflowStagesForProfile, type WorkflowProfile } from "./workflow-stages";
+import {
+  artifactFiles,
+  defaultWorkflowScale,
+  getWorkflowStagesForProfile,
+  type WorkflowProfile,
+  type WorkflowScale,
+} from "./workflow-stages";
 import {
   hasRunState,
   nowIso,
@@ -20,6 +26,7 @@ import { summarizeRunStatus as resolveRunStatus } from "./status-resolver";
 export interface StartWorkflowOptions {
   goal: string;
   profile?: WorkflowProfile;
+  scale?: WorkflowScale;
   executionMode?: WorkflowExecutionMode;
 }
 
@@ -29,11 +36,14 @@ export interface RerunWorkflowStageOptions {
 
 export async function startWorkflowEngine(options: StartWorkflowOptions): Promise<WorkflowRunState> {
   const profile = options.profile ?? detectWorkflowProfileFromGoal(options.goal);
+  // Масштаб задаётся явно на старте. Дефолт `full` намеренно консервативен: не уверен в
+  // масштабе — получаешь полный pipeline, а не урезанный по догадке.
+  const scale = options.scale ?? defaultWorkflowScale;
   const executionMode = options.executionMode ?? "local";
 
   const outputDir = await runLandingWorkflow({ goal: options.goal, profile });
   const now = nowIso();
-  const state = createInitialState(outputDir, options.goal, profile, executionMode, now);
+  const state = createInitialState(outputDir, options.goal, profile, scale, executionMode, now);
   const intakeArtifacts = [
     artifactFiles.run_plan,
     artifactFiles.handoff_bundle,
@@ -74,7 +84,7 @@ export async function resumeWorkflowEngine(outputDir: string): Promise<WorkflowR
 
   let state = await readRunState(outputDir);
 
-  const stages = getWorkflowStagesForProfile(state.profile);
+  const stages = getWorkflowStagesForProfile(state.profile, state.scale ?? defaultWorkflowScale);
   for (const stage of stages) {
     const stageState = state.stages[stage.id];
     if (stageState?.status === "completed" || stageState?.status === "partial" || stageState?.status === "skipped") {
@@ -126,7 +136,7 @@ export async function resumeWorkflowEngine(outputDir: string): Promise<WorkflowR
         break;
       }
 
-      await validateThroughStage(outputDir, stage.id, state.profile);
+      await validateThroughStage(outputDir, stage.id, state.profile, state.scale ?? defaultWorkflowScale);
     } catch (error) {
       const failedAt = nowIso();
       const message = error instanceof Error ? error.message : String(error);
@@ -168,11 +178,12 @@ export async function resumeWorkflowEngine(outputDir: string): Promise<WorkflowR
 
 export async function getWorkflowEngineStatus(outputDir: string): Promise<string> {
   const state = await readRunState(outputDir);
-  const stages = getWorkflowStagesForProfile(state.profile);
+  const stages = getWorkflowStagesForProfile(state.profile, state.scale ?? defaultWorkflowScale);
   const lines = [
     `Run: ${state.run_id}`,
     `Goal: ${state.goal}`,
     `Profile: ${state.profile}`,
+    `Scale: ${state.scale ?? defaultWorkflowScale}`,
     `Execution mode: ${state.execution_mode ?? "local"}`,
     `Status: ${state.status}`,
     "",
@@ -206,7 +217,7 @@ export async function rerunWorkflowStage(
 
   const state = await readRunState(outputDir);
 
-  const stages = getWorkflowStagesForProfile(state.profile);
+  const stages = getWorkflowStagesForProfile(state.profile, state.scale ?? defaultWorkflowScale);
   const targetIndex = stages.findIndex((stage) => stage.id === stageId);
   if (targetIndex < 0) {
     throw new Error(`Unknown stage id: ${stageId}`);
@@ -249,11 +260,12 @@ function createInitialState(
   outputDir: string,
   goal: string,
   profile: WorkflowProfile,
+  scale: WorkflowScale,
   executionMode: WorkflowExecutionMode,
   now: string,
 ): WorkflowRunState {
   const stages = Object.fromEntries(
-    getWorkflowStagesForProfile(profile).map((stage) => [
+    getWorkflowStagesForProfile(profile, scale).map((stage) => [
       stage.id,
       {
         id: stage.id,
@@ -270,6 +282,7 @@ function createInitialState(
     run_id: `${basename(outputDir)}-${Date.now()}`,
     goal,
     profile,
+    scale,
     execution_mode: executionMode,
     status: "pending",
     output_dir: outputDir,
@@ -279,8 +292,13 @@ function createInitialState(
   };
 }
 
-async function validateThroughStage(outputDir: string, stageId: string, profile: WorkflowProfile): Promise<void> {
-  const findings = validateWorkflowRun(outputDir, stageId, profile);
+async function validateThroughStage(
+  outputDir: string,
+  stageId: string,
+  profile: WorkflowProfile,
+  scale: WorkflowScale,
+): Promise<void> {
+  const findings = validateWorkflowRun(outputDir, stageId, profile, scale);
   const errors = findings.filter((finding) => finding.level === "error");
   await appendFile(
     join(outputDir, artifactFiles.stage_gate_ledger),

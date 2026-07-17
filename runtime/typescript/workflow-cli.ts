@@ -18,7 +18,7 @@ import { archiveWorkflowRun, cleanupTempOutputs, formatArchiveWorkflowRunResult,
 import { formatWorkflowOutputsGuide, formatWorkflowRunInspection, formatWorkflowRunList, inspectWorkflowRun, listWorkflowRuns } from "./output-metadata";
 import { formatSkillUsageInspection, inspectSkillUsage } from "./skill-usage";
 import { getWorkflowEngineStatus, rerunWorkflowStage, resumeWorkflowEngine, startWorkflowEngine } from "./workflow-engine";
-import { workflowStages } from "./workflow-stages";
+import { workflowScales, workflowStages, type WorkflowScale } from "./workflow-stages";
 import type { WorkflowExecutionMode } from "./workflow-state";
 
 const explicitWorkflowCommands = new Set([
@@ -53,13 +53,15 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
   }
 
   if (command === "start") {
-    const { mode, profile, args } = parseStartOptions(rest);
+    const { mode, profile, scale, args } = parseStartOptions(rest);
     const goal = args.join(" ").trim();
     if (!goal) {
-      throw new Error('Usage: yarn workflow:start "<landing workflow goal>" [--mode local|agentic] [--profile standard|reference]');
+      throw new Error(
+        'Usage: yarn workflow:start "<landing workflow goal>" [--mode local|agentic] [--profile standard|reference] [--scale full|increment|patch]',
+      );
     }
 
-    const state = await startWorkflowEngine({ goal, executionMode: mode, profile });
+    const state = await startWorkflowEngine({ goal, executionMode: mode, profile, scale });
     console.log(await getWorkflowEngineStatus(state.output_dir));
     return;
   }
@@ -385,7 +387,12 @@ function findMostRecentRunDir(baseDir: string = resolve(process.cwd(), "outputs"
   return mostRecentDir;
 }
 
-function parseStartOptions(args: string[]): { mode: WorkflowExecutionMode; profile?: "standard" | "reference"; args: string[] } {
+function parseStartOptions(args: string[]): {
+  mode: WorkflowExecutionMode;
+  profile?: "standard" | "reference";
+  scale?: WorkflowScale;
+  args: string[];
+} {
   let parsedArgs = args;
   const modeIndex = args.indexOf("--mode");
   let mode: WorkflowExecutionMode = "local";
@@ -409,7 +416,18 @@ function parseStartOptions(args: string[]): { mode: WorkflowExecutionMode; profi
     parsedArgs = parsedArgs.filter((_, index) => index !== profileIndex && index !== profileIndex + 1);
   }
 
-  return { mode, profile, args: parsedArgs };
+  const scaleIndex = parsedArgs.indexOf("--scale");
+  let scale: WorkflowScale | undefined;
+  if (scaleIndex >= 0) {
+    const rawScale = parsedArgs[scaleIndex + 1];
+    if (!workflowScales.includes(rawScale as WorkflowScale)) {
+      throw new Error(`Workflow scale must be one of: ${workflowScales.join(", ")}.`);
+    }
+    scale = rawScale as WorkflowScale;
+    parsedArgs = parsedArgs.filter((_, index) => index !== scaleIndex && index !== scaleIndex + 1);
+  }
+
+  return { mode, profile, scale, args: parsedArgs };
 }
 
 function parseApprovalArgs(args: string[]): { target?: string; by?: string; notes?: string } {

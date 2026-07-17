@@ -4,7 +4,15 @@ import { basename, join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import YAML from "js-yaml";
 import { syncOutputMetadata } from "./output-metadata";
-import { artifactFiles, getRequiredArtifactsForStage, getWorkflowStagesForProfile, type WorkflowProfile } from "./workflow-stages";
+import {
+  artifactFiles,
+  defaultWorkflowScale,
+  getRequiredArtifactsForStage,
+  getWorkflowStagesForProfile,
+  workflowScales,
+  type WorkflowProfile,
+  type WorkflowScale,
+} from "./workflow-stages";
 import { artifactStatusToStageStatus, readMarkdownStatus, summarizeRunStatus } from "./status-resolver";
 import {
   runStateFileName,
@@ -19,6 +27,7 @@ import {
 interface SyncOptions {
   outputDir: string;
   profile?: WorkflowProfile;
+  scale?: WorkflowScale;
   executionMode?: WorkflowExecutionMode;
   preview: boolean;
 }
@@ -47,10 +56,13 @@ export async function syncWorkflowRunState(options: SyncOptions): Promise<SyncRe
   const previousState = await readExistingRunState(outputDir);
   const runPlan = await readIfExists(join(outputDir, artifactFiles.run_plan));
   const profile = options.profile ?? previousState?.profile ?? detectProfile(runPlan);
+  // Масштаб не детектится из содержимого намеренно: неполный run иначе выглядел бы как
+  // честный маленький. Он задаётся явно на intake и дальше только читается.
+  const scale = options.scale ?? previousState?.scale ?? defaultWorkflowScale;
   const executionMode = options.executionMode ?? previousState?.execution_mode ?? "local";
   const goal = previousState?.goal ?? detectGoal(runPlan) ?? "Workflow run";
   const now = new Date().toISOString();
-  const stages = getWorkflowStagesForProfile(profile);
+  const stages = getWorkflowStagesForProfile(profile, scale);
   const stageStates: Record<string, WorkflowStageState> = {};
   const stageResults: WorkflowStageResult[] = [];
 
@@ -93,6 +105,7 @@ export async function syncWorkflowRunState(options: SyncOptions): Promise<SyncRe
     run_id: previousState?.run_id ?? `${basename(outputDir)}-${Date.now()}`,
     goal,
     profile,
+    scale,
     execution_mode: executionMode,
     status: summarizeRunStatus(Object.values(stageStates).map((stage) => stage.status)),
     output_dir: outputDir,
@@ -274,12 +287,19 @@ function renderSummary(result: SyncResult, outputDir: string, preview: boolean):
 function parseArgs(args: string[]): SyncOptions {
   const outputDir = args.find((arg) => !arg.startsWith("--"));
   if (!outputDir) {
-    throw new Error("Usage: yarn workflow:sync <run-dir> [--preview] [--profile standard|reference] [--mode local|agentic]");
+    throw new Error(
+      "Usage: yarn workflow:sync <run-dir> [--preview] [--profile standard|reference] [--scale full|increment|patch] [--mode local|agentic]",
+    );
   }
 
   const profile = readFlag(args, "--profile");
   if (profile && profile !== "standard" && profile !== "reference") {
     throw new Error("--profile must be standard or reference.");
+  }
+
+  const scale = readFlag(args, "--scale");
+  if (scale && !workflowScales.includes(scale as WorkflowScale)) {
+    throw new Error(`--scale must be one of: ${workflowScales.join(", ")}`);
   }
 
   const executionMode = readFlag(args, "--mode");
@@ -290,6 +310,7 @@ function parseArgs(args: string[]): SyncOptions {
   return {
     outputDir,
     profile: profile as WorkflowProfile | undefined,
+    scale: scale as WorkflowScale | undefined,
     executionMode: executionMode as WorkflowExecutionMode | undefined,
     preview: args.includes("--preview"),
   };

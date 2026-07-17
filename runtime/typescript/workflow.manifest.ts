@@ -4,6 +4,22 @@ import { toolNames } from "./tools";
 
 export type WorkflowProfile = "standard" | "reference";
 
+// Ось глубины, независимая от `WorkflowProfile`. Profile отвечает на вопрос «какого
+// типа задача» (reference-driven или нет), scale — «какого она размера». Смешивать их
+// в один enum нельзя: reference-driven задача бывает любого масштаба, и наоборот.
+//
+// full      — новый продукт: весь pipeline 00→12.
+// increment — новая секция/экран в существующем продукте: без research/PRD/IA/prototype.
+// patch     — правка готового: intake, design, frontend, qa.
+//
+// Режется ТОЛЬКО глубина проработки. Approval gates, run ledger и статусы действуют на
+// всех уровнях одинаково — уровень не является способом обойти гейт.
+export type WorkflowScale = "full" | "increment" | "patch";
+
+export const workflowScales = ["full", "increment", "patch"] as const satisfies readonly WorkflowScale[];
+
+export const defaultWorkflowScale: WorkflowScale = "full";
+
 export const artifactNames = {
   runPlan: "run_plan",
   handoffBundle: "handoff_bundle",
@@ -47,6 +63,8 @@ export interface WorkflowStage {
   mustUpdateHandoff: boolean;
   blocksFrontendUntilComplete?: boolean;
   profile?: WorkflowProfile;
+  // В каких масштабах стадия обязательна. Не задано = во всех (как и `profile`).
+  scales?: readonly WorkflowScale[];
 }
 
 export const artifactSchemas: Readonly<Record<string, string>> = {
@@ -156,6 +174,7 @@ export const workflowStages: readonly WorkflowStage[] = [
     },
     mustUpdateHandoff: true,
     blocksFrontendUntilComplete: true,
+    scales: ["full"],
   },
   {
     id: "02-prd",
@@ -167,6 +186,7 @@ export const workflowStages: readonly WorkflowStage[] = [
     },
     mustUpdateHandoff: true,
     blocksFrontendUntilComplete: true,
+    scales: ["full"],
   },
   {
     id: "03-ia",
@@ -178,6 +198,7 @@ export const workflowStages: readonly WorkflowStage[] = [
     },
     mustUpdateHandoff: true,
     blocksFrontendUntilComplete: true,
+    scales: ["full"],
   },
   {
     id: "04-design",
@@ -204,6 +225,7 @@ export const workflowStages: readonly WorkflowStage[] = [
     },
     mustUpdateHandoff: true,
     blocksFrontendUntilComplete: true,
+    scales: ["full", "increment"],
   },
   {
     id: "06-screens",
@@ -228,6 +250,7 @@ export const workflowStages: readonly WorkflowStage[] = [
     },
     mustUpdateHandoff: true,
     blocksFrontendUntilComplete: true,
+    scales: ["full", "increment"],
   },
   {
     id: "07-prototype",
@@ -249,6 +272,7 @@ export const workflowStages: readonly WorkflowStage[] = [
     },
     mustUpdateHandoff: true,
     blocksFrontendUntilComplete: true,
+    scales: ["full"],
   },
   {
     id: "08-frontend",
@@ -288,6 +312,7 @@ export const workflowStages: readonly WorkflowStage[] = [
       [artifactNames.testBenchResult]: ["## Main Funnel", "## Analytics Spec", "## Executable Checks", "## Result"],
     },
     mustUpdateHandoff: true,
+    scales: ["full"],
   },
   {
     id: "11-qa",
@@ -332,6 +357,7 @@ export const workflowStages: readonly WorkflowStage[] = [
       ],
     },
     mustUpdateHandoff: true,
+    scales: ["full", "increment"],
   },
 ];
 
@@ -761,18 +787,62 @@ export const frontendPrerequisiteArtifacts = workflowStages
   .filter((stage) => stage.blocksFrontendUntilComplete)
   .flatMap((stage) => stage.requiredArtifacts);
 
-export function getRoutePlanForProfile(profile: RouteProfile): readonly RouteStepName[] {
-  return profile === "reference" ? referenceRoutePlan : standardRoutePlan;
+export function getRoutePlanForProfile(
+  profile: RouteProfile,
+  scale: WorkflowScale = defaultWorkflowScale,
+): readonly RouteStepName[] {
+  const plan = profile === "reference" ? referenceRoutePlan : standardRoutePlan;
+  if (scale === defaultWorkflowScale) return plan;
+  const stagesInScale = new Set(getWorkflowStagesForProfile(profile, scale).map((stage) => stage.id));
+  // Шаг остаётся в плане, если его стадия входит в масштаб. Шаги без stageId (служебные)
+  // не относятся к масштабу и сохраняются.
+  return plan.filter((step) => {
+    const stageId = routeStepToStageId[step];
+    return !stageId || stagesInScale.has(stageId);
+  });
 }
 
-export function getCoreBundleArtifactsForProfile(profile: RouteProfile): readonly string[] {
-  return profile === "reference"
+export function getCoreBundleArtifactsForProfile(
+  profile: RouteProfile,
+  scale: WorkflowScale = defaultWorkflowScale,
+): readonly string[] {
+  const base = profile === "reference"
     ? [...coreBundleArtifacts, ...referenceBundleArtifacts]
-    : coreBundleArtifacts;
+    : [...coreBundleArtifacts];
+  if (scale === defaultWorkflowScale) return base;
+  const required = new Set(
+    getWorkflowStagesForProfile(profile, scale).flatMap((stage) => getRequiredArtifactsForStage(stage, profile)),
+  );
+  // Ledger-артефакты обязательны на любом масштабе — они и есть защита от тихого пропуска.
+  const ledger = new Set<string>([artifactNames.runPlan, artifactNames.handoffBundle, artifactNames.stageGateLedger]);
+  return base.filter((artifact) => required.has(artifact) || ledger.has(artifact));
 }
 
-export function getWorkflowStagesForProfile(profile: WorkflowProfile): readonly WorkflowStage[] {
-  return workflowStages.filter((stage) => !stage.profile || stage.profile === profile);
+// Дефолт `full` держит обратную совместимость: вызов без scale возвращает весь pipeline,
+// как до появления оси масштаба.
+export function getWorkflowStagesForProfile(
+  profile: WorkflowProfile,
+  scale: WorkflowScale = defaultWorkflowScale,
+): readonly WorkflowStage[] {
+  return workflowStages.filter(
+    (stage) =>
+      (!stage.profile || stage.profile === profile) && (!stage.scales || stage.scales.includes(scale)),
+  );
+}
+
+export function isStageInScale(stage: WorkflowStage, scale: WorkflowScale): boolean {
+  return !stage.scales || stage.scales.includes(scale);
+}
+
+// Стадии, которые данный масштаб пропускает. Нужно, чтобы run ledger фиксировал их как
+// `skipped_by_scale` явно, а не молча: молчаливый пропуск неотличим от забытой стадии.
+export function getStagesSkippedByScale(
+  profile: WorkflowProfile,
+  scale: WorkflowScale,
+): readonly WorkflowStage[] {
+  return workflowStages.filter(
+    (stage) => (!stage.profile || stage.profile === profile) && !isStageInScale(stage, scale),
+  );
 }
 
 export function getRequiredArtifactsForStage(stage: WorkflowStage, profile: WorkflowProfile): readonly string[] {

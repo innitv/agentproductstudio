@@ -29,6 +29,27 @@
 
 > Личный сайт-портфолио вынесен в отдельный репозиторий и в этой студии больше не живёт. Запросы про портфолио обслуживаются в том репозитории, а не через этот проект.
 
+### 0.2. Scale: глубина продуктового workflow
+
+Для `full product workflow` и `reference-driven workflow` на intake фиксируется **масштаб** — сколько стадий реально нужно задаче. Это отдельная ось от типа задачи: reference-driven бывает любого масштаба, и наоборот. Масштаб пишется в `run-state.json` (`scale`) и передаётся флагом `--scale`.
+
+| Scale | Когда | Стадии |
+|---|---|---|
+| `full` (дефолт) | Новый продукт или существенная фича: нужны исследование и требования | Весь pipeline `00`→`12` |
+| `increment` | Новая секция/экран в существующем продукте: продуктовые решения уже приняты | `00-intake`, `04-design`, `05-copy`, `06-screens`, `08-frontend`, `11-qa`, `12-release` |
+| `patch` | Правка готового: текст, стиль, состояние, баг | `00-intake`, `04-design`, `08-frontend`, `11-qa` |
+
+Правила (обязательные):
+
+- **Режется только глубина проработки, не защита.** Approval gates, run ledger (`handoff-bundle.md`, `stage-gate-ledger.md`), Anti-AI-Slop, Russian Publication Gate и статусы действуют одинаково на любом масштабе. `00-intake` и `11-qa` входят во все масштабы. Масштаб — НЕ способ обойти гейт.
+- **Не уверен — бери `full`.** Дефолт консервативен намеренно; занижение масштаба «на глаз» запрещено.
+- **Масштаб нельзя занизить задним числом.** Если стадия вне масштаба уже отработала, `yarn workflow:validate` вернёт error. Понижение возможно только как `process_deviation` с reason.
+- **Пропущенные по масштабу стадии фиксируются явно** в `stage-gate-ledger.md` как `skipped_by_scale` с указанием масштаба. Молчаливый пропуск неотличим от забытой стадии.
+- **`scale` и `quick draft` — разные вещи.** `scale` говорит «задача мелкая, делаем аккуратно» (возможен `success`); `quick draft` — «осознанно срезаем качество» (всегда `partial`/`draft`). Мелкий scale не является поводом для `quick draft`.
+- Reference-driven задача сохраняет `09-visual-reference` на любом масштабе — это ось профиля.
+
+Проверка: `yarn workflow:validate <run-dir> --scale <scale>`; старт — `yarn workflow:start "<goal>" --scale <scale>`; run без поля `scale` читается как `full`.
+
 Для selective commit/push используй `agent-pack/templates/selective-commit-sop.md`: сначала выписать include/exclude scope, staged делать только явными путями, затем выполнить `yarn git:check-staged`. Agentic handoff исполняется через runtime-контракты (Delegation Packet + Agent Output Critic). Agent Capability Registry — `runtime/typescript/agent-capability-registry.ts`; при изменении агента/маршрута/skill/approval проверяй `yarn workflow:test-agent-capabilities`. Перед началом полного workflow запусти `yarn workflow:doctor`; для поздних handoff от `08-frontend` используй сжатый `handoff-bundle.md`.
 
 ## 1. Роль и язык

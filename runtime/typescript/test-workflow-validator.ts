@@ -4,7 +4,15 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { artifactNames } from "./route.config";
 import { artifactStatusToStageStatus, canReleaseFromQaStatus, detectStageStatusFromMarkdown, summarizeRunStatus } from "./status-resolver";
-import { artifactFiles, getRequiredArtifactsForStage, getWorkflowStagesForProfile, type WorkflowProfile } from "./workflow-stages";
+import {
+  artifactFiles,
+  getRequiredArtifactsForStage,
+  getWorkflowStagesForProfile,
+  workflowScales,
+  type WorkflowProfile,
+  type WorkflowScale,
+} from "./workflow-stages";
+import { getCoreBundleArtifactsForProfile } from "./workflow.manifest";
 import { validateWorkflowRun } from "./validate-workflow-run";
 
 type Payload = Record<string, unknown>;
@@ -118,8 +126,14 @@ function writeArtifact(runDir: string, artifact: string, payload?: Payload): voi
   writeFileSync(join(runDir, fileName), `${frontmatter}${body}\n\nFixture paragraph keeps this artifact above the validator byte threshold and names its source.\n`, "utf8");
 }
 
-function writeArtifactsThrough(runDir: string, stageId: string, profile: WorkflowProfile, payloads: Record<string, Payload> = {}): void {
-  const stages = getWorkflowStagesForProfile(profile);
+function writeArtifactsThrough(
+  runDir: string,
+  stageId: string,
+  profile: WorkflowProfile,
+  payloads: Record<string, Payload> = {},
+  scale: WorkflowScale = "full",
+): void {
+  const stages = getWorkflowStagesForProfile(profile, scale);
   const limit = stages.findIndex((stage) => stage.id === stageId);
   assert.notEqual(limit, -1, `Unknown fixture stage ${stageId}`);
 
@@ -338,6 +352,81 @@ withRun((runDir) => {
 
   const findings = validateWorkflowRun(runDir, "09-visual-reference", "reference");
   assertError(findings, /missing required visual-diff-result\.json evidence/);
+});
+
+// --- Ось масштаба (scale) ---
+
+// Дефолт обязан совпадать с поведением до появления оси, иначе старые run сломаются.
+assert.deepEqual(
+  getWorkflowStagesForProfile("standard").map((stage) => stage.id),
+  getWorkflowStagesForProfile("standard", "full").map((stage) => stage.id),
+  "вызов без scale должен вести себя как full",
+);
+
+// Масштаб сужает pipeline монотонно: patch ⊆ increment ⊆ full.
+{
+  const ids = (scale: WorkflowScale) => getWorkflowStagesForProfile("standard", scale).map((stage) => stage.id);
+  const full = new Set(ids("full"));
+  const increment = new Set(ids("increment"));
+  for (const id of ids("patch")) assert.ok(increment.has(id), `patch-стадия ${id} должна входить в increment`);
+  for (const id of increment) assert.ok(full.has(id), `increment-стадия ${id} должна входить в full`);
+  assert.ok(ids("patch").length < ids("increment").length);
+  assert.ok(ids("increment").length < ids("full").length);
+}
+
+// Гейты, которые не режутся ни на каком масштабе.
+for (const scale of workflowScales) {
+  const ids = getWorkflowStagesForProfile("standard", scale).map((stage) => stage.id);
+  assert.ok(ids.includes("00-intake"), `${scale}: intake обязателен`);
+  assert.ok(ids.includes("11-qa"), `${scale}: qa обязателен`);
+  const ledger = getCoreBundleArtifactsForProfile("standard", scale);
+  for (const artifact of [artifactNames.runPlan, artifactNames.handoffBundle, artifactNames.stageGateLedger]) {
+    assert.ok(ledger.includes(artifact), `${scale}: ledger-артефакт ${artifact} обязателен`);
+  }
+}
+
+// Оси независимы: масштаб не должен выкидывать стадию, включённую профилем.
+assert.ok(
+  getWorkflowStagesForProfile("reference", "patch").map((stage) => stage.id).includes("09-visual-reference"),
+  "reference+patch обязан сохранять visual-reference: profile и scale — разные оси",
+);
+
+// Run масштаба increment валиден без research/PRD/IA, которых full бы требовал.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "11-qa", "standard", {}, "increment");
+  writeFileSync(
+    join(runDir, "run-state.json"),
+    JSON.stringify({ run_id: "fixture", goal: "fixture", profile: "standard", scale: "increment", status: "completed", output_dir: runDir, created_at: "", updated_at: "", stages: {} }),
+    "utf8",
+  );
+  const findings = validateWorkflowRun(runDir, "11-qa", "standard", "increment");
+  assert.equal(
+    findings.filter((f) => f.level === "error" && /missing required artifact/.test(f.message)).length,
+    0,
+    "increment не должен требовать артефакты стадий вне масштаба",
+  );
+});
+
+// Занижение масштаба задним числом ловится: стадия вне масштаба уже отработала.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "11-qa", "standard", {}, "increment");
+  writeFileSync(
+    join(runDir, "run-state.json"),
+    JSON.stringify({
+      run_id: "fixture",
+      goal: "fixture",
+      profile: "standard",
+      scale: "patch",
+      status: "completed",
+      output_dir: runDir,
+      created_at: "",
+      updated_at: "",
+      stages: { "06-screens": { status: "completed" } },
+    }),
+    "utf8",
+  );
+  const findings = validateWorkflowRun(runDir, "11-qa", "standard", "patch");
+  assertError(findings, /Scale cannot be lowered after stages have run/);
 });
 
 console.log("workflow validator regression tests passed");

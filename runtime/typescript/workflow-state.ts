@@ -29,6 +29,8 @@ export interface WorkflowRunState {
   run_id: string;
   goal: string;
   profile: "standard" | "reference";
+  // Глубина run. Отсутствие поля читается как "full" — так старые run остаются валидными.
+  scale?: "full" | "increment" | "patch";
   execution_mode?: WorkflowExecutionMode;
   status: WorkflowStageStatus;
   output_dir: string;
