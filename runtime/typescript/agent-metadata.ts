@@ -144,8 +144,65 @@ export function validateAgentMetadata(root = process.cwd()): string[] {
         errors.push(`${file}: routeTools never provide metadata required_input '${artifact}'.`);
       }
     }
+
+    errors.push(...validateWrapperSkills(root, key, expectedAgentName, metadata));
   }
 
+  return errors;
+}
+
+// Контракт — источник правды по составу skills, но исполняет агента обёртка
+// `.claude/agents/<name>.md`: именно её `skills:` Claude Code преднагружает. Пока эти два
+// списка никто не сверял, они разъезжались молча — обёртки отставали от контрактов на
+// целые skills (аудит 2026-07-17). Здесь связь становится проверкой, а не договорённостью.
+function validateWrapperSkills(
+  root: string,
+  key: AgentRegistryKey,
+  agentName: string,
+  metadata: AgentMetadata,
+): string[] {
+  // Оркестратор — это главная сессия, а не вызываемый субагент: его обёртка служит
+  // чек-листом и `skills:` не объявляет (главная сессия видит все skills сама).
+  if (key === "orchestrator") return [];
+
+  const wrapperFile = `.claude/agents/${agentName}.md`;
+  let content: string;
+  try {
+    content = readFileSync(join(root, wrapperFile), "utf8");
+  } catch {
+    return [`${wrapperFile}: missing native agent wrapper for contract agent '${agentName}'.`];
+  }
+
+  const frontmatter = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
+  if (!frontmatter) {
+    return [`${wrapperFile}: missing YAML frontmatter.`];
+  }
+
+  const parsed = YAML.load(frontmatter[1]) as Record<string, unknown> | undefined;
+  const rawSkills = parsed?.skills;
+  const wrapperSkills = Array.isArray(rawSkills)
+    ? rawSkills.map(String)
+    : typeof rawSkills === "string" && rawSkills.trim()
+      ? [rawSkills.trim()]
+      : [];
+
+  const contractSkills = metadata.skills;
+  const missing = contractSkills.filter((skill) => !wrapperSkills.includes(skill));
+  const extra = wrapperSkills.filter((skill) => !contractSkills.includes(skill));
+  const errors: string[] = [];
+
+  if (missing.length) {
+    errors.push(
+      `${wrapperFile}: skills is missing '${missing.join("', '")}' declared in ${agentInstructionFiles[key]}. ` +
+      "The contract is the source of truth; the wrapper is what actually runs, so it must list the same skills.",
+    );
+  }
+  if (extra.length) {
+    errors.push(
+      `${wrapperFile}: skills contains '${extra.join("', '")}' which the contract ${agentInstructionFiles[key]} does not declare. ` +
+      "Add it to the contract or drop it from the wrapper — the two must agree.",
+    );
+  }
   return errors;
 }
 

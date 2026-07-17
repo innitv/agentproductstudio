@@ -10,6 +10,10 @@ function withAgentDocFixture(assertion: (root: string) => void): void {
   try {
     mkdirSync(join(root, "agent-pack"), { recursive: true });
     cpSync("agent-pack/agent-contracts", join(root, "agent-pack/agent-contracts"), { recursive: true });
+    // Обёртки нужны в fixture: контракт сверяется с ними, и без копии каждый тест ловил бы
+    // постороннюю ошибку про отсутствующую обёртку.
+    mkdirSync(join(root, ".claude"), { recursive: true });
+    cpSync(".claude/agents", join(root, ".claude/agents"), { recursive: true });
     assertion(root);
   } finally {
     rmSync(root, { recursive: true, force: true });
@@ -18,6 +22,11 @@ function withAgentDocFixture(assertion: (root: string) => void): void {
 
 function overwriteAgent(root: string, fileName: string, transform: (content: string) => string): void {
   const path = join(root, "agent-pack/agent-contracts", fileName);
+  writeFileSync(path, transform(readFileSync(path, "utf8")), "utf8");
+}
+
+function overwriteWrapper(root: string, fileName: string, transform: (content: string) => string): void {
+  const path = join(root, ".claude/agents", fileName);
   writeFileSync(path, transform(readFileSync(path, "utf8")), "utf8");
 }
 
@@ -77,6 +86,46 @@ withAgentDocFixture((root) => {
 withAgentDocFixture((root) => {
   overwriteAgent(root, "frontend.agent.md", (content) => content.replace("  - landing-builder", "  - unknown-skill"));
   assertMetadataError(validateAgentMetadata(root), /skills contains unknown skill 'unknown-skill'/);
+});
+
+// --- Обёртка `.claude/agents/*` обязана совпадать по skills с контрактом ---
+
+// Обёртка отстала от контракта — ровно то расхождение, которое до 2026-07-17 копилось молча.
+withAgentDocFixture((root) => {
+  overwriteWrapper(root, "frontend.md", (content) =>
+    content.replace("skills: [landing-builder, ", "skills: ["));
+  assertMetadataError(
+    validateAgentMetadata(root),
+    /\.claude\/agents\/frontend\.md: skills is missing 'landing-builder' declared in/,
+  );
+});
+
+// Обёртка объявляет skill, которого нет в контракте — дрейф в обратную сторону.
+withAgentDocFixture((root) => {
+  overwriteWrapper(root, "prd.md", (content) =>
+    content.replace("skills: [anti-ai-slop]", "skills: [anti-ai-slop, run-ledger]"));
+  assertMetadataError(
+    validateAgentMetadata(root),
+    /\.claude\/agents\/prd\.md: skills contains 'run-ledger' which the contract .* does not declare/,
+  );
+});
+
+// Пропавшая обёртка — контракт есть, исполнять нечем.
+withAgentDocFixture((root) => {
+  rmSync(join(root, ".claude/agents/ia.md"), { force: true });
+  assertMetadataError(
+    validateAgentMetadata(root),
+    /\.claude\/agents\/ia\.md: missing native agent wrapper/,
+  );
+});
+
+// Оркестратор — исключение: главная сессия, а не субагент; его обёртка skills не объявляет.
+withAgentDocFixture((root) => {
+  const errors = validateAgentMetadata(root);
+  assert.ok(
+    !errors.some((error) => error.includes(".claude/agents/orchestrator.md")),
+    `Оркестратор не должен требовать skills в обёртке, got:\n${errors.join("\n")}`,
+  );
 });
 
 const instructions = await loadAgentInstructions();
