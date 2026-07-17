@@ -16,7 +16,7 @@ Skill превращает `screens.md` и дизайн-контекст в `fig
 - Нужно применить route/component/layout constraints и copy-fit до write.
 
 ## Ключевые шаги
-- Следуй `integrations/mcp/figma-canvas-write-guide.md` (§3 Two-Pass, §4 Contract Matrix, §12 канон); write — через `figma-roundtrip`/`figma-handoff`.
+- Следуй `integrations/mcp/figma-canvas-write-guide.md` (§3 Two-Pass, §4 Contract Matrix) и канону `/figma-ds:standard`; write — через `figma-roundtrip`/`figma-handoff`.
 - Прочитай `screens.md`, `design-brief.md`, `copy-deck.md`; при reuse/extend — `design/figma/registry.json` и DS index.
 - Скомпилируй `figma-layout-ir.json`: route, screens, zones, layout constraints, component sources, copy-fit, verification contract.
 - Примени DS honesty и copy-fit constraints; не превращай IR в видимую техническую доску или node inventory.
