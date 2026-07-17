@@ -1,0 +1,11 @@
+{
+  "name": "figma-ds",
+  "description": "Единый источник правды по сборке дизайн-систем в Figma: механика Plugin API, проверенные грабли, чек-лист самопроверки после write и textbook DS-канон (три тиера токенов, DTCG, modes, slots, WCAG 2.2).",
+  "version": "1.0.0",
+  "author": {
+    "name": "ignatovivin"
+  },
+  "homepage": "https://github.com/innitv/agentproductstudio",
+  "repository": "https://github.com/innitv/agentproductstudio",
+  "license": "MIT"
+}
