@@ -197,7 +197,7 @@ Visual regression после systemization блокирует `ready`, даже 
 
 | Нужно | Куда идти |
 |---|---|
-| **Как сделать** в Plugin API `use_figma`: токены как Variables и три тиера, code syntax, component sets и слоты, цвет иконки, организация файла по страницам, ограничения платформы, подводные камни движка, чек-лист самопроверки после каждого write | `/figma-ds:build` → `plugins/figma-ds/skills/build/SKILL.md` |
+| **Как сделать** в Plugin API `use_figma`: токены как Variables и три тиера, code syntax, component sets и слоты, цвет иконки, организация файла по страницам, ограничения платформы, подводные камни движка, финальная самопроверка перед отчётом/handoff (пакетный гейт, не после каждого write) | `/figma-ds:build` → `plugins/figma-ds/skills/build/SKILL.md` |
 | **Что именно правильно** по канону: тиеры токенов и naming, DTCG, modes vs themes, выбор property (variant/boolean/text/instance-swap/slot), матрица состояний, точные пороги WCAG 2.2, документация/versioning/статусы, визуальная подача DS-файла | `/figma-ds:standard` → `plugins/figma-ds/skills/standard/SKILL.md` |
 
 **Нормативность:** канон `/figma-ds:standard` обязателен для студии наравне с §1–§9 — отклонения фиксируются как `deviation` с reason, а не замалчиваются. Status-правило подачи (DS-deliverable без cover-страницы и документации ключевых компонентов — не выше `passed_with_notes`) действует оттуда же и учитывается в §9.

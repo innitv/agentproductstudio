@@ -70,7 +70,7 @@ yarn workflow:validate outputs/<slug>/<date> --scale increment
 
 Skills подключаются автоматически по описанию — своих команд у них нет. Кросс-стадийные: `approval-gate` (любое внешнее действие), `recursive-brief` (intake), `run-ledger` (журнал запуска), `anti-ai-slop` (перед записью research/PRD/copy и публикацией), `selective-commit`, `outputs-cleanup`. Покрытие стадий: `yarn workflow:skills`.
 
-Отдельно от проектных skills живёт плагин **`figma-ds`** (`plugins/figma-ds/`): `/figma-ds:build` — механика Figma Plugin API и чек-лист после каждого write, `/figma-ds:standard` — textbook-канон дизайн-систем. Граница простая: всё, что верно про Figma безотносительно нашего процесса, — в плагине; гейты, стадии и статусы — в `integrations/mcp/figma-canvas-write-guide.md`. Копий не заводить.
+Отдельно от проектных skills живёт плагин **`figma-ds`** (`plugins/figma-ds/`): `/figma-ds:build` — механика Figma Plugin API и финальная самопроверка перед отчётом (пакетный гейт, не после каждого write), `/figma-ds:standard` — textbook-канон дизайн-систем. Граница простая: всё, что верно про Figma безотносительно нашего процесса, — в плагине; гейты, стадии и статусы — в `integrations/mcp/figma-canvas-write-guide.md`. Копий не заводить.
 
 Полный справочник команд: [COMMANDS.md](COMMANDS.md).
 

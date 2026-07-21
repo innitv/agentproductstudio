@@ -88,6 +88,12 @@
         "hooks": [
           { "type": "command", "command": "node .claude/hooks/guard-bash.mjs" }
         ]
+      },
+      {
+        "matcher": "use_figma|generate_figma_design",
+        "hooks": [
+          { "type": "command", "command": "node .claude/hooks/delegation-guard.mjs" }
+        ]
       }
     ],
     "PostToolUse": [
@@ -95,6 +101,12 @@
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
           { "type": "command", "command": "node .claude/hooks/post-edit-sync.mjs" }
+        ]
+      },
+      {
+        "matcher": "use_figma|generate_figma_design",
+        "hooks": [
+          { "type": "command", "command": "node .claude/hooks/figma-selfcheck.mjs" }
         ]
       }
     ]
