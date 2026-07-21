@@ -12,7 +12,7 @@ process.stdout.write(
   "🔴 ДЕЛЕГАЦИЯ ОБЯЗАТЕЛЬНА, НЕ ДЕЛАЙ САМ: любую нетривиальную/многошаговую дизайн-, Figma-, DS-, визуальную или сборочную работу " +
   "НЕ выполняй линейно в главной сессии — ДЕЛЕГИРУЙ профильному субагенту (design / design-generator / qa-review) через Agent tool. " +
   "Ручная пошаговая сборка в оркестраторе = нарушение manager-style (студия агентов). " +
-  "🔴 ЭТАЛОН — СВЕРКА С ЛОКАЛЬНЫМ BASELINE, НЕ С ЖИВОЙ FIGMA: для DS/reference-driven задач сверяйся с локальным golden-baseline эталона в design/figma/<slug>/ (скриншоты + contract), а НЕ перечитывай Figma-файл каждый раз (View-seat ≈ 6 чтений/мес — живьём это исчерпает лимит за пару сборок). Нет локального baseline → это единственный оправданный разовый ingest эталона (делегируй figma-ds-ingest; источник — presa fileKey 5I76DPGJwiFk6IwTYUJk62), дальше сверка ТОЛЬКО локально; пере-ингест — лишь при смене version_id/lastModified эталона или ручном re-baseline. " +
+  "🔴 ЭТАЛОН — ЛОКАЛЬНЫЙ BASELINE, НЕ ЖИВАЯ FIGMA (View-seat ≈ 6 чтений/мес — живьём исчерпает лимит за пару сборок). Две роли индексов design/figma/<slug>/, не путать (полностью — design/figma/README.md): working DS = на чём строить/reuse (ТОЛЬКО это = selected_design_system_slug) · reference (M3) = как правильно устроить И оформить DS (структура + подача), compare-only, рабочей DS НЕ выбирается. reference учит «как правильно сделать/подать», НЕ «сделай похоже на Material» — бренд-вид продукта берётся из его референсов, не из эталона. Сверка локально (golden-скриншоты + contract); Figma живьём — только разовый ingest при отсутствии baseline или пере-ингест по изменению version_id/lastModified. " +
   "Правила: CLAUDE.md; детальные gates: agent-pack/workflows/claude-operating-rules.md."
 );
 process.exit(0);

@@ -18,6 +18,10 @@
           "figma_url": { "type": "string" },
           "status": { "enum": ["indexed", "partial", "planned", "blocked", "archived"] },
           "source_type": { "enum": ["owned", "corporate", "community_copy", "project_specific", "unknown"] },
+          "role": {
+            "enum": ["working", "reference"],
+            "description": "Роль индекса. Отсутствует = working. Только working может быть selected_design_system_slug; reference (эталон «как правильно» — структура и подача, напр. M3) — compare-only, не выбирается как рабочая DS."
+          },
           "code_connect_status": {
             "enum": ["connected", "unavailable_plan", "not_configured", "skipped_with_reason", "not_applicable"]
           },
