@@ -1,18 +1,15 @@
 ---
 description: >-
   Как правильно собирать токенизированную дизайн-систему и макеты в Figma через
-  use_figma (Figma Plugin API). Используй ВСЕГДА перед сборкой/редактированием
-  дизайн-системы, компонентов или экранов в Figma: организация по страницам,
-  токены как Variables, консолидация и документирование компонентов, подводные
-  камни Plugin API. Используй ТАКЖЕ перед отчётом/handoff по Figma-работе —
-  финальный чек-лист самопроверки на всю пачку изменений, НЕ после каждого
-  отдельного write (мастер в панели, хвосты клона, сырые заливки, слот
-  vs семантика, дубли стилей, оси вариантов). И при разборе странного поведения
-  Figma: оверрайд слетел при смене варианта, разные тексты в вариантах,
-  INSTANCE_SWAP принёс чужой цвет, иконка тёмная на цветном фоне, get_metadata
-  «не видит» страницы или component set, подпись значения врёт. Триггер: сборка
-  Figma-DS, компоненты в Figma, макеты в Figma, design tokens в Figma, use_figma,
-  финальная проверка перед отчётом по Figma, оверрайд слетел, иконка не красится.
+  use_figma (Plugin API): организация по страницам, токены как Variables в три
+  тиера, консолидация и документирование компонентов, подводные камни Plugin API.
+  Используй перед любой сборкой/правкой DS, компонентов или экранов в Figma;
+  перед отчётом/handoff по Figma-работе (финальная самопроверка на всю пачку
+  изменений, НЕ после каждого write); и при разборе странного поведения Figma.
+  Триггеры: сборка Figma-DS, компоненты в Figma, макеты в Figma, design tokens
+  в Figma, use_figma, финальная проверка перед отчётом по Figma, оверрайд слетел,
+  иконка не красится, INSTANCE_SWAP принёс чужой цвет, get_metadata не видит
+  страницы, подпись значения врёт.
 ---
 
 # Сборка токенизированной дизайн-системы в Figma (проверенный порядок)
@@ -21,142 +18,76 @@ description: >-
 
 **Это единственный источник правды по механике сборки Figma-DS.** Копий больше нет: знание держится здесь, в git, и раздаётся проектам плагином.
 
-Соседний skill — **`/figma-ds:standard`**: что именно правильно (три тиера, DTCG, modes, SLOT, WCAG-пороги, governance). Здесь — **как это сделать** в Plugin API и на какие грабли не наступить. При вопросе «а как правильно по канону» — туда.
+Тонкое ядро — ниже. Детали грабель вынесены в `references/` (грузить по ссылке из симптома/шага):
+- `references/tokens-and-variables.md` — токены как Variables, три тира, code syntax, scopes, modes.
+- `references/components-and-slots.md` — property-механизмы, INSTANCE_SWAP, SLOT, консолидация, цвет иконки, ширина dropdown.
+- `references/platform-limits.md` — ограничения, определяющие конструкцию (оверрайд/вариант, swapComponent, клоны, underline, Auto Layout).
+- `references/use-figma-pitfalls.md` — движок use_figma (полный откат, parse-error, шрифты) и «читающие инструменты врут».
+- `references/file-and-build-order.md` — организация файла по страницам, документация, порядок сборки новой системы.
 
-Если в проекте есть `integrations/mcp/figma-canvas-write-guide.md` — он про **процесс студии** (гейты, стадии, Component Contract Matrix, verification, статусы). Механику берём отсюда, процесс — оттуда; они не пересекаются.
+## Когда использовать
+- **Когда:** перед сборкой/правкой DS, компонентов, экранов в Figma через `use_figma`; перед отчётом/handoff по Figma-работе; при разборе странного поведения Figma.
+- **Многошаговую сборку в Figma ведёт субагент** в изолированном контексте (single-writer), а не главная сессия дроблением на месте.
+- **Когда НЕ:** вопрос «как правильно по канону» (три тиера, DTCG, modes, SLOT, WCAG-пороги, governance) → соседний `/figma-ds:standard`. Процесс студии (гейты, стадии, Component Contract Matrix, verification, статусы) → `integrations/mcp/figma-canvas-write-guide.md`, если он есть в проекте. Про конкретный продукт (колонки, ширина витрины, node id) → `design/figma/<slug>/`. Они не пересекаются: механику берём отсюда.
 
-## Перед write
-- Загрузить figma-use guidance (skill `/figma-use` или ресурс сервера), проверить доступность `use_figma`, exact target и согласие пользователя на запись.
-- Figma canvas write — внешнее действие: нужно явное разрешение человека с указанием файла/ноды. В проектах с формальным approval gate (`Product Agent Studio`) это `figma_write` + `write_allowed=true`.
-- Писать маленькими проверяемыми шагами.
+## Порядок сборки
+Каждый шаг — коротко; детали по ссылке.
 
-## Токены (Variables, не Styles)
-- **Цвета — Variables, а не Paint Styles.** Заливки/обводки биндить напрямую к переменной:
-  `figma.variables.setBoundVariableForPaint({type:"SOLID",color:{r,g,b}}, "color", variable)`.
-  Paint-styles для цвета не использовать (читается как «покрашено стилями», а не токенами).
-- **ТРИ уровня токенов (обязательно, не два):** `palette` (primitives, сырые) → `semantic` (bg/ink/muted/accent/…, alias на primitive) → **`component` (индивидуально под каждый компонент, alias на semantic)**.
-  - primitive → semantic: `sem.setValueForMode(mode, figma.variables.createVariableAlias(primVar))`. Альфа-варианты — отдельный primitive (alias не меняет alpha).
-  - semantic → component: то же, alias на semantic. **Ноды компонентов биндить к COMPONENT-слою, не к semantic напрямую.** Экраны/макеты — к semantic.
-  - **Почему 3-й уровень обязателен:** изоляция (перекрасить один компонент, не трогая другие), явная документация токен↔слот, темизация на уровне компонента. Его отсутствие = класс багов «иконка/лейбл унаследовал не тот общий цвет».
-- **Конвенция именования component-токенов — имена через СЛЭШИ** (слэш = уровень дерева в панели Variables; коллекция `components`, 1 mode):
-  - цвет: `{component}/{variant}/{scheme}/{slot}/color/{state}` — напр. `button/primary/accent/bg/color/default`, `button/primary/accent/label/color/disabled`, `button/primary/accent/icon/color/disabled`, `button/ghost/accent/border/color/hover`. slot = bg/label/border/**icon**; state = default/hover/active/focus/disabled/loading.
-  - размер: `{component}/{size}/{dim}` — напр. `button/md/height`, `button/md/padding-left`, `button/md/padding-right`, `button/md/min-width`, `button/md/border-radius`, `button/md/spacing`, `button/md/border-width`; вложенные — `button/sm/label/padding-horizontal`.
-- **Code Syntax — ОБЯЗАТЕЛЬНО для каждого токена** (иначе не подхватится в коде при handoff/Dev Mode):
-  `variable.setVariableCodeSyntax("WEB", "var(--<имя-со-слэшами→дефисы>)")`.
-  Напр. `button/primary/accent/bg/color/default` → `var(--button-primary-accent-bg-color-default)`; `button/md/padding-left` → `var(--button-md-padding-left)`. Задавать и цветовым, и FLOAT-токенам (минимум платформа WEB).
-  **Правило: слэши — в имени переменной (группировка), дефисы — только в code syntax.**
-- **Символы в имени переменной — ДВА разных запрета, не путать:** **точка — жёсткий запрет Plugin API** (`createVariable` кидает «invalid variable name»); **`_` — НАША конвенция** (CSS-стиль токенов; API подчёркивание допускает). Дробь в имени — ДЕФИСОМ: `border/width/1-5`, не `1_5` и не `1.5`. Проверка перед отчётом: `_` и точек в именах и code syntax по системе = 0.
-- **Переменная — это НЕ нода.** `figma.getNodeByIdAsync("VariableID:262:2")` вернёт `null`; переменную достаёт `figma.variables.getVariableByIdAsync("VariableID:…")`. Легко потерять время, решив «токена нет».
-- **Spacing/radius/border — FLOAT-переменные**, биндить layout-свойства **и в компонентах, и в макетах**:
-  `node.setBoundVariable("itemSpacing"|"paddingLeft"|"strokeRightWeight"|..., floatVar)`. НИКОГДА не хардкодить числа отступов даже «по шкале» — биндить к `space/*` (в макетах) / component-размерным токенам (в компонентах).
-- **`variable.scopes` — ограничить, где переменную предлагает пикер** (иначе каждый FLOAT предлагается во ВСЕХ числовых полях, а цвет — во всех заливках; пикер «замусоривается»). Примеры: spacing → `["GAP","WIDTH_HEIGHT"]`, radius → `["CORNER_RADIUS"]`, цвет фона → `["FRAME_FILL","SHAPE_FILL"]`, цвет текста → `["TEXT_FILL"]`. `ALL_SCOPES`/`ALL_FILLS` взаимоисключающи с частными. Задавать вместе с code syntax — это часть «правильно оформленного токена».
-- **Типографика — Text Styles** (уместно). Цвет текста — отдельно, через variable-bound fill (к component-токену лейбла).
-- **Modes — на semantic-коллекции, НЕ на primitives.** Light/Dark = разные значения semantic-переменных; primitives неизменны. В Figma: collections + modes, semantic aliasʼит primitive под каждый mode. `theme` (бренд) и `domain` — отдельные оси/коллекции, не мешать с mode. Канон и обоснование — `/figma-ds:standard`.
+1. **Перед write** — загрузить figma-use guidance, проверить доступность `use_figma`, exact target и согласие пользователя (Figma write = внешнее действие). Писать маленькими проверяемыми шагами. → подробности: `references/use-figma-pitfalls.md#перед-write`
+2. **Токены — три тира** `palette → semantic → component`, цвета Variables (не Paint Styles), spacing/radius/border FLOAT, каждому Code Syntax + scopes. Обоснование тиеров — `/figma-ds:standard` §1. → подробности: `references/tokens-and-variables.md`
+3. **Компоненты и слоты** — сначала выбери ТИП property (канон — `/figma-ds:standard` §2), консолидируй структурно одинаковые в один сет, контейнеры под произвольный контент — настоящий SLOT. → подробности: `references/components-and-slots.md`
+4. **Организация файла** — по страницам (Cover/Foundations/Components/Screens), группировать titled auto-layout фреймами (не Sections), документировать компоненты (порядок секций — `/figma-ds:standard` §4). → подробности: `references/file-and-build-order.md`
+5. **Финальная самопроверка** — пакетный гейт перед отчётом (раздел ниже). ОДИН раз на всю пачку, не после каждого write.
 
-## Компоненты и слоты
-- **Сначала выбери ТИП property, потом строй** (канон — `/figma-ds:standard`): VARIANT — реально разный вид/структура (`style × size × state`); BOOLEAN — видимость слоя; TEXT — редактируемый контент; INSTANCE_SWAP — сменный вложенный инстанс; **SLOT — гибкий контейнер** (add/edit/rearrange произвольного содержимого).
-  ⚠️ **Подделывать слот вариантами — анти-паттерн.** Связка `text`+`icon` через свойства — частный случай для лейбла, а НЕ универсальная замена слоту. Нужен контейнер под произвольный контент — делай настоящий slot (`Convert to slot` / `Wrap in new slot`).
-  Ограничения слотов (знать до, а не после): нельзя применять properties к слоям ВНУТРИ слота; нельзя сделать slot из top-level слоя; два слота в варианте не делят одно slot property.
-- **Полный набор механизмов Plugin API — не забывать про документирующие и exposed (легко упустить, собрав только variant/text):**
-  - `addComponentProperty(name, type, default, options?)` принимает и `'VARIANT'` (добавить ось к существующему сету), и `'TEXT'|'BOOLEAN'|'INSTANCE_SWAP'|'SLOT'`; для СОЗДАНИЯ сета из отдельных компонентов — `combineAsVariants` (не «только combineAsVariants»). `editComponentProperty(key,{preferredValues,defaultValue,name,description,slotSettings})`; `deleteComponentProperty` — **не работает для VARIANT** (офиц. дока).
-  - Читать свойства сета — `componentPropertyDefinitions` (`variantGroupProperties` — **deprecated**). Инстансы компонента — `getInstancesAsync()` (`instances` — **deprecated**). `.key` есть только у ОПУБЛИКОВАННЫХ компонентов (нужен для `importComponentByKeyAsync` в другом файле); у локальных `.key` годится как `preferredValue`, но не для импорта.
-  - **`preferredValues` обязательны у КАЖДОГО `INSTANCE_SWAP`** — иначе swap в UI предлагает ВСЕ компоненты файла, а не нужный набор (`icon/*`). Формат: `set.editComponentProperty(swapKey,{preferredValues:[{type:"COMPONENT",key:c.key}, …]})` (для локальных иконок — их `.key`).
-  - 🔴 **`default` у `INSTANCE_SWAP` — это NODE ID строкой (`"152:28"`), а НЕ `.key` компонента.** `addComponentProperty(name,"INSTANCE_SWAP", "152:28", {preferredValues:[{type:"COMPONENT",key}]})`. 40-символьный `.key` в позиции default кидает «Property value is incompatible with component property type» — это НЕ про локальные/неопубликованные компоненты и НЕ API-лимит, а неверный формат. Итого: **default по node id, preferredValues по key.** Слинковать инстанс со свойством: `iconInstance.componentPropertyReferences={mainComponent: swapPropId}`.
-  - **`node.description` / `descriptionMarkdown`** — документация компонента, видна в Assets/Dev Mode. Задавать КАЖДОМУ компоненту (purpose + usage). Без неё компонент документирован только в панели-витрине, но не в самой Figma (при handoff в код description доступен, витрина — нет).
-  - **`instance.isExposedInstance = true`** — экспонировать вложенный инстанс: его свойства становятся настраиваемыми с уровня родителя (без deep-override; читается через `parentInstance.exposedInstances`). Применять ИЗБИРАТЕЛЬНО: Modal footer-кнопки — да; галерея из 10+ инстансов — раздует API родителя, нет.
-  - `documentationLinks` / `annotations` / `reactions`+`setReactionsAsync` — ссылки на доки / dev-заметки / прототип-взаимодействия; в DS-файле обычно не нужны.
-- **SLOT в Plugin API умеет (хоть «Convert to slot» и звучит как чисто-UI):** `component.createSlot()` → нода type `SLOT` + авто SLOT-свойство. НЕТ `figma.createSlot` (даже `typeof figma.createSlot` кидает — Figma proxy). Поповер / меню / любой контейнер произвольного контента = контейнер + `createSlot()`, дефолт-контент перенести внутрь через `slot.appendChild`, затем `slot.layoutSizingHorizontal="FILL"`. **Жёстко зашитый контент (divider, фикс-строки) в контейнере — анти-паттерн:** divider вылезает там, где в конкретном использовании не нужен; должен быть контентом slot.
-  - **Ширина dropdown — СНАЧАЛА реши тип, потом ширину (частая ошибка — применить content-width к select):** **SELECT** (выбор значения, есть триггер) → ширина ФИКСИРОВАННАЯ под набор ИЛИ = ширине триггера (match-trigger — канон Radix `--radix-select-trigger-width` / Material / shadcn). `max-content`/content-based для select ПЛОХО: дёргается при смене значения, галочка липнет к тексту без воздуха. **MENU действий** (kebab, разной длины пункты) → content-based (hug) уместен. Галочка selected — справа с воздухом (`SPACE_BETWEEN`), опции ровной ширины (FILL до контейнера, не HUG — иначе фоны рваные).
-  - **Figma НЕ умеет `max-content`** — «HUG-контейнер по самой широкой опции + все опции одной ширины» через auto-layout невозможно (HUG-родитель + FILL-дети схлопывается; HUG-дети едут по тексту). Для content-меню — ручной расчёт: измерить `max(opt.width)` → `container.counterAxisSizingMode="FIXED"`+`resize` → опции `layoutSizingHorizontal="FILL"`. Для select — просто задать FIXED ширину под набор. **В CSS проще:** select — `.dropdown{width:<fix>px}` + опция `justify-content:space-between`; menu — `width:max-content` + опция `width:100%`.
-  - 🔴 **Добавить контент в slot ВНУТРИ ИНСТАНСА в общем случае НЕЛЬЗЯ.** Figma защищает структуру инстанса: перемещение/`appendChild` узла в slot инстанса кидает «Cannot move node. New parent is an instance or is inside of an instance» (офиц. открытый issue [figma/plugin-typings#351](https://github.com/figma/plugin-typings/issues/351)). Контент slot задавать на уровне **МАСТЕРА** либо через свойства/override; `detachInstance()` рвёт связь с мастером — крайняя мера. Помни: любая такая ошибка откатывает ВЕСЬ write-скрипт.
-  - Что на инстансе реально работает — **очистка inherited-детей slot** (наблюдение канала use_figma, 2026-07; `remove` inherited проходит, `appendChild` — нет): (1) inherited children (`I`-префикс) при `remove` ПЕРЕИНДЕКСИРУЮТСЯ → удалять только `while(slot.children.length) slot.children[0].remove()`, не по снапшоту `[...slot.children]`; (2) часть inherited (FRAME-обёртки) кидают «not found» → робастный clear: try `[0]`, catch try `[last]`, счётчик «застрял → break»; (3) `findOne`/`.remove` по stale inherited id откатывает ВЕСЬ скрипт — проверку выносить в ОТДЕЛЬНЫЙ вызов.
-- **Не плодить компоненты под контент.** Структурно одинаковые (лейбл, лейбл+иконка) — ОДИН компонент
-  с properties, не 4. Консолидировать в component set: `type` (VARIANT) + `text` (TEXT) +
-  `showIcon` (BOOLEAN) + `icon` (INSTANCE_SWAP).
-- **Нормальные паддинги/min-width — не узкие контролы.** Ориентиры:
-  кнопка md высота 40px, горизонтальный паддинг ≥16px (не 8–12), радиус 8px, min-width текстовых ≥64px.
-- **Иконки — отдельные vector-компоненты:** `figma.createNodeFromSvg(svg)` →
-  `figma.createComponentFromNode(node)`; в UI только инстансы. `createNodeFromSvg` даёт фрейм с СЫРОЙ фоновой
-  заливкой — чистить `fills = []`, иначе инстансы потянут сырой цвет.
-- **Цвет иконки — цепочка из ТРЁХ звеньев, рвётся на любом:**
-  1. нода иконки → **component-токен иконки этого варианта** (`button/primary/accent/icon/color/default`), НЕ общий
-     текстовый токен (`text/primary` / `text/ink` — как он назван в проекте). Иначе иконка на цветном фоне остаётся тёмной.
-  2. этот component-токен → **семантика семейства `icon/*`**, НЕ `text/*` / `status/*` / `accent/*`.
-  3. значит в semantic-слое нужен **полный иконочный набор**: `icon/{default|secondary|muted|subtle|accent|on-accent|danger|success}`.
-  **Одного лишь component-слоя МАЛО.** Реальный случай: component-токены были у всех компонентов, а иконочные слоты
-  всё равно алиасили в `text/*` и `status/*` — просто потому, что иконочной семантики под ними не существовало и тянуться
-  было некуда. Заводя первый `icon/*`-токен, сразу закрывай весь набор, иначе слоты разбегутся по чужим семьям.
-  ⚠️ Имена токенов здесь и везде — **через слэши** (см. правило слэш/дефис выше); дефисная форма — это только code syntax.
-- **Слот иконки:** инстанс-плейсхолдер; `showIcon` BOOLEAN → `iconInstance.componentPropertyReferences={visible:boolPropId}`;
-  `icon` INSTANCE_SWAP → `{mainComponent:swapPropId}`; набор через `set.editComponentProperty(iconKey,{preferredValues:[...]})`.
-- **Проперти текста:** `const id=set.addComponentProperty("text","TEXT","...")` →
-  `textNode.componentPropertyReferences={characters:id}`. Ключ для override читать с САМОГО инстанса.
-- **Override вложенных инстансов:** брать `frame.children.filter(n=>n.type==="INSTANCE")`, НЕ `findAll` (иначе
-  цепляются вложенные иконки и сдвигают индексы). Для plain-text override сперва `loadFontAsync`.
+**Если DS ещё нет:** сначала visual calibration (2–3 экрана) → вердикт → foundation extraction → pattern inventory → systemization → regression check. → подробности: `references/file-and-build-order.md#порядок-сборки-новой-системы`
 
-### Ограничения платформы, определяющие КОНСТРУКЦИЮ (знать до, а не после)
-- **Оверрайд инстанса НЕ переживает смену варианта** (⚠️ эмпирика/баг-репорты форума Figma, НЕ офиц. дока — help-дока про свойства звучит обратно, «оверрайды сохраняются»; но у вложенных инстансов при смене варианта/mode на практике слетает). Переключил `state` — Figma подменила мастер, оверрайд заливки/цвета молча слетел к значению варианта. **Правило: что обязано пережить смену варианта — делай ОСЬЮ, а не оверрайдом.** Это обратная граница к «не плоди оси»: оси не для всего, но и оверрайд не бесплатный. Реальный случай: цвет набранного текста в поле стоял оверрайдом → при смене состояния поле «теряло» ввод и возвращалось к плейсхолдерному серому.
-- **У VARIANT+TEXT-сета TEXT-свойство имеет ОДИН дефолт на весь сет.** Показать разные тексты по вариантам в матрице НЕВОЗМОЖНО — все варианты покажут один дефолт. Разные тексты только инстансами с override, и живут они в ПРИМЕРАХ, не в ВАРИАНТАХ. **Следствие: инстанс-ряд в витрине — не небрежность, а вынужденность.** Не «чинить» его, подставляя мастер: снесёшь единственную демонстрацию состояний контента (реальный случай: статусы «загрузка…» / «ошибка» у чипа файла).
-- **BOOLEAN-свойство не умеет инвертироваться** — нет `visible = !prop`. Взаимоисключающие пары («кнопка ИЛИ чип») через два булевых — смелл и ручная синхронизация. **Замена узла — это `INSTANCE_SWAP`** с `preferredValues` из обоих мастеров, одно свойство вместо двух.
-- **`INSTANCE_SWAP` тащит чужое ПОВЕРХ слота.** Свапнутый инстанс приносит свои бинды (цвет, `strokeWeight`) поверх слотового токена — и текстовые пропы родителя накладываются на его собственные. **После каждого свапа перебиндить цвет/`strokeWeight` на токен слота и проверить текстовые пропы.** Класс багов: «чёрная иконка на цветном фоне», «имя файла в чипе заменилось лейблом кнопки».
-- **`swapComponent()` на инстансе, ПРИВЯЗАННОМ к INSTANCE_SWAP-свойству, меняет ДЕФОЛТ свойства на ВЕСЬ сет** — та же ловушка «один дефолт на весь сет», что у TEXT. Хотел зафиксировать спиннер в одном варианте `state=loading` через `iconInstance.swapComponent(loader)` — дефолт свойства `icon` стал loader, и ВСЕ варианты сета показали спиннер. **Чтобы свапнуть глиф в ОДНОМ инстансе:** либо `instance.setProperties({[swapKey]: id})` (override значения свойства — дефолт сета не трогает, бинд слота сохраняет), либо снять привязку `instance.componentPropertyReferences = {}` и тогда `swapComponent` фиксирует глиф независимо.
-  ⚠️ **И раньше этого — спроси, нужен ли вообще вариант.** «Лоадер на кнопке» для icon-only контрола — это смена ГЛИФА (контент слота на `icon/loader`), а НЕ ось `state=loading`. Заводить вариант под loading у кнопки-иконки = variant explosion; loading достигается свойством `icon`. (Ось `loading` оправдана у текстовой кнопки, где меняется и лейбл, и спиннер, и disabled-поведение — см. `/figma-ds:standard`, матрица состояний.)
-- **Клонирование варианта (`variant.clone()`) при добавлении новой схемы (напр. `danger` из `primary`) — ТРИ ловушки:** (1) клон ложится на ТЕКУЩУЮ страницу (по умолчанию Cover `0:1`), НЕ в сет — нужен явный `set.appendChild(clone)`, иначе сирота на Cover. (2) `appendChild` кладёт клон в позицию ДОНОРА (те же x,y) → клоны наложились ПОВЕРХ доноров, и в матрице ряд «primary» показывал danger (донор скрыт под клоном). После добавления — ЯВНО спозиционировать (`x=col*step`, `y=новый ряд`) и проверить `overlaps==0` по (x,y). (3) клон тащит effect-стиль донора (`elevation-accent`/`elevation-focus` — фиолетовый glow primary) → для другой схемы снять `node.effectStyleId=""` на hover/focus-вариантах.
-- **Перемещение текст-ноды в новый фрейм РВЁТ `componentPropertyReferences.characters`** (ref становится `{}`) → text-property перестаёт менять текст, хотя ключ существует. Восстановить: `textNode.componentPropertyReferences={characters: textPropKey}` в каждом варианте. Плюс смена variant сбрасывает text-override инстанса — применять text ОТДЕЛЬНЫМ `setProperties` ПОСЛЕ смены variant.
-- **Underline-поле — только `strokeBottomWeight`; top/left/right = 0.** Забиндив `border-width` на все 4 стороны (`strokeTop/Bottom/Left/RightWeight`), превращаешь underline-поле в бокс-рамку. Перед ребиндом stroke-weight смотри, сколько сторон РЕАЛЬНО со stroke: underline — одна (bottom), остальные `setBoundVariable(side,null)` + `f[side]=0`.
-- **Контекстный бинд «все тексты секции» перебивает лейблы вложенных кнопок/инстансов.** Красишь всю секцию в текстовый токен — лейблы кнопок внутри перекрашиваются тоже. Кнопки/инстансы биндить ОТДЕЛЬНО и ПОСЛЕ секций.
+## Decision-таблицы
 
-### Auto Layout и раскладка витрин — грабли конструкции (знать до, а не после)
-- **Варианты сета имеют «схлопнутый» bbox.** Declared/rendered высота варианта может быть ~10px, а визуал рендерится ЗА фреймом (`clipsContent=false`). В auto-layout это уводит сет на отрицательный `y` и обрезает. **Витрину состояний делать `layoutMode='NONE'` + фикс-высота (`resize`) + абсолютные `x/y`.** ⚠️ `layoutPositioning='ABSOLUTE'` в NONE-родителе КИДАЕТ (оно только для auto-layout) — в NONE позиция и так по `x/y`, ставить его не нужно.
-- **Auto-layout игнорирует `node.x`** — позицией управляет layout. Центрировать сет через `counterAxisAlignItems='CENTER'`, а не `set.x=…` (иначе абсолютные подписи рассинхронятся с уехавшим по layout сетом; подписи заранее ставить на центрированные позиции).
-- **Смена `layoutMode` HORIZONTAL→VERTICAL оставляет высоту контейнера FIXED** → дети обрезаются снизу. После смены — `layoutSizingVertical='HUG'`.
-- **Расширил панель — FIXED-дети НЕ тянутся за ней.** После widening найти фреймы с `layoutSizingHorizontal=FIXED` и перевести в `FILL` (иначе витрина/карточка не растянулась, контент обрезан по старой ширине — «Скачать» уходит за край).
-- **Group-label в HORIZONTAL WRAP: FIXED на ширину контейнера ФОРСИРУЕТ перенос строки; `FILL`/grow — НЕТ** (лейбл остаётся inline). Подзаголовки групп свотчей — text-нода FIXED = ширине grid.
-- **Дробные («битые пиксели») высоты протекают вверх через HUG-контейнеры до root.** Источник обычно — склонированные иконки с дробными размерами (22.248 и т.п.). Округлять размеры таких нод. Текст с `lineHeight` в PERCENT не ломает (округляется до целого).
-- **Props-строка получает FIXED height от `text.resize(w,h)` на фикс-ширину** → большие разрывы между строками. Лечится `row.layoutSizingVertical='HUG'` + `text.textAutoResize='HEIGHT'` (не `resize`).
-- **`componentPropertyDefinitions` нельзя читать с ВАРИАНТА** — только с сета / не-variant компонента.
-- **Component-set НЕ авто-растёт под скриптом перемещённые collapsed-bbox варианты** — добавил/перенёс ряды → явный `set.resize(w,h)`, иначе новые варианты и их подписи торчат за сетом и обрезаются.
+### Тип component property
+| Тип | Когда |
+|---|---|
+| VARIANT | реально разный вид/структура (`style × size × state`) |
+| BOOLEAN | видимость слоя |
+| TEXT | редактируемый контент |
+| INSTANCE_SWAP | сменный вложенный инстанс |
+| SLOT | гибкий контейнер под произвольный контент (add/edit/rearrange) |
 
-## Организация файла — по СТРАНИЦАМ
-- `📄 Cover` (название, версия/статус, описание, мета, оглавление со ссылками) ·
-  `🎨 Foundations` (свотчи primitives+semantic, typography specimen, spacing-шкала) ·
-  `🧩 Components` (Icons / базовый компонент / composites + примеры использования) · `📄 Screens`.
-- **Группировать titled AUTO-LAYOUT фреймами, НЕ Sections.** У `SECTION` сдвиг `.y/.x` не двигает содержимое
-  (дети desync) и секции не обнимают детей надёжно. Auto-layout фрейм (VERTICAL, padding, hug) + заголовок = «панель».
-  Панели-карточки (тонкий border + радиус) в общий board (VERTICAL auto-layout, крупный gap). Воздух > плотность.
+Канон выбора — `/figma-ds:standard` §2. Подделывать слот вариантами — анти-паттерн. Механика (Plugin API) → `references/components-and-slots.md#выбор-типа-property`.
 
-## Документация (чтобы система читалась)
-- **Cover-страница** файла: editorial-титул, версия (v1·Draft), описание, мета (источник/автор/дата/шрифты), оглавление.
-- **Page-интро** на каждой странице: заголовок + one-line описание.
-- **Документация компонента: порядок секций — по канону `/figma-ds:standard` §4** (purpose → examples → anatomy → props → states → usage → accessibility → code, единый во ВСЕХ компонентах). Здесь не переопределять порядок — только механика подачи: таблица **свойств** (type/text/showIcon/icon), витрина состояний, короткий императивный текст.
-- 🔴 **Любая рукописная подпись значения рядом с забинденным элементом ПРОТУХАЕТ МОЛЧА.** Заливка свотча/образца привязана к переменной и обновляется сама; подпись («#XXXXXX», «1.5px», «40px») — обычный текст, он не обновляется никогда. Витрина при этом выглядит исправной. **Сменил значение токена — прогони сверку ВСЕХ подписей против фактических значений** (перечитать бинд → разрешить алиасы → сравнить со строкой). Реальный случай: свотч был подписан одним хексом при фактически другом — полдня врал в Foundations. Шрифт подписей грузить через `getStyledTextSegments(["fontName"])`, не угадывать.
+### Ширина dropdown
+| Тип | Ширина |
+|---|---|
+| SELECT (выбор значения, есть триггер) | ФИКС под набор ИЛИ = ширине триггера (match-trigger). `content`/`max-content` — плохо: дёргается при смене значения, галочка липнет к тексту |
+| MENU действий (kebab, пункты разной длины) | content-based (hug) уместен; опции ровной ширины (FILL), галочка справа с воздухом |
 
-## Подводные камни use_figma (Plugin API)
-- **Скрипт откатывается ЦЕЛИКОМ при любой ошибке** — все изменения до ошибки тоже. Каждый write делать
-  заведомо безошибочным; после teardown проверять, что удаление реально применилось (иначе дубли).
-- **Большие write-скрипты коррелируют с `parse-error` / малформед tool-call** — дробить на мелкие write (это и есть канон «маленькими шагами» выше). Падение = полный откат: файл не бьётся, но и шаг не применён — проверять скриншотом.
-- **В канале `use_figma`:** `figma.loadAllPagesAsync()` не нужен — канал не в режиме `documentAccess:"dynamic-page"` (это реальный метод API, а в dynamic-page он был бы ОБЯЗАТЕЛЕН перед `findAll` по документу; «не нужен здесь» ≠ «не существует»). `figma.currentPage = page` не работает — только `await figma.setCurrentPageAsync(page)`.
-- **Правильные имена:** `figma.variables.getLocalVariableCollectionsAsync()`;
-  `figma.variables.getLocalVariablesAsync("COLOR"|"FLOAT")`.
-- **Шрифты:** резолвить `figma.listAvailableFontsAsync()`, грузить `loadFontAsync` перед set characters/style. Inter/JetBrains Mono есть; нужного шрифта может не быть → взять ближайший доступный аналог. Точное имя стиля критично (напр. Inter — «Semi Bold», не «SemiBold»).
-  **Канал `use_figma` пишет через ОБЛАЧНУЮ библиотеку (порядка тысячи Google-шрифтов, набор меняется), локальных системных шрифтов НЕТ** (наблюдение канала use_figma, 2026-07: Arial/Segoe UI/Georgia отсутствуют, сколько бы их ни ставили в ОС). Проприетарные (Google Sans и т.п.) недоступны для записи — работать на доступном аналоге, привязав к Text Styles, чтобы пользователь сменил шрифт локально.
-- 🔴 **«unloaded font» при недоступном в канале шрифте:** если в стили/редактор Figma поставлен шрифт, которого нет в канале, `createText`/`clone`+`characters` падает «unloaded font» ДАЖЕ для загруженных шрифтов — потому что при `appendChild` в auto-layout Figma резолвит шрифт в дефолт. Лечится: **`characters` СТРОГО до `appendChild`** в auto-layout; либо пользователь возвращает стили на доступный шрифт.
-- Порядок: создать → выставить layout/props → resize/позиции. `create_new_file` требует `planKey` (team::...).
+**Figma НЕ умеет `max-content`** (HUG-родитель + FILL-дети схлопывается; HUG-дети едут по тексту) — для content-меню ручной расчёт. Детали → `references/components-and-slots.md#ширина-dropdown`.
 
-### Читающие инструменты врут — знать заранее
-> Это про инструменты MCP-канала (`get_metadata` и пр.), не про Plugin API. **Наблюдения канала use_figma/MCP, 2026-07 — не офиц. контракт;** поведение может измениться, при странностях перепроверять.
-- **`get_metadata` БЕЗ `nodeId` отдаёт НЕПОЛНЫЙ список страниц.** Реальный случай: вернул 2 из 4 (потерял Foundations и Screens), воспроизводилось дважды подряд — на этом основании страницы были объявлены несуществующими, а память проекта — врущей. **С явным `nodeId` всё отдаётся нормально.** ID страниц брать из UI/памяти, а не из листинга.
-- **`get_metadata` СХЛОПЫВАЕТ component set:** варианты приходят плоским списком, ID самого сета в дампе НЕТ. Сеты доставать только `use_figma` + `page.findAllWithCriteria({types:["COMPONENT_SET","COMPONENT"]})`.
-- **`get_metadata` по ТЯЖЁЛОМУ борду таймаутит** (дерево большое) — брать `get_screenshot` + точечную `get_metadata`/интроспекцию по под-нодам. Таймаут ≠ проблема доступа/оплаты (проверяется `whoami`).
-- Отсюда общее: **перед выводом «этого не существует» — перепроверить другим инструментом.** Дешевле, чем строить выводы на дыре в листинге.
+## Worked example: Button от токенов до витрины
+Один сквозной прогон из вызовов, уже описанных в references. Иллюстрирует порядок, не заменяет карточки-детали.
 
-## Порядок сборки новой системы (если DS ещё нет)
-1. **Visual calibration:** сначала 2–3 ключевых экрана без большой component matrix. Проверить композицию, плотность, иерархию, ритм, copy fit, длинный текст.
-2. **Вердикт** по калибровке: пока композиция не принята — foundation и компоненты не строить.
-3. **Foundation extraction:** токены извлекать из утверждённых экранов, а не генерировать из отраслевого preset.
-4. **Pattern inventory:** систематизировать только реальные повторы; уникальные блоки оставить bespoke. Не собирать «универсальный набор компонентов», не нужный экранам.
-5. **Systemization:** variables/styles, component sets, properties, nested instances, Auto Layout.
-6. **Regression check:** сравнить скриншоты до/после систематизации — она не должна ухудшить композицию.
+1. **Токены Button, три тира.** primitive `palette/*` (сырые) → semantic (`accent/bg`, `icon/default`) alias на primitive: `sem.setValueForMode(mode, figma.variables.createVariableAlias(primVar))` → component-токены под Button (`button/primary/accent/bg/color/default`, `button/primary/accent/label/color/disabled`, `button/primary/accent/icon/color/default`, `button/md/height`, `button/md/padding-left`, …) alias на semantic. Каждому: `variable.setVariableCodeSyntax("WEB","var(--button-primary-accent-bg-color-default)")` + scopes (`["FRAME_FILL","SHAPE_FILL"]` для bg, `["GAP","WIDTH_HEIGHT"]` для spacing). *(→ tokens-and-variables.md)*
+2. **Мастер-компонент.** Заливка через `figma.variables.setBoundVariableForPaint({type:"SOLID",color:{r,g,b}},"color", bgVar)`; layout через `node.setBoundVariable("paddingLeft"|"itemSpacing", floatVar)`. Ориентиры: md высота 40px, паддинг ≥16px, радиус 8px, min-width ≥64px. *(→ components-and-slots.md#паддинги-и-min-width)*
+3. **Иконка.** Иконки — vector-компоненты: `figma.createNodeFromSvg(svg)` → `figma.createComponentFromNode(node)`, чистить `fills = []`. Цвет иконки биндить к `button/primary/accent/icon/color/default` (цепочка 3 звена, не к общему text-токену). *(→ components-and-slots.md#цвет-иконки)*
+4. **Оси вариантов.** `combineAsVariants` → сет `type × size × state`. Схему `danger` добавляешь `variant.clone()` — три ловушки: `set.appendChild(clone)`, явная позиция + `overlaps==0`, снять `effectStyleId=""`. *(→ platform-limits.md#клонирование-варианта)*
+5. **Матрица состояний в витрине.** Варианты имеют схлопнутый bbox → витрину делать `layoutMode='NONE'` + фикс-высота (`resize`) + абсолютные `x/y`. *(→ platform-limits.md#схлопнутый-bbox-витрин)*
+6. **Консолидация.** Не 4 компонента, а один сет: `type`(VARIANT) + `text`(TEXT) + `showIcon`(BOOLEAN) + `icon`(INSTANCE_SWAP):
+   - text: `const id=set.addComponentProperty("text","TEXT","Label")` → `textNode.componentPropertyReferences={characters:id}`;
+   - showIcon: `iconInstance.componentPropertyReferences={visible:boolPropId}`;
+   - icon: `addComponentProperty("icon","INSTANCE_SWAP","152:28",{preferredValues:[{type:"COMPONENT",key:c.key}]})` (**default = node id, preferredValues = key**) → `iconInstance.componentPropertyReferences={mainComponent:swapPropId}`;
+   - каждому компоненту `node.description` (purpose + usage). *(→ components-and-slots.md)*
+7. **Финальная самопроверка** (раздел ниже): скриншот ВСЕЙ витрины, мастер в панели, хвосты клона вычищены, 0 сырых заливок, слот ↔ семантика, подписи сверены.
+
+## Частые грабли (симптом → куда смотреть)
+| Симптом | Куда | Фикс (кратко) |
+|---|---|---|
+| Оверрайд слетел при смене варианта | `references/platform-limits.md#оверрайд-не-переживает-вариант` | что обязано пережить вариант — делай ОСЬЮ, не оверрайдом |
+| Иконка тёмная на цветном фоне | `references/components-and-slots.md#цвет-иконки` | биндить к component-токену `icon` этого варианта + завести полный `icon/*` набор в semantic |
+| INSTANCE_SWAP принёс чужой цвет/текст | `references/platform-limits.md#instance_swap-тащит-чужое-поверх-слота` | после свапа перебиндить цвет/`strokeWeight` на токен слота, проверить текстовые пропы |
+| Ряд торчит за сетом / наезжает на подписи | `references/platform-limits.md#component-set-не-авто-растёт` | после правки сета `resize` сета и states-контейнера + подписи новых рядов |
+| unloaded font | `references/use-figma-pitfalls.md#шрифты` | `characters` СТРОГО до `appendChild` в auto-layout; шрифт канала может отсутствовать |
+| get_metadata не видит страницы / component set | `references/use-figma-pitfalls.md#читающие-инструменты-врут` | звать с явным `nodeId`; сеты — через `findAllWithCriteria` |
+| Подпись значения врёт (хекс/px) | `references/file-and-build-order.md#подписи-протухают` | сверить рукописные подписи против фактических биндов |
+| Клон `danger` лёг поверх `primary` | `references/platform-limits.md#клонирование-варианта` | явно спозиционировать клон, проверить `overlaps==0`, снять effect-стиль донора |
 
 ## 🔴 Перед отчётом — финальная самопроверка (пакетный гейт, НЕ после каждого write)
 
@@ -183,6 +114,6 @@ description: >-
 7. **Новый effect/style — не дубль?** Сверять по подписи (offset/radius/alpha), а не по имени: копия легко проходит как «новый стиль».
 8. **Проверять НЕ тем шаблоном, которым чинил.** Иначе проверка подтвердит ровно то, что ты уже сделал, и выдаст ложное «ноль нарушений» (в реальной сессии — дважды подряд).
 9. **Заводя вариант — спросить, чем вызвана разница.** Состояние ≠ контент ≠ контекст ≠ геометрия. Тень по наведению — не по экрану; «генерация» — не состояние, а текст + лоадер на кнопке; высота — не ось вариантов, а ресайз инстанса с биндом токена. Иначе variant explosion.
-   **Обратная граница (не менее важная):** ось НУЖНА там, где отличие обязано пережить смену другого варианта — оверрайд там слетит молча (см. «Ограничения платформы»). Проверка на оба конца: «это правда другая сущность?» и «переживёт ли оверрайд смену состояния?».
+   **Обратная граница (не менее важная):** ось НУЖНА там, где отличие обязано пережить смену другого варианта — оверрайд там слетит молча (см. `references/platform-limits.md#оверрайд-не-переживает-вариант`). Проверка на оба конца: «это правда другая сущность?» и «переживёт ли оверрайд смену состояния?».
 10. **Подписи значений сверены с фактом?** Менял значение токена — прогони сверку рукописных подписей (хекс, размеры) против реальных значений: бинд обновился, текст нет, витрина врёт молча.
 11. **Отчитываться фактом, а не намерением** — перечитать состояние из файла и показать числа, а не «должно быть ок».
