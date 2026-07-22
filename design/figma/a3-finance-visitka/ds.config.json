@@ -1,0 +1,38 @@
+{
+  "$schema": "../design-system-index.schema.json",
+  "slug": "a3-finance-visitka",
+  "name": "A3 Финанс — сайт-визитка (фриланс-макеты)",
+  "source": {
+    "figma_url": "https://www.figma.com/design/uxJWafaNxGCMyGOamuoTWA/A3?node-id=120-2",
+    "file_key": "uxJWafaNxGCMyGOamuoTWA",
+    "scope": "single_site_mockups",
+    "source_type": "project_specific"
+  },
+  "ingest": {
+    "status": "indexed",
+    "last_ingested_at": "2026-07-13",
+    "manifest_path": "design/figma/a3-finance-visitka/_scan/manifest.md",
+    "census_path": "design/figma/a3-finance-visitka/_scan/census.md"
+  },
+  "foundation": {
+    "path": "design/figma/a3-finance-visitka/foundation.md",
+    "semantic_modes": [],
+    "variable_collections": [],
+    "notes": [
+      "Системы токенов нет: единственная переменная H2 (JetBrains Mono 32), все значения захардкожены.",
+      "foundation.md содержит наблюдённые raw-значения как сырьё для будущей DS.",
+      "Google Sans в заголовках — лицензионный риск, заменить при пересборке."
+    ]
+  },
+  "components": {
+    "map_path": "design/figma/a3-finance-visitka/components.md",
+    "profile_dir": "design/figma/a3-finance-visitka/components",
+    "component_count": 8,
+    "component_set_count": 2,
+    "categories": ["actions", "forms", "icons", "brand"]
+  },
+  "contracts": {
+    "component_contracts_path": "design/figma/a3-finance-visitka/component-contracts.json",
+    "code_connect_status": "not_configured"
+  }
+}

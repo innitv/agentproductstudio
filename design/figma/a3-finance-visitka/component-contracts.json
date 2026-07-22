@@ -1,0 +1,132 @@
+{
+  "$schema": "../component-contracts.schema.json",
+  "designSystemSlug": "a3-finance-visitka",
+  "fileKey": "uxJWafaNxGCMyGOamuoTWA",
+  "fileName": "A3 (фриланс-макеты визитки РНКО «А3 Финанс»)",
+  "codeConnectStatus": "not_configured",
+  "codeConnectCheckedAt": "2026-07-13",
+  "components": [
+    {
+      "name": "btn-cta",
+      "nodeId": "3873:96",
+      "source": {
+        "designSystemSlug": "a3-finance-visitka",
+        "figmaUrl": "https://www.figma.com/design/uxJWafaNxGCMyGOamuoTWA/A3?node-id=3873-96",
+        "category": "actions"
+      },
+      "codeSource": "not_implemented_yet",
+      "codeExport": "ButtonPrimary",
+      "expectedVariants": {
+        "Version": ["Mobile", "Desktop", "Version3", "Version4", "Version5", "Version6", "Version7", "Version8"]
+      },
+      "slots": ["label"],
+      "resizeContract": "hug по контенту; паддинги mobile 36x28 / desktop 21x17; radius 8",
+      "requiredStates": ["default", "hover", "pressed", "focus"],
+      "storyTestLocator": "button-primary"
+    },
+    {
+      "name": "btn-secondary",
+      "nodeId": "3873:109",
+      "source": {
+        "designSystemSlug": "a3-finance-visitka",
+        "figmaUrl": "https://www.figma.com/design/uxJWafaNxGCMyGOamuoTWA/A3?node-id=3873-109",
+        "category": "actions"
+      },
+      "codeSource": "not_implemented_yet",
+      "codeExport": "ButtonSecondary",
+      "expectedVariants": {
+        "Version": ["Mobile", "Desktop"],
+        "Variant": ["Default", "Inverted"]
+      },
+      "slots": ["label"],
+      "resizeContract": "DEFECT: имена вариантов дублируются по 4 раза (стейты не вынесены в property) — set структурно ошибочен, перед reuse требуется пересборка осей на Version x Variant x State",
+      "requiredStates": ["default", "hover", "pressed", "focus"],
+      "storyTestLocator": "button-secondary"
+    },
+    {
+      "name": "btn-close",
+      "nodeId": "3565:41",
+      "source": {
+        "designSystemSlug": "a3-finance-visitka",
+        "figmaUrl": "https://www.figma.com/design/uxJWafaNxGCMyGOamuoTWA/A3?node-id=3565-41",
+        "category": "actions"
+      },
+      "codeSource": "not_implemented_yet",
+      "codeExport": "ButtonClose",
+      "expectedVariants": {
+        "size": ["36-desktop", "50-mobile"]
+      },
+      "resizeContract": "master скрыт внутри мобильной шторки «Документы»; размер масштабируется instance-ом, а не variant-ом",
+      "requiredStates": ["default", "hover", "pressed", "focus"],
+      "storyTestLocator": "button-close"
+    },
+    {
+      "name": "check_box",
+      "nodeId": "3907:331",
+      "source": {
+        "designSystemSlug": "a3-finance-visitka",
+        "figmaUrl": "https://www.figma.com/design/uxJWafaNxGCMyGOamuoTWA/A3?node-id=3907-331",
+        "category": "forms"
+      },
+      "codeSource": "not_implemented_yet",
+      "codeExport": "Checkbox",
+      "expectedVariants": {
+        "checked": ["true", "false"]
+      },
+      "resizeContract": "24x24; DEFECT: в desktop-форме 3565:223 лежит фрейм-двойник с тем же именем вместо instance",
+      "requiredStates": ["default", "checked", "focus", "error"],
+      "storyTestLocator": "checkbox"
+    },
+    {
+      "name": "icon-file-pdf",
+      "nodeId": "3565:47",
+      "source": {
+        "designSystemSlug": "a3-finance-visitka",
+        "figmaUrl": "https://www.figma.com/design/uxJWafaNxGCMyGOamuoTWA/A3?node-id=3565-47",
+        "category": "icons"
+      },
+      "codeSource": "not_implemented_yet",
+      "codeExport": "IconFilePdf",
+      "expectedVariants": {
+        "size": ["24", "48"]
+      },
+      "resizeContract": "master внутри шторки «Документы»; размеры разъезжаются между instance-ами (23.49 vs 48)",
+      "requiredStates": ["default"],
+      "storyTestLocator": "icon-file-pdf"
+    },
+    {
+      "name": "logo-a3-finance",
+      "nodeId": "3565:133",
+      "source": {
+        "designSystemSlug": "a3-finance-visitka",
+        "figmaUrl": "https://www.figma.com/design/uxJWafaNxGCMyGOamuoTWA/A3?node-id=3565-133",
+        "category": "brand"
+      },
+      "codeSource": "not_implemented_yet",
+      "codeExport": "LogoA3Finance",
+      "expectedVariants": {
+        "variant": ["default"]
+      },
+      "resizeContract": "master внутри Mobile-фрейма; исходники семейства логотипов на странице 0:1 — плоские vectors без компонентов",
+      "requiredStates": ["default"],
+      "storyTestLocator": "logo"
+    },
+    {
+      "name": "btn-up",
+      "nodeId": "3725:55",
+      "source": {
+        "designSystemSlug": "a3-finance-visitka",
+        "figmaUrl": "https://www.figma.com/design/uxJWafaNxGCMyGOamuoTWA/A3?node-id=3725-55",
+        "category": "actions"
+      },
+      "codeSource": "not_implemented_yet",
+      "codeExport": "ButtonScrollTop",
+      "expectedVariants": {
+        "variant": ["default"]
+      },
+      "resizeContract": "hidden во всех вхождениях — компонент заготовлен, но не включён ни на одном экране",
+      "requiredStates": ["default", "hover", "focus"],
+      "storyTestLocator": "button-scroll-top"
+    }
+  ]
+}

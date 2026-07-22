@@ -39,15 +39,17 @@
 - **Figma НЕ умеет `max-content`** — «HUG-контейнер по самой широкой опции + все опции одной ширины» через auto-layout невозможно (HUG-родитель + FILL-дети схлопывается; HUG-дети едут по тексту). Для content-меню — ручной расчёт: измерить `max(opt.width)` → `container.counterAxisSizingMode="FIXED"`+`resize` → опции `layoutSizingHorizontal="FILL"`. Для select — просто задать FIXED ширину под набор.
 - **В CSS проще:** select — `.dropdown{width:<fix>px}` + опция `justify-content:space-between`; menu — `width:max-content` + опция `width:100%`.
 
-## Контент в slot внутри инстанса нельзя (issue #351)
-🔴 **Добавить контент в slot ВНУТРИ ИНСТАНСА в общем случае НЕЛЬЗЯ.**
+## Контент в slot инстанса — МОЖНО создавать/клонировать; нельзя только ПЕРЕМЕЩАТЬ (issue #351)
+🔴 **Проверено 2026-07: в slot ИНСТАНСА МОЖНО добавлять НОВЫЕ и КЛОНИРОВАННЫЕ ноды.** `figma.createText()` / `node.clone()` (нода БЕЗ родителя) + `slot.appendChild(...)` — работает. Так наполняют слоты инстансов из плагина (напр. разный контент модалок).
 
-- **Симптом:** Figma защищает структуру инстанса — перемещение/`appendChild` узла в slot инстанса кидает «Cannot move node. New parent is an instance or is inside of an instance» (офиц. открытый issue [figma/plugin-typings#351](https://github.com/figma/plugin-typings/issues/351)).
-- **Фикс:** контент slot задавать на уровне **МАСТЕРА** либо через свойства/override; `detachInstance()` рвёт связь с мастером — крайняя мера.
-- Помни: любая такая ошибка откатывает ВЕСЬ write-скрипт.
+- **Что #351 реально блокирует:** ПЕРЕМЕЩЕНИЕ уже-парентованной ноды (особенно лежащей внутри другого инстанса) в slot инстанса → «Cannot move node. New parent is an instance or is inside of an instance» ([figma/plugin-typings#351](https://github.com/figma/plugin-typings/issues/351)). Обход: не перемещать существующую — **СОЗДАТЬ/КЛОНИРОВАТЬ** и `appendChild`.
+- 🔴 **Грабля раскладки слота (почему «контент есть, а пусто»):** `createSlot()` даёт slot с `layoutMode=NONE` + фикс-высота + `clipsContent=true`. Добавленный контент садится на абсолютную позицию донора и ОБРЕЗАЕТСЯ. Фикс: перевести master-slot в auto-layout — `layoutMode='VERTICAL'`, `primaryAxisSizingMode='AUTO'` (HUG высота), `layoutSizingHorizontal='FILL'`, `clipsContent=false`, padding 0. Тогда контент течёт и виден; пропагируется в инстансы.
+- **Замена контента в инстансе:** очистить slot (см. ниже) → `appendChild` новый/клон.
+- 🔴 **Клон в слоте инстанса ЗАМОРОЖЕН — не отслеживает мастер.** `master.clone()` + appendChild даёт НЕЗАВИСИМУЮ копию: поменял дефолт-контент в мастере → клоны в инстансах НЕ обновятся (визуально не отличить, ловится только интроспекцией). Живое наследование = **ПУСТОЙ слот** (инстанс показывает дефолт мастера, обновляется). Итого: контент фиксирован → клон ок; мастер будет меняться → либо пустой слот (инерит live), либо переклонировать ПОСЛЕ правок мастера. (Реальный случай: doc-строки модалки склонировали в сцены ДО конвертации в Function button; после конвертации мастера сцены остались с bespoke-клоном — пришлось переклонировать.)
+- Помни: любая ошибка write откатывает ВЕСЬ скрипт — дробить на мелкие.
 
 ## Очистка inherited-детей slot
-Что на инстансе реально работает — очистка inherited-детей slot (**наблюдение канала use_figma, 2026-07**; `remove` inherited проходит, `appendChild` — нет):
+Очистка inherited-детей slot (**наблюдение канала use_figma, 2026-07**; `remove` inherited проходит; `appendChild` НОВЫХ/клонированных нод — тоже, см. секцию выше):
 
 1. inherited children (`I`-префикс) при `remove` ПЕРЕИНДЕКСИРУЮТСЯ → удалять только `while(slot.children.length) slot.children[0].remove()`, не по снапшоту `[...slot.children]`;
 2. часть inherited (FRAME-обёртки) кидают «not found» → робастный clear: try `[0]`, catch try `[last]`, счётчик «застрял → break»;
@@ -78,6 +80,8 @@
 ## Слот иконки
 - инстанс-плейсхолдер; `showIcon` BOOLEAN → `iconInstance.componentPropertyReferences={visible:boolPropId}`;
 - `icon` INSTANCE_SWAP → `{mainComponent:swapPropId}`; набор через `set.editComponentProperty(iconKey,{preferredValues:[...]})`.
+- 🔴 **«Иконка невидима» после `swapComponent`+`resize` в clipsContent-обёртке.** Если иконка-инстанс лежит в фрейме-обёртке (`chevron-slot`/`icon-slot`) с `layoutMode=NONE` + `clipsContent=true`, после свапа/ресайза инстанс может сместиться на размер обёртки (напр. y+20 в 20px-фрейме) и уйти ЦЕЛИКОМ под отсечение → вектор корректный (visible, цвет, stroke), но обрезан = «пусто/несработавший свап». **Диагностика:** сравнить `absoluteBoundingBox` вектора с bbox обёртки — вектор ниже/правее фрейма. **Фикс:** обёртку перевести в auto-layout (`HORIZONTAL`, `primaryAxisAlignItems='CENTER'`, `counterAxisAlignItems='CENTER'`, `clipsContent=false`) — иконка центрируется независимо от размера, инстансы подтягиваются. Проверять bbox вектора ОТНОСИТЕЛЬНО слота, а не только его `visible`/цвет.
+- **Не вращать иконку под направление** (частая ошибка вместо отдельных глифов): поворот вектора внутри clipped-компонента ненадёжно рендерится в ресайзнутых инстансах. Направленные варианты (chevron up/down/left/right) — ОТДЕЛЬНЫЕ vector-компоненты с baked-геометрией через SVG-path, не `rotation`.
 
 ## Проперти текста
 - `const id=set.addComponentProperty("text","TEXT","...")` → `textNode.componentPropertyReferences={characters:id}`. Ключ для override читать с САМОГО инстанса.

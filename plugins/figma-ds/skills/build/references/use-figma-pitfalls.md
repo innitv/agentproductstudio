@@ -18,6 +18,8 @@
 - `figma.currentPage = page` не работает — только `await figma.setCurrentPageAsync(page)`.
 - **Правильные имена:** `figma.variables.getLocalVariableCollectionsAsync()`; `figma.variables.getLocalVariablesAsync("COLOR"|"FLOAT")`.
 - Порядок: создать → выставить layout/props → resize/позиции. `create_new_file` требует `planKey` (team::...).
+- 🔴 **`createFrame`/`createComponent`/`clone` садятся на `figma.currentPage`** — если это Cover/чужая страница, новый мастер/панель «насорят» там (реальный случай: субагент собрал компонент+панель, они улетели на Cover). Перед созданием: `await figma.setCurrentPageAsync(целеваяPage)` ИЛИ сразу после — `targetParent.appendChild(node)` на нужную страницу/борд. Проверять перед отчётом, что на Cover нет мастеров/панелей.
+- **Оставлять `_debug`/тест-токены/ноды — регресс.** Тестовую переменную (напр. `menuitem/_debug_test`) или тест-текст удалять до отчёта; финальный self-check ловит по грепу имён.
 
 ## Шрифты
 - Резолвить `figma.listAvailableFontsAsync()`, грузить `loadFontAsync` перед set characters/style. Inter/JetBrains Mono есть; нужного шрифта может не быть → взять ближайший доступный аналог. Точное имя стиля критично (напр. Inter — «Semi Bold», не «SemiBold»).

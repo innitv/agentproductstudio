@@ -42,6 +42,26 @@
         "code_connect_fallback": "design/figma/shadcn-ui-components-2026/code-connect-fallback.md"
       },
       "notes": "Read-only ingest of community shadcn/Tailwind Figma kit. Use selected_design_system_slug=shadcn-ui-components-2026 for reuse/extend; run focused reads before implementation because one component set reports existing Figma errors."
+    },
+    {
+      "slug": "a3-finance-visitka",
+      "name": "A3 Финанс — сайт-визитка (фриланс-макеты)",
+      "file_key": "uxJWafaNxGCMyGOamuoTWA",
+      "figma_url": "https://www.figma.com/design/uxJWafaNxGCMyGOamuoTWA/A3?node-id=120-2",
+      "status": "indexed",
+      "source_type": "project_specific",
+      "code_connect_status": "not_configured",
+      "last_ingested_at": "2026-07-13",
+      "paths": {
+        "root": "design/figma/a3-finance-visitka",
+        "source": "design/figma/a3-finance-visitka/source.md",
+        "census": "design/figma/a3-finance-visitka/_scan/census.md",
+        "manifest": "design/figma/a3-finance-visitka/_scan/manifest.md",
+        "foundation": "design/figma/a3-finance-visitka/foundation.md",
+        "components": "design/figma/a3-finance-visitka/components.md",
+        "component_contracts": "design/figma/a3-finance-visitka/component-contracts.json"
+      },
+      "notes": "Фриланс-поставка, а не DS: токенов нет (1 переменная H2), 2 дефектных component set (дубли имён вариантов, стейты как VersionN), masters спрятаны внутри макетов, content-block/формы/модалки не компонентизированы. Прямой reuse запрещён; режим — rebuild с извлечением палитры и стейт-матрицы из foundation.md. Remote metadata по файлу таймаутится — читать через Figma Desktop MCP."
     }
   ]
 }
