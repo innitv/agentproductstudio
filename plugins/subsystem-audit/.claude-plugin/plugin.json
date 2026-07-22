@@ -1,0 +1,10 @@
+{
+  "name": "subsystem-audit",
+  "description": "Переносимая методология тщательного аудита подсистемы: роль/сильные стороны/пробелы, сравнение с лучшими практиками на GitHub по реальным URL, верификация находок первоисточником, отчёт в файл + сжатый P0/P1/P2 в чат, и инженерные эвристики против ложных находок и молчаливого дрейфа.",
+  "author": {
+    "name": "ignatovivin"
+  },
+  "homepage": "https://github.com/innitv/agentproductstudio",
+  "repository": "https://github.com/innitv/agentproductstudio",
+  "license": "MIT"
+}

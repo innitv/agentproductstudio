@@ -67,6 +67,18 @@ description: >-
 - **Доковая типо-иерархия и воздух:** page-title > section-label (mono caps) > body-описание > caption. Переиспользовать продуктовые стили; page-heading допустим one-off, чтобы не засорять type-scale.
 - **Панели-карточки** (titled auto-layout + тонкий border + радиус) в общем board с крупным gap.
 
+### 6.1 Каталог визуальных приёмов (брать точечно, по наполнению)
+
+Приёмы подачи зрелых DS (Material 3 / Carbon / Polaris / Atlassian). **Правило отбора: подача от наполнения, не от шаблона** — не тащить тяжёлые паттерны больших библиотек на маленькую/сфокусированную систему just because. Брать приём только там, где он улучшает читаемость реального контента.
+
+- **Anatomy-диаграмма:** изображение/инстанс компонента + **буквенные выноски A/B/C** с легендой; отдельная диаграмма на вариант. Оформить как переиспользуемый паттерн-компонент выноски. Только если реально проясняет компонент. [Carbon](https://carbondesignsystem.com/components/button/usage)
+- **Do/Don't — парные карточки:** две колонки, **зелёная планка = Do / красная = Don't** сверху, слот под картинку, подпись-предложение. Самый узнаваемый приём — но нужен большим библиотекам; для маленькой системы обычно избыточен. [Carbon](https://carbondesignsystem.com/components/button/usage)
+- **Статус-бейджи** (`Stable / Beta / Deprecated`) как chip в навигации/на обложках — только когда статусов реально несколько. [Polaris](https://polaris.shopify.com/components/actions/button)
+- **Токен-палитра:** свотч = **имя токена + значение** (обязательный минимум); при желании — roles явно (`primary / on-primary / primary-container`) свотч + пояснение, light/dark значения. Цвет уместно давать **таблицей Name / Value / Description**, а не только сеткой. [M3 color roles](https://m3.material.io/styles/color/roles) · [Polaris tokens](https://polaris.shopify.com/tokens/color)
+- **Type-specimen строка:** роль → пример текста → size / lh / weight / имя токена (напр. Body Medium 14, Label Small 11; lh ≈1.2 крупное / ≈1.5 body). [M3 type scale](https://m3.material.io/styles/typography/type-scale-tokens)
+- **Spacing — токен + визуальный бар рядом** (Token / rem / px / bar), не просто цифры; числовая шкала с группировкой Small/Medium/Large. [Carbon spacing](https://carbondesignsystem.com/guidelines/spacing/overview) · [Atlassian](https://atlassian.design/foundations/spacing)
+- **Навигация страницы-доки:** левый sidebar по категориям + правый «On this page» rail + breadcrumbs — для крупных систем; маленькой хватает cover + page-интро.
+
 **Status-правило:** Figma DS-deliverable без cover-страницы и документации ключевых компонентов имеет presentation-статус не выше `passed_with_notes`; финальный `ready` требует и presentation-слоя, и visual/structural evidence.
 
 Источники подачи: [Figma Learn — Document your system](https://help.figma.com/hc/en-us/articles/14552804059927-Lesson-4-Document-and-manage-your-system) · [Figma Blog — Design Systems 103: Documentation](https://www.figma.com/blog/design-systems-103-documentation-that-drives-adoption/) · [Simple Design System (Figma Community)](https://www.figma.com/community/file/1380235722331273046/simple-design-system) · [12 Design System Examples — Figma](https://www.figma.com/resource-library/design-system-examples/).
