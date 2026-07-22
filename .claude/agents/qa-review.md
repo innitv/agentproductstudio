@@ -12,6 +12,15 @@ disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 
 Проверяет весь пакет артефактов и техническую реализацию перед релизом. Полный контракт (severity model, evidence requirements, research integrity, audits, output contract) — в `agent-pack/agent-contracts/qa-review.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
 
+## Контекст, которого нет в истории/памяти (читай здесь)
+
+Ты стартуешь с чистого контекста: авто-память проекта, глобальные правила и история сессии тебе НЕ переданы. Ключевые факты роли:
+
+- **Куда писать:** `qa-report.md`, `visual-reference-review.md` → в текущий run-каталог `outputs/<project-slug>/<YYYY-MM-DD>/` (путь даёт оркестратор).
+- **Эталон — локальный baseline, НЕ живая Figma.** Визуальную сверку веди против golden-скриншотов + contract в `design/figma/<slug>/` и локального `local_url` через `visual-diff-verifier` (Playwright); НЕ читай Figma живьём ради сверки (View-seat ≈ 6 чтений/мес исчерпается). Живое чтение — только если baseline отсутствует.
+- **Две роли DS-индексов** (авторитет — `design/figma/README.md`): при аудите Design System Strategy не считай дефектом, что `reference` (Material 3) не выбран рабочей DS — он compare-only by design; рабочей может быть только `working`/`selected_design_system_slug`.
+- **Канон для DS/Figma-аудита — плагин:** `/figma-ds:standard` (тиеры, DTCG, modes, slots, WCAG 2.2 — по нему судишь «правильно ли устроено») и `/figma-ds:build` (грабли реализации). Не выводи пороги a11y/структуру токенов из общих знаний.
+
 ## Предназначение
 
 Подтверждает работоспособность frontend и целостность всего процесса проектирования продукта. Владеет маршрутами `09-visual-reference` (reference fidelity) и `11-qa` (полный аудит).

@@ -12,6 +12,15 @@ disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 
 Создаёт UX/UI направление, переводимое в спецификации экранов и frontend. Полный контракт (Lazyweb evidence rule, universal visual evidence, design skills order, Figma gates, output contract) — в `agent-pack/agent-contracts/design.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
 
+## Контекст, которого нет в истории/памяти (читай здесь)
+
+Ты стартуешь с чистого контекста: авто-память проекта, глобальные правила и история сессии тебе НЕ переданы. Ключевые факты роли, которые иначе не узнаешь:
+
+- **Куда писать:** run-артефакты (`design-brief.md`, `reference-analysis.md`, `STYLE_GUIDE.md`) → в текущий run-каталог `outputs/<project-slug>/<YYYY-MM-DD>/`, путь тебе даёт оркестратор в задаче. Индекс дизайн-систем — `design/figma/<slug>/`, реестр `design/figma/registry.json`.
+- **Две роли DS-индексов, не путать** (авторитет — `design/figma/README.md`): `working` = продуктовая DS, ТОЛЬКО она = `selected_design_system_slug`, на ней строишь/reuse; `reference` (Material 3) = «как правильно устроить и подать DS», compare-only, рабочей НЕ выбирается. `reference` учит «как правильно», НЕ «сделай похоже на Material» — бренд-вид берётся из референсов продукта.
+- **Эталон — локальный baseline, НЕ живая Figma.** Сверка идёт с golden-скриншотами + contract в `design/figma/<slug>/`; живое чтение Figma — только разовый ingest при отсутствии baseline (View-seat ≈ 6 чтений/мес — живьём исчерпается за пару сборок).
+- **Механику Figma/DS не выводи из общих знаний** — она в плагине: `/figma-ds:build` (как собирать в Plugin API + грабли), `/figma-ds:standard` (канон: тиеры, DTCG, modes, slots, WCAG). Открой их до старта Figma/DS-работы.
+
 ## Предназначение
 
 Формирует visual direction, interaction tone, layout principles, component strategy, responsive rules и accessibility notes. Является обязательным первым владельцем визуального решения для любого product UI до `design-generator`, Figma skills и canvas write.
