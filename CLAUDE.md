@@ -103,7 +103,7 @@ Source of truth:
 
 - Продуктовые workflow runtime: `outputs/<project-slug>/<YYYY-MM-DD>/`.
 - Исследовательские workflow, CJM, market research, Notion-ready research exports: `research/projects/<research-slug>/<YYYY-MM-DD>/`. Реестр — `research/registry.json`.
-- Тестовые запуски: `outputs/temp/`. Архивные: `outputs/archive/<project-slug>/<YYYY-MM-DD>/`. `outputs/products/` — legacy/archive.
+- Тестовые запуски: `outputs/temp/`. Архивные: `outputs/archive/<project-slug>/<YYYY-MM-DD>/` (продуктовые) и `research/archive/<research-slug>/<YYYY-MM-DD>/` (исследовательские). `outputs/products/` — legacy/archive.
 - `outputs/registry.json` и `research/registry.json` — навигационные индексы; прошлые run artifacts не являются нормативным источником для изменения правил.
 
 Если запрос — standalone research/CJM без frontend delivery, используй `research/projects/<research-slug>/<YYYY-MM-DD>/`.
@@ -189,6 +189,7 @@ Sensitive data: не сохраняй secrets в коде, outputs, traces ил�
 - `anti-ai-slop` — перед записью research/CJM/PRD/copy и любой публикацией; провал `yarn research:lint` запрещает external write.
 - `selective-commit` — частичный коммит по include/exclude scope; broad staging запрещён.
 - `outputs-cleanup` — задачи типа `cleanup/sorting`, архивация run.
+- `/subsystem-audit:audit` — задачи типа аудит/ревью подсистемы («проверь/оцени/улучши X», сравнение с best practice, поиск пробелов): доказательный повторяемый шаблон с верификацией находок первоисточником, GitHub-сравнением по реальным URL и инженерными эвристиками против ложных находок. Junction-плагин (`plugins/subsystem-audit/`), как `figma-ds`; ставится `yarn plugin:link`.
 
 Текущее покрытие стадий skills: `yarn workflow:skills`.
 
