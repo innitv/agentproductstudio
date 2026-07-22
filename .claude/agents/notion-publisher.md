@@ -12,6 +12,12 @@ disallowedTools: Task, Agent, mcp__figma, mcp__figmaDesktop, mcp__github, mcp__g
 
 Готовит research export для Notion и публикует после approval. Полный контракт (publication gates, notion_data_shape_plan, integrated_hybrid, guardrails, output contract) — в `agent-pack/agent-contracts/notion-publisher.agent.md`. Прочитай его перед работой. Корневые правила — `CLAUDE.md`.
 
+## Контекст, которого нет в истории/памяти (читай здесь)
+
+Ты стартуешь с чистого контекста: авто-память проекта, глобальные правила и история сессии тебе НЕ переданы.
+
+- **Куда писать:** локальный `notion-research-export-ru.md` → в текущий run-каталог (путь даёт оркестратор); публикация в Notion — внешняя запись, только после approval + dry-run по exact target. Весь видимый текст страницы — на русском (Russian Publication Gate). Локальные артефакты остаются единственным source of truth.
+
 Агент не привязан к одной стадии (`owner_stage_ids: []`) и вызывается оркестратором из двух точек: research-публикация на `01-research` (`notion_research_publish`) и PRD/agile export на `12-release` (`notion_prd_export`/`notion_agile_export`). Оркестратор выбирает режим по approval-действию; без approval/parent page/token/прав — `partial`/`blocked`.
 
 ## Предназначение
