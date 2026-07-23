@@ -11,6 +11,8 @@
     "build": "yarn build:studio",
     "build:studio": "yarn typecheck && node node_modules/vite/bin/vite.js build --config apps/frontend/vite.config.ts",
     "preview": "node node_modules/vite/bin/vite.js preview --config apps/frontend/vite.config.ts --host 127.0.0.1",
+    "demo:dev": "node node_modules/vite/bin/vite.js --config apps/contractor-payment-demo/vite.config.ts --host 127.0.0.1",
+    "demo:build": "tsc --noEmit -p apps/contractor-payment-demo/tsconfig.json && node node_modules/vite/bin/vite.js build --config apps/contractor-payment-demo/vite.config.ts",
     "qa:studio": "yarn build:studio && node tooling/scripts/run-and-log.mjs playwright-studio \"node tooling/scripts/run-playwright-with-preview.mjs --app=frontend tests/playwright/studio.spec.ts\"",
     "qa:playwright": "yarn qa:studio && yarn qa:firecrawl",
     "qa:firecrawl": "yarn build:studio && node tooling/scripts/run-and-log.mjs playwright-firecrawl \"node tooling/scripts/run-playwright-with-preview.mjs --app=frontend tests/playwright/firecrawl.spec.ts\"",

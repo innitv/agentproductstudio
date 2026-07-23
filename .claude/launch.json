@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "contractor-payment-demo",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["demo:dev"],
+      "port": 5173
+    }
+  ]
+}
