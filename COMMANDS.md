@@ -64,6 +64,14 @@ yarn workflow:test-agent-capabilities
 yarn workflow:test-agent-output-skeletons
 ```
 
+Сверить отчёт субагента с фактическим состоянием диска и проверок (Agent Output Critic):
+
+```bash
+yarn agent:verify-output <report-file> --run-dir outputs/<project-slug>/<YYYY-MM-DD>
+```
+
+Команда проверяет, что заявленные в отчёте файлы существуют и непусты, что заявленные пройденными проверки действительно проходят, и что статус не противоречит фактам; для run-каталога дополнительно прогоняет `workflow:validate`. Вердикт `rejected` даёт ненулевой код выхода. Исполняются только команды из allowlist внутри `runtime/typescript/agent-output-critic.ts` — строки из отчёта никогда не исполняются. Как этим пользоваться — `docs/architecture/agent-output-critic.md`; регрессия — `yarn workflow:test-agent-output-critic`.
+
 Проверить standard route без visual reference:
 
 ```bash

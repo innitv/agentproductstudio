@@ -24,6 +24,7 @@
 - `approval-gate.ts` — локальный helper approval records для внешних записей.
 - `doctor.ts` — диагностика структуры проекта, шаблонов и optional provider keys.
 - `context-truncator.ts` — State Truncation Gate для поздних стадий.
+- `agent-output-critic.ts` — Agent Output Critic: сверка отчёта субагента с фактическим состоянием диска, git и реально прогнанных проверок; вердикт `accepted`/`accepted_with_warnings`/`rejected` (`yarn agent:verify-output`, инструкция — `docs/architecture/agent-output-critic.md`).
 - `agent-metadata.ts` — парсинг и semantic validation YAML frontmatter в `agent-pack/agent-contracts/*.agent.md`, включая сверку artifact inputs/outputs с `routeTools`.
 - `agents.registry.ts`, `agents.sdk.ts`, `route.config.ts` — регистрация агентов и маршрутов для инспекции/совместимости.
 
@@ -76,6 +77,7 @@ yarn workflow:approvals outputs/<project-slug>/<YYYY-MM-DD>
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
 yarn workflow:doctor
+yarn agent:verify-output <report-file> --run-dir outputs/<project-slug>/<YYYY-MM-DD>
 yarn research:run research/projects/<research-slug>/<YYYY-MM-DD> ["research query"]
 yarn reference:scan "<reference url>" [slug]
 yarn reference:diff reports/visual-review/<reference-slug> reports/visual-review/<local-slug> [output-dir]

@@ -39,7 +39,7 @@ disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 5. **Traceability Audit**: `research/JTBD/scenario-flow -> PRD requirement -> IA node -> design/screen -> copy -> prototype -> frontend/test signal`; разрыв для `must` = blocker/high.
 6-8. Соответствие PRD/MoSCoW, согласованность IA/screens/prototype, проверка claims (evidence или `[needs validation]`).
 9. **Визуальная скриншот-сверка** через skill `visual-diff-verifier` (Playwright desktop+mobile; desktop-only запрещён для pass).
-10-13. Accessibility/responsive/keyboard, **Negative & Edge Path Pass**, Figma handoff fidelity, design-engineering (motion/focus/hover/reduced-motion). Каждый a11y-finding привязывать к конкретному критерию **WCAG 2.2 AA** (`1.4.3 Contrast`, `2.1.1 Keyboard`, `4.1.2 Name/Role/Value`), а не к «неудобно»; при доступности инструмента прогнать axe-core/Lighthouse и приложить результат, `experience_based` — только fallback с обоснованием.
+10-13. Accessibility/responsive/keyboard (для мобильной поверхности — **Mobile Device Acceptance Gate** через skill `design-engineering`), **Negative & Edge Path Pass**, Figma handoff fidelity, design-engineering (motion/focus/hover/reduced-motion). Каждый a11y-finding привязывать к конкретному критерию **WCAG 2.2 AA** (`1.4.3 Contrast`, `2.1.1 Keyboard`, `4.1.2 Name/Role/Value`), а не к «неудобно»; при доступности инструмента прогнать axe-core/Lighthouse и приложить результат, `experience_based` — только fallback с обоснованием.
 14-15. Аналитика/PII и **Security & Sensitive Data Pass**. Дополнительно — **hallucinated/slopsquatted зависимости**: каждый импортируемый пакет обязан быть в `package.json`/lockfile и быть реальным; несовпадение = `high`/`critical`.
 16-17. Результаты тестов + **Devil's Advocate / False Positive Pass**.
 18-19. **Severity Matrix** (blocker/critical/high/medium/low/info) и итоговый вердикт `pass|pass_with_known_limitations|fail|blocked`.
@@ -55,6 +55,7 @@ disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 - **Bespoke UI Audit**: `fail`, если используются шаблонные компоненты/готовые UI-заготовки вместо bespoke на чистом Tailwind/HTML/React.
 - Нет релиза, если primary flow не работает или падает.
 - Motion не passed при `transition: all`, отсутствии reduced-motion fallback, hover на touch или отсутствии видимого focus/active.
+- **Mobile Device Acceptance Gate** (норма — skill `design-engineering`): без приёмки в профиле устройства (`isMobile` + `hasTouch`, реальные тач-жесты) с пятью сценариями мобильная поверхность не получает **ни `pass`, ни `pass_with_known_limitations`** — это `blocker`, вердикт `blocked`; пропущенная проверка не является «известным ограничением». Узкий desktop-вьюпорт приёмкой не считается. При выполненной приёмке без строки `engine_limitation` (Chromium ≠ WebKit) потолок — `pass_with_known_limitations`. Evidence — в секцию `Responsive`.
 - Figma surface не passed без `figma-layout-ir.json` до write и `figma-visual-qa.json` после; при `ready_allowed=false` -> `fail/blocked` для must-scope.
 - Каждый finding с evidence; нет `pass` без Evidence Matrix, Severity Matrix и списка skipped/unavailable checks.
 - 100% pass без negative/edge проверки требует Devil's Advocate note; иначе не выше `pass_with_known_limitations`.

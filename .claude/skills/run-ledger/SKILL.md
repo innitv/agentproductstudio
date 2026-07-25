@@ -16,7 +16,8 @@ description: Использовать при старте продуктовог
 
 ## Ключевые шаги
 - Ledger до стадий: `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, `run-state.json`, `run-meta.json`, `artifact-manifest.json`, `run-index.md`.
-- После этапа: в `handoff-bundle.md` — completed artifacts, решения, риски, следующий артефакт; в `stage-gate-ledger.md` — статус, gate notes, validation.
+- После этапа: в `handoff-bundle.md` — completed artifacts, решения, риски, следующий артефакт; в `stage-gate-ledger.md` — статус, gate notes, validation, **вердикт Agent Output Critic** для делегированных стадий.
+- Для стадии субагента: `yarn agent:verify-output <отчёт>`, вердикт пишется в ledger. `rejected` несовместим с `success` — отчёт заявляет, Critic сверяет с диском, git и валидатором.
 - `inputs_used` — реально прочитанные файлы, а не список по умолчанию.
 - Пропуски пишутся явно: `skipped_with_reason`, `skipped_by_scale`, `partial`, `blocked`. Молчаливый пропуск запрещён.
 - Масштаб (`full`/`increment`/`patch`, CLAUDE.md §0.2) фиксируется на старте в `run-plan.md` и `run-state.json`; стадии вне масштаба перечисляются как `skipped_by_scale`. Понижать масштаб задним числом нельзя — валидатор отклонит.

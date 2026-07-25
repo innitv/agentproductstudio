@@ -11,6 +11,7 @@
     "inputs_used": { "type": "array", "items": { "type": "string" } },
     "skills_used": { "type": "array", "items": { "type": "string" } },
     "outputs": { "type": "object" },
+    "surface_output": { "type": "object" },
     "assumptions": { "type": "array", "items": { "type": "string" } },
     "risks": { "type": "array", "items": { "type": "string" } },
     "open_questions": { "type": "array", "items": { "type": "string" } },

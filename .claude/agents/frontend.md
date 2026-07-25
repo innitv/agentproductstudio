@@ -42,7 +42,7 @@ disallowedTools: mcp__notion, mcp__github, mcp__gitlab, Task, Agent
 7. **Component Architecture** (composition over configuration), state machine/симулятор со скелетонами.
 8. Адаптивность и A11y (aria-labels, семантика, keyboard focus, цвет не единственный индикатор), анонимная аналитика без PII.
 9. **Motion polish** (transitions <300ms, без `transition: all`, hover только `hover: hover and pointer: fine`, `prefers-reduced-motion`).
-10. **Frontend QA Inventory** + desktop/mobile screenshot evidence; state catalog/Storybook при запросе.
+10. **Frontend QA Inventory** + desktop/mobile screenshot evidence; для мобильной поверхности — **Mobile Device Acceptance Gate** через skill `design-engineering` (профиль устройства, пять сценариев, `engine_limitation`); state catalog/Storybook при запросе.
 11. Typecheck, lint, build, автотесты; исправить ошибки. Записать `frontend-result.md`.
 
 ## Обязательные результаты
@@ -55,6 +55,7 @@ disallowedTools: mcp__notion, mcp__github, mcp__gitlab, Task, Agent
 - Безопасность секретов: не hardcode ключей/токенов; переменные окружения. Минимизация зависимостей.
 - **Figma visual QA / Layout IR fidelity**: не `success`, если `figma-visual-qa.json` отсутствует/`ready_allowed=false`/unresolved blocked checks, либо не реализованы route/zones/copy-fit из `figma-layout-ir.json` без deviation.
 - **Evidence-first UI**: визуально значимые изменения требуют browser/Playwright desktop и mobile checks либо честный `blocked`/`partial`.
+- **Mobile Device Acceptance Gate** (норма — skill `design-engineering`): мобильная поверхность не `success` без приёмки в **профиле устройства** (`isMobile` + `hasTouch`, реальные тач-жесты) с пятью сценариями и строкой `engine_limitation` в `frontend-result.md`. Узкий desktop-вьюпорт (`setViewportSize`) приёмкой не считается — картинка похожа, touch/safe-area/`visualViewport` не воспроизводятся.
 - **Surface / Primary app flow coverage first**: не `success` без карты coverage/deviation и рабочего сценария от entry point до completion evidence.
 - **Modular Views Architecture**: презентационные страницы в `apps/frontend/src/views/`; `ConsoleView.tsx` защищён; `App.tsx` остаётся лёгким роутером.
 - Не перезаписывать код пользователя без согласования.

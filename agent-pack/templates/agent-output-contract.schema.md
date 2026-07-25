@@ -55,6 +55,7 @@ recommended_next_step: <рекомендуемый_следующий_шаг>
 - Статус `blocked` (заблокирован) требует указания конкретного блокирующего фактора (`blocker`) и следующего необходимого действия (`next required action`).
 - Поясняющий контент пишется на русском языке; технические ключи, имена файлов, stage id, env vars и contract fields остаются на английском.
 - Если для stage нужен внешний provider, external write или model provider call, а approval отсутствует, возвращай `status: blocked` или `status: partial`, но не `success`.
+- Поля `outputs` и `surface_output.verification` — не декларация, а проверяемое утверждение: оркестратор прогоняет отчёт через Agent Output Critic (`yarn agent:verify-output`, инструкция — `docs/architecture/agent-output-critic.md`). Заявленный файл, которого нет на диске, и заявленная пройденной проверка, которая на самом деле падает, дают вердикт `rejected`, и отчёт не принимается. Заявляй только то, что реально сделал и реально прогнал.
 
 Пример:
 
