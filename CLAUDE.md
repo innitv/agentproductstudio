@@ -193,6 +193,7 @@ Sensitive data: не сохраняй secrets в коде, outputs, traces ил�
 - `anti-ai-slop` — перед записью research/CJM/PRD/copy и любой публикацией; провал `yarn research:lint` запрещает external write.
 - `selective-commit` — частичный коммит по include/exclude scope; broad staging запрещён.
 - `outputs-cleanup` — задачи типа `cleanup/sorting`, архивация run.
+- `run-retrospective` — разбор завершённого run: `yarn workflow:retro <run-dir>` считает пять метрик процесса (повторные заходы, канал находок, отклонения, долг валидатора, слепые зоны ledger), skill задаёт пороги и правило «одна находка — одно из трёх решений: машинная проверка, норма, осознанный отказ». Slash-команда `/retro`. Разбирает **хронику одного run**; расхождения устройства системы («правило заявлено, код не исполняет») — это `/subsystem-audit:audit`, не ретро.
 - `/subsystem-audit:audit` — задачи типа аудит/ревью подсистемы («проверь/оцени/улучши X», сравнение с best practice, поиск пробелов): доказательный повторяемый шаблон с верификацией находок первоисточником, GitHub-сравнением по реальным URL и инженерными эвристиками против ложных находок. Junction-плагин (`plugins/subsystem-audit/`), как `figma-ds`; ставится `yarn plugin:link`.
 
 Текущее покрытие стадий skills: `yarn workflow:skills`.
@@ -228,6 +229,7 @@ Sensitive data: не сохраняй secrets в коде, outputs, traces ил�
 
 - Управление: `/workflow-start` (начать воркфлоу, новый проект, start landing), `/workflow-resume` (продолжить запуск, resume workflow), `/workflow-status` (покажи статус, что готово), `/doctor`.
 - Этапы: `/research`, `/prd`, `/ia`, `/design`, `/screens`, `/prototype`, `/copy`, `/frontend`, `/visual-diff`, `/test-bench`, `/qa`, `/release`, `/notion-publish`.
+- После run: `/retro` (сделай ретро, разбери запуск, что пошло не так в run).
 
 ## 13. Финальный ответ
 

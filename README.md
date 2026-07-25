@@ -68,7 +68,7 @@ yarn workflow:start "цель" --scale increment
 yarn workflow:validate outputs/<slug>/<date> --scale increment
 ```
 
-Skills подключаются автоматически по описанию — своих команд у них нет. Кросс-стадийные: `approval-gate` (любое внешнее действие), `recursive-brief` (intake), `run-ledger` (журнал запуска), `anti-ai-slop` (перед записью research/PRD/copy и публикацией), `selective-commit`, `outputs-cleanup`. Покрытие стадий: `yarn workflow:skills`.
+Skills подключаются автоматически по описанию — своих команд у них нет. Кросс-стадийные: `approval-gate` (любое внешнее действие), `recursive-brief` (intake), `run-ledger` (журнал запуска), `anti-ai-slop` (перед записью research/PRD/copy и публикацией), `selective-commit`, `outputs-cleanup`, `run-retrospective` (разбор завершённого run, команда `/retro`). Покрытие стадий: `yarn workflow:skills`.
 
 Отдельно от проектных skills живут **плагины** (`plugins/`, ставятся `yarn plugin:link`):
 

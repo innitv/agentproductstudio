@@ -353,6 +353,17 @@ yarn outputs:cleanup                                # уборка outputs по 
 
 Реестр ведёт runtime: `workflow:start` вносит слаг в `activeProducts`, `workflow:archive` убирает его, когда у слага не осталось каталогов (и удаляет опустевший `outputs/<slug>/`). `workflow:registry-sync` — сверка: без флага печатает расхождение и завершается с ненулевым кодом, с `--force` чинит. Флаг `--base <путь>` позволяет сверить другой корень `outputs/`. Регрессию охраняет `yarn workflow:test-outputs-registry`.
 
+## Разбор завершённого run
+
+```bash
+yarn workflow:retro outputs/<project-slug>/<YYYY-MM-DD>          # пять метрик процесса
+yarn workflow:retro outputs/<project-slug>/<YYYY-MM-DD> --json   # то же машиночитаемо
+```
+
+Читает `run-state.json`, `run-meta.json`, `stage-gate-ledger.md`, `stage-results/*.json` и markdown-артефакты стадий; считает повторные заходы, канал обнаружения дефектов, отклонения процесса, approval задним числом, долг валидатора на закрытии и слепые зоны ledger. В run ничего не пишет — закрытый run read-only.
+
+Отчёт всегда заканчивается разделом «Чего эти числа не видят»: канал находки машинно не выводится и определяется эвристикой, пока в артефакте нет маркера `<!-- retro: found_by=... -->` под заголовком захода. Интерпретация чисел, пороги и правило «одна находка — одно из трёх решений» — skill `run-retrospective`; slash-команда `/retro`. Регрессию охраняет `yarn workflow:test-run-retro`.
+
 ## QA
 
 Быстрая проверка конфигов, типов и документации:
