@@ -446,7 +446,7 @@ yarn workflow:doctor --repair
 | --- | --- |
 | `yarn typecheck` | `tsc --noEmit` по всему репозиторию. Входит в `qa:quick`. |
 | `yarn validate:config` | Валидация конфигов + семантическая проверка маршрутов и стадий. Входит в `qa:quick`. |
-| `yarn docs:audit` | Проверка backtick-путей в `README.md`, `CLAUDE.md`, `AGENTS.md`. Входит в `qa:quick`. |
+| `yarn docs:audit` | Аудит документации: битые пути в backticks и markdown-ссылки в `docs/**`, `agent-pack/**`, `.claude/**`, `plugins/**`, корневых `*.md`, `outputs/README.md`, `research/README.md`; сверка упомянутых `yarn`-команд с `package.json` в обе стороны; сверка MCP-серверов из `.mcp.json` с `README.md`/`CLAUDE.md`. Входит в `qa:quick`. Правила исключений — в шапке `tooling/scripts/audit-docs.mjs`. |
 | `yarn qa:all` | `qa:quick` + полный Playwright. Запускается `pre-push` хуком. |
 | `yarn qa:playwright:install` | Установка Chromium для Playwright. |
 | `yarn workflow:sync <run-dir>` | Пересобрать `run-state.json` после ручной правки артефактов run. |

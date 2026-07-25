@@ -44,7 +44,7 @@
 |---|---|---|---|
 | Studio/AgentFlow console | `apps/frontend/src/App.tsx` (роутер), `apps/frontend/src/views/ConsoleView.tsx`, `apps/frontend/src/views/LandingView.tsx` | `/`, `/console`, `/#console`, `/components` | `yarn qa:studio` |
 
-> Runnable surface в репозитории ровно одна. Строка про «A3Pay demo» удалена 2026-07-25: ни ветки, ни каталога `apps/a3pay-demo` никогда не существовало, а колонки Route и QA target в ней были перепутаны местами. Продуктовые демо, как и портфолио, живут в отдельных репозиториях — сюда они попадают только как ledger в `outputs/<slug>/<date>/`.
+> Runnable surface в репозитории ровно одна. Строка про «A3Pay demo» удалена 2026-07-25: ни ветки, ни каталога `apps/a3pay-demo` никогда не существовало, а колонки Route и QA target в ней были перепутаны местами. Продуктовые демо, как и портфолио, живут в отдельных репозиториях — сюда они попадают только как ledger в `outputs/<slug>/<date>/`. <!-- docs-audit-ignore: упоминание `apps/a3pay-demo` намеренное — строка утверждает, что каталога не существует -->
 
 ## Ledger Boundaries
 
