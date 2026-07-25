@@ -16,6 +16,7 @@ import { loadLocalEnv } from "./env";
 import { parseUserIntent } from "./intent-parser";
 import { archiveWorkflowRun, cleanupTempOutputs, formatArchiveWorkflowRunResult, formatCleanupTempResult } from "./output-lifecycle";
 import { formatWorkflowOutputsGuide, formatWorkflowRunInspection, formatWorkflowRunList, inspectWorkflowRun, listWorkflowRuns } from "./output-metadata";
+import { formatOutputsRegistrySync, syncOutputsRegistry } from "./outputs-registry";
 import { formatSkillUsageInspection, inspectSkillUsage } from "./skill-usage";
 import { getWorkflowEngineStatus, rerunWorkflowStage, resumeWorkflowEngine, startWorkflowEngine } from "./workflow-engine";
 import { workflowScales, workflowStages, type WorkflowScale } from "./workflow-stages";
@@ -31,6 +32,7 @@ const explicitWorkflowCommands = new Set([
   "skills",
   "cleanup-temp",
   "archive",
+  "registry-sync",
   "run-stage",
   "approve",
   "deny",
@@ -136,6 +138,19 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
       quarantine: rest.includes("--quarantine"),
       targetRoot: readFlagValue(rest, "--target-root"),
     })));
+    return;
+  }
+
+  if (command === "registry-sync") {
+    // Сверка `outputs/registry.json` с фактическими каталогами. Без флага только
+    // сообщает расхождение и выходит с ненулевым кодом, чтобы рассинхрон был заметен.
+    const outputsRoot = readFlagValue(rest, "--base");
+    const fix = rest.includes("--force") || rest.includes("--fix");
+    const result = await syncOutputsRegistry({ outputsRoot, fix });
+    console.log(formatOutputsRegistrySync(result));
+    if (!result.in_sync) {
+      throw new Error("Outputs registry is out of sync. Re-run with --force to fix.");
+    }
     return;
   }
 
@@ -302,7 +317,7 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
     return;
   }
 
-  throw new Error("Usage: workflow engine command must be one of: start, resume, status, list, inspect, outputs, skills, cleanup-temp, archive, run-stage, approve, deny, approval-request, approvals, agentic-stages, agentic-readiness, agentic-approval-commands, agentic-preflight\nOr use a natural trigger phrase!");
+  throw new Error("Usage: workflow engine command must be one of: start, resume, status, list, inspect, outputs, skills, cleanup-temp, archive, registry-sync, run-stage, approve, deny, approval-request, approvals, agentic-stages, agentic-readiness, agentic-approval-commands, agentic-preflight\nOr use a natural trigger phrase!");
 }
 
 async function tryRunIntentCommand(command: string | undefined, rest: string[], rawArgs: string[]): Promise<boolean> {

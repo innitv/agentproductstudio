@@ -325,11 +325,15 @@ yarn workflow:skills
 yarn workflow:list                                  # что вообще есть и в каком статусе
 yarn workflow:archive outputs/<project-slug>/<YYYY-MM-DD>   # переместить завершённый run в архив
 yarn workflow:cleanup-temp                          # очистить outputs/temp
+yarn workflow:registry-sync                         # сверить outputs/registry.json с фактическими каталогами
+yarn workflow:registry-sync --force                 # привести реестр в соответствие с диском
 yarn outputs:cleanup-dry-run                        # план уборки без единого перемещения — запускать ПЕРВЫМ
 yarn outputs:cleanup                                # уборка outputs по правилам lifecycle
 ```
 
-`outputs:cleanup` переносит в `outputs/temp/` всё, чего нет в `activeProducts` из `outputs/registry.json`. Зоны `products/`, `archive/`, `temp/` защищены в скрипте и в реестр не вносятся. Реестр ведётся вручную: при пустом `activeProducts` и непустом `outputs/` команда останавливается с ошибкой вместо переноса (обойти можно только флагом `--force`).
+`outputs:cleanup` переносит в `outputs/temp/` всё, чего нет в `activeProducts` из `outputs/registry.json`. Зоны `products/`, `archive/`, `temp/` защищены в скрипте и в реестр не вносятся. При пустом `activeProducts` и непустом `outputs/` команда останавливается с ошибкой вместо переноса (обойти можно только флагом `--force`).
+
+Реестр ведёт runtime: `workflow:start` вносит слаг в `activeProducts`, `workflow:archive` убирает его, когда у слага не осталось каталогов (и удаляет опустевший `outputs/<slug>/`). `workflow:registry-sync` — сверка: без флага печатает расхождение и завершается с ненулевым кодом, с `--force` чинит. Флаг `--base <путь>` позволяет сверить другой корень `outputs/`. Регрессию охраняет `yarn workflow:test-outputs-registry`.
 
 ## QA
 

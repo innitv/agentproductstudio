@@ -104,7 +104,7 @@ Source of truth:
 - Продуктовые workflow runtime: `outputs/<project-slug>/<YYYY-MM-DD>/`.
 - Исследовательские workflow, CJM, market research, Notion-ready research exports: `research/projects/<research-slug>/<YYYY-MM-DD>/`. Реестр — `research/registry.json`.
 - Тестовые запуски: `outputs/temp/`. Архивные: `outputs/archive/<project-slug>/<YYYY-MM-DD>/` (продуктовые) и `research/archive/<research-slug>/<YYYY-MM-DD>/` (исследовательские). `outputs/products/` — legacy/archive.
-- `outputs/registry.json` и `research/registry.json` — навигационные индексы; прошлые run artifacts не являются нормативным источником для изменения правил.
+- `outputs/registry.json` и `research/registry.json` — навигационные индексы; прошлые run artifacts не являются нормативным источником для изменения правил. `outputs/registry.json` ведёт runtime, а не человек: `workflow:start` вносит слаг, `workflow:archive` убирает его, когда у слага не осталось каталогов, `workflow:registry-sync [--force]` сверяет и чинит. Править файл руками не нужно; `research/registry.json` пока ведётся вручную.
 
 Если запрос — standalone research/CJM без frontend delivery, используй `research/projects/<research-slug>/<YYYY-MM-DD>/`.
 

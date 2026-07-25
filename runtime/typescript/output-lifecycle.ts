@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
-import { mkdir, readdir, readFile, rename, rm, stat } from "node:fs/promises";
+import { mkdir, readdir, readFile, rename, rm, rmdir, stat } from "node:fs/promises";
 import { basename, dirname, join, relative, resolve } from "node:path";
+import { resolveOutputsRootForRun, syncRegistryAfterArchive, type RegistryChange } from "./outputs-registry";
 
 interface RunStateSummary {
   status?: string;
@@ -41,6 +42,8 @@ export interface ArchiveWorkflowRunResult {
   status?: string;
   profile?: string;
   goal?: string;
+  /** Что стало с записью слага в `outputs/registry.json` после переноса. */
+  registry_change?: RegistryChange;
 }
 
 export async function cleanupTempOutputs(options: CleanupTempOptions = {}): Promise<CleanupTempResult> {
@@ -115,9 +118,14 @@ export async function archiveWorkflowRun(options: ArchiveWorkflowRunOptions): Pr
     throw new Error(`Archive target already exists: ${targetDir}`);
   }
 
+  let registryChange: RegistryChange | undefined;
   if (options.force) {
     await mkdir(dirname(targetDir), { recursive: true });
     await rename(sourceDir, targetDir);
+    // Реестр ведёт runtime: слаг уходит из `activeProducts`, только если у него не
+    // осталось ни одного каталога в `outputs/<slug>/`. Dry-run реестр не трогает.
+    registryChange = await syncRegistryAfterArchive(sourceDir);
+    await removeEmptySlugDir(sourceDir);
   }
 
   return {
@@ -128,6 +136,7 @@ export async function archiveWorkflowRun(options: ArchiveWorkflowRunOptions): Pr
     status: state?.status,
     profile: state?.profile,
     goal: state?.goal,
+    registry_change: registryChange,
   };
 }
 
@@ -142,11 +151,53 @@ export function formatArchiveWorkflowRunResult(result: ArchiveWorkflowRunResult)
     `- Status: ${result.status ?? "unknown"}`,
     `- Profile: ${result.profile ?? "unknown"}`,
     `- Goal: ${result.goal ?? "unknown"}`,
+    `- Outputs registry: ${formatRegistryChange(result.registry_change)}`,
     "",
     result.force
       ? "Run was moved to the archive target."
       : "Dry-run only. Re-run with `--force` to move this run.",
   ].join("\n");
+}
+
+/**
+ * Убирает опустевший `outputs/<slug>/` после архивации последнего run.
+ * Иначе пустой каталог сам становится рассинхроном: записи в реестре уже нет,
+ * а `outputs:cleanup` увидел бы незарегистрированный каталог.
+ * Зоны хранения (`temp/`, `archive/`, `products/`, `quarantine/`) не трогаются:
+ * `resolveOutputsRootForRun` возвращает для них `undefined`.
+ */
+async function removeEmptySlugDir(sourceDir: string): Promise<void> {
+  if (!resolveOutputsRootForRun(sourceDir)) {
+    return;
+  }
+
+  const slugDir = dirname(sourceDir);
+  const items = await readdir(slugDir).catch(() => undefined);
+  if (items && items.length === 0) {
+    await rmdir(slugDir).catch(() => undefined);
+  }
+}
+
+function formatRegistryChange(change?: RegistryChange): string {
+  if (!change) {
+    return "not touched (dry-run)";
+  }
+
+  const slug = change.slug ? ` '${change.slug}'` : "";
+  const reason = change.reason ? ` (${change.reason})` : "";
+  if (change.action === "removed") {
+    return `${slug.trim()} removed from activeProducts`;
+  }
+
+  if (change.action === "unchanged") {
+    return `${slug.trim()} kept in activeProducts${reason}`;
+  }
+
+  if (change.action === "skipped") {
+    return `not updated${reason}`;
+  }
+
+  return `${change.action}${slug}`;
 }
 
 async function listCleanupCandidates(baseDir: string): Promise<CleanupTempCandidate[]> {

@@ -1,5 +1,6 @@
 import { appendFile } from "node:fs/promises";
 import { basename, join, relative } from "node:path";
+import { registerRunInRegistry } from "./outputs-registry";
 import { runLandingWorkflow } from "./run-landing-workflow";
 import { validateWorkflowRun } from "./validate-workflow-run";
 import { truncateContextForSpecialist } from "./context-truncator";
@@ -42,6 +43,14 @@ export async function startWorkflowEngine(options: StartWorkflowOptions): Promis
   const executionMode = options.executionMode ?? "local";
 
   const outputDir = await runLandingWorkflow({ goal: options.goal, profile });
+
+  // Реестр `outputs/registry.json` ведёт runtime, а не человек: незарегистрированный
+  // каталог `yarn outputs:cleanup` считает мусором и уводит в `outputs/temp/`.
+  const registryChange = await registerRunInRegistry(outputDir);
+  if (registryChange.action === "added") {
+    console.log(`Outputs registry updated: '${registryChange.slug}' added to activeProducts.`);
+  }
+
   const now = nowIso();
   const state = createInitialState(outputDir, options.goal, profile, scale, executionMode, now);
   const intakeArtifacts = [

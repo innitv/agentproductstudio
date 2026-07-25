@@ -20,7 +20,7 @@ description: Использовать для задач типа cleanup/sorting
 - План показать пользователю конкретным списком до выполнения.
 - Approval `delete_data` с exact path — перед необратимым удалением. Архивация approval не требует.
 - Run с незакрытыми обязательствами (blocked approval, неопубликованный research, needs_validation) не удаляются.
-- После перемещений синхронизировать `outputs/registry.json` и `research/registry.json`.
+- После перемещений сверить индексы: `outputs/registry.json` — командой `yarn workflow:registry-sync` (ведётся runtime, руками не править), `research/registry.json` — вручную.
 
 ## Обязательные проверки
 - `yarn workflow:list`
