@@ -39,10 +39,15 @@ research/
 
 ## Текущие проекты
 
-- `projects/a3pay-cjm/`
-- `projects/a3pay-cjm-new/`
-- `projects/crm-russia-payments/`
-- `projects/real-estate-payments-russia-company-workflows-market-research/`
+Список живёт в `research/registry.json` (массив `activeResearchProjects`) — здесь он не дублируется, потому что ручная копия неизбежно устаревает: до 2026-07-25 в этом разделе стоял `projects/a3pay-cjm/`, давно уехавший в `archive/`, и не было трёх из семи актуальных проектов.
+
+Реестр — навигационный индекс, а не gate: ни один скрипт уборки его не читает (в отличие от `outputs/registry.json`, по которому `yarn outputs:cleanup` решает судьбу каталогов). Поэтому ведение здесь такое:
+
+- `yarn research:run <research/projects/<slug>/<date>>` вносит слаг в `activeResearchProjects` автоматически;
+- команды создания research-run не существует (каталог заводит оркестратор обычной записью файлов), поэтому автозапись перекрывает не все случаи. Основная проверка — `yarn research:registry-sync`: печатает обе стороны расхождения и завершается с ненулевым кодом; `--force` чинит;
+- архивация research выполняется вручную (`workflow:archive` работает только внутри `outputs/`), поэтому запись уехавшего в `archive/` слага убирает та же сверка.
+
+Регрессию охраняет `yarn workflow:test-research-registry` (входит в `yarn workflow:test-agentic`).
 
 ## Правила работы
 

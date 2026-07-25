@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 import { artifactFiles } from "./workflow-stages";
 import { runMultiSourceResearch, type MultiSourceResearchResult } from "./multi-source-research";
 import { advisoryResearchProviders, researchProviders, type ResearchProvider } from "./research.config";
+import { registerResearchRunInRegistry } from "./research-registry";
 import { validateWorkflowRun } from "./validate-workflow-run";
 
 interface ResearchStageRunOptions {
@@ -171,6 +172,16 @@ export async function runResearchStage(options: ResearchStageRunOptions): Promis
   const missing = requiredIntakeFiles.filter((file) => !existsSync(join(outputDir, file)));
   if (missing.length) {
     throw new Error(`Research stage requires intake artifacts first. Missing: ${missing.join(", ")}`);
+  }
+
+  // Навигационный индекс `research/registry.json`. Это единственная runtime-точка, которая
+  // работает с research-run: команды-аналога `workflow:start` для research нет, каталог
+  // создаётся оркестратором обычным `Write`. Поэтому автозапись здесь перекрывает только
+  // run, прошедшие через runtime; полное покрытие даёт сверка `yarn research:registry-sync`.
+  // Продуктовый run в `outputs/**` и временный в `research/temp/**` реестр не трогают.
+  const researchRegistryChange = await registerResearchRunInRegistry(outputDir);
+  if (researchRegistryChange.action === "added") {
+    console.log(`Research registry updated: '${researchRegistryChange.slug}' added to activeResearchProjects.`);
   }
 
   const artifactContext = collectRunArtifactContext(outputDir);

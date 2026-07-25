@@ -259,7 +259,90 @@
 
 Защита первого захода цела: `yarn outputs:cleanup-dry-run` по-прежнему показывает 0 переносов, `protectedItems`, предохранитель и `--dry-run` не менялись.
 
+## 8. Закрытие остатка — 2026-07-25 (второй заход)
+
+Объём: P1-6, P1-8, все 11 P2, автоведение `research/registry.json` и найденное в работе ложное срабатывание `guard-bash` на тексте сообщения коммита. **P1-2 в этот заход не входил** (закрывался параллельно другим исполнителем).
+
+### 8.1. Ложное срабатывание `guard-bash` на сообщении коммита (найдено вне отчёта)
+
+Хук читал текст всей Bash-команды, включая **сообщение коммита**, и блокировал `git commit`, если в сообщении встречался литеральный frozen-путь или слова `git push --force`. То есть нельзя было задокументировать в сообщении коммита пример пути к run-артефакту — ровно то, что требуется при работе с ledger.
+
+Причина: проверки 1 (force push) и 2 (`git add` с frozen-путями) текстовые по своей природе, и heredoc/`-m` они читали наравне с командой. Проверка 3 (`git commit`) никогда этим не страдала — она смотрит на реально застейдженные файлы.
+
+Исправление (`.claude/hooks/guard-bash.mjs`): перед текстовыми проверками из команды вырезаются тела heredoc, объявленных **в строке с `git commit`**, и значения `-m`/`--message` при наличии `git commit`. Границу держит именно принадлежность heredoc команде: тела `bash <<'EOF' … EOF` **не** вырезаются — там содержимое исполняется, и ослабление было бы дырой.
+
+Обе стороны закреплены тестом `runtime/typescript/test-guard-bash-hook.ts` (`yarn workflow:test-guard-bash-hook`, входит в `workflow:test-agentic`), 9 кейсов: 4 «должен пройти» (сообщение с frozen-путём в heredoc и в `-m`, упоминание `--force` в сообщении, безопасный `git add`) и 5 «должен блокироваться» (`git add` frozen `outputs/` и `research/`, `git add` перед commit в той же строке, `git push --force`, `bash <<EOF` с `git add` внутри).
+
+### 8.2. Автоведение `research/registry.json` — реализовано частично, и это осознанно
+
+Прямой перенос схемы `outputs/registry.json` невозможен, и подгонять её силой было бы неверно. Две проверенные причины:
+
+- **Точки создания run не существует.** `outputs/<slug>/<date>` создаёт ровно одна функция (`runLandingWorkflow` из `workflow:start`), поэтому автозапись там перекрывает все случаи. Research-run создаётся оркестратором обычной записью файлов; команды-аналога `research:start` нет, а `yarn research:run` **требует уже существующий каталог** (`research-stage-runner.ts`: `throw new Error("Output directory does not exist")`). Перехватить создание нечем.
+- **Автоудаления не к чему подключить.** Архивация research ручная: `archiveWorkflowRun` отказывается работать вне `outputs/` (`assertArchivableRun`).
+
+Плюс цена рассинхрона здесь принципиально другая: `research/registry.json` не читает ни один скрипт уборки (в `tooling/scripts/cleanup-outputs.mjs` слова `research` нет вовсе), тогда как забытая запись в `outputs/registry.json` уводила живой продуктовый каталог в `temp/`. Здесь задача — точность навигационного индекса, а не защита от разрушения.
+
+Поэтому реализовано:
+
+| Что | Где | Поведение |
+|---|---|---|
+| Модуль реестра | `runtime/typescript/research-registry.ts` | Полный аналог `outputs-registry.ts`: чтение/запись, идемпотентная вставка с сохранением порядка, diff, sync, форматирование отчёта |
+| Автозапись в единственной runtime-точке | `research-stage-runner.ts` → `runResearchStage` | `yarn research:run` вносит слаг в `activeResearchProjects`. Run в `outputs/**`, `research/temp/**`, `research/archive/**` реестр не трогает |
+| Сверка и починка — **основной** инструмент | `run-research-registry-sync.ts` → `yarn research:registry-sync` | Печатает обе стороны расхождения, завершается с ненулевым кодом; `--force` (алиас `--fix`) чинит; `--base <путь>` сверяет другой корень |
+
+Тест: `runtime/typescript/test-research-registry.ts` (`yarn workflow:test-research-registry`, включён в `workflow:test-agentic`), работает на временном `<tmpdir>/research/...`. Покрывает автозапись, идемпотентность, игнорирование temp/archive/outputs, обнаружение обеих сторон расхождения, починку только по флагу и проверку **маршрута** (тело `runResearchStage` обязано вызывать `registerResearchRunInRegistry(`).
+
+Фактическое состояние на момент правки: `yarn research:registry-sync` → in sync, 7 записей ↔ 7 каталогов.
+
+### 8.3. P1-6 и P1-8
+
+- **P1-6 (плагинов два, а не один)** — подтверждено (`plugins/figma-ds`, `plugins/subsystem-audit`). Исправлены `docs/architecture/repo-map.md` (таблица верхнего уровня + дерево) и `README.md` (раздел про плагины переписан списком + строка в таблице «Где что лежит»).
+- **P1-8 (`outputs/README.md:41`)** — подтверждено: ни `siteportfolio/`, ни `apps/portfolio/` не существуют. Формулировка заменена на фактическую: продукты выносятся в собственные репозитории, в студии остаётся только ledger; единственная runnable surface — `apps/frontend`. **Найдено сверх отчёта:** такой же протухший ручной список был в `research/README.md` («Текущие проекты» перечислял уехавший в архив `a3pay-cjm` и не содержал трёх из семи актуальных). Заменён указателем на `research/registry.json` — ручная копия индекса устаревает по определению.
+
+### 8.4. Статус по всем 11 P2
+
+| # | Статус | Что сделано |
+|---|---|---|
+| P2-1 | исправлено | `repo-map.md`: путь `views/LandingView.tsx` → `apps/frontend/src/views/LandingView.tsx` |
+| P2-2 | исправлено | Строка «A3Pay demo» удалена. Подтверждено: веток кроме `main` нет, `apps/a3pay-demo` нет, колонки Route и QA target были перепутаны местами. На месте строки — примечание, почему surface ровно одна |
+| P2-3 | исправлено | `README.md` и `CLAUDE.md`: в список MCP добавлен `figmaDesktop` (в `.mcp.json` их 8) |
+| P2-4 | исправлено | 14 файлов `.claude/commands/*.md`: «`Task` tool» → «`Agent` tool». Заодно `README.md:85`. Упоминания `Agent` в названии гейта «Design Agent First Gate» не трогали — это не инструмент |
+| P2-5 | **частично ложная** | Проверено первоисточником: `runtime/typescript/skill-metadata.ts:120-124` **прямо разрешает** расхождение — «Не требует равенства description с детальной версией — обёртка намеренно короче». Значит краткость сама по себе не дефект, и полная синхронизация противоречила бы дизайну. Правилом взято: детальная версия не должна **терять** то, что заявляет обёртка, и не должна содержать фактических ошибок. По нему исправлены 4 пары, где полная версия потеряла содержание (`design-engineering`, `design-loop`, `figma-ds-ingest`, `figma-handoff`). Оставлены как есть: `ds-to-storybook` («Skill создает» / «Создает»), `figma-screen-compiler` (тире vs двоеточие), `notion-sync` (ё/е), `research-pack` (полная версия шире — это штатное направление) |
+| P2-6 | исправлено | `funnel-analytics-verifier`, `landing-builder`, `seo-copy-validator`: `test_bench_result`/`qa_report`/`copy_deck`/`frontend_result` → дефисные имена файлов |
+| P2-7 | исправлено, **номер строки в отчёте неверен** | Английская вставка «visually risky» находится не в `SKILL.md:566` (в файле 47 строк), а во frontmatter, строка 5. Переведено; заодно «на 04-design» → «на этапе 04-design» |
+| P2-8 | исправлено | Тело `qa-review.agent.md` дополнено `visual-reference-review.md` с указанием маршрута — frontmatter и обёртка были правы, отставало тело |
+| P2-9 | **ложная в предложенном исправлении** | Отчёт предлагал заменить `notion_prd_export` во frontmatter на `notion_research_export_ru`. Проверено маршрутом: `notionPrdExport` в `workflow.manifest.ts:436-453` объявляет `outputs: [notion_prd_export]`, а `agent-metadata.ts:110-117` требует, чтобы `required_outputs` покрывал outputs маршрута. Замена **ломает `yarn validate:config`** (проверено фактически: `metadata required_outputs is missing route output 'notion_prd_export'`). Реальное расхождение было обратным — тело и обёртка не упоминали артефакт маршрута. Итог: frontmatter расширен до трёх записей с комментарием, откуда каждая берётся; `notion-prd-export.md` добавлен в тело контракта и в обёртку |
+| P2-10 | исправлено | Решающий аргумент — `requiredArtifactsByProfile` для `04-design`: `reference_analysis` обязателен **только** в профиле `reference`. Значит frontmatter (`optional_outputs`) верен, а тело контракта и обёртка врали безусловной обязательностью. В обоих местах формулировка сделана условной со ссылкой на манифест |
+| P2-11 | исправлено | В обёртки дотянуты ужесточения контрактов: `test-bench` (стабильные локаторы + web-first assertions, trace/screenshot вместо «логов сбоев», consent-gate через network interception), `qa-review` (привязка a11y к WCAG 2.2 AA + axe/Lighthouse, slopsquatted-зависимости), `release` (semver по Conventional Commits, technical vs product-facing, anomaly-пороги как rollback trigger), `prd` (Given-When-Then, evals-критерии для AI-фич). Триггер-фразы `design`/`frontend`/`design-generator` дополнены до контрактных. Машинной валидации триггер-фраз нет — сверено чтением |
+
+**Мелочи из отчёта:**
+
+- `.agents/` — **ложная находка на уровне репозитория.** Каталог пуст и git его не отслеживает (`git ls-files .agents` → 0); git пустые каталоги не хранит, поэтому при клоне его не существует. Это локальный мусор одной машины, а не пробел в `repo-map.md`. Не трогали.
+- `Bash(yarn deploy:*)` в `.claude/settings.json` — **подтверждено** (скрипта `deploy` в `package.json` нет), но **не исправлено намеренно**: это правка permissions, её нельзя вносить по указанию агента. Оставлено пользователю; вреда нет — permission просто мёртв.
+- `COMMANDS.md` как «полный справочник» — исправлено: добавлен раздел «Остальные локальные команды» (`typecheck`, `validate:config`, `docs:audit`, `qa:all`, `workflow:sync`/`inspect`/`outputs`/`approval-request`, `plugin:link`, `figma:*`, `notion:publish-*`, группа `workflow:test-*`) и описан `research:registry-sync`.
+
+### 8.5. Проверки
+
+Все зелёные: `yarn workflow:doctor` (единственное предупреждение — отсутствующие optional provider keys в `.env`, штатное), `yarn validate:config` (Config + Semantic passed), `yarn docs:audit`, `yarn typecheck`, вся цепочка `yarn workflow:test-agentic` — 16 тестов, включая два новых, итоговый код 0. Защита первого захода цела: `yarn workflow:registry-sync` — in sync (4↔4), `yarn outputs:cleanup-dry-run` — 0 переносов.
+
+Негативные контроли выполнены четырежды, каждый раз с возвратом кода в исходное состояние:
+
+1. **research, маршрут** — автозапись убрана из `runResearchStage` → `Error: Функция runResearchStage … не вызывает registerResearchRunInRegistry( — автозапись research/registry.json разорвана.`
+2. **research, поведение** — сверка перестала убирать записи без каталога → `Error: Сверка с флагом обязана привести реестр в соответствие.`
+3. **хук, откат исправления** — текстовые проверки снова читают сообщение коммита → падают все три кейса «должен пройти» (frozen-путь в heredoc, frozen-путь в `-m`, упоминание `--force`).
+4. **хук, переослабление** — вырезаются тела **любых** heredoc → `heredoc не для commit (bash <<EOF) с git add frozen внутри: ожидалось block, получено pass`.
+
+Контроль 4 существен: он показывает, что тест ловит не только возврат бага, но и слишком широкое исправление — ошибка здесь двусторонняя.
+
+### 8.6. Что осталось открытым
+
+- **P1-2** (судьба run `contractor-payment-demo/2026-07-23`) — вне объёма этого захода.
+- **Расширение `audit-docs.mjs`** на `docs/**`, `agent-pack/**`, `.claude/**` и на markdown-ссылки `[](...)` (предложение 6.2) — не делалось. Это новая машинная связь; решение за пользователем. Показательно, что все три документационные находки этого захода (P1-6, P1-8, P2-1) лежали ровно в непокрытой зоне.
+- **`Bash(yarn deploy:*)`** в `.claude/settings.json` — оставлено пользователю (правка permissions).
+- **Парность `description` у skills машиной не проверяется** и проверяться не должна: runtime явно разрешает обёртке быть короче. Регресс класса P2-6 (snake_case имена артефактов в description) сейчас ловится только чтением.
+
 ## Changelog
 
 - 2026-07-25 — аудит проведён, правки в репозиторий **не вносились** (задача read-only). Отчёт создан как единственный новый файл.
 - 2026-07-25 — исправлены P1-1, P0-1, P1-3, P1-4, P1-5, P1-7; добавлен тест `workflow:test-agent-output-skeletons`. Детали — раздел 7. Git-операции не выполнялись.
+- 2026-07-25 — закрыт остаток: P1-6, P1-8 и все 11 P2 (из них P2-5 признана частично ложной, P2-9 — ложной в предложенном исправлении, `.agents/` — ложной); реализована сверка `research:registry-sync` с частичной автозаписью; починено ложное срабатывание `guard-bash` на тексте сообщения коммита. Добавлены тесты `workflow:test-research-registry` и `workflow:test-guard-bash-hook`. Детали — раздел 8. Git-операции не выполнялись.

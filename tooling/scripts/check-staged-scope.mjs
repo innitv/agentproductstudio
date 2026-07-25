@@ -60,8 +60,14 @@ function getStagedFiles() {
 const blockedMediaExtensions = /\.(png|jpe?g|webp|gif|mp4|webm|mov|pdf)$/i;
 
 function classifyBlocked(file) {
-  if (!allow.outputs && file.startsWith("outputs/")) {
-    return "outputs/** запрещены для selective commit без явного разрешения";
+  // Блокируем ТОЛЬКО вложенные каталоги (`outputs/<slug>/...`) — это run-артефакты,
+  // они в .gitignore и версионироваться не должны. Файлы в корне `outputs/`
+  // (`registry.json`, `README.md`, `.gitkeep`) — инфраструктура индекса: они
+  // отслеживаются git, их изменения обязаны попадать в коммит. То же правило
+  // и по той же причине действует в .claude/hooks/guard-bash.mjs — два места
+  // проверяют один инвариант и должны совпадать.
+  if (!allow.outputs && /^outputs\/[^/]+\//.test(file)) {
+    return "outputs/<run>/** запрещены для selective commit без явного разрешения";
   }
   if (!allow.siteportfolioRuns && file.startsWith("siteportfolio/runs/")) {
     return "siteportfolio/runs/** является продуктовым ledger/evidence и не коммитится по умолчанию";

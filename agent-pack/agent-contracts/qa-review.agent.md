@@ -153,7 +153,8 @@ QA-агент обязан проверить:
 
 ## Required Outputs (Обязательные результаты)
 
-- `qa-report.md`
+- `qa-report.md` (маршрут `11-qa`)
+- `visual-reference-review.md` (маршрут `09-visual-reference`) — агент владеет обеими стадиями, и `required_outputs` во frontmatter перечисляет оба артефакта
 
 ## Guardrails (Ограничения и правила)
 

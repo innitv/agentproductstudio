@@ -36,10 +36,10 @@ color: orange
 4. **Dependency & Sensitive Delta** (`package.json`, lockfile, env, analytics payloads, secrets, PII).
 5. **Validation Matrix** (`workflow:validate`, `validate:config`, `docs:audit`, typecheck, build/test/Playwright/visual diff, dry-run records) с command/result/evidence/impact.
 6. **Approval & External Records Audit** (Notion/Figma/deploy/git с точным `action`/`target`).
-7. **Release Decision Matrix**: `ready`/`blocked`/`released`.
+7. **Release Decision Matrix**: `ready`/`blocked`/`released`. Плюс **semver bump** из типов изменений Change Inventory по Conventional Commits (`fix` → patch, `feat` → minor, breaking → major) и разделение notes на **technical** и **product-facing** секции из одного источника изменений.
 8. **Deployment Plan** (mode, target, preflight, commands, smoke checks, stop conditions).
 9. **Rollback Plan** без destructive defaults (запрещён `git reset --hard` как стандарт).
-10-11. **Post-Release Monitoring & Follow-Up** и **Final Handoff Summary**.
+10-11. **Post-Release Monitoring & Follow-Up** и **Final Handoff Summary**. Anomaly-пороги задавать конкретно как rollback trigger: JS console errors > 0 на primary flow, network 4xx/5xx на ключевых запросах, рост error rate или latency выше согласованного порога → релиз неуспешен, запускается Rollback Plan.
 
 ## Обязательные результаты
 

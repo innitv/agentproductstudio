@@ -70,7 +70,10 @@ yarn workflow:validate outputs/<slug>/<date> --scale increment
 
 Skills подключаются автоматически по описанию — своих команд у них нет. Кросс-стадийные: `approval-gate` (любое внешнее действие), `recursive-brief` (intake), `run-ledger` (журнал запуска), `anti-ai-slop` (перед записью research/PRD/copy и публикацией), `selective-commit`, `outputs-cleanup`. Покрытие стадий: `yarn workflow:skills`.
 
-Отдельно от проектных skills живёт плагин **`figma-ds`** (`plugins/figma-ds/`): `/figma-ds:build` — механика Figma Plugin API и финальная самопроверка перед отчётом (пакетный гейт, не после каждого write), `/figma-ds:standard` — textbook-канон дизайн-систем. Граница простая: всё, что верно про Figma безотносительно нашего процесса, — в плагине; гейты, стадии и статусы — в `integrations/mcp/figma-canvas-write-guide.md`. Копий не заводить.
+Отдельно от проектных skills живут **плагины** (`plugins/`, ставятся `yarn plugin:link`):
+
+- **`figma-ds`** — `/figma-ds:build` (механика Figma Plugin API и финальная самопроверка перед отчётом — пакетный гейт, не после каждого write) и `/figma-ds:standard` (textbook-канон дизайн-систем). Граница простая: всё, что верно про Figma безотносительно нашего процесса, — в плагине; гейты, стадии и статусы — в `integrations/mcp/figma-canvas-write-guide.md`. Копий не заводить.
+- **`subsystem-audit`** — `/subsystem-audit:audit`: доказательный шаблон аудита подсистемы (верификация находок первоисточником, сравнение с GitHub по реальным URL, эвристики против ложных находок).
 
 Полный справочник команд: [COMMANDS.md](COMMANDS.md).
 
@@ -79,18 +82,19 @@ Skills подключаются автоматически по описанию
 | Path | Назначение |
 | --- | --- |
 | `CLAUDE.md` | Главные правила: маршрутизация, язык, approvals, gates, source of truth |
-| `.claude/agents/` | Нативные обёртки 13 субагентов (вызов через `Task`, `subagent_type` = имя) |
+| `.claude/agents/` | Нативные обёртки 13 субагентов (вызов через `Agent`, `subagent_type` = имя; `Task` работает как alias) |
 | `.claude/skills/` | Обёртки skills; полные процедуры — в `agent-pack/skills/` |
 | `.claude/commands/` | Slash-команды этапов и управления workflow |
 | `.claude/hooks/` | Hooks сессии: session-start, orchestrator-reminder, guard-write, guard-bash, post-edit-sync |
 | `.claude/settings.json` | Модель, permissions, разрешённые команды, hooks |
-| `.mcp.json` | MCP-серверы: figma, notion, tavily, playwright, github, gitlab, lazyweb |
+| `.mcp.json` | MCP-серверы: figma, figmaDesktop, notion, tavily, playwright, github, gitlab, lazyweb |
 | `agent-pack/agent-contracts/` | Детальные контракты специалистов: orchestrator, research, prd, ia, design, design-generator, copywriting, prototype, frontend, test-bench, qa-review, release, notion-publisher |
 | `agent-pack/skills/` | Детальные процедуры skills: approval-gate, research-pack, anti-ai-slop, run-ledger, figma-*, visual-*, landing-builder и другие |
 | `agent-pack/workflows/` | Маршруты, handoff-контракты, детальные gates (`claude-operating-rules.md`), продуктовый pipeline |
 | `agent-pack/quality/`, `agent-pack/guardrails/` | Quality gates, approval matrix, sensitive data policy |
 | `agent-pack/schemas/`, `agent-pack/artifacts/` | JSON Schema для structured outputs и шаблоны артефактов |
 | `plugins/figma-ds/` | Плагин: единый источник Figma-знания вне процесса студии — `/figma-ds:build` (механика Plugin API, грабли, чек-лист после write) и `/figma-ds:standard` (textbook-канон DS). Раздаётся на машину junction'ом из `~/.claude/skills/` |
+| `plugins/subsystem-audit/` | Плагин: `/subsystem-audit:audit` — повторяемый шаблон аудита подсистемы. Раздаётся junction'ом так же |
 | `runtime/typescript/` | Исполняемый слой: workflow engine, валидаторы, approval CLI, research и reference tooling |
 | `apps/frontend/` | Studio frontend |
 | `design/figma/` | Design-system context, Figma maps, component contracts |

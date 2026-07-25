@@ -24,7 +24,7 @@
 | `.claude/` | Claude канон | Нативный слой Claude Code: `agents/` (субагенты), `skills/`, `commands/`, `hooks/`, `settings.json`. | Менять по правилам Claude Code; синхронизировать с `agent-pack/agent-contracts`. |
 | `apps/` | active | Runnable frontend apps и app shells. Главный app target: `apps/frontend` для studio. | Менять через product/frontend tasks, проверять build и relevant QA target. |
 | `agent-pack/` | active | Агентная система (проектный слой): `agent-contracts/`, `skills/`, `workflows/`, `artifacts/`, `templates/`, `schemas/`, `guardrails/`, `quality/`. | При изменении правил синхронизировать `CLAUDE.md`, agent docs и validators/tests. |
-| `plugins/` | active | Плагины Claude Code — переносимое знание, не привязанное к процессу студии. Сейчас один: `figma-ds/` (`/figma-ds:build` — механика Figma Plugin API и чек-лист после write, `/figma-ds:standard` — textbook-канон DS). Раздаётся на машину junction'ом из `~/.claude/skills/<name>`, поэтому правка из любого проекта попадает сюда. | Всё Figma-знание вне процесса студии держать только здесь; копий в `agent-pack/skills` и guide не заводить. Граница — раздел «Границы знания» в `integrations/mcp/figma-canvas-write-guide.md`. |
+| `plugins/` | active | Плагины Claude Code — переносимое знание, не привязанное к процессу студии. Сейчас два: `figma-ds/` (`/figma-ds:build` — механика Figma Plugin API и чек-лист после write, `/figma-ds:standard` — textbook-канон DS) и `subsystem-audit/` (`/subsystem-audit:audit` — доказательный шаблон аудита подсистемы). Раздаются на машину junction'ом из `~/.claude/skills/<name>`, поэтому правка из любого проекта попадает сюда. | Всё Figma-знание вне процесса студии держать только здесь; копий в `agent-pack/skills` и guide не заводить. Граница — раздел «Границы знания» в `integrations/mcp/figma-canvas-write-guide.md`. |
 | `runtime/` | active | TypeScript workflow runtime: commands, validators, stage engine, route/intent logic. | Менять вместе с tests/runtime commands. |
 | `tooling/` | active | Скрипты для audit, publish, screenshots, cleanup, lint и git scope checks. | Проверять точечными командами и `docs:audit`/`validate:config`, если меняются контракты. |
 | `tests/` | active | Автотесты. Playwright tests разделяются по app/surface target. | Не смешивать studio и demo assertions в одном spec без явного shared scope. |
@@ -42,8 +42,9 @@
 
 | Surface | Код | Route | QA target |
 |---|---|---|---|
-| Studio/AgentFlow console | `apps/frontend/src/App.tsx` (роутер), `apps/frontend/src/views/ConsoleView.tsx`, `views/LandingView.tsx` | `/`, `/console`, `/#console`, `/components` | `yarn qa:studio` |
-| A3Pay demo | product-specific branch/code until promoted | demo routes by branch context | future `apps/a3pay-demo`, if retained |
+| Studio/AgentFlow console | `apps/frontend/src/App.tsx` (роутер), `apps/frontend/src/views/ConsoleView.tsx`, `apps/frontend/src/views/LandingView.tsx` | `/`, `/console`, `/#console`, `/components` | `yarn qa:studio` |
+
+> Runnable surface в репозитории ровно одна. Строка про «A3Pay demo» удалена 2026-07-25: ни ветки, ни каталога `apps/a3pay-demo` никогда не существовало, а колонки Route и QA target в ней были перепутаны местами. Продуктовые демо, как и портфолио, живут в отдельных репозиториях — сюда они попадают только как ledger в `outputs/<slug>/<date>/`.
 
 ## Ledger Boundaries
 
@@ -79,6 +80,7 @@ agent-pack/               # агентная система
   artifacts/ templates/ schemas/ guardrails/ quality/
 plugins/                  # плагины Claude Code (переносимое знание вне процесса студии)
   figma-ds/               # /figma-ds:build (механика Figma) + /figma-ds:standard (канон DS); junction из ~/.claude/skills
+  subsystem-audit/        # /subsystem-audit:audit (доказательный шаблон аудита подсистемы); junction из ~/.claude/skills
 runtime/typescript/       # workflow engine, validators, тесты, CLI (yarn workflow:*)
 apps/frontend/            # studio shell (ConsoleView, LandingView, App)
 integrations/ design/ docs/architecture/ tooling/scripts/ tests/playwright/

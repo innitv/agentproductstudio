@@ -8,6 +8,6 @@ argument-hint: "[run-dir]"
 Порядок действий:
 - Убедись, что `screens.md` создан и завершён. Если экранов нет, направь на `/screens`.
 - Прочитай `screens.md`, `ia-brief.md`, `design-brief.md` и `handoff-bundle.md`; зафиксируй `inputs_used`.
-- Делегируй этап через `Task` tool с `subagent_type: prototype`. Цель: собрать `prototype-report.md` с transition/route map, состояниями `loading|empty|error|success|permission/disabled` и acceptance walkthrough основного сценария.
+- Делегируй этап через `Agent` tool с `subagent_type: prototype`. Цель: собрать `prototype-report.md` с transition/route map, состояниями `loading|empty|error|success|permission/disabled` и acceptance walkthrough основного сценария.
 - Прототип должен проходить Primary App Flow Gate: пользователь может пройти P0-сценарий от входа до результата (CLAUDE.md раздел 7).
 - Синтез собирает оркестратор. После этапа обнови `handoff-bundle.md` и `stage-gate-ledger.md`. Frontend разрешён только после этого этапа.

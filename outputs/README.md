@@ -47,7 +47,7 @@ research/
 
    **Что делать при расхождении.** Причина почти всегда — каталог, созданный или перенесённый мимо `workflow:*` (вручную, скриптом, из другого репозитория). Порядок: `yarn workflow:registry-sync` (посмотреть, что именно разошлось) → убедиться, что каталог из списка «есть на диске, нет в реестре» действительно нужен → `yarn workflow:registry-sync --force`. Правка `registry.json` руками допустима, но не нужна: сверка делает то же самое и не ошибается в формате. Регрессию охраняет `yarn workflow:test-outputs-registry` (входит в `yarn workflow:test-agentic`).
 
-   Отдельные продукты могут жить вне `outputs/`, если это явно зафиксировано в корне проекта. Сейчас личный сайт-портфолио вынесен в `siteportfolio/`, а production app shell живет в `apps/portfolio/`.
+   Отдельные продукты могут жить вне `outputs/` — в собственных репозиториях. Так вынесены личный сайт-портфолио и демо оплаты подрядчику: в этой студии от них остаётся только ledger в `outputs/<slug>/<date>/`, кода нет (`CLAUDE.md` §0.1, `docs/architecture/repo-map.md`). Единственная runnable surface студии — `apps/frontend`.
    Исследовательские проекты регистрируются отдельно в `research/registry.json`.
 2. **Runtime source of truth:** Workflow-агент и команды `workflow:*` по умолчанию работают с `outputs/<project-slug>/<YYYY-MM-DD>/`. Содержимое прошлых run folders используется только как диагностический контекст конкретного запуска, а не как источник правил workflow.
 3. **Run ledger:** каждый полноценный run содержит `run-index.md`, `run-state.json`, `run-meta.json` и `artifact-manifest.json`. `run-index.md` — первый файл для человека; `artifact-manifest.json` — machine-readable ledger артефактов.

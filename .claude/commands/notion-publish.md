@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Порядок действий:
 - Прочитай полный research pack run (`research-summary.md`, `scenario-user-flows.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`, при наличии `cjm-map.md`/`opportunity-roadmap.md`); зафиксируй `inputs_used`.
-- Делегируй подготовку через `Task` tool с `subagent_type: notion-publisher` с задействованием skill `notion-sync`. Цель: собрать человекочитаемый `notion-research-export-ru.md` (без workflow dump, schema/frontmatter, raw JSON, code-block копий).
+- Делегируй подготовку через `Agent` tool с `subagent_type: notion-publisher` с задействованием skill `notion-sync`. Цель: собрать человекочитаемый `notion-research-export-ru.md` (без workflow dump, schema/frontmatter, raw JSON, code-block копий).
 - Пройди publication gates до записи: Russian Publication Gate, Publication Completeness Gate, Publication Shape Gate, Publication Editor Pass, Publication Cross-Link Gate и исполняемый `yarn research:lint <run-dir>` (CLAUDE.md раздел 6). При провале любого gate внешняя запись запрещена.
 - Подготовь publication plan и dry-run (target, layout strategy, block count, `notion_data_shape_plan`). Для подробного pack — `hub_with_child_pages`.
 - ОБЯЗАТЕЛЬНО получи human approval интерактивно: `yarn workflow:approval-request <run-dir> notion_research_publish --target <notion-parent-page-id> --by human`, а при недоступном TTY задай явный вопрос в чате (`AskUserQuestion`). Молча переводить в blocked/partial без запроса запрещено (CLAUDE.md раздел 8). После ответа запиши `workflow:approve` или `workflow:deny`.

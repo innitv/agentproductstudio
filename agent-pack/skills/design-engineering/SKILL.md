@@ -2,7 +2,7 @@
 id: design-engineering
 name: design-engineering
 title: "Motion И Interaction Polish"
-description: "Использовать на 08-frontend и 11-qa для проверки UI motion, interaction states, easing, reduced motion, focus и hover behavior."
+description: "Использовать на этапах 08-frontend и 11-qa для проверки UI motion, interaction states, easing, reduced motion, focus и hover behavior. Skill проверяет невидимые детали интерфейса: feedback, motion, focus, active states и reduced-motion поведение."
 platforms:
   - claude
 mcp_servers:

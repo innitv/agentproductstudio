@@ -50,7 +50,7 @@ Skill применяется, когда тип работы — `cleanup/sortin
 3. **Покажи план пользователю** до выполнения: что уйдёт в архив, что удаляется, что остаётся. Список конкретный, а не «почищу временные файлы».
 4. **Approval.** Необратимое удаление требует approval `delete_data` с exact path (см. [`approval-gate`](../approval-gate/SKILL.md)). Архивация — перемещение, а не удаление, и такого approval не требует.
 5. **Выполнение.** `yarn outputs:cleanup`, `yarn workflow:cleanup-temp`, `yarn workflow:archive <run-dir>` — по составленному плану.
-6. **Синхронизация индексов.** После перемещений сверь индексы — рассинхрон делает их бесполезными и опаснее того: незарегистрированный каталог `yarn outputs:cleanup` считает мусором. `outputs/registry.json` ведёт runtime (`workflow:start` вносит слаг, `workflow:archive` убирает), поэтому проверяй его командой `yarn workflow:registry-sync` и чини `--force`, а не руками. `research/registry.json` пока ведётся вручную.
+6. **Синхронизация индексов.** После перемещений сверь индексы — рассинхрон делает их бесполезными и опаснее того: незарегистрированный каталог `yarn outputs:cleanup` считает мусором. `outputs/registry.json` ведёт runtime (`workflow:start` вносит слаг, `workflow:archive` убирает), поэтому проверяй его командой `yarn workflow:registry-sync` и чини `--force`, а не руками. `research/registry.json` проверяй командой `yarn research:registry-sync` (чинится тем же `--force`): автозапись там подключена только к `yarn research:run`, потому что команды создания research-run не существует, а архивация research ручная — поэтому именно сверка, а не автозапись, является основной защитой индекса. Разрушительных последствий рассинхрон research не имеет: скрипты уборки `research/` не читают.
 7. **Запись.** Зафиксируй в `stage-gate-ledger.md`: что заархивировано, что удалено, с чьим approval.
 
 ## 4. Evidence и failure modes
@@ -68,5 +68,5 @@ Evidence: инвентарный список до уборки, план (archi
 - [ ] План (archive / delete / keep) показан пользователю конкретным списком.
 - [ ] Approval `delete_data` с exact path получен перед необратимым удалением.
 - [ ] Run с незакрытыми обязательствами не удалены.
-- [ ] `yarn workflow:registry-sync` не сообщает расхождений; `research/registry.json` синхронизирован вручную.
+- [ ] `yarn workflow:registry-sync` и `yarn research:registry-sync` не сообщают расхождений.
 - [ ] Cleanup не смешан с feature work в одном коммите.

@@ -39,8 +39,8 @@ disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 5. **Traceability Audit**: `research/JTBD/scenario-flow -> PRD requirement -> IA node -> design/screen -> copy -> prototype -> frontend/test signal`; разрыв для `must` = blocker/high.
 6-8. Соответствие PRD/MoSCoW, согласованность IA/screens/prototype, проверка claims (evidence или `[needs validation]`).
 9. **Визуальная скриншот-сверка** через skill `visual-diff-verifier` (Playwright desktop+mobile; desktop-only запрещён для pass).
-10-13. Accessibility/responsive/keyboard, **Negative & Edge Path Pass**, Figma handoff fidelity, design-engineering (motion/focus/hover/reduced-motion).
-14-15. Аналитика/PII и **Security & Sensitive Data Pass**.
+10-13. Accessibility/responsive/keyboard, **Negative & Edge Path Pass**, Figma handoff fidelity, design-engineering (motion/focus/hover/reduced-motion). Каждый a11y-finding привязывать к конкретному критерию **WCAG 2.2 AA** (`1.4.3 Contrast`, `2.1.1 Keyboard`, `4.1.2 Name/Role/Value`), а не к «неудобно»; при доступности инструмента прогнать axe-core/Lighthouse и приложить результат, `experience_based` — только fallback с обоснованием.
+14-15. Аналитика/PII и **Security & Sensitive Data Pass**. Дополнительно — **hallucinated/slopsquatted зависимости**: каждый импортируемый пакет обязан быть в `package.json`/lockfile и быть реальным; несовпадение = `high`/`critical`.
 16-17. Результаты тестов + **Devil's Advocate / False Positive Pass**.
 18-19. **Severity Matrix** (blocker/critical/high/medium/low/info) и итоговый вердикт `pass|pass_with_known_limitations|fail|blocked`.
 

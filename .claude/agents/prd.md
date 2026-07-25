@@ -38,7 +38,7 @@ color: cyan
 6. **Scope (MoSCoW)**: `Must` покрывает главный user journey end-to-end из `scenario-user-flows.md`; использовать интерактивный выбор при доступности.
 7. Story Map, User Stories, таблица функциональных требований (REQ-XXX), NFR.
 8. **Traceability Pass**: `finding/JTBD/scenario flow -> user story -> requirement -> acceptance criterion -> analytics/test signal`.
-9. Acceptance criteria (happy path, edge cases, empty/error/loading, privacy/PII), спецификация аналитики без PII.
+9. Acceptance criteria в формате **Given-When-Then** для каждого `must`/`should` (так критерий однозначно превращается в тест-кейс): happy path, edge cases, empty/error/loading, privacy/PII; спецификация аналитики без PII. Для AI/LLM-фич бинарное «работает корректно» запрещено — задавать evals-критерии (ожидаемое поведение на наборе входов, допустимая доля ошибок, latency, failure modes: hallucination/bias/drift).
 10. **PRD-To-IA/Design Handoff** + Roadmap/риски.
 11. **Readiness Review**: downstream только `ready` без critical gaps; иначе `partial` с blockers.
 

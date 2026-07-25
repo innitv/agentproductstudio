@@ -226,6 +226,16 @@ yarn research:lint <research-export-md>
 
 Lint проверяет: не тезисная выжимка, глубина CJM/user-flow, связь roadmap с CJM и валидацией, claims с механизмом, неуниверсальные формулировки, неповторяющиеся строки таблиц. **Если lint падает, Notion/Figma/external write запрещён** до исправления источников или export.
 
+Сверить навигационный индекс `research/registry.json` с фактическими каталогами `research/projects/*`:
+
+```bash
+yarn research:registry-sync                  # отчёт; ненулевой код при расхождении
+yarn research:registry-sync --force          # привести реестр в соответствие (алиас: --fix)
+yarn research:registry-sync --base <путь>    # сверить другой корень research/
+```
+
+Ведение реестра здесь частичное — и это осознанно. `yarn research:run` вносит слаг в `activeResearchProjects` сам, но команды создания research-run не существует (каталог заводит оркестратор обычной записью файлов), а архивация research выполняется вручную: `workflow:archive` работает только внутри `outputs/`. Поэтому основной инструмент — сверка, а не автозапись. В отличие от `outputs/registry.json`, рассинхрон здесь ничего не разрушает: скрипты уборки `research/` не читают. Регрессию охраняет `yarn workflow:test-research-registry`.
+
 ## Визуальный референс
 
 Собрать Firecrawl + Playwright reference pack:
@@ -427,6 +437,30 @@ yarn workflow:doctor
 ```bash
 yarn workflow:doctor --repair
 ```
+
+## Остальные локальные команды
+
+Раздел закрывает пробел: `README.md` называет этот файл полным справочником, а часть скриптов `package.json` в нём не была описана.
+
+| Команда | Что делает |
+| --- | --- |
+| `yarn typecheck` | `tsc --noEmit` по всему репозиторию. Входит в `qa:quick`. |
+| `yarn validate:config` | Валидация конфигов + семантическая проверка маршрутов и стадий. Входит в `qa:quick`. |
+| `yarn docs:audit` | Проверка backtick-путей в `README.md`, `CLAUDE.md`, `AGENTS.md`. Входит в `qa:quick`. |
+| `yarn qa:all` | `qa:quick` + полный Playwright. Запускается `pre-push` хуком. |
+| `yarn qa:playwright:install` | Установка Chromium для Playwright. |
+| `yarn workflow:sync <run-dir>` | Пересобрать `run-state.json` после ручной правки артефактов run. |
+| `yarn workflow:inspect <run-dir>` | Детальное состояние стадий и gates одного run. |
+| `yarn workflow:outputs <run-dir>` | Список артефактов run с их статусом. |
+| `yarn workflow:approval-request <run-dir> <action>` | Интерактивный запрос approval с точным `target` (Interactive Question Gate). |
+| `yarn plugin:link` | Ставит плагины из `plugins/` junction'ом в `~/.claude/skills/`. |
+| `yarn figma:check` | Проверка локального Figma token. |
+| `yarn figma:audit` | Аудит Figma component contracts против live-файла (`figma:audit:a3` — преднастроенный вариант для A3 DS). |
+| `yarn figma:verify-layout` | Проверка `figma-layout-ir.json` против собранных экранов. |
+| `yarn notion:publish-research-hub`, `yarn notion:publish-stories`, `yarn notion:test-export` | Notion publish/export скрипты; требуют approval `notion_research_publish`. |
+| `yarn workflow:test-*` | Отдельные runtime-тесты. Обычно запускаются пачкой через `yarn workflow:test-agentic`; поштучный запуск нужен при отладке конкретной подсистемы. |
+
+Полный список подкоманд `workflow:test-*` смотри в `package.json` — цепочка `workflow:test-agentic` перечисляет их в порядке запуска.
 
 ## Типовые сценарии
 

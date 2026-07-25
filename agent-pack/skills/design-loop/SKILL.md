@@ -2,7 +2,7 @@
 id: design-loop
 name: design-loop
 title: "Design Prompt И Цикл Критики"
-description: "Использовать на 06-screens, когда есть STYLE_GUIDE.md или высокий риск визуального качества. Создает design-generator-prompt.md и design-loop-report.md с конкретной критикой и revision blocks."
+description: "Использовать на этапе 06-screens, когда есть STYLE_GUIDE.md или высокий риск визуального качества. Skill создает design-generator-prompt.md и design-loop-report.md с конкретной критикой в формате \"что выглядит дешево и почему\" и revision blocks."
 platforms:
   - claude
 mcp_servers: []

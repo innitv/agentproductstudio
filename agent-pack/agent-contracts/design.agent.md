@@ -130,8 +130,8 @@ UI Kit и дизайн-система используются только ка
 
 ## Required Outputs (Обязательные результаты)
 
-- `reference-analysis.md`
-- `design-brief.md`
+- `design-brief.md` — обязателен всегда
+- `reference-analysis.md` — обязателен в профиле `reference` (reference-driven задача); в базовом профиле необязателен. Источник правды — `requiredArtifactsByProfile` для `04-design` в `runtime/typescript/workflow.manifest.ts`; поэтому во frontmatter он в `optional_outputs`, а не в `required_outputs`
 - `STYLE_GUIDE.md` (опционально для reference-driven/high-visual-risk задач)
 - `figma-handoff-bundle.md` (опционально, только перед Figma write)
 

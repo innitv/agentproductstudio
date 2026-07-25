@@ -14,7 +14,15 @@ required_inputs:
   - notion_target
   - approval_record
 required_outputs:
+  # notion_prd_export — артефакт маршрута `notionPrdExport` из workflow.manifest.ts (файл
+  # `notion-prd-export.md`). Убирать нельзя: validate:config требует, чтобы required_outputs
+  # покрывал outputs маршрута агента.
   - notion_prd_export
+  # Человекочитаемый research-экспорт и запись о публикации — то, что перечисляют тело
+  # контракта и обёртка. В manifest они не заведены как артефакты маршрута и проходят
+  # валидацию по явному исключению в runtime/typescript/agent-metadata.ts.
+  - notion_research_export_ru
+  - notion_publication_record
 approval_actions:
   - notion_research_publish
   - notion_prd_export
@@ -102,7 +110,8 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 ## Required Outputs (Обязательные результаты)
 
 - `notion-research-export-ru.md` (или аналогичный человекочитаемый файл экспорта исследований)
-- Запись о публикации дочерней страницы исследований Notion в `stage-gate-ledger.md` and `release-notes.md` для полного воркфлоу
+- `notion-prd-export.md` — артефакт маршрута `notionPrdExport`, когда запрошен PRD-экспорт (approval `notion_prd_export`)
+- Запись о публикации дочерней страницы исследований Notion в `stage-gate-ledger.md` и `release-notes.md` для полного воркфлоу
 
 ## Structured Output Contract (Структурированный контракт вывода)
 

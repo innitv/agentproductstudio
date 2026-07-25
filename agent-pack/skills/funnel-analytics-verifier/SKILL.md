@@ -2,7 +2,7 @@
 id: funnel-analytics-verifier
 name: funnel-analytics-verifier
 title: "Funnel Analytics & PII Verifier"
-description: "Использовать, когда на этапе 10-test-bench или 11-qa нужно проверить PRD analytics events, CTA/form funnel поведение и отсутствие PII в analytics payloads через Playwright interception или dataLayer checks. Skill пишет test_bench_result и qa_report evidence."
+description: "Использовать, когда на этапе 10-test-bench или 11-qa нужно проверить PRD analytics events, CTA/form funnel поведение и отсутствие PII в analytics payloads через Playwright interception или dataLayer checks. Skill пишет test-bench-result и qa-report evidence."
 platforms:
   - open-code
   - claude

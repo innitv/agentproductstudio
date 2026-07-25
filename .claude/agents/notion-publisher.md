@@ -44,6 +44,7 @@ disallowedTools: Task, Agent, mcp__figma, mcp__figmaDesktop, mcp__github, mcp__g
 ## Обязательные результаты
 
 - `notion-research-export-ru.md` (или аналогичный человекочитаемый export)
+- `notion-prd-export.md` — артефакт маршрута `notionPrdExport`, когда запрошен PRD-экспорт (approval `notion_prd_export`)
 - Запись о публикации в `stage-gate-ledger.md` и `release-notes.md` для полного workflow
 
 ## Ключевые guardrails

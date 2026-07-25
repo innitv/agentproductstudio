@@ -2,7 +2,7 @@
 id: figma-handoff
 name: figma-handoff
 title: "Figma Handoff Bundle"
-description: "Использовать, когда пользователь просит Figma design system или canvas write. Создает figma-handoff-bundle.md перед любым approval-gated Figma MCP write."
+description: "Использовать, когда пользователь просит Figma design system или canvas write. Skill создает figma-handoff-bundle.md — текстовый foundation/components/screens contract — перед любым approval-gated Figma MCP write."
 platforms:
   - claude
 mcp_servers:
