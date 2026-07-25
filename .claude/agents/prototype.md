@@ -62,15 +62,19 @@ outputs:
   prototype_report: |
     # Prototype
 
+    ## Input Readiness Pass
+
+    ...
+
     ## Prototype Type
 
     ...
 
-    ## Start Screen
+    ## Flow Goal
 
     ...
 
-    ## Flow Goal
+    ## Start Screen
 
     ...
 
@@ -86,7 +90,13 @@ outputs:
 
     ...
 
+    ## Frontend Handoff Contract
+
+    ...
+
     ## Missing Interactions
 
     ...
 ```
+
+> Секции синхронизированы с `requiredSectionsByArtifact` для стадии `07-prototype` в `runtime/typescript/workflow.manifest.ts` (проверяется `yarn workflow:test-agent-output-skeletons`).

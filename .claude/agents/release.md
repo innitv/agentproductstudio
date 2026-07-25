@@ -68,6 +68,14 @@ outputs:
 
     ready|blocked|released
 
+    ## Release Scope
+
+    ...
+
+    ## Run Ledger Audit
+
+    ...
+
     ## Changed Files
 
     ...
@@ -84,11 +92,13 @@ outputs:
 
     ...
 
-    ## Approval And External Records
-
-    ...
-
     ## Rollback Notes
 
     ...
+
+    ## Approval And External Records
+
+    ...
 ```
+
+> Секции синхронизированы с `requiredSectionsByArtifact` для стадии `12-release` в `runtime/typescript/workflow.manifest.ts` (проверяется `yarn workflow:test-agent-output-skeletons`). Неприменимые секции заполняются как `not_applicable` с причиной, но не удаляются — иначе section-gate валидатора не пройдёт.

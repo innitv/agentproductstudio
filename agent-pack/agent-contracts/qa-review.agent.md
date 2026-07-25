@@ -202,11 +202,11 @@ outputs:
 
     ...
 
-    ## Evidence Matrix
+    ## Research Integrity
 
     ...
 
-    ## Severity Matrix
+    ## Traceability Audit
 
     ...
 
@@ -222,7 +222,59 @@ outputs:
 
     ...
 
+    ## Negative & Edge Path Pass
+
+    ...
+
+    ## Design System Strategy Audit
+
+    ...
+
+    ## Component Contract Audit
+
+    ...
+
     ## Validation
 
     ...
+
+    ## Evidence Matrix
+
+    ...
+
+    ## Severity Matrix
+
+    ...
+  visual_reference_review: |   # маршрут 09-visual-reference
+    # Visual Reference Review
+
+    ## Inputs Used
+
+    ...
+
+    ## Source Pair Matrix
+
+    ...
+
+    ## Screenshot Set
+
+    ...
+
+    ## Full-Site Comparison
+
+    ...
+
+    ## Gaps Found
+
+    ...
+
+    ## Corrections Made
+
+    ...
+
+    ## Gate Result
+
+    ...
 ```
+
+> Секции синхронизированы с `requiredSectionsByArtifact` для стадий `11-qa` и `09-visual-reference` в `runtime/typescript/workflow.manifest.ts` и проверяются тестом `yarn workflow:test-agent-output-skeletons`. Неприменимые секции заполняются как `not_applicable` с причиной, но не удаляются — иначе section-gate валидатора не пройдёт.

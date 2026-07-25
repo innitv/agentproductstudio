@@ -76,6 +76,22 @@ outputs:
 
     ...
 
+    ## Design System Implementation
+
+    ...
+
+    ## Component Contract Implementation
+
+    ...
+
+    ## Frame / State Implementation Map
+
+    ...
+
+    ## Figma Visual QA Gate Summary
+
+    ...
+
     ## Commands Run
 
     ...
@@ -83,6 +99,12 @@ outputs:
     ## Known Limitations
 
     ...
+
+    ## Figma Roundtrip Deviations
+
+    ...
 ```
+
+> Секции синхронизированы с `requiredSectionsByArtifact` для стадии `08-frontend` в `runtime/typescript/workflow.manifest.ts` (проверяется `yarn workflow:test-agent-output-skeletons`). Для не-Figma задач секции `Design System Implementation`, `Component Contract Implementation`, `Frame / State Implementation Map`, `Figma Visual QA Gate Summary`, `Figma Roundtrip Deviations` заполняются как `not_applicable` с причиной, но не удаляются — иначе section-gate валидатора не пройдёт.
 
 Для UI/frontend surface поле `surface_output` обязательно (implemented views/components/states, upstream coverage, verification evidence, unresolved deviations). Если входы неполные, State Truncation Gate не выполнен или требуется approval — `partial`/`blocked`.

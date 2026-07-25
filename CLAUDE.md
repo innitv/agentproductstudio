@@ -70,7 +70,7 @@ Claude работает как инженерно-продуктовый аге�
 - `orchestrator` (главная сессия Claude Code) владеет финальным результатом; специалисты вызываются как bounded capabilities через `Agent` tool с `subagent_type`.
 - Финальный ответ продуктового pipeline собирает только `orchestrator`. Каждый специалист возвращает структурированный результат по `agent-pack/templates/agent-output-contract.schema.md`.
 - Матрица `кто что получает и что отдает` — `agent-pack/workflows/stage-handoff-contract.md`; при изменении маршрута синхронизируй `runtime/typescript/workflow.manifest.ts`, `.agent.md`, `.claude/agents/*.md`, шаблоны и тесты.
-- Route/dependency graph — `runtime/typescript/route.config.ts` и `runtime/typescript/workflow-stages.ts`. Архитектурные границы repo и правила веток — `docs/architecture/repo-map.md` и `docs/architecture/git-workflow.md`.
+- Route/dependency graph — `runtime/typescript/route.config.ts` и `runtime/typescript/workflow-stages.ts`. Архитектурные границы repo и правила git (main-direct, без feature-веток) — `docs/architecture/repo-map.md` и `docs/architecture/git-workflow.md`.
 
 **Правило дисциплины оркестратора (обязательное):** Главная сессия Claude Code — это оркестратор. Даже если запрос совпадает с триггер-фразой специалиста, сначала классифицируй тип работы и владей маршрутизацией; НИКОГДА не выдавай сырой вывод субагента как финальный ответ продуктового pipeline — финал собирает только оркестратор.
 

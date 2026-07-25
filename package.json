@@ -52,9 +52,10 @@
     "workflow:agentic-preflight": "tsx runtime/typescript/run-workflow-engine.ts agentic-preflight",
     "workflow:doctor": "tsx runtime/typescript/doctor.ts",
     "workflow:test-validator": "tsx runtime/typescript/test-workflow-validator.ts",
-    "workflow:test-agentic": "yarn workflow:test-agentic-rollout && yarn workflow:test-approval-gate && yarn workflow:test-agent-metadata && yarn workflow:test-agent-capabilities && yarn workflow:test-skill-metadata && yarn workflow:test-skill-usage && yarn workflow:test-validator && yarn workflow:test-figma-layout-contract && yarn workflow:test-figma-layout-verifier && yarn workflow:test-output-metadata && yarn workflow:test-output-lifecycle && yarn workflow:test-agentic-executor && yarn workflow:test-agentic-readiness && yarn workflow:test-agentic-engine",
+    "workflow:test-agentic": "yarn workflow:test-agentic-rollout && yarn workflow:test-approval-gate && yarn workflow:test-agent-metadata && yarn workflow:test-agent-capabilities && yarn workflow:test-agent-output-skeletons && yarn workflow:test-skill-metadata && yarn workflow:test-skill-usage && yarn workflow:test-validator && yarn workflow:test-figma-layout-contract && yarn workflow:test-figma-layout-verifier && yarn workflow:test-output-metadata && yarn workflow:test-output-lifecycle && yarn workflow:test-agentic-executor && yarn workflow:test-agentic-readiness && yarn workflow:test-agentic-engine",
     "workflow:test-agent-metadata": "tsx runtime/typescript/test-agent-metadata.ts",
     "workflow:test-agent-capabilities": "yarn tsx runtime/typescript/test-agent-capability-registry.ts",
+    "workflow:test-agent-output-skeletons": "yarn tsx runtime/typescript/test-agent-output-skeletons.ts",
     "workflow:test-skill-metadata": "tsx runtime/typescript/test-skill-metadata.ts",
     "workflow:test-skill-usage": "tsx runtime/typescript/test-skill-usage.ts",
     "workflow:test-figma-layout-contract": "yarn tsx runtime/typescript/test-figma-layout-contract.ts",
@@ -77,7 +78,8 @@
     "plugin:link": "node tooling/scripts/link-plugin.mjs",
     "typecheck": "node tooling/scripts/run-and-log.mjs typecheck \"tsc --noEmit\"",
     "landing:run": "tsx runtime/typescript/run-landing-workflow.ts",
-    "outputs:cleanup": "node tooling/scripts/cleanup-outputs.mjs"
+    "outputs:cleanup": "node tooling/scripts/cleanup-outputs.mjs",
+    "outputs:cleanup-dry-run": "node tooling/scripts/cleanup-outputs.mjs --dry-run"
   },
   "dependencies": {
     "@openai/agents": "0.11.4",

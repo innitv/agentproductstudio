@@ -58,6 +58,12 @@ yarn workflow:test-agentic
 yarn workflow:test-agent-capabilities
 ```
 
+Проверить, что скелеты Output Contract в `.claude/agents/*.md` и `agent-pack/agent-contracts/*.agent.md` не разошлись с `requiredSectionsByArtifact` в `runtime/typescript/workflow.manifest.ts`:
+
+```bash
+yarn workflow:test-agent-output-skeletons
+```
+
 Проверить standard route без visual reference:
 
 ```bash
@@ -319,8 +325,11 @@ yarn workflow:skills
 yarn workflow:list                                  # что вообще есть и в каком статусе
 yarn workflow:archive outputs/<project-slug>/<YYYY-MM-DD>   # переместить завершённый run в архив
 yarn workflow:cleanup-temp                          # очистить outputs/temp
+yarn outputs:cleanup-dry-run                        # план уборки без единого перемещения — запускать ПЕРВЫМ
 yarn outputs:cleanup                                # уборка outputs по правилам lifecycle
 ```
+
+`outputs:cleanup` переносит в `outputs/temp/` всё, чего нет в `activeProducts` из `outputs/registry.json`. Зоны `products/`, `archive/`, `temp/` защищены в скрипте и в реестр не вносятся. Реестр ведётся вручную: при пустом `activeProducts` и непустом `outputs/` команда останавливается с ошибкой вместо переноса (обойти можно только флагом `--force`).
 
 ## QA
 
