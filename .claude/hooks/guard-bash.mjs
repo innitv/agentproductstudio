@@ -30,7 +30,14 @@ const cwd = data.cwd || process.cwd();
 const block = (msg) => { process.stderr.write(`[guard-bash] ${msg}`); process.exit(2); };
 
 // Префикс frozen ledger путей (проверяем НАЧАЛО реального пути к файлу).
-const FROZEN = /^(outputs\/|research\/projects\/|research\/archive\/|siteportfolio\/runs\/|\.lazyweb\/)/;
+//
+// Для `outputs/` блокируем ТОЛЬКО вложенные каталоги (`outputs/<slug>/...`) — это run-артефакты,
+// они в .gitignore и версионироваться не должны. Файлы В КОРНЕ `outputs/` — наоборот,
+// инфраструктура индекса: `registry.json` (навигационный индекс, с 2026-07-25 ведётся runtime,
+// см. runtime/typescript/outputs-registry.ts), `README.md`, `.gitkeep`. Они отслеживаются git,
+// то есть их изменения ОБЯЗАНЫ попадать в коммит; блокировать их — ложное срабатывание.
+// Паттерны research/* изначально указывают на подкаталоги и этой проблемы не имели.
+const FROZEN = /^(outputs\/[^/]+\/|research\/projects\/|research\/archive\/|siteportfolio\/runs\/|\.lazyweb\/)/;
 const allowLedger = process.env.CLAUDE_ALLOW_LEDGER_COMMIT === "1";
 
 // 1. Force push требует явного намерения (это флаг команды, проверка текста тут корректна).
