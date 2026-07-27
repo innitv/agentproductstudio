@@ -117,6 +117,6 @@ outputs:
 >
 > На маршруте `track=code` (умолчание студии: shadcn/ui + Storybook, Figma в производстве не участвует) секции `Design System Implementation`, `Component Contract Implementation`, `Frame / State Implementation Map`, `Figma Visual QA Gate Summary`, `Figma Roundtrip Deviations` **не требуются вовсе** — валидатор их не спрашивает, а не «прощает» отсутствие. Заполнять их как `not_applicable` больше не нужно; если раздел всё же написан, ошибкой это не является.
 >
-> Пропуск фиксируется положительной записью в `stage-gate-ledger.md` — строкой со статусом `skipped_by_track`, называющей стадию и секцию. Запись проверяется в обе стороны: пропуск секции, которую маршрут требует, и пропуск секции, которой нет ни в одном маршруте, — ошибки валидатора. Маршрут берётся из `run-state.json`, определять его по наличию `figma-layout-ir.json` запрещено.
+> Пропуск фиксируется положительной записью в `stage-gate-ledger.md` — строкой со статусом `skipped_by_track`, называющей стадию и секцию. Запись проверяется в три стороны: ошибки валидатора дают пропуск секции, которую маршрут требует; пропуск секции, которой нет ни в одном маршруте; и снятая маршрутом секция без строки в ledger. Маршрут берётся из `run-state.json`, определять его по наличию `figma-layout-ir.json` запрещено.
 
 Для UI/frontend surface поле `surface_output` обязательно (implemented views/components/states, upstream coverage, verification evidence, unresolved deviations). Если входы неполные, State Truncation Gate не выполнен или требуется approval — `partial`/`blocked`.

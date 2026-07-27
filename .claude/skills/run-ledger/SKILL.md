@@ -19,7 +19,7 @@ description: Использовать при старте продуктовог
 - После этапа: в `handoff-bundle.md` — completed artifacts, решения, риски, следующий артефакт; в `stage-gate-ledger.md` — статус, gate notes, validation, **вердикт Agent Output Critic** для делегированных стадий.
 - Для стадии субагента: `yarn agent:verify-output <отчёт>`, вердикт пишется в ledger. `rejected` несовместим с `success` — отчёт заявляет, Critic сверяет с диском, git и валидатором.
 - `inputs_used` — реально прочитанные файлы, а не список по умолчанию.
-- Пропуски пишутся явно: `skipped_with_reason`, `skipped_by_scale`, `skipped_by_track`, `partial`, `blocked`. Молчаливый пропуск запрещён.
+- Пропуски пишутся явно: `skipped_with_reason`, `skipped_by_scale`, `skipped_by_track`, `partial`, `blocked`. Молчаливый пропуск запрещён и проверяется машинно: незакрытое ожидание (стадия вне масштаба или снятая маршрутом секция без строки в ledger) — ошибка валидатора, а не тишина.
 - Масштаб (`full`/`increment`/`patch`, CLAUDE.md §0.2) фиксируется на старте в `run-plan.md` и `run-state.json`; стадии вне масштаба перечисляются как `skipped_by_scale`. Понижать масштаб задним числом нельзя — валидатор отклонит.
 - Маршрут (`code`/`figma`, CLAUDE.md §0.3) фиксируется на старте в `run-plan.md`, `run-state.json` и поле `Track` шапки ledger; секции вне маршрута перечисляются в таблице «Секции вне маршрута» как `skipped_by_track` с указанием стадии и секции. Менять маршрут задним числом нельзя — валидатор отклонит.
 - С `08-frontend` специалистам передаётся сжатый `handoff-bundle.md`, а не вся история.

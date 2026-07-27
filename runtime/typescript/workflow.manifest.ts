@@ -50,6 +50,24 @@ export const defaultWorkflowTrack: WorkflowTrack = "code";
 // фактически проходили.
 export const legacyWorkflowTrack: WorkflowTrack = "figma";
 
+// Косвенный гейт опроса на intake. Прямого гейта быть не может: два вопроса и план работ
+// показываются пользователю ДО того, как каталог запуска существует, поэтому валидатор не
+// видит самого факта вопроса. Он видит только запись о нём.
+//
+// Поэтому проверяется НАЛИЧИЕ ЗАПИСИ, а не факт вопроса. Три легитимных случая «не
+// спрашивали» (ответ уже дан в запросе, непродуктовый тип работы, `quick draft`) по
+// правилам тоже требуют записи с причиной — см. `agent-pack/templates/run-plan.template.md`
+// и skill `recursive-brief` шаг 3.1. Запись «не спрашивали, потому что ответ был в
+// запросе» валидна; пустота не является ни одним из трёх случаев.
+export const intakeSurveySection = "## Ответы на вопросы intake";
+
+// Дата, с которой опрос intake существует (`docs/architecture/intake-questions-spec-2026-07-27.md`).
+// Запуски, созданные раньше, физически не могли записать его результат: требовать раздел
+// от них — не гейт, а вечный шум, который учит игнорировать вывод валидатора. Для них
+// отсутствие раздела — предупреждение (принцип ansible-lint: не прятать, но и не валить).
+// Неизвестная дата создания трактуется строго: неизвестное по умолчанию включается.
+export const intakeSurveyIntroducedOn = "2026-07-27";
+
 export const artifactNames = {
   runPlan: "run_plan",
   handoffBundle: "handoff_bundle",
@@ -172,7 +190,7 @@ export const workflowStages: readonly WorkflowStage[] = [
       artifactNames.recursiveBrief,
     ],
     requiredSectionsByArtifact: {
-      [artifactNames.runPlan]: ["## Запрос", "## План этапов", "## Ограничения"],
+      [artifactNames.runPlan]: ["## Запрос", intakeSurveySection, "## План этапов", "## Ограничения"],
       [artifactNames.handoffBundle]: ["## Goal", "## Completed Artifacts", "## Next Required Artifact"],
       [artifactNames.stageGateLedger]: ["## Run", "## Rule", "## Stage Status", "## Validation Runs"],
       [artifactNames.recursiveBrief]: ["## Expansion", "## Deepening", "## Consolidation", "## Assumptions", "## Open Questions"],
@@ -997,4 +1015,44 @@ export function isStageTrackConditional(stage: WorkflowStage): boolean {
 // смена маршрута опасна ровно тогда, когда такая стадия уже отработала.
 export function getTrackSensitiveStages(): readonly WorkflowStage[] {
   return workflowStages.filter(isStageTrackConditional);
+}
+
+export interface SkippedSectionExpectation {
+  stage: WorkflowStage;
+  artifact: string;
+  section: string;
+}
+
+// Ожидания, которые данный маршрут СНИМАЕТ, — вторая фаза оси маршрута.
+//
+// Первая фаза (фиксация) уже существует и защищена: маршрут выбирается на `00-intake`,
+// пишется в `run-state.json` и не меняется задним числом. Отсюда набор ожиданий выводится
+// детерминированно, поэтому отдельный журнал ожиданий на диске не нужен — он был бы
+// денормализованной копией манифеста и разъехался бы с ним.
+//
+// Вторая фаза (закрытие) — это то, чего не было: ничто не требовало, чтобы каждое снятое
+// ожидание получило положительную запись `skipped_by_track`. Проверка записей работала
+// только в обе стороны ПО СУЩЕСТВУЮЩИМ записям, поэтому «пропущено намеренно» и «забыто»
+// оставались неразличимы, пока никто не сверил вручную (модель Dagster: незакрытое
+// обещание резолвится в отдельный статус, а не исчезает).
+export function getSectionsSkippedByTrack(track: WorkflowTrack): readonly SkippedSectionExpectation[] {
+  const skipped: SkippedSectionExpectation[] = [];
+
+  for (const stage of workflowStages) {
+    for (const artifact of Object.keys(stage.requiredSectionsByArtifact)) {
+      const conditional = getTrackConditionalSections(stage, artifact);
+      if (conditional.size === 0) {
+        continue;
+      }
+
+      const requiredNow = new Set(getRequiredSectionsForStage(stage, artifact, track));
+      for (const section of conditional) {
+        if (!requiredNow.has(section)) {
+          skipped.push({ stage, artifact, section });
+        }
+      }
+    }
+  }
+
+  return skipped;
 }

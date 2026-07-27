@@ -22,7 +22,7 @@ import { validateWorkflowRun } from "./validate-workflow-run";
 type Payload = Record<string, unknown>;
 
 const baseSections: Record<string, readonly string[]> = {
-  [artifactNames.runPlan]: ["## Запрос", "## План этапов", "## Ограничения"],
+  [artifactNames.runPlan]: ["## Запрос", "## Ответы на вопросы intake", "## План этапов", "## Ограничения"],
   [artifactNames.handoffBundle]: ["## Goal", "## Completed Artifacts", "## Next Required Artifact"],
   [artifactNames.stageGateLedger]: ["## Run", "## Rule", "## Stage Status", "## Validation Runs"],
   [artifactNames.recursiveBrief]: ["## Expansion", "## Deepening", "## Consolidation", "## Assumptions", "## Open Questions"],
@@ -538,11 +538,23 @@ withRun((runDir) => {
   );
 });
 
-// Легальная запись о пропуске: секция, которую маршрут `code` действительно не требует.
+// Полный набор строк о пропуске для маршрута `code`. Записан литералом намеренно — набор,
+// выведенный из манифеста, проверял бы манифест сам собой.
+const codeTrackSkipRows = [
+  "| 06-screens | `screens.md` | `## Layout Compiler Contract` | `skipped_by_track` | маршрут code |",
+  "| 06-screens | `screens.md` | `## Figma Readiness` | `skipped_by_track` | маршрут code |",
+  "| 08-frontend | `frontend-result.md` | `## Design System Implementation` | `skipped_by_track` | маршрут code |",
+  "| 08-frontend | `frontend-result.md` | `## Component Contract Implementation` | `skipped_by_track` | маршрут code |",
+  "| 08-frontend | `frontend-result.md` | `## Frame / State Implementation Map` | `skipped_by_track` | маршрут code |",
+  "| 08-frontend | `frontend-result.md` | `## Figma Visual QA Gate Summary` | `skipped_by_track` | маршрут code |",
+  "| 08-frontend | `frontend-result.md` | `## Figma Roundtrip Deviations` | `skipped_by_track` | маршрут code |",
+];
+
+// Легальная запись о пропуске: секции, которые маршрут `code` действительно не требует.
 withRun((runDir) => {
   writeArtifactsThrough(runDir, "08-frontend", "standard", { [artifactNames.frontendResult]: frontendCodeTrackPayload });
   writeTrackRunState(runDir, "code");
-  appendLedgerRows(runDir, ["| 08-frontend | `frontend-result.md` | `## Figma Roundtrip Deviations` | `skipped_by_track` | маршрут code |"]);
+  appendLedgerRows(runDir, codeTrackSkipRows);
 
   const findings = validateWorkflowRun(runDir, "08-frontend", "standard", "full", "code");
   assert.deepEqual(
@@ -614,6 +626,181 @@ withRun((runDir) => {
     [],
   );
   assert.ok(findings.some((finding) => finding.level === "warning" && /validation track is 'code'/.test(finding.message)));
+});
+
+// --- Косвенный гейт опроса на intake ---
+
+// Раздел с ответами обязателен: валидатор не видит самого вопроса, только запись о нём.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "00-intake", "standard");
+  writeFileSync(
+    join(runDir, artifactFiles[artifactNames.runPlan]),
+    ["# Run Plan", "", "## Запрос", "", "фикстура", "", "## План этапов", "", "- 00-intake", "", "## Ограничения", "", "- фикстура без записи опроса, длинная строка для порога размера артефакта."].join("\n"),
+    "utf8",
+  );
+  writeTrackRunState(runDir, "code");
+
+  const findings = validateWorkflowRun(runDir, "00-intake", "standard", "full", "code");
+  assertError(findings, /does not record the intake survey/);
+  // Сообщение обязано называть три легитимных случая «не спрашивали», иначе агент решит,
+  // что гейт требует задать вопрос задним числом.
+  assertError(findings, /already given in the request/);
+  assertError(findings, /not a product workflow/);
+  assertError(findings, /quick draft/);
+});
+
+// Запись «не спрашивали, потому что ответ был в запросе» — валидная запись.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "00-intake", "standard");
+  writeFileSync(
+    join(runDir, artifactFiles[artifactNames.runPlan]),
+    [
+      "# Run Plan",
+      "",
+      "## Запрос",
+      "",
+      "фикстура",
+      "",
+      "## Ответы на вопросы intake",
+      "",
+      "- Вопросы не задавались: маршрут и профиль названы пользователем в самом запросе.",
+      "",
+      "## План этапов",
+      "",
+      "- 00-intake",
+      "",
+      "## Ограничения",
+      "",
+      "- фикстура с записью опроса, длинная строка для порога размера артефакта.",
+    ].join("\n"),
+    "utf8",
+  );
+  writeTrackRunState(runDir, "code");
+
+  const findings = validateWorkflowRun(runDir, "00-intake", "standard", "full", "code");
+  assert.deepEqual(
+    findings.filter((finding) => /intake survey/.test(finding.message)),
+    [],
+    "запись о том, почему опрос не проводился, закрывает гейт",
+  );
+});
+
+// Легаси: запуск, созданный до появления опроса, физически не мог его записать.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "00-intake", "standard");
+  writeFileSync(
+    join(runDir, artifactFiles[artifactNames.runPlan]),
+    ["# Run Plan", "", "## Запрос", "", "фикстура", "", "## План этапов", "", "- 00-intake", "", "## Ограничения", "", "- легаси-фикстура, длинная строка для порога размера артефакта."].join("\n"),
+    "utf8",
+  );
+  writeFileSync(
+    join(runDir, "run-state.json"),
+    JSON.stringify({ profile: "standard", scale: "full", track: "code", status: "completed", created_at: "2026-07-20T10:00:00.000Z", stages: {} }),
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "00-intake", "standard", "full", "code");
+  assert.deepEqual(
+    findings.filter((finding) => finding.level === "error" && /intake survey/.test(finding.message)),
+    [],
+    "run до 2026-07-27 не должен падать из-за отсутствия записи опроса",
+  );
+  assert.ok(
+    findings.some((finding) => finding.level === "warning" && /before the intake survey existed/.test(finding.message)),
+    "но пропуск обязан оставаться видимым как предупреждение",
+  );
+});
+
+// --- Закрытие ожиданий (вторая фаза) ---
+
+// Маршрут `code` снимает семь секций. Молчаливое отсутствие записи о каждой — ошибка.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "08-frontend", "standard", { [artifactNames.frontendResult]: frontendCodeTrackPayload });
+  writeTrackRunState(runDir, "code");
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard", "full", "code");
+  assert.equal(
+    findings.filter((finding) => finding.level === "error" && /has no `skipped_by_track` row for it/.test(finding.message)).length,
+    codeTrackSkipRows.length,
+    "каждое снятое маршрутом ожидание обязано быть закрыто записью",
+  );
+  assertError(findings, /unclosed expectation is indistinguishable from a forgotten section/);
+});
+
+// Ожидание закрывается только тогда, когда стадия отдала артефакт: до этого закрывать нечего.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "00-intake", "standard");
+  writeTrackRunState(runDir, "code");
+
+  const findings = validateWorkflowRun(runDir, "00-intake", "standard", "full", "code");
+  assert.deepEqual(
+    findings.filter((finding) => /skipped_by_track` row for it/.test(finding.message)),
+    [],
+    "только что созданный run не обязан закрывать ожидания ещё не отработавших стадий",
+  );
+});
+
+// Маршрут `figma` ничего не снимает — закрывать нечего, записи не требуются.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "08-frontend", "standard", { [artifactNames.frontendResult]: frontendCodeTrackPayload });
+  writeTrackRunState(runDir, "figma");
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard", "full", "figma");
+  assert.deepEqual(
+    findings.filter((finding) => /skipped_by_track` row for it/.test(finding.message)),
+    [],
+    "маршрут figma требует все условные секции, поэтому снятых ожиданий у него нет",
+  );
+});
+
+// Масштаб: стадия вне масштаба обязана быть закрыта записью `skipped_by_scale`.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "11-qa", "standard", {}, "increment");
+  writeFileSync(
+    join(runDir, "run-state.json"),
+    JSON.stringify({ profile: "standard", scale: "increment", track: "code", status: "completed", created_at: "", updated_at: "", stages: {} }),
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, undefined, "standard", "increment", "code");
+  assertError(findings, /scale 'increment' excludes this stage, but stage-gate-ledger\.md has no `skipped_by_scale` row/);
+  assert.equal(
+    findings.filter((finding) => finding.level === "error" && /skipped_by_scale` row for it/.test(finding.message)).length,
+    5,
+    "increment исключает 01-research, 02-prd, 03-ia, 07-prototype, 10-test-bench",
+  );
+});
+
+// Те же строки в ledger — и ожидания закрыты. Эмодзи в ячейке статуса не мешает.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "11-qa", "standard", {}, "increment");
+  writeFileSync(
+    join(runDir, "run-state.json"),
+    JSON.stringify({ profile: "standard", scale: "increment", track: "code", status: "completed", created_at: "", updated_at: "", stages: {} }),
+    "utf8",
+  );
+  const ledgerPath = join(runDir, artifactFiles[artifactNames.stageGateLedger]);
+  writeFileSync(
+    ledgerPath,
+    [
+      readFileSync(ledgerPath, "utf8"),
+      "",
+      "| Этап | Владелец | Артефакты | Статус | Заметки |",
+      "|---|---|---|---|---|",
+      ...["01-research", "02-prd", "03-ia", "07-prototype", "10-test-bench"].map(
+        (stageId) => `| ${stageId} | owner | artifacts | ⏭️ \`skipped_by_scale\` | Scale \`increment\` |`,
+      ),
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, undefined, "standard", "increment", "code");
+  assert.deepEqual(
+    findings.filter((finding) => /skipped_by_scale` row/.test(finding.message)),
+    [],
+    "положительная запись о пропуске по масштабу закрывает ожидание",
+  );
 });
 
 console.log("workflow validator regression tests passed");

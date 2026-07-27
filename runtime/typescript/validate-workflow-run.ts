@@ -10,10 +10,13 @@ import {
   getRequiredArtifactsForStage,
   getRequiredSectionsForStage,
   getSchemaFieldsNotRequiredForTrack,
+  getSectionsSkippedByTrack,
   getStagesSkippedByScale,
   getTrackConditionalSections,
   getTrackSensitiveStages,
   getWorkflowStagesForProfile,
+  intakeSurveyIntroducedOn,
+  intakeSurveySection,
   legacyWorkflowTrack,
   workflowScales,
   workflowStages,
@@ -42,6 +45,7 @@ interface RunStateLike {
   profile?: WorkflowProfile;
   scale?: WorkflowScale;
   track?: WorkflowTrack;
+  created_at?: string;
   stages?: Record<string, { status?: StageStateStatus; artifacts?: string[] }>;
 }
 
@@ -82,6 +86,7 @@ export function validateWorkflowRun(
   // обошёл бы гейт. Отсутствие поля читается строго (`figma`).
   const track = trackInput ?? persistedState?.track ?? legacyWorkflowTrack;
   const stages = getWorkflowStagesForProfile(profile, scale);
+  const predatesIntakeSurvey = runPredatesIntakeSurvey(persistedState?.created_at);
 
   const stageLimit = throughStageId
     ? stages.findIndex((stage) => stage.id === throughStageId)
@@ -123,10 +128,10 @@ export function validateWorkflowRun(
       const requiredSections = getRequiredSectionsForStage(stage, artifact, track);
       for (const section of requiredSections) {
         if (!content.includes(section)) {
-          findings.push({
-            level: "error",
-            message: `${stage.id} ${stage.title}: artifact ${fileName} is missing section ${section}`,
-          });
+          findings.push(describeMissingSection(stage, fileName, section, {
+            predatesIntakeSurvey,
+            runCreatedAt: persistedState?.created_at,
+          }));
         }
       }
 
@@ -226,6 +231,56 @@ function withoutTrackConditionalRequired(schema: JsonObject, notRequired: Readon
   };
 }
 
+// Запуск создан до того, как опрос intake появился? Тогда записать его результат было
+// физически невозможно. Дата берётся из `run-state.json` (пишется скаффолдом), неизвестная
+// дата трактуется строго — как «не легаси».
+function runPredatesIntakeSurvey(createdAt: string | undefined): boolean {
+  if (!createdAt) {
+    return false;
+  }
+
+  const created = Date.parse(createdAt);
+  const introduced = Date.parse(`${intakeSurveyIntroducedOn}T00:00:00.000Z`);
+  return Number.isFinite(created) && created < introduced;
+}
+
+// Общий формат сообщения об отсутствующей секции плюс специальный случай раздела с
+// ответами на вопросы intake: общее «is missing section» не говорит, ЧТО именно не
+// записано, а здесь важно назвать все три легитимных случая — иначе агент, который
+// законно не задавал вопрос, решит, что гейт требует задать его задним числом.
+function describeMissingSection(
+  stage: ReturnType<typeof getWorkflowStagesForProfile>[number],
+  fileName: string,
+  section: string,
+  context: { predatesIntakeSurvey: boolean; runCreatedAt?: string },
+): Finding {
+  if (section !== intakeSurveySection) {
+    return {
+      level: "error",
+      message: `${stage.id} ${stage.title}: artifact ${fileName} is missing section ${section}`,
+    };
+  }
+
+  if (context.predatesIntakeSurvey) {
+    return {
+      level: "warning",
+      message:
+        `${stage.id} ${stage.title}: ${fileName} has no '${intakeSurveySection}' section, but the run was created ` +
+        `${context.runCreatedAt} — before the intake survey existed (${intakeSurveyIntroducedOn}). Reported as a warning, not an error.`,
+    };
+  }
+
+  return {
+    level: "error",
+    message:
+      `${stage.id} ${stage.title}: ${fileName} does not record the intake survey (section '${intakeSurveySection}'). ` +
+      "Record both answers — 'Нужен макет в Figma перед вёрсткой?' (track) and 'Есть конкретный образец, с которым сверять результат?' (profile) — " +
+      "together with how each answer was obtained. If the survey was legitimately not run (the answer was already given in the request, " +
+      "the task is not a product workflow, or the mode is quick draft), record that reason in the same section: " +
+      "the gate checks the record, not the question, and silence is none of the three.",
+  };
+}
+
 function validateGateSemantics(options: {
   outputDir: string;
   stages: ReturnType<typeof getWorkflowStagesForProfile>;
@@ -243,6 +298,7 @@ function validateGateSemantics(options: {
   const runState = readJsonIfExists<RunStateLike>(join(options.outputDir, runStateFileName));
 
   findings.push(...validateTrackGates(options, runState));
+  findings.push(...validateExpectationClosure(options));
 
   if (runState) {
     const missingMetadata = [
@@ -428,7 +484,14 @@ interface TrackSkipRecord {
   raw: string;
 }
 
-function parseTrackSkipRecords(ledger: string): TrackSkipRecord[] {
+// Ячейка статуса в ledger часто снабжена эмодзи (`⏭️ \`skipped_by_scale\``). Нормализуем
+// оформление, но НЕ ослабляем распознавание до «содержит подстроку»: иначе ячейка причины
+// («Scale increment, поэтому skipped_by_scale») сама стала бы записью.
+function normalizeLedgerCell(cell: string): string {
+  return cell.replaceAll("`", "").replaceAll("*", "").trim().replace(/^[^\p{L}]+/u, "");
+}
+
+function parseLedgerSkipRecords(ledger: string, status: "skipped_by_track" | "skipped_by_scale"): TrackSkipRecord[] {
   const records: TrackSkipRecord[] = [];
   const lines = ledger.split(/\r?\n/);
 
@@ -441,7 +504,7 @@ function parseTrackSkipRecords(ledger: string): TrackSkipRecord[] {
     }
 
     const cells = line.split("|").slice(1, -1).map((cell) => cell.replaceAll("`", "").replaceAll("*", "").trim());
-    if (!cells.some((cell) => cell === "skipped_by_track")) {
+    if (!cells.some((cell) => normalizeLedgerCell(cell) === status)) {
       continue;
     }
 
@@ -462,7 +525,7 @@ function validateTrackSkipRecords(outputDir: string, track: WorkflowTrack): Find
   const findings: Finding[] = [];
   const where = `${artifactFiles.stage_gate_ledger}`;
 
-  for (const record of parseTrackSkipRecords(readFileSync(ledgerPath, "utf8"))) {
+  for (const record of parseLedgerSkipRecords(readFileSync(ledgerPath, "utf8"), "skipped_by_track")) {
     if (!record.stageId) {
       findings.push({
         level: "error",
@@ -516,6 +579,97 @@ function validateTrackSkipRecords(outputDir: string, track: WorkflowTrack): Find
         message:
           `${where}:${record.line}: ${record.stageId} section '${record.section}' is recorded as skipped_by_track, ` +
           `but no track declares it as conditional. Remove the stale record or fix the section title.`,
+      });
+    }
+  }
+
+  return findings;
+}
+
+// Вторая фаза журнала ожиданий: незакрытое ожидание становится видимым статусом.
+//
+// Что здесь НОВОГО по сравнению с уже работающим. Существующие проверки идут от записи к
+// требованию: запись `skipped_by_track` обязана быть законной (`xfail(strict=True)`) и не
+// протухшей (`warn_unused_ignores`). Но ни одна не шла от требования к записи: run, где
+// секции просто нет и записи о ней тоже нет, проходил молча, хотя `CLAUDE.md` §0.2 и §0.3
+// требуют явной фиксации. Именно поэтому «пропущено намеренно» и «забыто» до сих пор
+// различались только ручной сверкой.
+//
+// Момент фиксации ожидания отдельным файлом НЕ вводится намеренно: ожидание уже
+// зафиксировано осями `track`/`scale` в `run-state.json` на `00-intake`, и обе оси
+// защищены от смены задним числом. Набор ожиданий выводится из них манифестом
+// детерминированно, поэтому копия на диске была бы вторым источником правды.
+function validateExpectationClosure(options: {
+  outputDir: string;
+  stages: ReturnType<typeof getWorkflowStagesForProfile>;
+  stageLimit: number;
+  profile: WorkflowProfile;
+  scale: WorkflowScale;
+  track: WorkflowTrack;
+  throughStageId?: string;
+}): Finding[] {
+  const ledgerPath = join(options.outputDir, artifactFiles.stage_gate_ledger);
+  if (!existsSync(ledgerPath)) {
+    // Отсутствие самого ledger уже ловится как отсутствующий обязательный артефакт
+    // `00-intake`; дублировать это N раз для каждой секции — шум, а не сигнал.
+    return [];
+  }
+
+  const ledger = readFileSync(ledgerPath, "utf8");
+  const findings: Finding[] = [];
+  const checkedStageIds = new Set(options.stages.slice(0, options.stageLimit + 1).map((stage) => stage.id));
+
+  const closedSections = new Set(
+    parseLedgerSkipRecords(ledger, "skipped_by_track")
+      .filter((record) => record.stageId && record.section)
+      .map((record) => `${record.stageId} ${record.section}`),
+  );
+
+  for (const expectation of getSectionsSkippedByTrack(options.track)) {
+    if (!checkedStageIds.has(expectation.stage.id)) {
+      continue;
+    }
+
+    // Ожидание закрывается тогда, когда стадия отдала артефакт: до этого закрывать нечего,
+    // и требовать запись авансом значило бы валить каждый только что созданный run.
+    if (!existsSync(join(options.outputDir, artifactFiles[expectation.artifact]))) {
+      continue;
+    }
+
+    if (closedSections.has(`${expectation.stage.id} ${expectation.section}`)) {
+      continue;
+    }
+
+    findings.push({
+      level: "error",
+      message:
+        `${expectation.stage.id} ${expectation.stage.title}: track '${options.track}' does not require section ` +
+        `'${expectation.section}' of ${artifactFiles[expectation.artifact]}, but ${artifactFiles.stage_gate_ledger} has no ` +
+        "`skipped_by_track` row for it. An unclosed expectation is indistinguishable from a forgotten section — " +
+        "add a row naming the stage, the section and the reason.",
+    });
+  }
+
+  // Стадии вне масштаба резолвятся на полном прогоне: они не «отдают артефакт», поэтому
+  // момента «после стадии» у них нет — обещание закрывается к концу run (модель Dagster).
+  if (!options.throughStageId && options.scale !== defaultWorkflowScale) {
+    const closedStages = new Set(
+      parseLedgerSkipRecords(ledger, "skipped_by_scale")
+        .filter((record) => record.stageId)
+        .map((record) => record.stageId as string),
+    );
+
+    for (const stage of getStagesSkippedByScale(options.profile, options.scale)) {
+      if (closedStages.has(stage.id)) {
+        continue;
+      }
+
+      findings.push({
+        level: "error",
+        message:
+          `${stage.id} ${stage.title}: scale '${options.scale}' excludes this stage, but ${artifactFiles.stage_gate_ledger} has no ` +
+          "`skipped_by_scale` row for it. An unclosed expectation is indistinguishable from a forgotten stage — " +
+          "add a row naming the stage, the scale and the reason.",
       });
     }
   }

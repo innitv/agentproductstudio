@@ -21,6 +21,10 @@ const REQUIRED_DIRS = [
 
 const REQUIRED_TEMPLATES = [
   "agent-pack/templates/skill.template.md",
+  // Шаблон плана запуска: держит формат ответов на вопросы intake и утверждённого плана
+  // работ, из которого выводится масштаб. Валидатор требует раздел «Ответы на вопросы
+  // intake» в `run-plan.md`, поэтому пропажа шаблона ломала бы каждый новый запуск молча.
+  "agent-pack/templates/run-plan.template.md",
   "agent-pack/artifacts/brief/recursive-brief.template.md",
   "agent-pack/artifacts/prd/prd.template.md"
 ];

@@ -7,10 +7,13 @@ export {
   getRequiredArtifactsForStage,
   getRequiredSectionsForStage,
   getSchemaFieldsNotRequiredForTrack,
+  getSectionsSkippedByTrack,
   getStagesSkippedByScale,
   getTrackConditionalSections,
   getTrackSensitiveStages,
   getWorkflowStagesForProfile,
+  intakeSurveyIntroducedOn,
+  intakeSurveySection,
   isStageInScale,
   isStageTrackConditional,
   legacyWorkflowTrack,
@@ -20,6 +23,7 @@ export {
 } from "./workflow.manifest";
 
 export type {
+  SkippedSectionExpectation,
   WorkflowProfile,
   WorkflowScale,
   WorkflowStage,
