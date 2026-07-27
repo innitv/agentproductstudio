@@ -9,6 +9,9 @@ Skill превращает `screens.md` и дизайн-контекст в `fig
 
 **Полная процедура, входы/выходы, gates и validation-команды — в [`agent-pack/skills/figma-screen-compiler/SKILL.md`](../../../agent-pack/skills/figma-screen-compiler/SKILL.md). Следуй ей.**
 
+## Применимость
+**Только когда Figma реально в деле** (`CLAUDE.md` §6.1). IR нужен исключительно как guardrail перед Figma canvas write. Для кодовой поверхности контракт экрана — composition story плюс `yarn vr:test` / `yarn test-storybook`; отсутствие `figma-layout-ir.json` тогда записывается как `skipped_with_reason: Figma не участвует`, а не как пробел.
+
 ## Когда использовать
 - Перед любым Figma canvas write для `figma_board`, `product_ui` или `prototype`.
 - Результат должен быть похож на приложение, а не набор декоративных страниц.

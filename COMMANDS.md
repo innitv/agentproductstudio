@@ -121,6 +121,22 @@ release; `patch` — intake, design, frontend, qa. Масштаб режет т�
 run ledger, `00-intake` и `11-qa` остаются на любом уровне. Масштаб пишется в `run-state.json`
 и не может быть понижен задним числом.
 
+Выбрать маршрут производства макета (ось `track`, см. CLAUDE.md §0.3). Без флага — `code`,
+умолчание студии (shadcn/ui + Storybook):
+
+```bash
+yarn workflow:start "консоль выплат" --track figma
+```
+
+`code` не требует Figma-специфичных секций и полей схемы (`## Layout Compiler Contract`,
+`## Figma Readiness` в `screens.md`; `## Design System Implementation`,
+`## Component Contract Implementation`, `## Frame / State Implementation Map`,
+`## Figma Visual QA Gate Summary`, `## Figma Roundtrip Deviations` в `frontend-result.md`) —
+валидатор их не спрашивает вовсе. Маршрут пишется в `run-state.json` и `run-meta.json`, берётся
+оттуда (а не по наличию `figma-layout-ir.json`) и не может быть сменён после того, как
+`06-screens` или `08-frontend` отработали. Пропущенные по маршруту секции перечисляются в
+`stage-gate-ledger.md` со статусом `skipped_by_track`.
+
 Запустить persisted workflow engine в agentic mode для staged rollout специалистов:
 
 ```bash
@@ -321,6 +337,14 @@ yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
 
 ```bash
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard --scale increment
+```
+
+Перепроверить чужой run под другим маршрутом (флаг не нужен для своего run — валидатор читает
+`track` из `run-state.json`; на run, где маршрут-зависимая стадия уже отработала, попытка
+переобъявить маршрут вернёт ошибку anti-backdating):
+
+```bash
+yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard --track code
 ```
 
 Проверить полный reference workflow:

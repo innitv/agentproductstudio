@@ -48,8 +48,9 @@ Skill применяется при старте продуктового run и
 
 1. Создай директорию run по правилам маршрутизации: продуктовый workflow → `outputs/<project-slug>/<YYYY-MM-DD>/`; standalone research/CJM → `research/projects/<research-slug>/<YYYY-MM-DD>/`; тестовый прогон → `outputs/temp/`.
 2. Создай обязательный ledger **до первых стадий**: `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, `run-state.json`, `run-meta.json`, `artifact-manifest.json`, `run-index.md`.
-3. Зафиксируй в `run-plan.md`: тип работы, профиль (`standard`/`reference`), **масштаб** (`full`/`increment`/`patch`, см. CLAUDE.md §0.2), маршрут стадий и non-goals. Масштаб — отдельная ось от профиля; не уверен — бери `full`.
+3. Зафиксируй в `run-plan.md`: тип работы, профиль (`standard`/`reference`), **масштаб** (`full`/`increment`/`patch`, см. CLAUDE.md §0.2), **маршрут** (`code`/`figma`, см. CLAUDE.md §0.3), последовательность стадий и non-goals. Это три независимые оси: профиль — «какого типа задача», масштаб — «какого размера», маршрут — «через какой инструмент делается макет». Не уверен в масштабе — бери `full`.
 3a. Стадии, которые масштаб исключает, перечисли сразу в `stage-gate-ledger.md` как `skipped_by_scale` с указанием масштаба. Пропуск по масштабу — легальное решение, но только записанное: молчаливый пропуск неотличим от забытой стадии. Список даёт `getStagesSkippedByScale` (или `yarn workflow:validate <run-dir> --scale <scale>`).
+3b. Секции, которые исключает **маршрут**, перечисли сразу в `stage-gate-ledger.md` в таблице «Секции вне маршрута» со статусом `skipped_by_track`; строка обязана называть стадию и секцию. Маршрут пишется в `run-state.json` (`track`) и определять его по наличию `figma-layout-ir.json` запрещено: Figma-run, не создавший файл, выглядел бы как честный код-маршрут. Запись проверяется машинно в обе стороны — пропуск секции, которую маршрут требует, и пропуск секции, которой нет ни в одном маршруте, дают ошибку валидатора. Точный список даёт `yarn workflow:validate <run-dir> --track <track>`.
 
 ### После каждого этапа
 
@@ -57,7 +58,8 @@ Skill применяется при старте продуктового run и
 5. **`stage-gate-ledger.md`:** статус стадии (`success`/`partial`/`blocked`), gate notes, результат validation, **вердикт Agent Output Critic** для делегированных стадий.
 5a. **Вердикт Critic — часть записи, а не устная оценка.** Для стадии, выполненной субагентом, оркестратор прогоняет `yarn agent:verify-output <отчёт>` и пишет вердикт (`accepted` / `accepted_with_warnings` / `rejected`) рядом с validation notes. `rejected` несовместим с `success`: отчёт заявляет, а Critic сверяет с диском, git и валидатором. Причина правила — два реальных случая в run `contractor-payment-demo`: прерванный агент оставил состояние, выглядевшее завершённым, и отчёт `success` о правке, не изменившей результат валидатора.
 6. **`inputs_used`:** перечисли файлы, которые этап реально прочитал. Не «recursive-brief.md» по умолчанию, а фактический список.
-7. **Незакрытое — записывается.** Пропущенный слой → `skipped_with_reason`. Стадия вне масштаба → `skipped_by_scale`. Недоступный provider/approval → `blocked`/`partial`. Молчаливый пропуск запрещён.
+7. **Незакрытое — записывается.** Пропущенный слой → `skipped_with_reason`. Стадия вне масштаба → `skipped_by_scale`. Секция вне маршрута → `skipped_by_track`. Недоступный provider/approval → `blocked`/`partial`. Молчаливый пропуск запрещён.
+7a1. **Маршрут не меняется задним числом.** Если `06-screens` или `08-frontend` уже отработали, смена `track` в `run-state.json` — попытка переопределить, какие проверки run проходил; валидатор ловит расхождение `run-state.json` и `run-meta.json` и возвращает ошибку. Смена — только `process_deviation` с reason.
 7a. **Масштаб не понижается задним числом.** Обнаружил, что задача крупнее — поднимай масштаб и добирай стадии. Понижение ради пропуска уже начатой стадии — `process_deviation` с reason; валидатор такой run отклонит.
 8. **После ручной правки файлов** run — `yarn workflow:sync <run-dir>`, иначе `run-state.json` разойдётся с реальностью.
 
@@ -84,7 +86,8 @@ Definition of Done для этапа: обязательные артефакт�
 - [ ] Ledger создан до первых стадий (7 файлов).
 - [ ] После каждого этапа обновлены `handoff-bundle.md` и `stage-gate-ledger.md`.
 - [ ] `inputs_used` отражает реально прочитанные файлы.
-- [ ] Все пропуски записаны как `skipped_with_reason`, `skipped_by_scale`, `partial` или `blocked`.
+- [ ] Все пропуски записаны как `skipped_with_reason`, `skipped_by_scale`, `skipped_by_track`, `partial` или `blocked`.
 - [ ] Масштаб зафиксирован в `run-plan.md` и `run-state.json`; стадии вне масштаба перечислены как `skipped_by_scale`.
+- [ ] Маршрут зафиксирован в `run-plan.md`, `run-state.json` и шапке ledger; секции вне маршрута перечислены как `skipped_by_track` с указанием стадии и секции.
 - [ ] `yarn workflow:sync <run-dir>` выполнен после ручных правок.
 - [ ] `yarn workflow:validate <run-dir> --profile standard` (или `--profile reference`) пройден.

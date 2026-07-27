@@ -9,9 +9,12 @@ import {
   defaultWorkflowScale,
   getRequiredArtifactsForStage,
   getWorkflowStagesForProfile,
+  legacyWorkflowTrack,
   workflowScales,
+  workflowTracks,
   type WorkflowProfile,
   type WorkflowScale,
+  type WorkflowTrack,
 } from "./workflow-stages";
 import { artifactStatusToStageStatus, readMarkdownStatus, summarizeRunStatus } from "./status-resolver";
 import {
@@ -28,6 +31,7 @@ interface SyncOptions {
   outputDir: string;
   profile?: WorkflowProfile;
   scale?: WorkflowScale;
+  track?: WorkflowTrack;
   executionMode?: WorkflowExecutionMode;
   preview: boolean;
 }
@@ -59,6 +63,10 @@ export async function syncWorkflowRunState(options: SyncOptions): Promise<SyncRe
   // Масштаб не детектится из содержимого намеренно: неполный run иначе выглядел бы как
   // честный маленький. Он задаётся явно на intake и дальше только читается.
   const scale = options.scale ?? previousState?.scale ?? defaultWorkflowScale;
+  // Маршрут — по той же причине не детектится из содержимого (в частности, по наличию
+  // `figma-layout-ir.json`): Figma-run, не создавший файл, выглядел бы как честный
+  // код-маршрут. Задаётся на intake, дальше только читается.
+  const track = options.track ?? previousState?.track ?? legacyWorkflowTrack;
   const executionMode = options.executionMode ?? previousState?.execution_mode ?? "local";
   const goal = previousState?.goal ?? detectGoal(runPlan) ?? "Workflow run";
   const now = new Date().toISOString();
@@ -106,6 +114,7 @@ export async function syncWorkflowRunState(options: SyncOptions): Promise<SyncRe
     goal,
     profile,
     scale,
+    track,
     execution_mode: executionMode,
     status: summarizeRunStatus(Object.values(stageStates).map((stage) => stage.status)),
     output_dir: outputDir,
@@ -276,6 +285,7 @@ function renderSummary(result: SyncResult, outputDir: string, preview: boolean):
     `Run status: ${result.previousState?.status ?? "none"} -> ${result.nextState.status}`,
     `Run ID: ${result.nextState.run_id}`,
     `Created at: ${result.nextState.created_at}`,
+    `Track: ${result.nextState.track ?? legacyWorkflowTrack}`,
     `Execution mode: ${result.nextState.execution_mode ?? "local"}`,
     "",
     "| Stage | Status | Artifacts |",
@@ -288,7 +298,7 @@ function parseArgs(args: string[]): SyncOptions {
   const outputDir = args.find((arg) => !arg.startsWith("--"));
   if (!outputDir) {
     throw new Error(
-      "Usage: yarn workflow:sync <run-dir> [--preview] [--profile standard|reference] [--scale full|increment|patch] [--mode local|agentic]",
+      "Usage: yarn workflow:sync <run-dir> [--preview] [--profile standard|reference] [--scale full|increment|patch] [--track code|figma] [--mode local|agentic]",
     );
   }
 
@@ -302,6 +312,11 @@ function parseArgs(args: string[]): SyncOptions {
     throw new Error(`--scale must be one of: ${workflowScales.join(", ")}`);
   }
 
+  const track = readFlag(args, "--track");
+  if (track && !workflowTracks.includes(track as WorkflowTrack)) {
+    throw new Error(`--track must be one of: ${workflowTracks.join(", ")}`);
+  }
+
   const executionMode = readFlag(args, "--mode");
   if (executionMode && executionMode !== "local" && executionMode !== "agentic") {
     throw new Error("--mode must be local or agentic.");
@@ -311,6 +326,7 @@ function parseArgs(args: string[]): SyncOptions {
     outputDir,
     profile: profile as WorkflowProfile | undefined,
     scale: scale as WorkflowScale | undefined,
+    track: track as WorkflowTrack | undefined,
     executionMode: executionMode as WorkflowExecutionMode | undefined,
     preview: args.includes("--preview"),
   };

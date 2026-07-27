@@ -34,7 +34,7 @@ Skill проверяет невидимые детали интерфейса: f
 4. композиция минимум на **двух** реальных ширинах устройств (например 390 и 430);
 5. `scrollTop` не прыгает при смене состояния (частая причина — размонтирование узла).
 
-Каркас не пишется с нуля: шаблон [`agent-pack/templates/mobile-acceptance.template.mjs`](../../../agent-pack/templates/mobile-acceptance.template.mjs) копируется в тесты продукта (`mobile-acceptance.check.mjs`), заполняется только блок `CONFIG`; незаполненный падает с кодом 2, заполненный пишет `mobile-acceptance.json` со статусами пяти сценариев и строкой `engine_limitation`.
+Каркас не пишется с нуля: шаблон [`agent-pack/templates/mobile-acceptance.template.mjs`](../../../agent-pack/templates/mobile-acceptance.template.mjs) копируется в тесты продукта (`mobile-acceptance.check.mjs`), заполняется только блок `CONFIG`; незаполненный падает с кодом 2, заполненный пишет `mobile-acceptance.json` со статусами пяти сценариев и строкой `engine_limitation`. В этом репозитории запуск — `yarn qa:mobile` поверх поднятого превью сборки.
 
 Строка `engine_limitation` (Chromium ≠ WebKit, что именно не проверено, подтверждение — живое устройство) пишется **каждый раз**; если приёмка выполнена, но строки нет, статус не выше `pass_with_known_limitations`. Результат — в `frontend-result.md` / секцию `Responsive` в `qa-report.md`.
 

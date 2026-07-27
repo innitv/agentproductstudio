@@ -2,7 +2,7 @@
 id: landing-builder
 name: landing-builder
 title: "Bespoke UI Landing Builder"
-description: "Использовать при реализации этапа 08-frontend для landing, console или product UI из одобренных PRD/IA/design/copy/screens/prototype артефактов. Skill собирает bespoke React/Vite/Tailwind UI, выводит стиль из design-артефактов или reference-analysis, сохраняет workflow gates и пишет frontend-result evidence."
+description: "Использовать при реализации этапа 08-frontend для landing, console или product UI из одобренных PRD/IA/design/copy/screens/prototype артефактов. Skill собирает React/Vite/Tailwind UI: для product UI по умолчанию из компонентов shadcn/ui, bespoke — для лендингов с сильным визуальным характером и нестандартных интерфейсов; выводит стиль из design-артефактов или reference-analysis, сохраняет workflow gates и пишет frontend-result evidence."
 platforms:
   - open-code
   - claude
@@ -35,6 +35,26 @@ contract_schema: agent-pack/templates/skill.template.md
 
 Стек по умолчанию: React + Vite + Tailwind CSS. Верстка целевого лендинга и калькуляторов живет в `apps/frontend/src/views/`. Для базового лендинга используй `apps/frontend/src/views/LandingView.tsx`; для отдельного продукта допустим новый `<ProductName>View.tsx`. `ConsoleView.tsx` не смешивай с кодом лендинга. `App.tsx` держи тонким роутером.
 
+## 1.1. Выбор основы: shadcn по умолчанию, bespoke по характеру
+
+Решение владельца продукта от 2026-07-27 (`CLAUDE.md` §6.1): **для product UI дефолт — компоненты shadcn/ui**, а не вёрстка примитивов с нуля. Они ставятся `yarn shadcn add <component>` в `apps/frontend/src/components/shadcn/` и после установки являются кодом проекта — править их можно и нужно.
+
+Выбор основы делается до первой строки разметки и записывается в `frontend-result.md`:
+
+| Поверхность | Основа | Что именно |
+|---|---|---|
+| `app/dashboard/console`, формы, таблицы, оверлеи | **shadcn/ui** | Примитивы из реестра; свой код — только на подтверждённый пробел (`Chip`, `SegmentedControl`, `InputCard` со сбросом, уровень `warning` у `Alert`) |
+| `marketing/landing` с сильным визуальным характером | bespoke | Композиция, hero, ритм секций пишутся под задачу; служебные контролы (поля, кнопки, диалоги) всё равно берутся из shadcn, если нет причины иначе |
+| Нестандартный интерфейс: редактор, канвас, плотная таблица | bespoke | Обоснование — в `design-brief.md` через Design System Strategy Gate |
+
+Bespoke без такого обоснования — не «характер», а лишняя работа и второй непроверенный слой примитивов.
+
+Границы правки shadcn (измерены на паре тем `default`/`branded`, детали — `docs/architecture/storybook-figma-research-2026-07-27.md`):
+
+- **Меняй смело:** цветовые токены, гарнитуру, кольцо фокуса — через `design/tokens/shadcn/` и `yarn tokens:build:shadcn`, не правкой значений в компоненте.
+- **Не трогай `--spacing` и шкалу радиусов.** В Tailwind 4 от `--spacing` считаются все отступы и высоты; сжатие даёт дробные пиксели и ломает ритм.
+- **Порталы** (`SelectContent`, `DropdownMenuContent`, `TooltipContent`, `sonner`) рендерятся вне контейнера темы — атрибут темы зеркалится на корень документа. Тени Tailwind впечатаны константой и токеном не управляются.
+
 ## 2. Обязательные inputs
 
 Перед изменением кода прочитай:
@@ -58,11 +78,11 @@ contract_schema: agent-pack/templates/skill.template.md
    - `marketing/landing`: первый viewport работает как brand/product signal, composition-first, минимум chrome;
    - `app/dashboard/console`: primary workspace, navigation, inspector/context, плотная повторяемая работа;
    - blended projects разделяй на разные views/sections, не смешивай marketing hero с операционным dashboard.
-4. Собери UI bespoke-стилем: CSS Grid/Flexbox и Tailwind только как запись значений из design/reference artifacts. Не используй готовые шаблоны, дефолтные сетки и стандартный "component library look".
+4. Выбери основу по таблице §1.1 и зафиксируй выбор с причиной. Для shadcn-основы собери экран из компонентов реестра и вкладывай характер в тему (цвет, гарнитура, фокус) и композицию, а не в переписывание примитивов. Для bespoke-основы собирай UI на CSS Grid/Flexbox, где Tailwind — только запись значений из design/reference artifacts: не используй готовые шаблоны, дефолтные сетки и стандартный "component library look".
 5. В reference-driven задаче layout, gaps, column counts, aspect ratios и section order бери только из `reference-analysis.md`; не подставляй Bootstrap-like/12-column defaults.
 6. В обычной задаче стиль выводи из `design-brief.md`, `STYLE_GUIDE.md` и `figma-handoff-bundle.md` при наличии. Не навязывай glassmorphism, gradients, blur или темную тему, если они не заданы дизайном.
-7. Синхронизируй tokens/components:
-   - Figma variables/design tokens -> CSS custom properties или Tailwind theme values;
+7. Синхронизируй tokens/components. Источник правды для значений — `design/tokens/` (DTCG, сборка `yarn tokens:build`; для shadcn-темы `design/tokens/shadcn/` и `yarn tokens:build:shadcn`), а не Figma-файл: правка значения делается в токенах, иначе baseline-гейт отклонит незаявленное изменение. Если решение пришло из Figma-черновика `04-design`, оно переносится в токены один раз; обратной синхронизации нет.
+   - design tokens -> CSS custom properties или Tailwind theme values;
    - Figma Auto Layout intent -> Flex/Grid, gap, padding, min/max, fixed/fill/hug equivalents;
    - component states/variants -> React props, data attributes или local state.
 8. Реализуй component architecture: компоненты сфокусированы на одной задаче, без over-configured props, без prop drilling глубже 3 уровней. Состояние выбирай минимально достаточное: local state, lifted state, URL state, context или store только по необходимости.
@@ -77,7 +97,8 @@ contract_schema: agent-pack/templates/skill.template.md
 - Компонент должен иметь одну ответственность; если файл компонента разрастается и смешивает layout, data mapping и behavior, выдели подкомпоненты или hook.
 - Избегай "config-object UI", где компонент пытается принять все варианты через огромный набор props. Предпочитай composition: `Card`, `CardHeader`, `CardBody`, `ActionRow`.
 - Для repeated UI опиши стабильные размеры и responsive constraints, чтобы длинный текст, hover/focus state или loading label не меняли layout.
-- Не добавляй новую UI-библиотеку ради одного компонента. Используй существующий стек проекта.
+- Не добавляй новую UI-библиотеку ради одного компонента. Используй существующий стек проекта: shadcn/ui уже в нём, добавление ещё одного набора примитивов рядом с ним — регресс, а не ускорение.
+- Не переписывай примитив shadcn целиком, чтобы поменять внешний вид: сначала проверь, закрывается ли задача темой в `design/tokens/shadcn/`.
 
 ## 5. Anti-Patterns
 
@@ -113,6 +134,8 @@ contract_schema: agent-pack/templates/skill.template.md
 - [ ] Loading/empty/error/success states проверены.
 - [ ] Длинный текст не ломает кнопки, cards, table rows и nav.
 - [ ] Motion не использует `transition: all`, поддерживает reduced motion и hover gated для fine pointer.
-- [ ] Figma/design tokens имеют frontend equivalents или deviations записаны.
+- [ ] Значения взяты из `design/tokens/`; сырых hex/px без токена нет, `yarn tokens:build` проходит baseline-гейт.
+- [ ] Выбор основы (shadcn или bespoke) записан с причиной; bespoke для product UI имеет обоснование по Design System Strategy Gate.
 - [ ] Analytics hooks соответствуют PRD и не содержат PII.
 - [ ] Для визуально значимой UI-задачи есть Playwright/browser screenshot evidence на desktop и mobile или явный blocker.
+- [ ] Экран имеет composition story в витрине (`ds-to-storybook`), и она рендерит тот же компонент, что и роут.

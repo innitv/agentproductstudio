@@ -34,7 +34,7 @@ color: orange
 2. **Run Ledger Audit** (`run-state.json`, `run-meta.json`, `artifact-manifest.json`, `run-index.md`, ledger, handoff) + **Surface Output Summary**.
 3. **Change Inventory**: git-изменения, `outputs/*`, runtime artifacts, external records; разделить product/code/config/tests/docs/external/unrelated.
 4. **Dependency & Sensitive Delta** (`package.json`, lockfile, env, analytics payloads, secrets, PII).
-5. **Validation Matrix** (`workflow:validate`, `validate:config`, `docs:audit`, typecheck, build/test/Playwright/visual diff, dry-run records) с command/result/evidence/impact.
+5. **Validation Matrix** (`workflow:validate`, `validate:config`, `docs:audit`, `typecheck`, build/test/Playwright; машинная приёмка UI — `yarn vr:test`, `yarn test-storybook`, `yarn qa:mobile`, `yarn tokens:check:shadcn`; dry-run records) с command/result/evidence/impact. Для релиза с изменением UI отсутствие вердиктов машинной приёмки без записанной причины — `blocked`, а не «известное ограничение».
 6. **Approval & External Records Audit** (Notion/Figma/deploy/git с точным `action`/`target`).
 7. **Release Decision Matrix**: `ready`/`blocked`/`released`. Плюс **semver bump** из типов изменений Change Inventory по Conventional Commits (`fix` → patch, `feat` → minor, breaking → major) и разделение notes на **technical** и **product-facing** секции из одного источника изменений.
 8. **Deployment Plan** (mode, target, preflight, commands, smoke checks, stop conditions).

@@ -34,12 +34,12 @@ export const agentCapabilityDescriptions: Record<AgentRegistryKey, string> = {
   notionPublisher: "Готовит Notion-ready export и выполняет Notion publication только при exact approval.",
   ia: "Проектирует information architecture, sitemap, primary screen/action и основной пользовательский flow.",
   design: "Выбирает design_system_mode, создает design brief и visual evidence; поддерживает reuse, extend, product-specific и bespoke маршруты.",
-  designGenerator: "Создает screen/Figma specification, visual calibration, Component Contract Matrix и проверяемый Figma handoff.",
+  designGenerator: "Создает спецификацию экранов, visual calibration и Component Contract Matrix; по умолчанию экран описывается как composition story, Figma handoff — только на Figma-маршруте.",
   prototype: "Описывает transition map и инструкции для clickable prototype.",
   copywriting: "Готовит copy deck: hero, CTA, секции, FAQ, SEO и claims to validate.",
-  frontend: "Реализует frontend с Figma property-to-prop mapping, state catalog и paired verification.",
+  frontend: "Реализует frontend на компонентах реестра shadcn/ui, ведет Storybook как витрину состояний и закрывает машинную приёмку (vr:test, test-storybook, qa:mobile).",
   testBench: "Создает test bench: funnel analytics, проверки главного сценария и refresh после frontend.",
-  qaReview: "Проверяет product fit, Figma roundtrip, component contracts, visual/behavior evidence, accessibility и readiness.",
+  qaReview: "Проверяет product fit, component contracts, вердикты машинной приёмки, visual/behavior evidence, accessibility и readiness; Figma roundtrip — только на Figma-маршруте.",
   release: "Формирует release notes: scope, changed files, validation, decision matrix и rollback notes.",
 };
 

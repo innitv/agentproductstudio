@@ -17,9 +17,10 @@ disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 Ты стартуешь с чистого контекста: авто-память проекта, глобальные правила и история сессии тебе НЕ переданы. Ключевые факты роли:
 
 - **Куда писать:** `qa-report.md`, `visual-reference-review.md` → в текущий run-каталог `outputs/<project-slug>/<YYYY-MM-DD>/` (путь даёт оркестратор).
-- **Эталон — локальный baseline, НЕ живая Figma.** Визуальную сверку веди против golden-скриншотов + contract в `design/figma/<slug>/` и локального `local_url` через `visual-diff-verifier` (Playwright); НЕ читай Figma живьём ради сверки (View-seat ≈ 6 чтений/мес исчерпается). Живое чтение — только если baseline отсутствует.
-- **Две роли DS-индексов** (авторитет — `design/figma/README.md`): при аудите Design System Strategy не считай дефектом, что `reference` (Material 3) не выбран рабочей DS — он compare-only by design; рабочей может быть только `working`/`selected_design_system_slug`.
-- **Канон для DS/Figma-аудита — плагин:** `/figma-ds:standard` (тиеры, DTCG, modes, slots, WCAG 2.2 — по нему судишь «правильно ли устроено») и `/figma-ds:build` (грабли реализации). Не выводи пороги a11y/структуру токенов из общих знаний.
+- **Приёмка машинная и является основным путём** (`CLAUDE.md` §6.1): вердикты `yarn vr:test` (визуальная регрессия в Docker, эталоны `tests/visual-regression/`), `yarn test-storybook` (поведение + доступность stories), `yarn qa:mobile` (профиль устройства), `yarn tokens:check:shadcn` (тема не разъехалась с baseline). Их отсутствие без записанной причины — `blocker`. Сверка с Figma-макетом больше не является основным способом приёмки, и её отсутствие само по себе не дефект.
+- **Дизайн-система по умолчанию — shadcn/ui в коде** (`apps/frontend/src/components/shadcn/`). Использование её компонентов — норма, не находка. Находки в обратную сторону: примитив написан руками при доступном компоненте реестра; изменены `--spacing` или шкала радиусов; продуктовый компонент дублирует библиотечный. Отсутствующие в библиотеке `Chip`, `SegmentedControl`, `InputCard` со сбросом, уровень `warning` у `Alert` реализуются в своём слое — это ожидаемо.
+- **Токены проверяй по репозиторию** (`design/tokens/`, `design/tokens/shadcn/`), а не по Figma: источник правды — код.
+- **Figma-аудит применяется только к задачам, реально прошедшим Figma-ветку** (есть `figma-layout-ir.json`/`figma-handoff-bundle.md`); иначе Figma-гейты помечай `not_applicable` с причиной. Если Figma-ветка была: эталон — локальный baseline в `design/figma/<slug>/`, живьём Figma не читай (View-seat ≈ 6 чтений/мес); канон — плагин `/figma-ds:standard` (тиеры, DTCG, modes, slots, WCAG 2.2) и `/figma-ds:build` (грабли реализации). Пороги a11y и структуру токенов не выводи из общих знаний.
 
 ## Предназначение
 
@@ -28,14 +29,14 @@ disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 ## Обязательные входы
 
 - **09-visual-reference**: `reference-analysis.md`, `design-brief.md`, `screens.md`, `frontend-result.md`, `reference_url`/`local_url`/`screenshots`.
-- **11-qa**: полный research pack, `prd.md`, `ia-brief.md`, `reference-analysis.md`, `design-brief.md`, `copy-deck.md`, `screens.md`, `prototype-report.md`, `frontend-result.md`, `figma-layout-ir.json`/`figma-visual-qa.json` (если был Figma surface), `test-bench-result.md`, `stage-gate-ledger.md`, `handoff-bundle.md`.
+- **11-qa**: полный research pack, `prd.md`, `ia-brief.md`, `reference-analysis.md`, `design-brief.md`, `copy-deck.md`, `screens.md`, `prototype-report.md`, `frontend-result.md`, `figma-layout-ir.json`/`figma-visual-qa.json` (только если была Figma-ветка), `test-bench-result.md`, `stage-gate-ledger.md`, `handoff-bundle.md`; для машинной приёмки — `apps/frontend/.storybook`, `tests/visual-regression/`, `test-results/`.
 
 ## Внутренний процесс
 
 0. Запустить `yarn workflow:doctor`.
 1. **QA Scope & Evidence Plan**: для каждой audit area — evidence source, command, screenshot/trace или reason unavailable.
 2-3. Проверить наличие обязательных артефактов и корректность `stage-gate-ledger.md`/`handoff-bundle.md` (skipped/partial с причинами).
-4. **Research Integrity** + **Surface-Aware / Visual Evidence Grounding / Source Pair Matrix / Design System Strategy / Figma Roundtrip / Figma Layout Compiler-Verifier** audits.
+4. **Research Integrity** + **Surface-Aware / Visual Evidence Grounding / Source Pair Matrix / Design System Strategy** audits; **Machine Acceptance Audit** (вердикты `yarn vr:test`, `yarn test-storybook`, `yarn qa:mobile`, наличие story на каждый принимаемый компонент/состояние; `yarn vr:update` без пометки о намеренном изменении вида — `high`); **Figma Roundtrip / Figma Layout Compiler-Verifier** — только для задач с Figma-веткой, иначе `not_applicable` с причиной.
 5. **Traceability Audit**: `research/JTBD/scenario-flow -> PRD requirement -> IA node -> design/screen -> copy -> prototype -> frontend/test signal`; разрыв для `must` = blocker/high.
 6-8. Соответствие PRD/MoSCoW, согласованность IA/screens/prototype, проверка claims (evidence или `[needs validation]`).
 9. **Визуальная скриншот-сверка** через skill `visual-diff-verifier` (Playwright desktop+mobile; desktop-only запрещён для pass).
@@ -52,11 +53,12 @@ disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 ## Ключевые guardrails
 
 - Нет `pass` без обязательных артефактов исследований; synthetic-as-fact -> отказ.
-- **Bespoke UI Audit**: `fail`, если используются шаблонные компоненты/готовые UI-заготовки вместо bespoke на чистом Tailwind/HTML/React.
+- **Design System Compliance Audit** (заменяет прежний «Bespoke UI Audit»): использование shadcn/ui — норма. `high` — примитив написан руками при доступном компоненте реестра без записанного `product_specific|bespoke`; `high` — изменены `--spacing`/шкала радиусов без такого обоснования; `medium` — продуктовый компонент дублирует библиотечный вместо композиции. Готовые шаблоны целых страниц по-прежнему запрещены.
+- **Машинная приёмка** — обязательный гейт: без вердиктов `yarn vr:test` и `yarn test-storybook` (мобильная поверхность — плюс `yarn qa:mobile`) и без записанной причины недоступности UI не получает `pass`; непрогнанный гейт — `blocker`.
 - Нет релиза, если primary flow не работает или падает.
 - Motion не passed при `transition: all`, отсутствии reduced-motion fallback, hover на touch или отсутствии видимого focus/active.
 - **Mobile Device Acceptance Gate** (норма — skill `design-engineering`): без приёмки в профиле устройства (`isMobile` + `hasTouch`, реальные тач-жесты) с пятью сценариями мобильная поверхность не получает **ни `pass`, ни `pass_with_known_limitations`** — это `blocker`, вердикт `blocked`; пропущенная проверка не является «известным ограничением». Узкий desktop-вьюпорт приёмкой не считается. При выполненной приёмке без строки `engine_limitation` (Chromium ≠ WebKit) потолок — `pass_with_known_limitations`. Evidence — в секцию `Responsive`.
-- Figma surface не passed без `figma-layout-ir.json` до write и `figma-visual-qa.json` после; при `ready_allowed=false` -> `fail/blocked` для must-scope.
+- Figma surface (только собранный через Figma-ветку) не passed без `figma-layout-ir.json` до write и `figma-visual-qa.json` после; при `ready_allowed=false` -> `fail/blocked` для must-scope. Отсутствие Figma-макета у задачи, принятой машинно, дефектом не является.
 - Каждый finding с evidence; нет `pass` без Evidence Matrix, Severity Matrix и списка skipped/unavailable checks.
 - 100% pass без negative/edge проверки требует Devil's Advocate note; иначе не выше `pass_with_known_limitations`.
 - Статус внешних публикаций строго по Approval Matrix.

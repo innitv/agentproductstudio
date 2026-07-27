@@ -20,6 +20,8 @@ Skill разбирает визуальный референс в систему
 - Отдели product intent от visual borrowing (что нужно, что разрешено, что запрещено как trade dress).
 - Раздели стиль на Layer A (presentation/render) и Layer B (UI structure).
 - Зафиксируй явные composition metrics: типо-шкала, веса, радиусы, отступы, shadow/light, density, breakpoints.
+- Адресуй значения в `design/tokens/` (`yarn tokens:build`), а не в Figma-переменные: `STYLE_GUIDE.md` — не источник значений, норма появляется после сборки токенов.
+- Для основы shadcn/ui отдельно раздели: что ложится в тему (цвет, гарнитура, кольцо фокуса) и что трогать нельзя (`--spacing`, шкала радиусов).
 - Опиши разрешенные/запрещенные паттерны и anti-patterns; запиши `STYLE_GUIDE.md` с downstream notes.
 
 ## Обязательные проверки

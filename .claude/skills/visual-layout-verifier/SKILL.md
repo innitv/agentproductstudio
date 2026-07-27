@@ -10,10 +10,14 @@ Skill защищает от результата, который структу�
 **Полная процедура, входы/выходы, gates и validation-команды — в [`agent-pack/skills/visual-layout-verifier/SKILL.md`](../../../agent-pack/skills/visual-layout-verifier/SKILL.md). Следуй ей.**
 
 ## Когда использовать
+**Только когда Figma реально в деле.** По `CLAUDE.md` §6.1 Figma сузилась до дивергентной фазы на `04-design` и разового извлечения решений в токены — постоянной синхронизации нет.
+
 - После Figma write, calibration write или component systemization.
-- Этапы 06-screens, 08-frontend, 11-qa перед отметкой макета как ready.
+- Этапы 06-screens, 08-frontend, 11-qa перед отметкой **макета** как ready.
 - Нужно проверить screenshots/object inventory против `figma-layout-ir.json`.
 - Есть подозрение на обрезанный текст, наезды, DS instance dishonesty или route incoherence.
+
+**Не использовать для UI в коде.** Там приёмка другая: `yarn vr:test` (пиксельная регрессия историй витрины, вердикт в `reports/visual-regression/summary.json`), `yarn test-storybook` (интеракции + a11y), `yarn qa:mobile` (профиль устройства). Отсутствие `figma-layout-ir.json` — признак кодовой поверхности, а не пробел проверки: запиши `skipped_with_reason`.
 
 ## Ключевые шаги
 - Проверь target: file key, page, board node, screen node IDs.

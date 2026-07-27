@@ -35,7 +35,7 @@ contract_schema: agent-pack/templates/skill.template.md
    - Layer A: presentation/render: свет, глубина, материал, фон, грейд, hero/media treatment.
    - Layer B: UI structure: сетка, иерархия, компоненты, типографика, цвет, формы, data visualization.
 4. Зафиксируй явные composition metrics: типо-шкала, веса, радиусы, отступы, пропорции, edge treatment, shadow/light rules, density, breakpoint logic.
-5. Опиши reusable design decisions как tokens/rules, а не как просьбу "сделай красиво".
+5. Опиши reusable design decisions как tokens/rules, а не как просьбу "сделай красиво". Значения, которые доживут до реализации, адресуй в `design/tokens/` (`CLAUDE.md` §6.1: источник правды для токенов — репозиторий, сборка `yarn tokens:build`), а не в Figma-переменные. Если основа — shadcn/ui, отдельно отметь, что из разобранного стиля ложится в тему (цвет, гарнитура, кольцо фокуса — меняются свободно) и что трогать нельзя (`--spacing` и шкала радиусов: от них считаются все отступы и высоты).
 6. Опиши разрешенные паттерны, запрещенные паттерны и anti-patterns, включая generic/default landing style.
 7. Запиши `STYLE_GUIDE.md` по `agent-pack/artifacts/design/style-guide.template.md`.
 8. Добавь downstream notes: что обязан прочитать `design-generator`, что обязан проверить frontend, что должен подтвердить QA.
@@ -44,4 +44,6 @@ contract_schema: agent-pack/templates/skill.template.md
 
 `STYLE_GUIDE.md` не заменяет `reference-analysis.md`; он уточняет стиль для downstream stages. Если skill применим, но пропущен, зафиксируй `skipped_with_reason` в `handoff-bundle.md`.
 
-Frontend, Figma write и Storybook export не должны использовать `STYLE_GUIDE.md` как разрешение на копирование референса. Он задает правила адаптации, а не право на pixel-copy.
+Frontend, витрина Storybook и Figma write не должны использовать `STYLE_GUIDE.md` как разрешение на копирование референса. Он задает правила адаптации, а не право на pixel-copy.
+
+`STYLE_GUIDE.md` — не источник значений. Значение становится нормой, когда записано в `design/tokens/` и прошло `yarn tokens:build`; до этого оно остаётся описанием стиля.

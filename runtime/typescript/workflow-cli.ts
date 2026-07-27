@@ -19,7 +19,7 @@ import { formatWorkflowOutputsGuide, formatWorkflowRunInspection, formatWorkflow
 import { formatOutputsRegistrySync, syncOutputsRegistry } from "./outputs-registry";
 import { formatSkillUsageInspection, inspectSkillUsage } from "./skill-usage";
 import { getWorkflowEngineStatus, rerunWorkflowStage, resumeWorkflowEngine, startWorkflowEngine } from "./workflow-engine";
-import { workflowScales, workflowStages, type WorkflowScale } from "./workflow-stages";
+import { workflowScales, workflowStages, workflowTracks, type WorkflowScale, type WorkflowTrack } from "./workflow-stages";
 import type { WorkflowExecutionMode } from "./workflow-state";
 
 const explicitWorkflowCommands = new Set([
@@ -55,15 +55,15 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
   }
 
   if (command === "start") {
-    const { mode, profile, scale, args } = parseStartOptions(rest);
+    const { mode, profile, scale, track, args } = parseStartOptions(rest);
     const goal = args.join(" ").trim();
     if (!goal) {
       throw new Error(
-        'Usage: yarn workflow:start "<landing workflow goal>" [--mode local|agentic] [--profile standard|reference] [--scale full|increment|patch]',
+        'Usage: yarn workflow:start "<landing workflow goal>" [--mode local|agentic] [--profile standard|reference] [--scale full|increment|patch] [--track code|figma]',
       );
     }
 
-    const state = await startWorkflowEngine({ goal, executionMode: mode, profile, scale });
+    const state = await startWorkflowEngine({ goal, executionMode: mode, profile, scale, track });
     console.log(await getWorkflowEngineStatus(state.output_dir));
     return;
   }
@@ -406,6 +406,7 @@ function parseStartOptions(args: string[]): {
   mode: WorkflowExecutionMode;
   profile?: "standard" | "reference";
   scale?: WorkflowScale;
+  track?: WorkflowTrack;
   args: string[];
 } {
   let parsedArgs = args;
@@ -442,7 +443,18 @@ function parseStartOptions(args: string[]): {
     parsedArgs = parsedArgs.filter((_, index) => index !== scaleIndex && index !== scaleIndex + 1);
   }
 
-  return { mode, profile, scale, args: parsedArgs };
+  const trackIndex = parsedArgs.indexOf("--track");
+  let track: WorkflowTrack | undefined;
+  if (trackIndex >= 0) {
+    const rawTrack = parsedArgs[trackIndex + 1];
+    if (!workflowTracks.includes(rawTrack as WorkflowTrack)) {
+      throw new Error(`Workflow track must be one of: ${workflowTracks.join(", ")}.`);
+    }
+    track = rawTrack as WorkflowTrack;
+    parsedArgs = parsedArgs.filter((_, index) => index !== trackIndex && index !== trackIndex + 1);
+  }
+
+  return { mode, profile, scale, track, args: parsedArgs };
 }
 
 function parseApprovalArgs(args: string[]): { target?: string; by?: string; notes?: string } {

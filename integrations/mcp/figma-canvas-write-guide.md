@@ -2,7 +2,16 @@
 
 ## Назначение
 
-Этот документ — нормативный источник для Figma read/write, создания новой продуктовой дизайн-системы и передачи между Figma и frontend. Старый pseudo-REST формат `action/create_node/payload`, hardcoded Slate/Inter и обязательное наследование A3 запрещены.
+Этот документ — нормативный источник для Figma read/write и передачи между Figma и frontend. Старый pseudo-REST формат `action/create_node/payload`, hardcoded Slate/Inter и обязательное наследование чужой библиотеки запрещены.
+
+**Когда этот SOP применяется (важно, читать первым).** С 2026-07-27 Figma не является источником правды (CLAUDE.md §6.1, обоснование — `docs/architecture/storybook-figma-research-2026-07-27.md`). Источник правды: токены — DTCG в `design/tokens/`, компоненты — код (`reuse` shadcn/ui по умолчанию), витрина — Storybook, приёмка — машинная (`yarn vr:test`, `yarn test-storybook`, `yarn qa:mobile`). Figma сузилась до двух ролей: **дивергентный черновик** на `04-design` и **разовый показ человеку**; обе не требуют поддерживать синхронизацию с репозиторием.
+
+Отсюда границы применения:
+
+- SOP **обязателен** для задач, где Figma действительно участвует: пользователь передал файл, нужен canvas write, идёт разовое извлечение токенов, frontend строится по чужой Figma-библиотеке. Гейты и approval здесь не ослаблены ни на шаг.
+- SOP **не применяется** к дефолтному маршруту продуктового UI. Отсутствие Figma-артефактов в такой задаче — штатный маршрут, а не `skipped_with_reason`. Не заводи Figma-стадию ради заполнения чек-листа.
+- Ведение Figma-кита компонентов параллельно коду — **не наш маршрут**. Ресёрч шести зрелых DS показал: библиотеку компонентов из кода не генерирует никто, её ведут штатные дизайнеры; такого ресурса у студии нет, а расходящаяся вручную копия хуже её отсутствия.
+- Code Connect нам **недоступен по тарифу** (Organization/Enterprise + full seat). Не трать шаги на попытку настроить — сразу фиксируй `code_connect_status=unavailable` и работай через Component Contract Matrix (§4).
 
 **Границы знания (чтобы не заводить копий):** этот документ — **процесс студии**: §1–§9 — workflow, gates, Component Contract Matrix, verification, статусы. **Про Figma как таковую здесь ничего нет** — механика Plugin API, подводные камни, textbook-канон (тиеры токенов, naming, modes, component API/slots/states, a11y-пороги, docs/versioning) и визуальная подача живут в плагине `figma-ds` (§10). Про конкретный продукт (колонки, ширина витрины, node id) — рядом с продуктом в `design/figma/<slug>/`.
 
@@ -12,12 +21,12 @@
 
 | Mode | Когда выбирать | Правило |
 |---|---|---|
-| `reuse` | Существующая система соответствует продукту и бренду | Не дублировать primitives/components |
-| `extend` | Foundation подходит, но есть доказанные product gaps | Новые entities имеют gap/reason и совместимый contract |
-| `product_specific` | Нужна самостоятельная продуктовая система | Создать новую foundation после visual calibration |
+| `reuse` (умолчание) | Существующая система соответствует продукту и бренду | Не дублировать primitives/components. Для нового product UI существующая система — shadcn/ui в коде (`yarn shadcn add <component>`); зарегистрированная Figma-система из `design/figma/registry.json` — когда работа идёт по переданному пользователем файлу |
+| `extend` | Foundation подходит, но есть доказанные product gaps | Новые entities имеют gap/reason и совместимый contract; недостающий компонент дописывается в своём слое, а не форком библиотеки |
+| `product_specific` | Нужна самостоятельная продуктовая система | Создать новую foundation после visual calibration; требует записанного обоснования отказа от умолчания (`agent-pack/workflows/ds-baseline.workflow.md`) |
 | `bespoke` | Повторяемость мала, уникальная композиция критична | Сначала screens; components только после подтвержденного повтора |
 
-Доступная библиотека не означает автоматический `reuse`. Запиши решение, rejected alternatives и влияние на frontend maintenance в `design-brief.md`, `screens.md` и `figma-handoff-bundle.md`.
+Доступная библиотека не означает автоматический `reuse` именно этой библиотеки. Запиши решение, rejected alternatives и влияние на frontend maintenance в `design-brief.md`, `screens.md` и — на Figma-маршруте — в `figma-handoff-bundle.md`. Полный текст гейта: `agent-pack/workflows/claude-operating-rules.md` §5.
 
 ## 2. Read path: Figma → context
 
@@ -32,7 +41,7 @@
   - только нужные `components/<category>.md`.
 - Не читай весь Figma-файл повторно, если локальный индекс отвечает на вопрос.
 - В Figma обращайся только для missing nodes, refresh, screenshot/object verification или approved write.
-- Если нужной DS нет в registry или индекс `partial|blocked`, сначала выполни read-only `figma-ds-ingest`.
+- Если нужной DS нет в registry или индекс `partial|blocked`, сначала выполни read-only `figma-ds-ingest`. Ingest запускается только когда работа реально пойдёт по Node ID переданного файла: пустой реестр — это норма (рабочих DS в нём нет), и заполнять его «на всякий случай» запрещено (входной гейт — `agent-pack/workflows/figma-ds-ingest.workflow.md`).
 
 ### 2.2 Exact node context
 
@@ -130,8 +139,8 @@
 
 Классифицируй изменение:
 
-- `token_change`: обновить versioned token source, затем Figma Variables и CSS variables.
-- `component_api_change`: обновить Component Contract Matrix, Code Connect/fallback mapping, Figma properties и frontend stories.
+- `token_change`: править **только** DTCG-источник в `design/tokens/`, затем `yarn tokens:build` — он собирает CSS-переменные фронтенда и DTCG-экспорт для Figma Variables. Обратный порядок (сначала поправить переменную в Figma) запрещён: правка в Figma не попадает в код и расхождение не ловится ничем. Перенос в Figma — ручной импорт DTCG-файла в Variables view, по необходимости и без обязательства держать синхронно.
+- `component_api_change`: обновить Component Contract Matrix, Code Connect/fallback mapping, истории Storybook и — на Figma-маршруте — Figma properties.
 - `screen_composition_change`: приложить browser screenshot/DOM evidence и patch существующих instances; DOM/screenshot import допустим только как draft.
 
 Не синхронизируй каждый DOM node с каждым Figma layer. Source of truth — contracts, states, tokens и accepted composition, а не идентичное дерево.
@@ -149,7 +158,7 @@
 - Component Contract Matrix;
 - intentional deviations.
 
-Frontend сначала ищет production component по Code Connect/registry. Новый primitive допустим только с `gap_reason`; локальный bespoke component не должен дублировать уже доступный contract.
+Frontend сначала ищет production component в коде: официальный реестр shadcn/ui (`yarn shadcn search @shadcn`, установка `yarn shadcn add <component>`), затем уже существующие компоненты проекта, затем Component Contract Matrix. Code Connect в этот поиск не входит — он нам недоступен по тарифу. Новый primitive допустим только с `gap_reason`; локальный bespoke component не должен дублировать уже доступный contract. Реализованный компонент попадает в витрину историей — без истории он не считается сданным.
 
 ## 8. Verification
 

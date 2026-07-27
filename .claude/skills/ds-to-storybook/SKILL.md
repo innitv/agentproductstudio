@@ -5,24 +5,26 @@ description: Использовать для component library, Storybook/state 
 
 # Design System To Storybook
 
-Skill готовит Storybook или эквивалентный component state catalog. Для обычного frontend он опциональный; для Figma-driven component handoff обязателен Storybook или отдельный state route/catalog. Сопоставляет Figma component/property/value с frontend component/prop и Storybook story/state.
+Storybook — **основная витрина** product UI студии, а не опциональный слой поверх frontend (`CLAUDE.md` §6.1). Экран = composition story = роут приложения, один и тот же код. Приёмка машинная.
 
 **Полная процедура, входы/выходы, gates и validation-команды — в [`agent-pack/skills/ds-to-storybook/SKILL.md`](../../../agent-pack/skills/ds-to-storybook/SKILL.md). Следуй ей.**
 
 ## Когда использовать
-- Нужен component library или Storybook/state catalog.
-- Figma-driven component handoff (тогда Storybook или отдельный state route обязателен).
-- Нужно зафиксировать Component Contract Matrix mapping с gaps и accepted deviations.
-- Этап 08-frontend с variant/state coverage требованиями.
+- Реализован или изменён product UI: витрина обязательна, а не опциональна.
+- Нужен каталог состояний компонентов и экранов.
+- Figma-driven component handoff — отдельное ветвление, применяется только при наличии `figma-handoff-bundle.md`.
 
 ## Ключевые шаги
-- Собери inventory компонентов из frontend source, `design-brief.md`, `screens.md`, `STYLE_GUIDE.md`, `figma-handoff-bundle.md` при наличии.
-- Сопоставь Figma component/property/value -> frontend component/prop -> Storybook story/state -> test locator; зафиксируй gaps.
-- Опиши stories по категориям: forms, async buttons, tabs/toggles, overlays, search/pagination, data visualization.
-- Проверь states: default, hover, focus, disabled, loading, error, empty, selected, active.
-- Канон типов property (variant/boolean/text/instance-swap/slot) и матрицы состояний — `/figma-ds:standard`; сверяйся с ним, а не выводи из фактической структуры Figma-файла.
+- Собери inventory из frontend source (`apps/frontend/src/components/`, `apps/frontend/src/views/`), `design-brief.md`, `screens.md`; источник каждого компонента — реестр shadcn, свой слой или пробел.
+- Каждый экран из `screens.md` получает composition story с тегом `vr-page`, рендерящую тот же компонент, что и роут.
+- Компоненты по умолчанию — shadcn/ui (`apps/frontend/src/components/shadcn/`, `yarn shadcn add <component>`); свой компонент — только на подтверждённый пробел реестра или обоснованный `product_specific|bespoke`.
+- Проверь states: default, hover, focus, disabled, loading, error, empty, selected, active; интерактивные — play-функцией.
+- Значения только из токенов (`design/tokens/`, `yarn tokens:build`); сырые hex/px в сторях запрещены.
+- Прогони `yarn test-storybook` и `yarn vr:test`; вердикт читай из `reports/visual-regression/summary.json`. Эталоны обновляются только `yarn vr:update` внутри Docker.
 - Примени motion/a11y checklist из `design-engineering`; запиши `storybook-result.md`.
 
 ## Обязательные проверки
 - `yarn typecheck`
 - `yarn build`
+- `yarn test-storybook`
+- `yarn vr:test`

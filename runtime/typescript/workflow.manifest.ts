@@ -20,6 +20,36 @@ export const workflowScales = ["full", "increment", "patch"] as const satisfies 
 
 export const defaultWorkflowScale: WorkflowScale = "full";
 
+// Третья ось запуска, независимая от `WorkflowProfile` и `WorkflowScale`. Profile —
+// «какого типа задача» (reference-driven или нет), scale — «какого она размера»,
+// track — «через какой инструмент идёт производство макета».
+//
+// code  — умолчание студии: спецификация экранов + shadcn/ui + Storybook как витрина
+//         состояний. Figma в производстве не участвует.
+// figma — макет собирается на холсте Figma; появляются layout IR, visual QA, roundtrip.
+//
+// Маршрут режет ТОЛЬКО состав секций и полей схемы, специфичных для Figma. Стадии,
+// approval gates, run ledger и статусы одинаковы на обоих маршрутах.
+//
+// Перечень закрытый и валидируется отдельно от самих требований. Это не украшение:
+// при подходе «условие на каждом требовании» (JSON Schema `if`/`then`) опечатка в
+// значении маршрута молча отключает все условные требования разом — измерено на ajv,
+// см. docs/architecture/conditional-sections-research-2026-07-27.md §2.
+export type WorkflowTrack = "code" | "figma";
+
+export const workflowTracks = ["code", "figma"] as const satisfies readonly WorkflowTrack[];
+
+// Что получает НОВЫЙ запуск, если маршрут не задан явно на `00-intake`.
+export const defaultWorkflowTrack: WorkflowTrack = "code";
+
+// Как читается запуск БЕЗ поля `track`. Намеренно НЕ равен `defaultWorkflowTrack`.
+// У оси `scale` дефолт `full` означал «как было раньше», и обратная совместимость
+// доставалась бесплатно. Здесь «как было раньше» — это Figma-маршрут: до появления оси
+// манифест требовал Figma-секции у каждого запуска. Прочитать отсутствие поля как `code`
+// значило бы задним числом освободить все исторические запуски от проверок, которые они
+// фактически проходили.
+export const legacyWorkflowTrack: WorkflowTrack = "figma";
+
 export const artifactNames = {
   runPlan: "run_plan",
   handoffBundle: "handoff_bundle",
@@ -59,7 +89,19 @@ export interface WorkflowStage {
   owner: string;
   requiredArtifacts: readonly string[];
   requiredArtifactsByProfile?: Partial<Record<WorkflowProfile, readonly string[]>>;
+  // Канонический список секций артефакта: полный набор в каноническом ПОРЯДКЕ, то есть
+  // набор максимального маршрута (`figma`). Маршрут его только сужает — см.
+  // `requiredSectionsByTrack` и единственную точку выбора `getRequiredSectionsForStage`.
   requiredSectionsByArtifact: Readonly<Record<string, readonly string[]>>;
+  // Секции, обязательные ТОЛЬКО на перечисленном маршруте. Каждая обязана присутствовать
+  // в `requiredSectionsByArtifact` (проверяет `yarn validate:config`): здесь объявляется
+  // условность, а не новая секция. Секция, не упомянутая ни в одном маршруте, обязательна
+  // на всех — «неизвестное по умолчанию включается».
+  requiredSectionsByTrack?: Partial<Record<WorkflowTrack, Readonly<Record<string, readonly string[]>>>>;
+  // То же самое для верхнеуровневых `required`-полей JSON-схемы артефакта: схема
+  // описывает максимальный маршрут, а валидатор снимает поля, которых текущий маршрут не
+  // требует. Условность живёт рядом со стадией, а не внутри схемы через `if`/`then`.
+  requiredSchemaFieldsByTrack?: Partial<Record<WorkflowTrack, Readonly<Record<string, readonly string[]>>>>;
   mustUpdateHandoff: boolean;
   blocksFrontendUntilComplete?: boolean;
   profile?: WorkflowProfile;
@@ -248,6 +290,20 @@ export const workflowStages: readonly WorkflowStage[] = [
         "## Figma Readiness",
       ],
     },
+    // `## Component Contract Matrix` и `## Frame / State Implementation Map` остаются
+    // обязательными на обоих маршрутах: контракт design-generator называет маршрут без
+    // Figma штатным дефолтом, в котором Storybook stories заменяют Figma-фрейм, — то есть
+    // мэппинг «состояние -> реализация» нужен и там, меняется только адресат.
+    requiredSectionsByTrack: {
+      figma: {
+        [artifactNames.screens]: ["## Layout Compiler Contract", "## Figma Readiness"],
+      },
+    },
+    requiredSchemaFieldsByTrack: {
+      figma: {
+        [artifactNames.screens]: ["layout_compiler_contract", "figma_readiness"],
+      },
+    },
     mustUpdateHandoff: true,
     blocksFrontendUntilComplete: true,
     scales: ["full", "increment"],
@@ -281,6 +337,31 @@ export const workflowStages: readonly WorkflowStage[] = [
     requiredArtifacts: [artifactNames.frontendResult],
     requiredSectionsByArtifact: {
       [artifactNames.frontendResult]: ["## Changed Files", "## Implementation Notes", "## Design System Implementation", "## Component Contract Implementation", "## Frame / State Implementation Map", "## Figma Visual QA Gate Summary", "## Commands Run", "## Known Limitations", "## Figma Roundtrip Deviations"],
+    },
+    // Figma-условные секции стоят внутри канонического списка (позиции 3-6 и 9), а не
+    // хвостом. Поэтому маршрут их ФИЛЬТРУЕТ, а не отрезает: порядок оставшихся секций
+    // сохраняется, и скелет в промпте агента остаётся сверяемым как максимальный набор.
+    requiredSectionsByTrack: {
+      figma: {
+        [artifactNames.frontendResult]: [
+          "## Design System Implementation",
+          "## Component Contract Implementation",
+          "## Frame / State Implementation Map",
+          "## Figma Visual QA Gate Summary",
+          "## Figma Roundtrip Deviations",
+        ],
+      },
+    },
+    requiredSchemaFieldsByTrack: {
+      figma: {
+        [artifactNames.frontendResult]: [
+          "design_system_implementation",
+          "component_contract_implementation",
+          "frame_state_implementation_map",
+          "figma_visual_qa_gate_summary",
+          "figma_roundtrip_deviations",
+        ],
+      },
     },
     mustUpdateHandoff: true,
   },
@@ -847,4 +928,73 @@ export function getStagesSkippedByScale(
 
 export function getRequiredArtifactsForStage(stage: WorkflowStage, profile: WorkflowProfile): readonly string[] {
   return stage.requiredArtifactsByProfile?.[profile] ?? stage.requiredArtifacts;
+}
+
+// --- Ось маршрута (track) ---
+
+function collectConditional(
+  byTrack: Partial<Record<WorkflowTrack, Readonly<Record<string, readonly string[]>>>> | undefined,
+  artifact: string,
+): ReadonlySet<string> {
+  const all = new Set<string>();
+  for (const track of workflowTracks) {
+    for (const item of byTrack?.[track]?.[artifact] ?? []) {
+      all.add(item);
+    }
+  }
+
+  return all;
+}
+
+// Секции артефакта, объявленные условными хотя бы на одном маршруте. Нужны, чтобы
+// отличить «секция не требуется на этом маршруте» от «секции нет в манифесте вообще».
+export function getTrackConditionalSections(stage: WorkflowStage, artifact: string): ReadonlySet<string> {
+  return collectConditional(stage.requiredSectionsByTrack, artifact);
+}
+
+// ЕДИНСТВЕННАЯ точка выбора обязательных секций. Все читатели (валидатор, agentic
+// executor, config-semantics, тест скелетов) обязаны идти сюда, а не в
+// `requiredSectionsByArtifact` напрямую: иначе маршрут будет исполняться в одном месте и
+// игнорироваться в другом.
+//
+// Валидатор на маршруте `code` НЕ СПРАШИВАЕТ Figma-секцию, а не «прощает» её отсутствие:
+// сужение до генерации сильнее прощения после. Промпт специалиста строится тем же
+// хелпером, поэтому неприменимая секция не попадает и в задание агенту.
+export function getRequiredSectionsForStage(
+  stage: WorkflowStage,
+  artifact: string,
+  track: WorkflowTrack = legacyWorkflowTrack,
+): readonly string[] {
+  const canonical = stage.requiredSectionsByArtifact[artifact] ?? [];
+  const conditional = getTrackConditionalSections(stage, artifact);
+  if (conditional.size === 0) {
+    return canonical;
+  }
+
+  const requiredOnTrack = new Set(stage.requiredSectionsByTrack?.[track]?.[artifact] ?? []);
+  // Фильтр сохраняет канонический порядок: условные секции стоят внутри списка, а не хвостом.
+  return canonical.filter((section) => !conditional.has(section) || requiredOnTrack.has(section));
+}
+
+// Верхнеуровневые поля схемы, которые текущий маршрут не требует. Валидатор снимает их из
+// `required` перед проверкой payload — вторая, параллельная проверка тех же фактов обязана
+// знать про маршрут, иначе ось работает наполовину.
+export function getSchemaFieldsNotRequiredForTrack(
+  stage: WorkflowStage,
+  artifact: string,
+  track: WorkflowTrack = legacyWorkflowTrack,
+): ReadonlySet<string> {
+  const conditional = collectConditional(stage.requiredSchemaFieldsByTrack, artifact);
+  const requiredOnTrack = new Set(stage.requiredSchemaFieldsByTrack?.[track]?.[artifact] ?? []);
+  return new Set([...conditional].filter((field) => !requiredOnTrack.has(field)));
+}
+
+export function isStageTrackConditional(stage: WorkflowStage): boolean {
+  return Boolean(stage.requiredSectionsByTrack) || Boolean(stage.requiredSchemaFieldsByTrack);
+}
+
+// Стадии, у которых состав требований зависит от маршрута. Нужно anti-backdating gate:
+// смена маршрута опасна ровно тогда, когда такая стадия уже отработала.
+export function getTrackSensitiveStages(): readonly WorkflowStage[] {
+  return workflowStages.filter(isStageTrackConditional);
 }

@@ -33,6 +33,18 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 Создает направление UX/UI, которое может быть переведено в спецификации экранов и последующую фронтенд-разработку.
 
+## Design System Default: shadcn/ui (Дизайн-система по умолчанию)
+
+Решение владельца продукта от 2026-07-27, нормативный текст — `CLAUDE.md` §6.1, обоснование — `docs/architecture/storybook-figma-research-2026-07-27.md`.
+
+- **Дефолт — `design_system_mode=reuse` на shadcn/ui.** Компоненты берутся из официального реестра (`yarn shadcn search @shadcn` — список из 61 компонента, `yarn shadcn add <component>` — установка) и живут в коде: `apps/frontend/src/components/shadcn/`. Design Agent не проектирует заново то, что уже есть в реестре.
+- **Источник правды для токенов — репозиторий, не Figma.** DTCG-исходники в `design/tokens/`, сборка `yarn tokens:build`; тема shadcn — `design/tokens/shadcn/`, сборка `yarn tokens:build:shadcn`, baseline-гейт `yarn tokens:check:shadcn`.
+- **Витрина компонентов и состояний — Storybook** (`yarn storybook`, `yarn build-storybook`), а не Figma-макет. Экран существует одновременно как composition story и как роут приложения — это один и тот же код.
+- **Что менять в теме безопасно:** цветовые токены, гарнитура, кольцо фокуса. **Что не трогать:** `--spacing` и шкалу радиусов — в Tailwind 4 от `--spacing` считаются все отступы и высоты, его сжатие даёт дробные пиксели и ломает ритм библиотеки.
+- **Чего в библиотеке нет** (из кода не вывести): `Chip`, `SegmentedControl`, `InputCard` со сбросом, уровень `warning` у `Alert`. Если продукту они нужны, фиксировать как gap собственного слоя, не переписывая библиотечные компоненты.
+- **Роль Figma сузилась до двух сценариев:** дивергентная фаза на `04-design` (подобрать вид, показать человеку) и разовое извлечение решений в токены `design/tokens/`. Постоянной синхронизации Figma↔код нет; Figma-ветка контракта ниже остаётся рабочей, но включается по явному запросу или по обоснованному `product_specific|bespoke`, а не по умолчанию.
+- `product_specific`/`bespoke` остаются допустимыми, но требуют явного обоснования в `design-brief.md`: сильный визуальный характер продукта или нестандартный интерфейс (редактор, канвас, плотная таблица). Формулировка «хотим уникальность» обоснованием не является.
+
 ## Visual Reference Rule (Правило визуального референса)
 
 Если пользователь предоставляет визуальный референс, создайте посекционную визуальную спецификацию (section-by-section visual spec) перед началом фронтенд-разработки. Спецификация должна охватывать: hero/nav, фон, цветовую систему, типографику, сетку отступов, структуру макета, порядок секций, карточки/списки, кнопки CTA, формы/контролы, медиафайлы, футер и поведение на мобильных устройствах.
@@ -78,7 +90,10 @@ UI Kit и дизайн-система используются только ка
 - `copy-deck.md` (при наличии)
 - `integrations/mcp/figma-canvas-write-guide.md`
 - `agent-pack/workflows/ds-baseline.workflow.md`
-- `design/figma/registry.json`
+- `CLAUDE.md` §6.1 — правила shadcn/ui (что менять безопасно, что не трогать, чего в библиотеке нет)
+- `apps/frontend/src/components/shadcn/` — фактический состав установленных компонентов (читать код напрямую, отдельных индексов состава не заводить)
+- `design/tokens/` и `design/tokens/shadcn/README.md` — токены и темы
+- `design/figma/registry.json` — только если задача включает Figma-ветку
 - `design/figma/<selected_design_system_slug>/ds.config.json`, если выбран `reuse|extend`
 - `design/figma/<selected_design_system_slug>/foundation.md|token-map.md`, если выбран `reuse|extend`
 - `design/figma/<selected_design_system_slug>/components.md|component-map.md`, если выбран `reuse|extend`
@@ -89,8 +104,9 @@ UI Kit и дизайн-система используются только ка
 0. **Product UI Routing Gate**: если запрос пользователя звучит как `собери макеты`, `собери use cases`, `собери flow`, `мобильное приложение`, `интерфейс приложения`, `экраны в Figma`, `app flow`, `mobile app screens` или близко к этому, Design Agent является обязательным первым владельцем визуального решения. Он не должен отдавать задачу напрямую в `design-generator`, `figma-screen-compiler`, `figma-handoff`, `figma-roundtrip` или `use_figma`, пока не зафиксирует visual direction, LazyWeb/reference evidence, `design_system_mode`, reuse/extend strategy и список только недостающих DS gaps. Если текущий запрос требует готовые макеты, результат design stage должен описывать app-like UI, а не техническую доску.
 
 1. Проверить product context: `prd.md`, `research-summary.md`, `scenario-user-flows.md`, `ia-brief.md`, `copy-deck.md` при наличии, constraints, целевое действие, user journey, возражения пользователей, статусы/исключения и trust requirements.
-1a. Выполнить **Design System Strategy Gate** и записать `design_system_mode=reuse|extend|product_specific|bespoke`, rationale, rejected alternatives и maintenance impact. Наличие A3/другой библиотеки не обязывает выбирать `reuse`; новая продуктовая система является штатным маршрутом.
-1b. **Token Precedence Rule**: при выборе значений токенов соблюдать явный порядок источников: (1) явная спецификация из PRD/reference-analysis/STYLE_GUIDE → (2) bound variables выбранной DS (`design/figma/<slug>/foundation.md`) → (3) документация/дефолты. Если источники токенов противоречат друг другу (например reference-цвет ≠ DS-variable) — **не выбирать молча**, а зафиксировать конфликт и эскалировать пользователю/оркестратору как открытый вопрос.
+1a. Выполнить **Design System Strategy Gate** и записать `design_system_mode=reuse|extend|product_specific|bespoke`, rationale, rejected alternatives и maintenance impact. **Стартовое значение — `reuse` на shadcn/ui** (см. раздел «Design System Default»): прежде чем выбрать другой режим, перечислить, какие из нужных компонентов уже есть в реестре (`yarn shadcn search @shadcn`) и какие реально отсутствуют. `extend` означает «reuse shadcn + перечисленные gap-компоненты своего слоя»; `product_specific`/`bespoke` требуют записанного обоснования (визуальный характер или нестандартный интерфейс) и не выбираются по умолчанию. Наличие Figma-библиотеки в `design/figma/registry.json` само по себе не является основанием ни для `reuse` на ней, ни против shadcn.
+1b. **Token Precedence Rule**: при выборе значений токенов соблюдать явный порядок источников: (1) явная спецификация из PRD/reference-analysis/STYLE_GUIDE → (2) токены репозитория (`design/tokens/`, для shadcn — `design/tokens/shadcn/`; собираются `yarn tokens:build` / `yarn tokens:build:shadcn`) → (3) bound variables Figma-DS (`design/figma/<slug>/foundation.md`), если задача включает Figma-ветку → (4) документация/дефолты. Источник правды для токенов — репозиторий, а не Figma: значение из Figma переносится в `design/tokens/` разовым извлечением и дальше живёт там. Если источники токенов противоречат друг другу (например reference-цвет ≠ токен темы) — **не выбирать молча**, а зафиксировать конфликт и эскалировать пользователю/оркестратору как открытый вопрос.
+1c. **Theme Customization Boundary**: в теме менять цвет, гарнитуру и кольцо фокуса; `--spacing` и шкалу радиусов не менять. Если дизайн-направление требует другой шаг сетки или другие радиусы, это не правка темы, а заявка на `product_specific` с обоснованием — зафиксировать как открытое решение, а не переопределять токены молча.
 2. Если задача reference-driven, убедиться, что технический scan референса уже выполнен и evidence сохранен. Без scan evidence не создавать финальный `reference-analysis.md`.
 3. Выполнить **Universal Visual Evidence Grounding** для любой визуальной/интерактивной поверхности: собрать или явно отклонить same-domain, adjacent high-quality, interaction/state references и design-system grounding; сформировать `visual_evidence_plan` и `visual_reference_cards`.
 4. Если задача UI-heavy/high-visual-risk или research handoff содержит `lazyweb_evidence_need`, выбрать один Lazyweb mode, получить реальные product screenshots/flows/patterns и записать применимость. Не отправлять приватные скриншоты, макеты или код в `lazyweb_compare_image` без отдельного approval.
@@ -99,7 +115,8 @@ UI Kit и дизайн-система используются только ка
 7. **Surface Output Contract Pass**: если результат должен стать Figma board, screen spec, dashboard, landing, prototype или Notion/wiki surface, заполнить контракт по `agent-pack/templates/surface-output-contract.template.md`: surface type, expected units, coverage gate, visual evidence grounding, evidence-to-output map, quality bar и verification plan.
 7a. **Primary App Flow Gate**: для `figma_board`, `product_ui`, `prototype` и `frontend` surface зафиксировать primary user/job, trigger, entry point, P0 route/transition map, главный экран/действие, success evidence, error/recovery path и acceptance walkthrough. Если есть только набор страниц без сквозного сценария, вернуть `partial`.
 8. Сформировать `design-brief.md`: пользовательский путь из `scenario-user-flows.md`, `design_system_mode`, visual direction, interaction tone, layout principles, component strategy, responsive rules, accessibility notes, visual evidence grounding, Primary App Flow Gate result, риски и решения для следующего этапа.
-8a. Для `extend|product_specific` зафиксировать Two-Pass Figma Build: сначала `visual_calibration` на 2-3 экранах, затем `systemization`; component matrix нельзя масштабировать до visual verdict.
+8a. Для `extend|product_specific`, **если задача идёт через Figma-ветку**, зафиксировать Two-Pass Figma Build: сначала `visual_calibration` на 2-3 экранах, затем `systemization`; component matrix нельзя масштабировать до visual verdict. Если Figma-ветка не используется (дефолт), тот же двухпроходный порядок применяется в коде: сначала 2-3 экрана как composition stories в Storybook и визуальный вердикт человека, затем систематизация токенов/компонентов; в `design-brief.md` записать, какой из двух путей выбран и почему.
+8b. **Витрина — Storybook.** В `design-brief.md` указать, какие компоненты и состояния должны существовать как stories (`apps/frontend/.storybook`, запуск `yarn storybook`) и какие экраны — как composition story плюс роут приложения. Не описывать состояния только словами, если их предстоит принимать: приёмка идёт машинно (`yarn test-storybook`, `yarn vr:test`), а машинная приёмка требует именованных stories.
 9. Если нужен Figma canvas write или дизайн-система в Figma, не писать на холст на этом этапе. Зафиксировать requirement `figma_handoff_required=true` и `figma_layout_ir_required=true`, затем передать задачу в `06-screens` после `screens.md`, потому что Figma write требует screen/component inventory и `figma-layout-ir.json`.
 10. Обновить `handoff-bundle.md`: какие visual decisions приняты, какой Surface Output Contract выбран, какие assumptions остались, какие optional skills/Lazyweb modes применены или пропущены через `skipped_with_reason`.
 
@@ -109,17 +126,17 @@ UI Kit и дизайн-система используются только ка
 
 1. `style-decompose` — после `reference-analysis.md`, до финального `design-brief.md`. Нужен для референсов, визуального риска, Figma handoff и задач, где есть риск generic/default UI.
 2. `design-loop` — на этапе `06-screens`, после `STYLE_GUIDE.md`, `design-brief.md`, `ia-brief.md` и `copy-deck.md`. Нужен для калибровки 2-3 экранов и фиксации visual critique.
-3. `figma-handoff` — после `screens.md` и `design-loop-report.md` при наличии, перед любым Figma write. Нужен для foundation/components/screens bundle и approval gate.
+3. `figma-handoff` — только для Figma-ветки: после `screens.md` и `design-loop-report.md` при наличии, перед любым Figma write. Нужен для foundation/components/screens bundle и approval gate. Для дефолтного маршрута (reuse shadcn + Storybook) пропускается как `skipped_with_reason=figma_branch_not_used`.
 4. `design-engineering` — на `08-frontend` и `11-qa`, когда дизайн уже переносится в код и проверяются motion, focus, hover, reduced-motion, active/loading/error/empty states.
-5. `ds-to-storybook` — после frontend, только если нужен component library/Storybook export или отдельное evidence по компонентам.
+5. `ds-to-storybook` — после frontend. Для дефолтного маршрута это основная витрина компонентов и состояний, а не опция: именно stories принимаются машинно (`yarn test-storybook` — поведение и доступность, `yarn vr:test` — визуальная регрессия в Docker с машинным вердиктом).
 
 Если skill применим, но не используется, причина фиксируется в `handoff-bundle.md` как `skipped_with_reason`.
 
 ## Guardrails (Ограничения и правила)
 
 - **Правило интерактивных решений (Interactive Decision Rule):** При выборе визуального стиля, сеток отступов, радиусов, цветовых схем или утверждении референсов Агент Дизайна обязан запросить решение пользователя через доступный интерактивный механизм. Если специализированный инструмент опросов недоступен, агент задает короткий вопрос в чате и фиксирует решение в `handoff-bundle.md`.
-- **Кастомное проектирование (Bespoke UI by Default):** Агент Дизайна полностью исключает любые шаблонные дизайн-библиотеки и заготовки из процесса проектирования и спецификации экранов. Все визуальные решения проектируются как полностью уникальные (Bespoke UI), ориентируясь исключительно на визуальные токены референсов и создавая собственные сетки и структуры компонентов.
-- **UI Kit не равен visual evidence:** UI Kit, token map и готовые компоненты нельзя использовать как единственный источник layout, density, hierarchy, states или визуального ритма. Для `ready` нужен real-world visual evidence или explicit waiver/deviation.
+- **Reuse by Default (переопределяет прежнее правило «Bespoke UI by Default»):** примитивы (кнопки, поля, селекты, диалоги, таблицы, тултипы) берутся из shadcn/ui и не перерисовываются заново. Уникальность продукта создаётся темой (цвет, гарнитура, кольцо фокуса), композицией экранов и продуктовыми компонентами поверх примитивов, а не собственной реализацией того, что уже есть в реестре. Проектирование примитива с нуля допустимо только при записанном `product_specific|bespoke` с обоснованием либо когда компонента нет в реестре (`Chip`, `SegmentedControl`, `InputCard` со сбросом, уровень `warning` у `Alert`).
+- **UI Kit не равен visual evidence:** shadcn/ui, token map и готовые компоненты дают примитивы, но не отвечают, какие плотность, иерархия, состояния и визуальный ритм нужны продукту. Для `ready` нужен real-world visual evidence или explicit waiver/deviation — набор дефолтных компонентов сам по себе не является визуальным решением.
 - Дизайн не должен гарантировать неподтвержденные результаты.
 - Видимая дизайн-поверхность не может считаться полной, если нет Surface Output Contract и карты `input evidence -> output unit`.
 - Figma/product UI/prototype не может считаться `ready`, если экраны не связаны в P0 route/transition map с primary action, next state, completion evidence и error/recovery path.

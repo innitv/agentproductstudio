@@ -42,20 +42,24 @@
   -> design-generator-prompt.md (опционально, перед генерацией экранов)
   -> screens.md
   -> design-loop-report.md (опционально, после первичной спецификации/макета экранов)
-  -> figma-layout-ir.json (обязательно для Figma/product UI/prototype surface перед Figma write)
-  -> figma-handoff-bundle.md
-  -> Figma canvas write (опционально, approval-gated)
-  -> figma-visual-qa.json (обязательно после Figma write перед ready_for_review)
+  -> [только Figma-маршрут] figma-layout-ir.json (обязателен перед Figma write)
+  -> [только Figma-маршрут] figma-handoff-bundle.md
+  -> [только Figma-маршрут] Figma canvas write (approval-gated)
+  -> [только Figma-маршрут] figma-visual-qa.json (обязателен после Figma write перед ready_for_review)
   -> prototype-report.md
   -> frontend-result.md
+  -> истории Storybook: компонентные + composition story на каждый экран (обязательно для product_ui/frontend surface)
+  -> машинная приёмка: yarn vr:test + yarn test-storybook + yarn qa:mobile (обязательно для product_ui/frontend surface)
   -> visual-reference-review.md (если был задан визуальный референс)
   -> test-bench-result.md
   -> qa-report.md
   -> release-notes.md
   -> Запись о публикации исследования в Notion (обязательно для полного воркфлоу)
   -> notion-prd-export.md (если требуется отдельный плоский экспорт PRD)
-  -> storybook-result.md (опциональный export/evidence artifact)
+  -> storybook-result.md (опциональный файл-обёртка; сама витрина и вердикты приёмки обязательны, см. ниже)
 ```
+
+**Ветвление маршрута (решение владельца продукта от 2026-07-27, CLAUDE.md §6.1).** Дефолтный маршрут продуктового UI **не проходит через Figma**: компоненты берутся из shadcn/ui в коде, токены живут в `design/tokens/`, витрина — Storybook, сверка — машинная. Шаги, помеченные `[только Figma-маршрут]`, обязательны, когда задача действительно идёт через Figma (пользователь дал Figma-файл, нужен canvas write, идёт извлечение токенов); их отсутствие в задаче без Figma — штатный маршрут, а не `skipped_with_reason`. Обоснование — `docs/architecture/storybook-figma-research-2026-07-27.md`.
 
 ## Жесткий контроль этапов (Hard Stage Enforcement)
 
@@ -76,7 +80,7 @@
 
 Если визуальная поверхность проходит через несколько источников правды, stage обязан определить **Source Pair Matrix**: `reference_to_figma`, `figma_to_frontend`, `reference_to_frontend`, `spec_to_frontend_behavior`. Для каждой пары фиксируются required yes/no, evidence, status и notes. Эта матрица записывается в `figma-handoff-bundle.md`, `frontend-result.md`, `visual-reference-review.md` или `qa-report.md` в зависимости от stage.
 
-Если поверхность проходит через Figma или дизайн-систему, stage обязан выполнить **Design System Strategy Gate**: выбрать `reuse|extend|product_specific|bespoke`. Новая продуктовая дизайн-система является штатным маршрутом. Для `extend|product_specific` действует Two-Pass Figma Build: сначала `visual_calibration` на 2-3 экранах, затем `systemization` без visual regression. Для `figma_board|product_ui|prototype` surface до Figma write обязателен `figma-layout-ir.json` с route, zones, copy-fit, component sources, resize constraints, `ui_fidelity_target` и verification contract; после write обязателен `figma-visual-qa.json` с screenshot/object inventory checks, `app_likeness_review` и `gate_result.ready_allowed=true` или explicit deviation. Перед frontend handoff обязательны Component Contract Matrix, Code Connect/fallback status и frame/state -> route/story/component mapping по `integrations/mcp/figma-canvas-write-guide.md`.
+Если поверхность проходит через Figma или дизайн-систему, stage обязан выполнить **Design System Strategy Gate**: выбрать `reuse|extend|product_specific|bespoke`. Умолчание для нового product UI — `reuse` shadcn/ui в коде репозитория (`apps/frontend/src/components/shadcn/`, `yarn shadcn add <component>`); новая продуктовая дизайн-система остаётся штатным маршрутом, но требует записанного обоснования — сильный визуальный характер продукта или нестандартный интерфейс (редактор, канвас, плотная таблица). Полный текст гейта — `agent-pack/workflows/claude-operating-rules.md` §5. Для `extend|product_specific` **на Figma-маршруте** действует Two-Pass Figma Build: сначала `visual_calibration` на 2-3 экранах, затем `systemization` без visual regression. Для `figma_board|product_ui|prototype` surface до Figma write обязателен `figma-layout-ir.json` с route, zones, copy-fit, component sources, resize constraints, `ui_fidelity_target` и verification contract; после write обязателен `figma-visual-qa.json` с screenshot/object inventory checks, `app_likeness_review` и `gate_result.ready_allowed=true` или explicit deviation. Перед frontend handoff обязательны Component Contract Matrix, Code Connect/fallback status и frame/state -> route/story/component mapping по `integrations/mcp/figma-canvas-write-guide.md`.
 
 Для запросов на макеты, use cases, app flow, мобильное приложение, Figma screens или product UI действует **Design Agent First Gate**: первым визуальным владельцем всегда является `04-design` (`design`). `06-screens`, `figma-screen-compiler`, `figma-handoff`, `figma-roundtrip`, `visual-layout-verifier` и Figma `use_figma` не могут начинать работу, если нет свежего `design-brief.md` от Design Agent для того же запроса. Этот handoff должен содержать LazyWeb/reference evidence, `design_system_mode`, решение reuse/extend/product_specific/bespoke, список существующих компонентов для переиспользования и список только недостающих gap-компонентов. Если gate не выполнен, stage status = `blocked_missing_design_agent_handoff`.
 
@@ -227,11 +231,39 @@ NOT_STARTED -> IN_PROGRESS -> GENERATED -> VALIDATED -> HANDED_OFF -> COMPLETE
 - `figma-layout-ir.json`: machine-readable contract перед Figma write: P0 route, screen zones, copy-fit, layout constraints, component sources, DS honesty и verification contract.
 - `figma-handoff-bundle.md`: approval-gated пакет foundation/components/screens перед любой записью в Figma.
 - `figma-visual-qa.json`: evidence после Figma write: screenshots/object inventory, checks, repair actions и gate result перед frontend/QA.
-- `storybook-result.md`: optional evidence для компонентной библиотеки, Storybook states и motion/a11y checks.
+- `storybook-result.md`: файл-обёртка над coverage историй и вердиктами приёмки. **Optional здесь — только файл, а не витрина:** сами истории Storybook и машинная приёмка обязательны для `product_ui|frontend` surface (см. следующий раздел). Если отдельный файл не создаётся, coverage и вердикты записываются в `frontend-result.md`.
 
 Для reference-driven задач `STYLE_GUIDE.md` рекомендуется создавать сразу после `reference-analysis.md`, чтобы `design-brief.md`, `screens.md` и frontend не скатывались в generic/default landing style. Если этот слой пропущен, причина фиксируется в `handoff-bundle.md` как `skipped_with_reason`.
 
-Figma write и Storybook export не выполняются молча: Figma требует human approval и `write_allowed=true`, Storybook требует явного запроса пользователя или release/export scope.
+Figma write не выполняется молча: он требует human approval и `write_allowed=true`. Локальная сборка витрины и прогон приёмки внешней записью не являются и approval не требуют.
+
+## Обязательный слой витрины и машинной приёмки (Storybook Acceptance Gate)
+
+Storybook перестал быть опциональным слоем: для surface `product_ui|frontend|prototype` витрина и машинная приёмка обязательны на `08-frontend` и проверяются на `11-qa`. Опциональным остаётся только отдельный файл `storybook-result.md` — обязательны истории в коде и вердикты.
+
+Что должно существовать до `success`:
+
+- **История на каждый реализованный компонент** с покрытием применимых состояний (`default|hover|focus|disabled|loading|error|empty|selected`). Компонент без истории не считается сданным.
+- **Composition story на каждый экран**, помеченная тегом `vr-page`. Экран = composition story = роут приложения: одна и та же сборка, а не отдельный «экран для витрины». Две расходящиеся сборки одного экрана — `process_deviation`.
+- Истории рендерятся на тех же токенах, что и приложение (`apps/frontend/.storybook/` подключает реальный vite-конфиг и `styles.css`). Подмена стилей ради витрины запрещена.
+
+Три оси машинного вердикта, каждая с результатом в `stage-gate-ledger.md`:
+
+| Ось | Команда | Артефакт вердикта |
+|---|---|---|
+| Визуальная регрессия витрины | `yarn vr:test` | `reports/visual-regression/summary.json` |
+| Поведение и a11y компонентов | `yarn test-storybook` | exit code + отчёт раннера |
+| Мобильная приёмка в профиле устройства | `yarn qa:mobile` | `test-results/mobile-acceptance/mobile-acceptance.json` |
+
+Жёсткие правила:
+
+- **`yarn vr:test`/`yarn vr:update` выполняются только внутри пиннутого Docker-образа Playwright.** Имя снапшота содержит платформу: эталон, снятый на Windows-хосте, на Linux не сравнивается, а молча создаёт новый файл, и регрессия не будет замечена. Обёртка и конфиг проверяют это принудительно; обход запрещён.
+- `yarn vr:update` — приёмка нового эталона, а не способ погасить красный тест. Перегенерация допустима только после осознанного изменения компонента, с причиной в ledger. Массовое обновление «чтобы прошло» — `process_deviation`.
+- Пороги различия задаются декларативно в конфиге (`maxDiffPixels`, `maxDiffPixelRatio`, `threshold`); читать процент из текста ошибки нельзя — он округлён до двух знаков.
+- Токены для витрины и приложения общие: DTCG в `design/tokens/`, сборка `yarn tokens:build`.
+- Недоступность оси (нет Docker, не поднято превью) не понижает требование до визуального осмотра: пиши `skipped_with_reason` и downstream risk, статус surface — не выше `partial`.
+
+Этот gate заменяет ручную сверку макета с Figma. Если Figma в задаче не участвует, парная сверка с Figma не требуется; машинная приёмка требуется всегда.
 
 ### Порядок Skills В Design Enhancement Layer
 
@@ -239,12 +271,14 @@ Design skills применяются в таком порядке:
 
 1. `style-decompose` на `04-design`: после `reference-analysis.md`, до финального `design-brief.md`.
 2. `design-loop` на `06-screens`: сначала `design-generator-prompt.md`, затем `screens.md`, затем `design-loop-report.md`.
-3. `figma-screen-compiler` на `06-screens`: создает `figma-layout-ir.json` до любого Figma write для app/Figma/prototype surface.
-4. `figma-handoff` после `screens.md`, `design-loop-report.md` и `figma-layout-ir.json`: готовит `figma-handoff-bundle.md`, approval gate и canvas strategy.
+3. `figma-screen-compiler` на `06-screens` — **только Figma-маршрут**: создает `figma-layout-ir.json` до любого Figma write для app/Figma/prototype surface.
+4. `figma-handoff` после `screens.md`, `design-loop-report.md` и `figma-layout-ir.json` — **только Figma-маршрут**: готовит `figma-handoff-bundle.md`, approval gate и canvas strategy.
 5. Figma `use_figma` write выполняется только после human approval, `write_allowed=true`, проверки target и `search_design_system`.
-6. `visual-layout-verifier` после Figma write/systemization: создает `figma-visual-qa.json`; `ready_for_review` запрещен без passed/passed_with_notes gate.
-7. `design-engineering` на `08-frontend` и `11-qa`: проверяет motion, focus, hover, active, disabled/loading/error/empty states и reduced motion.
-8. `ds-to-storybook` после frontend: только если нужен component library / Storybook export.
+6. `visual-layout-verifier` после Figma write/systemization — **только Figma-маршрут**: создает `figma-visual-qa.json`; `ready_for_review` запрещен без passed/passed_with_notes gate.
+7. `design-engineering` на `08-frontend` и `11-qa`: проверяет motion, focus, hover, active, disabled/loading/error/empty states и reduced motion, включая мобильную приёмку в профиле устройства (`yarn qa:mobile`).
+8. `ds-to-storybook` на `08-frontend`: **обязателен для `product_ui|frontend` surface**, а не «только если нужен export». Skill ведёт покрытие вариантов/состояний историями и связывает Component Contract Matrix с историями и вердиктами приёмки (`yarn vr:test`, `yarn test-storybook`).
+
+Пункты 3-6 применяются только когда задача действительно идёт через Figma. На дефолтном маршруте (`reuse` shadcn/ui, витрина в Storybook) они не выполняются, и их отсутствие не фиксируется как пропуск.
 
 Figma canvas strategy выбирается по задаче: если пользователь дал anchor frame, он может использоваться как точка привязки, но полноценная дизайн-доска должна создаваться отдельными frames на canvas, если это улучшает читаемость handoff.
 

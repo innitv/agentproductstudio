@@ -42,13 +42,34 @@
 Правила (обязательные):
 
 - **Режется только глубина проработки, не защита.** Approval gates, run ledger (`handoff-bundle.md`, `stage-gate-ledger.md`), Anti-AI-Slop, Russian Publication Gate и статусы действуют одинаково на любом масштабе. `00-intake` и `11-qa` входят во все масштабы. Масштаб — НЕ способ обойти гейт.
-- **Не уверен — бери `full`.** Дефолт консервативен намеренно; занижение масштаба «на глаз» запрещено.
+- **Масштаб выводится из утверждённого плана работ, а не выбирается категорией.** На `00-intake` оркестратор показывает человеку конкретный список работ («Разбор задачи», «Исследование — конкуренты, сценарии», «Требования», «Структура и навигация», «Дизайн-направление», «Тексты», «Экраны», «Реализация», «Проверка») и даёт его поправить; масштаб — следствие правки: убрали исследование, требования и структуру → `increment`; убрали ещё тексты и экраны → `patch`; ничего не убрали → `full`. Пользователю слова `full`/`increment`/`patch` не показываются — он правит работы, а не выбирает термин. Если правка не совпадает с границей масштаба, берётся ближайший больший, и вернувшиеся в план работы называются вслух. План записывается в `run-plan.md` **на старте** (шаблон — `agent-pack/templates/run-plan.template.md`), процедура — skill `recursive-brief`, шаги 3.1-3.4.
+- **Не уверен — бери `full`.** Дефолт консервативен намеренно; занижение масштаба «на глаз» запрещено. Молчаливый выбор масштаба без показанного плана — `process_deviation` (Intake Question Gate в контракте оркестратора).
 - **Масштаб нельзя занизить задним числом.** Если стадия вне масштаба уже отработала, `yarn workflow:validate` вернёт error. Понижение возможно только как `process_deviation` с reason.
 - **Пропущенные по масштабу стадии фиксируются явно** в `stage-gate-ledger.md` как `skipped_by_scale` с указанием масштаба. Молчаливый пропуск неотличим от забытой стадии.
 - **`scale` и `quick draft` — разные вещи.** `scale` говорит «задача мелкая, делаем аккуратно» (возможен `success`); `quick draft` — «осознанно срезаем качество» (всегда `partial`/`draft`). Мелкий scale не является поводом для `quick draft`.
 - Reference-driven задача сохраняет `09-visual-reference` на любом масштабе — это ось профиля.
 
 Проверка: `yarn workflow:validate <run-dir> --scale <scale>`; старт — `yarn workflow:start "<goal>" --scale <scale>`; run без поля `scale` читается как `full`.
+
+### 0.3. Track: маршрут производства макета
+
+Третья ось запуска, независимая от `profile` и `scale`. Profile — «какого типа задача», scale — «какого она размера», **track — через какой инструмент идёт производство макета**. Маршрут фиксируется на `00-intake` ответом на вопрос «Нужен макет в Figma перед вёрсткой?» (§0.2, опрос на старте), пишется в `run-state.json` (`track`) и передаётся флагом `--track`.
+
+| Track | Когда | Что добавляется |
+|---|---|---|
+| `code` (дефолт нового запуска) | Умолчание студии (§6.1): спецификация экранов + shadcn/ui + Storybook как витрина состояний | ничего сверх ядра |
+| `figma` | Макет собирается на холсте Figma | `## Layout Compiler Contract`, `## Figma Readiness` в `screens.md`; `## Design System Implementation`, `## Component Contract Implementation`, `## Frame / State Implementation Map`, `## Figma Visual QA Gate Summary`, `## Figma Roundtrip Deviations` в `frontend-result.md`; те же поля в схемах |
+
+Правила (обязательные):
+
+- **Режется только состав Figma-специфичных секций и полей схемы.** Стадии, approval gates, run ledger, Anti-AI-Slop, Russian Publication Gate и статусы одинаковы на обоих маршрутах. Маршрут — НЕ способ обойти гейт. `## Component Contract Matrix` и `## Frame / State Implementation Map` в `screens.md` обязательны на обоих маршрутах: на `code` мэппинг «состояние → реализация» ведёт в Storybook story, а не в Figma-node.
+- **Валидатор вне маршрута не спрашивает секцию, а не «прощает» её отсутствие.** Промпт специалиста строится тем же источником, поэтому неприменимая секция не попадает и в задание агенту.
+- **Маршрут не определяется по наличию файлов.** Он берётся из `run-state.json`. Детекция по `figma-layout-ir.json` запрещена: Figma-запуск, не создавший файл, выглядел бы как честный не-Figma и обошёл бы гейт.
+- **Маршрут нельзя сменить задним числом.** Если маршрут-зависимая стадия (`06-screens`, `08-frontend`) уже отработала, а записи маршрута в `run-state.json` и `run-meta.json` разошлись, `yarn workflow:validate` вернёт error. Смена возможна только как `process_deviation` с reason.
+- **Пропущенные по маршруту секции фиксируются явно** в `stage-gate-ledger.md` в таблице «Секции вне маршрута» строкой со статусом `skipped_by_track`, называющей стадию и секцию. Запись проверяется в обе стороны: пропуск секции, которую маршрут требует, — ошибка; пропуск секции, которой нет ни в одном маршруте, — тоже ошибка (протухшая запись).
+- **Run без поля `track` читается как `figma`, а не как `code`.** Это намеренно строже дефолта новых запусков: до появления оси манифест требовал Figma-секции у каждого запуска, и читать пустое поле как `code` значило бы задним числом освободить исторические run от проверок, которые они проходили.
+
+Проверка: `yarn workflow:validate <run-dir> --track <track>` (флаг нужен только чтобы перепроверить чужой запуск; свой маршрут валидатор читает из state); старт — `yarn workflow:start "<goal>" --track <track>`. Обоснование конструкции — `docs/architecture/conditional-sections-research-2026-07-27.md`.
 
 Для selective commit/push используй `agent-pack/templates/selective-commit-sop.md`: сначала выписать include/exclude scope, staged делать только явными путями, затем выполнить `yarn git:check-staged`. Agentic handoff исполняется через runtime-контракты (Delegation Packet + Agent Output Critic). Agent Capability Registry — `runtime/typescript/agent-capability-registry.ts`; при изменении агента/маршрута/skill/approval проверяй `yarn workflow:test-agent-capabilities`. Перед началом полного workflow запусти `yarn workflow:doctor`; для поздних handoff от `08-frontend` используй сжатый `handoff-bundle.md`.
 
@@ -203,7 +224,7 @@ Sensitive data: не сохраняй secrets в коде, outputs, traces ил�
 Кросс-стадийные skills, которые действуют вне зависимости от этапа:
 
 - `approval-gate` — перед любым внешним действием (Notion, Figma, git, deploy, секреты, удаление, provider call). Исполняет Interactive Question Gate: молчаливый пропуск approval-вопроса запрещён.
-- `recursive-brief` — `00-intake`: expansion → deepening → consolidation до research.
+- `recursive-brief` — `00-intake`: expansion → deepening → consolidation до research. Консолидация начинается с опроса: два вопроса (макет в Figma? образец для сверки?) и утверждаемый план работ, из которого выводится масштаб. Молчаливый выбор маршрута или масштаба запрещён.
 - `run-ledger` — ведение `handoff-bundle.md`/`stage-gate-ledger.md`/`run-state.json` после каждого этапа.
 - `anti-ai-slop` — перед записью research/CJM/PRD/copy и любой публикацией; провал `yarn research:lint` запрещает external write.
 - `selective-commit` — частичный коммит по include/exclude scope; broad staging запрещён.

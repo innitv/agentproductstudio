@@ -31,6 +31,19 @@ contract_schema: agent-pack/templates/skill.template.md
 
 # Skill: Figma Roundtrip Quality
 
+## Применимость
+
+**Skill применяется, только когда Figma реально в деле.** По решению от 2026-07-27 (`CLAUDE.md` §6.1, обоснование — `docs/architecture/storybook-figma-research-2026-07-27.md`) Figma сузилась до двух ролей: **дивергентный черновик** на `04-design` (дёшево ошибиться до кода) и **разовый показ человеку**. Обе — до кода или в сторону от него; постоянной синхронизации нет, Figma-кит компонентов студия не ведёт.
+
+Что это меняет в самом roundtrip:
+
+- **Дефолтный `design_system_mode` — `reuse` поверх shadcn/ui в коде** (`apps/frontend/src/components/shadcn/`), а не поверх Figma-библиотеки. Пункт 1 порядка ниже относится к случаю, когда Figma-DS действительно выбрана источником.
+- **Направление «frontend → Figma» (пункт 10) больше не является каналом синхронизации.** Обратный патч допустим только как разовый показ человеку; расхождение кода и Figma после него — норма, а не дефект, и не блокирует код.
+- **Токены не ходят по кругу.** Источник правды — `design/tokens/` (DTCG, `yarn tokens:build`); из Figma решения извлекаются один раз (`figma-token-extractor`), обратно не возвращаются.
+- **Приёмка результата в коде — не через сверку с макетом:** `yarn vr:test`, `yarn test-storybook`, `yarn qa:mobile`. `figma-visual-qa.json` относится к Figma-поверхности, а не к коду.
+
+Если Figma в задаче нет, весь этот skill записывается как `skipped_with_reason: Figma не участвует`, а выбор основы делается по `landing-builder` §1.1.
+
 ## Нормативный источник
 
 Перед действием прочитай `integrations/mcp/figma-canvas-write-guide.md`. Не дублируй его полную процедуру в run artifacts.

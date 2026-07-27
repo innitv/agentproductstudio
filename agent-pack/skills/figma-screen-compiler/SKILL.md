@@ -29,6 +29,8 @@ contract_schema: agent-pack/templates/skill.template.md
 
 ## 1. Назначение
 
+**Применимость: только когда Figma реально в деле.** IR — guardrail перед Figma canvas write и ни для чего другого не нужен. По `CLAUDE.md` §6.1 Figma сузилась до дивергентной фазы на `04-design` и разового показа человеку, поэтому в большинстве задач этот skill не запускается: экран собирается сразу в коде, а его контракт — composition story плюс приёмка `yarn vr:test` / `yarn test-storybook`. Отсутствие `figma-layout-ir.json` для кодовой поверхности — не пробел, а `skipped_with_reason: Figma не участвует`.
+
 Применяй этот skill перед любым Figma canvas write для `figma_board`, `product_ui` или `prototype`, если результат должен быть похож на приложение, а не на набор декоративных страниц.
 
 Нормативные источники — процесс студии `integrations/mcp/figma-canvas-write-guide.md`: §3 (Two-Pass Build), §4 (Component Contract Matrix / DS Instance Enforcement); и textbook-канон skill `/figma-ds:standard` (`plugins/figma-ds/skills/standard/SKILL.md`: тиеры токенов, component API/slots/states, a11y). IR обязан отражать эти требования; сам write выполняется через `figma-roundtrip`/`figma-handoff`.

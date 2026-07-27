@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Frontend Result",
   "type": "object",
+  "$comment": "Схема описывает МАКСИМАЛЬНЫЙ маршрут запуска (`track=figma`). Поля design_system_implementation, component_contract_implementation, frame_state_implementation_map, figma_visual_qa_gate_summary, figma_roundtrip_deviations обязательны только на нём; на `track=code` валидатор снимает их из required по объявлению requiredSchemaFieldsByTrack в runtime/typescript/workflow.manifest.ts (стадия 08-frontend). Условность НЕ выражается через if/then внутри схемы намеренно: опечатка в значении условия молча отключает все условные требования разом — см. docs/architecture/conditional-sections-research-2026-07-27.md §2. Если run на маршруте figma сделал часть работы неприменимой, используй уже существующие значения not_applicable в enum-ах ниже, а не удаление поля.",
   "required": ["status", "inputs_used", "changed_files", "implementation_notes", "design_system_implementation", "component_contract_implementation", "frame_state_implementation_map", "figma_visual_qa_gate_summary", "commands_run", "known_limitations", "figma_roundtrip_deviations"],
   "properties": {
     "status": { "enum": ["success", "partial", "blocked"] },

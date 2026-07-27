@@ -15,7 +15,7 @@ import { formatEnabledAgenticStages, isAgenticStageEnabled } from "../agentic-ro
 import { requireApproval } from "../approval-gate";
 import { routeTools } from "../route.config";
 import { agentOutputStatusToStageStatus } from "../status-resolver";
-import { artifactFiles, getRequiredArtifactsForStage } from "../workflow-stages";
+import { artifactFiles, getRequiredArtifactsForStage, getRequiredSectionsForStage, legacyWorkflowTrack } from "../workflow-stages";
 import { nowIso, type WorkflowStageResult, type WorkflowStageStatus } from "../workflow-state";
 import { formatLedgerCell, stageResult } from "./executor-common";
 import type { WorkflowStageExecutorContext } from "./types";
@@ -87,7 +87,7 @@ export async function executeAgenticStage(context: WorkflowStageExecutorContext)
 
   for (const artifactName of requiredArtifacts) {
     const file = artifactFiles[artifactName];
-    const sections = context.stage.requiredSectionsByArtifact[artifactName] ?? [];
+    const sections = getRequiredSectionsForStage(context.stage, artifactName, context.track ?? legacyWorkflowTrack);
     if (parsedOutput.envelope && !hasArtifactOutput(parsedOutput.envelope, artifactName, file)) {
       warnings.push(`${file}: agent output contract did not include outputs.${artifactName} or outputs.${file}`);
     }
@@ -161,7 +161,7 @@ async function writeBlockedAgenticArtifacts(
       continue;
     }
 
-    const sections = context.stage.requiredSectionsByArtifact[artifactName] ?? [];
+    const sections = getRequiredSectionsForStage(context.stage, artifactName, context.track ?? legacyWorkflowTrack);
     const content = renderBlockedAgenticArtifact({
       title: context.stage.title,
       stageId: context.stage.id,
@@ -229,7 +229,12 @@ async function buildSpecialistPrompt(
   }));
 
   const requiredFiles = requiredArtifacts.map((artifact) => artifactFiles[artifact]).join(", ");
-  const requiredSections = requiredArtifacts.flatMap((artifact) => context.stage.requiredSectionsByArtifact[artifact] ?? []);
+  // Промпт специалиста строится тем же хелпером, что и гейт валидатора: неприменимая
+  // секция не должна попадать даже в задание агенту — сужение до генерации сильнее
+  // прощения после.
+  const requiredSections = requiredArtifacts.flatMap((artifact) =>
+    getRequiredSectionsForStage(context.stage, artifact, context.track ?? legacyWorkflowTrack),
+  );
 
   return [
     `Ты исполняешь workflow stage ${context.stage.id}: ${context.stage.title}.`,

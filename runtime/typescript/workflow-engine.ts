@@ -8,9 +8,12 @@ import { executeWorkflowStage } from "./workflow-stage-executors";
 import {
   artifactFiles,
   defaultWorkflowScale,
+  defaultWorkflowTrack,
   getWorkflowStagesForProfile,
+  legacyWorkflowTrack,
   type WorkflowProfile,
   type WorkflowScale,
+  type WorkflowTrack,
 } from "./workflow-stages";
 import {
   hasRunState,
@@ -28,6 +31,7 @@ export interface StartWorkflowOptions {
   goal: string;
   profile?: WorkflowProfile;
   scale?: WorkflowScale;
+  track?: WorkflowTrack;
   executionMode?: WorkflowExecutionMode;
 }
 
@@ -40,6 +44,9 @@ export async function startWorkflowEngine(options: StartWorkflowOptions): Promis
   // Масштаб задаётся явно на старте. Дефолт `full` намеренно консервативен: не уверен в
   // масштабе — получаешь полный pipeline, а не урезанный по догадке.
   const scale = options.scale ?? defaultWorkflowScale;
+  // Маршрут фиксируется на intake. Дефолт нового запуска — `code`: умолчание студии
+  // (shadcn/ui + Storybook), Figma подключается явным решением, а не по инерции.
+  const track = options.track ?? defaultWorkflowTrack;
   const executionMode = options.executionMode ?? "local";
 
   const outputDir = await runLandingWorkflow({ goal: options.goal, profile });
@@ -52,7 +59,7 @@ export async function startWorkflowEngine(options: StartWorkflowOptions): Promis
   }
 
   const now = nowIso();
-  const state = createInitialState(outputDir, options.goal, profile, scale, executionMode, now);
+  const state = createInitialState(outputDir, options.goal, profile, scale, track, executionMode, now);
   const intakeArtifacts = [
     artifactFiles.run_plan,
     artifactFiles.handoff_bundle,
@@ -126,6 +133,7 @@ export async function resumeWorkflowEngine(outputDir: string): Promise<WorkflowR
         goal: state.goal,
         stage,
         profile: state.profile,
+        track: state.track ?? legacyWorkflowTrack,
         executionMode: state.execution_mode ?? "local",
       });
       state = await readRunState(outputDir);
@@ -145,7 +153,7 @@ export async function resumeWorkflowEngine(outputDir: string): Promise<WorkflowR
         break;
       }
 
-      await validateThroughStage(outputDir, stage.id, state.profile, state.scale ?? defaultWorkflowScale);
+      await validateThroughStage(outputDir, stage.id, state.profile, state.scale ?? defaultWorkflowScale, state.track ?? legacyWorkflowTrack);
     } catch (error) {
       const failedAt = nowIso();
       const message = error instanceof Error ? error.message : String(error);
@@ -193,6 +201,7 @@ export async function getWorkflowEngineStatus(outputDir: string): Promise<string
     `Goal: ${state.goal}`,
     `Profile: ${state.profile}`,
     `Scale: ${state.scale ?? defaultWorkflowScale}`,
+    `Track: ${state.track ?? legacyWorkflowTrack}`,
     `Execution mode: ${state.execution_mode ?? "local"}`,
     `Status: ${state.status}`,
     "",
@@ -270,6 +279,7 @@ function createInitialState(
   goal: string,
   profile: WorkflowProfile,
   scale: WorkflowScale,
+  track: WorkflowTrack,
   executionMode: WorkflowExecutionMode,
   now: string,
 ): WorkflowRunState {
@@ -292,6 +302,7 @@ function createInitialState(
     goal,
     profile,
     scale,
+    track,
     execution_mode: executionMode,
     status: "pending",
     output_dir: outputDir,
@@ -306,8 +317,9 @@ async function validateThroughStage(
   stageId: string,
   profile: WorkflowProfile,
   scale: WorkflowScale,
+  track: WorkflowTrack,
 ): Promise<void> {
-  const findings = validateWorkflowRun(outputDir, stageId, profile, scale);
+  const findings = validateWorkflowRun(outputDir, stageId, profile, scale, track);
   const errors = findings.filter((finding) => finding.level === "error");
   await appendFile(
     join(outputDir, artifactFiles.stage_gate_ledger),

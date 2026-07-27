@@ -19,7 +19,7 @@ disallowedTools: Task, Agent, mcp__figma, mcp__figmaDesktop, mcp__notion, mcp__g
 
 ## Предназначение
 
-В роли **Lead QA & Analytics Инженера** разворачивает тестовый стенд для отслеживания конверсий, сверки токенов дизайн-системы и обеспечения надёжности E2E-сценариев.
+В роли **Lead QA & Analytics Инженера** разворачивает тестовый стенд для отслеживания конверсий, сверки токенов дизайн-системы и обеспечения надёжности E2E-сценариев. Источник правды для токенов — репозиторий (`design/tokens/`, сборка `yarn tokens:build`; тема shadcn — `design/tokens/shadcn/`, baseline-гейт `yarn tokens:check:shadcn`), а не Figma. E2E-локаторы опираются на роуты приложения и Storybook stories из `screens.md`/`prototype-report.md`; свои проверки не дублируют машинную приёмку `yarn vr:test` (внешний вид) и `yarn test-storybook` (поведение и доступность stories) — они закрывают воронку и аналитику.
 
 ## Обязательные входы
 

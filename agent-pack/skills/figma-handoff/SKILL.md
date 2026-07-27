@@ -27,6 +27,15 @@ contract_schema: agent-pack/templates/skill.template.md
 
 # Skill: Figma Handoff Bundle
 
+## Применимость
+
+**Skill применяется, только когда Figma реально в деле** — то есть когда пользователь просит макет в Figma или показ результата человеку. По `CLAUDE.md` §6.1 Figma сузилась до дивергентной фазы на `04-design` и разового показа; Figma-кит компонентов не ведётся, синхронизации с кодом нет.
+
+Отсюда две поправки к процедуре ниже:
+
+- **`design_system_mode` (пункт 2) по умолчанию решается в пользу shadcn/ui в коде**, а не Figma-библиотеки. Пункты про `selected_design_system_slug` и локальный индекс относятся к случаю, когда Figma-DS действительно выбрана источником.
+- **Handoff не является предусловием frontend.** Код собирается из `design/tokens/` и shadcn; bundle описывает Figma-поверхность. Если Figma в задаче нет, запиши `skipped_with_reason: Figma не участвует` и не создавай `figma-handoff-bundle.md` ради формальности.
+
 ## Назначение
 
 Готовит текстовый foundation/components/screens bundle перед любой записью в Figma. Работает вместе с `figma-roundtrip`: сначала strategy + visual calibration, затем systemization, текстовый contract и approval, только потом MCP write.

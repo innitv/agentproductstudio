@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { artifactNames } from "./route.config";
@@ -7,10 +7,14 @@ import { artifactStatusToStageStatus, canReleaseFromQaStatus, detectStageStatusF
 import {
   artifactFiles,
   getRequiredArtifactsForStage,
+  getRequiredSectionsForStage,
   getWorkflowStagesForProfile,
   workflowScales,
+  workflowStages,
+  workflowTracks,
   type WorkflowProfile,
   type WorkflowScale,
+  type WorkflowTrack,
 } from "./workflow-stages";
 import { getCoreBundleArtifactsForProfile } from "./workflow.manifest";
 import { validateWorkflowRun } from "./validate-workflow-run";
@@ -47,15 +51,20 @@ const baseSections: Record<string, readonly string[]> = {
   [artifactNames.referenceAnalysis]: ["## Inputs Used", "## References", "## Allowed Patterns", "## Disallowed Copying", "## Design Implications"],
   [artifactNames.designBrief]: ["## Visual Direction", "## Sections", "## Components", "## Responsive Notes", "## Accessibility Notes"],
   [artifactNames.copyDeck]: ["## Hero", "## Service Cards", "## FAQ", "## SEO", "## Claims To Validate"],
+  // Набор маршрута `code`: канонический список стадии 06-screens минус Figma-условные
+  // `## Layout Compiler Contract` и `## Figma Readiness`. Записан литералом намеренно —
+  // фикстура, выведенная из манифеста, проверяла бы манифест сам собой.
   [artifactNames.screens]: [
     "## Inputs Used",
     "## Input Readiness Pass",
+    "## Design System Strategy",
     "## Design-System Grounding",
     "## Screen List",
     "## Screen Traceability",
     "## Component Inventory",
+    "## Component Contract Matrix",
+    "## Frame / State Implementation Map",
     "## State Inventory",
-    "## Figma Readiness",
   ],
   [artifactNames.prototypeReport]: [
     "## Input Readiness Pass",
@@ -427,6 +436,184 @@ withRun((runDir) => {
   );
   const findings = validateWorkflowRun(runDir, "11-qa", "standard", "patch");
   assertError(findings, /Scale cannot be lowered after stages have run/);
+});
+
+// --- Ось маршрута (track) ---
+
+// Маршрут обязан только СУЖАТЬ набор секций: набор `code` — подмножество `figma`.
+for (const stage of workflowStages) {
+  for (const artifact of Object.keys(stage.requiredSectionsByArtifact)) {
+    const figma = new Set(getRequiredSectionsForStage(stage, artifact, "figma"));
+    for (const section of getRequiredSectionsForStage(stage, artifact, "code")) {
+      assert.ok(figma.has(section), `${stage.id}/${artifact}: '${section}' есть на code, но нет на figma`);
+    }
+
+    // Ни один маршрут не остаётся без требований вообще.
+    for (const track of workflowTracks) {
+      assert.ok(getRequiredSectionsForStage(stage, artifact, track).length > 0);
+    }
+
+    // Вызов без маршрута обязан вести себя строго (как `figma`): неизвестное включается.
+    assert.deepEqual(
+      getRequiredSectionsForStage(stage, artifact),
+      getRequiredSectionsForStage(stage, artifact, "figma"),
+      `${stage.id}/${artifact}: вызов без track должен вести себя как figma`,
+    );
+  }
+}
+
+const frontendCodeTrackPayload: Payload = {
+  status: "success",
+  inputs_used: ["fixture"],
+  changed_files: ["apps/frontend/src/App.tsx"],
+  implementation_notes: ["fixture"],
+  commands_run: [{ command: "yarn typecheck", status: "passed" }],
+  known_limitations: [],
+};
+
+const figmaSectionPattern =
+  /is missing section ## (Layout Compiler Contract|Figma Readiness|Design System Implementation|Component Contract Implementation|Frame \/ State Implementation Map|Figma Visual QA Gate Summary|Figma Roundtrip Deviations)/;
+const figmaSchemaPattern =
+  /schema validation failed: \$\.(layout_compiler_contract|figma_readiness|design_system_implementation|component_contract_implementation|frame_state_implementation_map|figma_visual_qa_gate_summary|figma_roundtrip_deviations) is required/;
+
+function writeTrackRunState(
+  runDir: string,
+  track: WorkflowTrack,
+  stages: Record<string, { status: string }> = {},
+): void {
+  writeFileSync(
+    join(runDir, "run-state.json"),
+    JSON.stringify({
+      run_id: "fixture",
+      goal: "fixture",
+      profile: "standard",
+      scale: "full",
+      track,
+      status: "completed",
+      output_dir: runDir,
+      created_at: "",
+      updated_at: "",
+      stages,
+    }),
+    "utf8",
+  );
+}
+
+function appendLedgerRows(runDir: string, rows: string[]): void {
+  const path = join(runDir, artifactFiles[artifactNames.stageGateLedger]);
+  const header = ["", "## Секции вне маршрута", "", "| Этап | Артефакт | Секция | Статус | Причина |", "|---|---|---|---|---|"];
+  writeFileSync(path, [readFileSync(path, "utf8"), ...header, ...rows, ""].join("\n"), "utf8");
+}
+
+// Маршрут `code`: Figma-секции и Figma-поля схемы не спрашиваются вовсе.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "08-frontend", "standard", { [artifactNames.frontendResult]: frontendCodeTrackPayload });
+  writeTrackRunState(runDir, "code");
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard", "full", "code");
+  assert.deepEqual(
+    findings.filter(
+      (finding) => finding.level === "error" && (figmaSectionPattern.test(finding.message) || figmaSchemaPattern.test(finding.message)),
+    ),
+    [],
+    "маршрут code не должен спрашивать Figma-секции и Figma-поля схемы",
+  );
+});
+
+// Тот же run на маршруте `figma`: те же секции и поля становятся ошибками.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "08-frontend", "standard", { [artifactNames.frontendResult]: frontendCodeTrackPayload });
+  writeTrackRunState(runDir, "figma");
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard", "full", "figma");
+  assert.equal(
+    findings.filter((finding) => finding.level === "error" && figmaSectionPattern.test(finding.message)).length,
+    7,
+    "маршрут figma обязан требовать 2 секции 06-screens и 5 секций 08-frontend",
+  );
+  assert.equal(
+    findings.filter((finding) => finding.level === "error" && figmaSchemaPattern.test(finding.message)).length,
+    5,
+    "маршрут figma обязан требовать 5 Figma-полей frontend-result.md",
+  );
+});
+
+// Легальная запись о пропуске: секция, которую маршрут `code` действительно не требует.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "08-frontend", "standard", { [artifactNames.frontendResult]: frontendCodeTrackPayload });
+  writeTrackRunState(runDir, "code");
+  appendLedgerRows(runDir, ["| 08-frontend | `frontend-result.md` | `## Figma Roundtrip Deviations` | `skipped_by_track` | маршрут code |"]);
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard", "full", "code");
+  assert.deepEqual(
+    findings.filter((finding) => finding.level === "error" && /skipped_by_track/.test(finding.message)),
+    [],
+    "легальная запись о пропуске не должна быть ошибкой",
+  );
+});
+
+// Модель pytest.mark.xfail(strict=True): пропуск секции, которую маршрут требует, — ошибка.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "08-frontend", "standard", { [artifactNames.frontendResult]: frontendCodeTrackPayload });
+  writeTrackRunState(runDir, "code");
+  appendLedgerRows(runDir, ["| 08-frontend | `frontend-result.md` | `## Changed Files` | `skipped_by_track` | fixture |"]);
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard", "full", "code");
+  assertError(findings, /section '## Changed Files' is recorded as skipped_by_track, but track 'code' requires it/);
+});
+
+// Та же запись, но на маршруте figma: секция там обязательна — тоже ошибка.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "08-frontend", "standard", { [artifactNames.frontendResult]: frontendCodeTrackPayload });
+  writeTrackRunState(runDir, "figma");
+  appendLedgerRows(runDir, ["| 08-frontend | `frontend-result.md` | `## Figma Roundtrip Deviations` | `skipped_by_track` | fixture |"]);
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard", "full", "figma");
+  assertError(findings, /section '## Figma Roundtrip Deviations' is recorded as skipped_by_track, but track 'figma' requires it/);
+});
+
+// Модель mypy warn_unused_ignores: пропуск секции, которой нет ни в одном маршруте, — ошибка.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "08-frontend", "standard", { [artifactNames.frontendResult]: frontendCodeTrackPayload });
+  writeTrackRunState(runDir, "code");
+  appendLedgerRows(runDir, ["| 08-frontend | `frontend-result.md` | `## Figma Telepathy Gate` | `skipped_by_track` | fixture |"]);
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard", "full", "code");
+  assertError(findings, /section '## Figma Telepathy Gate' is recorded as skipped_by_track, but no track declares it as conditional/);
+});
+
+// Запись без stage id неотличима от записи про другую стадию — требуем стадию явно.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "08-frontend", "standard", { [artifactNames.frontendResult]: frontendCodeTrackPayload });
+  writeTrackRunState(runDir, "code");
+  appendLedgerRows(runDir, ["| frontend | `frontend-result.md` | `## Figma Roundtrip Deviations` | `skipped_by_track` | fixture |"]);
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard", "full", "code");
+  assertError(findings, /skipped_by_track record does not name a stage id/);
+});
+
+// Anti-backdating: маршрут нельзя сменить после того, как маршрут-зависимая стадия отработала.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "08-frontend", "standard", { [artifactNames.frontendResult]: frontendCodeTrackPayload });
+  writeTrackRunState(runDir, "code", { "08-frontend": { status: "completed" } });
+  writeFileSync(join(runDir, "run-meta.json"), JSON.stringify({ workflow_track: "figma" }), "utf8");
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard", "full");
+  assertError(findings, /Track cannot be changed after track-sensitive stages have run/);
+});
+
+// До того как стадии отработали, расхождение записей — предупреждение, а не блокировка.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "08-frontend", "standard", { [artifactNames.frontendResult]: frontendCodeTrackPayload });
+  writeTrackRunState(runDir, "code");
+  writeFileSync(join(runDir, "run-meta.json"), JSON.stringify({ workflow_track: "figma" }), "utf8");
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard", "full");
+  assert.deepEqual(
+    findings.filter((finding) => finding.level === "error" && /Track cannot be changed/.test(finding.message)),
+    [],
+  );
+  assert.ok(findings.some((finding) => finding.level === "warning" && /validation track is 'code'/.test(finding.message)));
 });
 
 console.log("workflow validator regression tests passed");

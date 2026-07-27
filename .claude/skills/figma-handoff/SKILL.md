@@ -9,6 +9,9 @@ Skill готовит текстовый foundation/components/screens bundle п�
 
 **Полная процедура, входы/выходы, gates и validation-команды — в [`agent-pack/skills/figma-handoff/SKILL.md`](../../../agent-pack/skills/figma-handoff/SKILL.md). Следуй ей.**
 
+## Применимость
+**Только когда Figma реально в деле** — пользователь просит макет в Figma или показ человеку (`CLAUDE.md` §6.1). `design_system_mode` по умолчанию решается в пользу shadcn/ui в коде, а не Figma-библиотеки. Handoff не является предусловием frontend: код собирается из `design/tokens/` и shadcn. Нет Figma — `skipped_with_reason: Figma не участвует`, bundle ради формальности не создаётся.
+
 ## Когда использовать
 - Пользователь просит Figma design system или canvas write.
 - Перед любым approval-gated Figma MCP write на этапах 04-design или 06-screens.

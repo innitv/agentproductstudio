@@ -9,10 +9,19 @@ Skill управляет полным циклом работы с Figma: выб
 
 **Полная процедура, входы/выходы, gates и validation-команды — в [`agent-pack/skills/figma-roundtrip/SKILL.md`](../../../agent-pack/skills/figma-roundtrip/SKILL.md). Следуй ей.**
 
+## Применимость
+**Только когда Figma реально в деле.** По `CLAUDE.md` §6.1 у Figma осталось две роли: дивергентный черновик на `04-design` и разовый показ человеку. Постоянной синхронизации нет, Figma-кит компонентов не ведётся.
+
+- Дефолтный `design_system_mode` — `reuse` поверх shadcn/ui в коде (`apps/frontend/src/components/shadcn/`), а не поверх Figma-библиотеки.
+- «frontend → Figma» — разовый показ, а не канал синхронизации; расхождение после него не блокирует код.
+- Токены не ходят по кругу: правда в `design/tokens/` (`yarn tokens:build`), из Figma решения извлекаются один раз.
+- Приёмка кода — `yarn vr:test`, `yarn test-storybook`, `yarn qa:mobile`, а не сверка с макетом.
+- Если Figma в задаче нет — `skipped_with_reason: Figma не участвует`, выбор основы по `landing-builder`.
+
 ## Когда использовать
 - Нужно выбрать reuse/extend/product-specific/bespoke стратегию DS.
 - Создание или обновление Figma design system, Figma canvas write.
-- Передача Figma-to-frontend или frontend-to-Figma.
+- Передача Figma-to-frontend или разовый показ frontend-to-Figma.
 - Нужна paired verification (Figma и frontend) с Component Contract Matrix.
 
 ## Ключевые шаги

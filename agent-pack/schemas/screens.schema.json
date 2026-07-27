@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Screens",
   "type": "object",
+  "$comment": "Схема описывает МАКСИМАЛЬНЫЙ маршрут запуска (`track=figma`). Поля layout_compiler_contract и figma_readiness обязательны только на нём; на `track=code` валидатор снимает их из required по объявлению requiredSchemaFieldsByTrack в runtime/typescript/workflow.manifest.ts (стадия 06-screens). Условность НЕ выражается через if/then внутри схемы намеренно — см. docs/architecture/conditional-sections-research-2026-07-27.md §2. Внутри Figma-маршрута честный отказ выражается уже существующим словарём: layout_compiler_contract.figma_layout_ir_required=false и layout_ir_status='not_required', figma_readiness[].status='not_applicable'. frame_state_implementation_map и component_contract_matrix обязательны на обоих маршрутах: на `track=code` адресатом мэппинга выступает Storybook story, а не Figma-node.",
   "required": [
     "status",
     "inputs_used",

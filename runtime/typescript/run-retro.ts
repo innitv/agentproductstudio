@@ -109,6 +109,8 @@ export interface RetroReport {
   run_date: string;
   profile: string;
   scale: string;
+  /** Маршрут run: `code` | `figma`. Отсутствие поля читается как `figma`. */
+  track: string;
   status: string;
   /** Календарная длительность run в днях (created_at → updated_at). */
   duration_days: number;
@@ -455,6 +457,7 @@ export function collectRunRetro(runDir: string): RetroReport {
     run_date: String(runMeta.run_date ?? basename(dir)),
     profile: String(runMeta.workflow_profile ?? runState.profile ?? "unknown"),
     scale: String(runMeta.workflow_scale ?? runState.scale ?? "full"),
+    track: String(runMeta.workflow_track ?? runState.track ?? "figma"),
     status: String(runMeta.status ?? runState.status ?? "unknown"),
     duration_days: durationDays,
     stages,
@@ -513,7 +516,7 @@ export function formatRunRetro(report: RetroReport): string {
   lines.push(`# Ретро run: ${report.project_slug} / ${report.run_date}`);
   lines.push("");
   lines.push(
-    `Профиль \`${report.profile}\`, масштаб \`${report.scale}\`, статус \`${report.status}\`, ` +
+    `Профиль \`${report.profile}\`, масштаб \`${report.scale}\`, маршрут \`${report.track}\`, статус \`${report.status}\`, ` +
       `календарная длительность ${report.duration_days} дн.`,
   );
   lines.push("");

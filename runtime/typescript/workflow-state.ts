@@ -31,6 +31,10 @@ export interface WorkflowRunState {
   profile: "standard" | "reference";
   // Глубина run. Отсутствие поля читается как "full" — так старые run остаются валидными.
   scale?: "full" | "increment" | "patch";
+  // Маршрут производства макета. Отсутствие поля читается как "figma" (строгий вариант):
+  // до появления оси манифест требовал Figma-секции у каждого запуска, и читать пустое
+  // поле как "code" значило бы задним числом снять с исторических run их проверки.
+  track?: "code" | "figma";
   execution_mode?: WorkflowExecutionMode;
   status: WorkflowStageStatus;
   output_dir: string;

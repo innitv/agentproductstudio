@@ -31,6 +31,13 @@ contract_schema: agent-pack/templates/skill.template.md
 
 Применяй skill, когда workflow содержит Figma URL/file/node id и нужно извлечь visual tokens как evidence для `design-brief.md` или frontend implementation. Canvas write/update является отдельным действием и требует `figma_write` approval.
 
+**Извлечение разовое и однонаправленное.** По решению от 2026-07-27 (`CLAUDE.md` §6.1) источник правды для токенов — репозиторий: `design/tokens/` (DTCG, три тиера, сборка `yarn tokens:build`; для shadcn-тем — `design/tokens/shadcn/` и `yarn tokens:build:shadcn`). Figma в этом маршруте — донор решения, а не хранилище: значение из макета переносится в токены один раз, обратной синхронизации нет и Figma-кит не ведётся.
+
+Отсюда два следствия для процедуры ниже:
+
+- Извлечённое значение считается принятым, только когда оно записано в `design/tokens/` и прошло `yarn tokens:build` с baseline-гейтом. Токен, оставшийся только в таблице `design-brief.md`, — это evidence, а не решение.
+- Расхождение Figma-переменной и токена в репозитории после переноса — не дефект и не повод перечитывать Figma. Правда — в репозитории.
+
 ## 2. Обязательные inputs
 
 - Figma URL, file id или node id из `recursive-brief.md`, `run-plan.md` или `design-brief.md`.
@@ -52,7 +59,7 @@ contract_schema: agent-pack/templates/skill.template.md
 
 ## 4. Frontend mapping
 
-На `08-frontend` можно маппить токены в CSS variables, если frontend stage уже разрешен. Не меняй `apps/frontend/src/styles.css` на design stage только ради extraction.
+На `08-frontend` перенос идёт в `design/tokens/` — правку значений делай там и пересобирай `yarn tokens:build`. Сгенерированные файлы (`apps/frontend/src/styles/tokens.generated.css`, `apps/frontend/src/styles/shadcn/tokens.generated.css`) руками не редактируются: сборка их перезапишет, а baseline-гейт отклонит незаявленное изменение значений. Не меняй `apps/frontend/src/styles.css` на design stage только ради extraction.
 
 Пример формата в `design-brief.md`:
 
@@ -72,5 +79,6 @@ contract_schema: agent-pack/templates/skill.template.md
 
 - [ ] Все ключевые tokens имеют source id или помечены как assumption.
 - [ ] `design-brief.md` обновлен таблицей tokens.
+- [ ] Принятые значения записаны в `design/tokens/` и проходят `yarn tokens:build` с baseline-гейтом; сгенерированные CSS-файлы вручную не правились.
 - [ ] Figma write не выполнялся без approval.
 - [ ] `yarn validate:config` проходит.
