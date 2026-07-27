@@ -45,4 +45,3 @@ const render = (theme: ShadcnTheme) => (
 )
 
 export const Default: Story = { render: () => render("default") }
-export const Branded: Story = { render: () => render("branded") }

@@ -2,7 +2,7 @@
  * Мобильная приёмка приложения (Mobile Device Acceptance Gate).
  *
  * Каркас из `agent-pack/templates/mobile-acceptance.template.mjs` с CONFIG под
- * маршрут #card-request-shadcn-branded — единственный продуктовый экран
+ * маршрут #card-request-shadcn — единственный продуктовый экран
  * приложения. Запуск — `yarn qa:mobile`.
  *
  * Норма живёт в `agent-pack/skills/design-engineering/SKILL.md`
@@ -135,14 +135,13 @@ const CONFIG = {
       "поведение visualViewport при появлении панелей браузера и клавиатуры",
       "захват оси вложенным скроллером в WebKit",
       "resize от сворачивания адресной строки",
-      "рендеринг моноширинного слоя branded-темы: заявленные JetBrains Mono и IBM Plex Mono в среде отсутствуют, используется системный fallback",
     ],
   },
 
   scenarios: {
     // ── 1. Скролл от касания контента ────────────────────────────────────
     touch_scroll_from_content: {
-      route: "/#card-request-shadcn-branded",
+      route: "/#card-request-shadcn",
       /*
        * Жест подаётся в координатах вьюпорта, поэтому цель обязана быть на
        * экране. `tap` в prelude прокручивает элемент в вид и одновременно
@@ -163,7 +162,7 @@ const CONFIG = {
 
     // ── 2. Fixed/sticky и фон против safe-area ───────────────────────────
     safe_area_and_fixed: {
-      route: "/#card-request-shadcn-branded",
+      route: "/#card-request-shadcn",
       prelude: [],
       stickyPanels: [
         '[data-testid="card-request-shadcn-topbar"]',
@@ -177,18 +176,22 @@ const CONFIG = {
       themeColor: null,
       requireViewportFitCover: true,
       /**
-       * Ожидаемый цвет канвы — `--background` брендовой темы
-       * (`oklch(0.978 0.004 240)`), замеренный по отрисованному пикселю.
-       * Красит его правило `html[data-shadcn-theme]` из сгенерированных
-       * токенов: атрибут зеркалится на корень документа именно ради этой зоны.
+       * Ожидаемый цвет канвы — `--background` штатной темы реестра
+       * (`oklch(1 0 0)`, то есть чистый белый). Красит его правило
+       * `html[data-shadcn-theme]` из сгенерированных токенов: атрибут
+       * зеркалится на корень документа именно ради этой зоны.
+       *
+       * Значение меняется вместе с темой: проектная тема со своим фоном
+       * потребует замерить пиксель заново, иначе сценарий 2 поймает не
+       * «системная зона осталась некрашеной», а собственную устаревшую цифру.
        */
-      expectedCanvasColor: [245, 248, 250],
+      expectedCanvasColor: [255, 255, 255],
       colorTolerance: 1,
     },
 
     // ── 3. Появление оверлея/баннера/клавиатуры ──────────────────────────
     overlay_appearance: {
-      route: "/#card-request-shadcn-branded",
+      route: "/#card-request-shadcn",
       prelude: [],
       /*
        * Триггер — «Сохранить черновик»: он показывает уведомление sonner и НЕ
@@ -206,7 +209,7 @@ const CONFIG = {
 
     // ── 4. Композиция на реальных ширинах устройств ──────────────────────
     composition_widths: {
-      route: "/#card-request-shadcn-branded",
+      route: "/#card-request-shadcn",
       prelude: [],
       widths: [390, 430],
       heights: [664, 852],
@@ -233,7 +236,7 @@ const CONFIG = {
 
     // ── 5. Позиция прокрутки при смене состояния ─────────────────────────
     scroll_position_on_state_change: {
-      route: "/#card-request-shadcn-branded",
+      route: "/#card-request-shadcn",
       prelude: [],
       scrollTo: "third",
       /*

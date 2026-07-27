@@ -7,9 +7,11 @@ import type { ShadcnTheme } from "./theme-scope"
 
 /**
  * Переключатель — единственный компонент набора, чьи размеры заданы
- * произвольными значениями (`h-[1.15rem] w-8`), а не шкалой Tailwind. Токен
- * плотности его не двигает, поэтому в теме `branded` он выправлен правилом в
- * `branded-overrides.css`. Пара кадров показывает результат.
+ * произвольными значениями (`h-[1.15rem] w-8`), а не шкалой Tailwind.
+ *
+ * Знание на будущее: токен плотности `--spacing` его НЕ двигает. Тема, которая
+ * сожмёт плотность, оставит переключатель прежним, и он выпадет из ритма
+ * строки — править придётся отдельным правилом CSS, токеном не получится.
  */
 const meta = {
   title: "shadcn/Forms/Switch",
@@ -43,4 +45,3 @@ const render = (theme: ShadcnTheme) => (
 )
 
 export const Default: Story = { render: () => render("default") }
-export const Branded: Story = { render: () => render("branded") }

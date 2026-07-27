@@ -6,12 +6,11 @@ import { ShadcnStoryRow, ShadcnStoryShell } from "./story-shell"
 import type { ShadcnTheme } from "./theme-scope"
 
 /**
- * Кнопка shadcn в двух темах.
+ * Кнопка shadcn на штатной теме реестра.
  *
- * Истории парные и показывают одну и ту же матрицу вариантов: единственное
- * различие между кадрами — значение атрибута темы. Если разница видна только
- * в цвете заливки, значит тема не дотянулась до формы и плотности, и это
- * должно быть заметно в скриншоте, а не в описании.
+ * История показывает полную матрицу вариантов, размеров и состояний одним
+ * кадром: это точка отсчёта «как компонент выглядит из коробки», от которой
+ * будет считаться отличие проектной темы, когда та появится.
  */
 const meta = {
   title: "shadcn/Actions/Button",
@@ -49,4 +48,3 @@ const render = (theme: ShadcnTheme) => (
 )
 
 export const Default: Story = { render: () => render("default") }
-export const Branded: Story = { render: () => render("branded") }

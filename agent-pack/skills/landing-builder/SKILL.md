@@ -49,7 +49,7 @@ contract_schema: agent-pack/templates/skill.template.md
 
 Bespoke без такого обоснования — не «характер», а лишняя работа и второй непроверенный слой примитивов.
 
-Границы правки shadcn (измерены на паре тем `default`/`branded`, детали — `docs/architecture/storybook-figma-research-2026-07-27.md`):
+Границы правки shadcn (измерены экспериментом с разделением факторов, метод и числа — `design/tokens/shadcn/README.md`):
 
 - **Меняй смело:** цветовые токены, гарнитуру, кольцо фокуса — через `design/tokens/shadcn/` и `yarn tokens:build`, не правкой значений в компоненте.
 - **Не трогай `--spacing` и шкалу радиусов.** В Tailwind 4 от `--spacing` считаются все отступы и высоты; сжатие даёт дробные пиксели и ломает ритм.

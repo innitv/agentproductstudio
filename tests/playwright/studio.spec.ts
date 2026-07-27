@@ -15,17 +15,18 @@ test("корневой маршрут показывает указатель ж
 
   await expect(page.getByRole("heading", { name: "Маршруты приложения" })).toBeVisible();
 
-  // Четыре темы пилотного экрана. Число, а не список: состав маршрутов —
-  // предмет правок, а вот «указатель пустой» это поломка роутера.
-  await expect(page.locator('[data-testid^="studio-route-"]')).toHaveCount(4);
+  // Не список, а «хотя бы один»: состав маршрутов — предмет правок и будет
+  // расти с каждым продуктом студии, а вот пустой указатель это поломка
+  // роутера, и её надо ловить при любом составе.
+  await expect(page.locator('[data-testid^="studio-route-"]').first()).toBeVisible();
 });
 
 test("с указателя открывается пилотный экран заявки", async ({ page }) => {
   await page.goto("/");
 
-  await page.getByTestId("studio-route-card-request-shadcn-branded").click();
+  await page.getByTestId("studio-route-card-request-shadcn").click();
 
-  await expect(page).toHaveURL(/#card-request-shadcn-branded$/);
+  await expect(page).toHaveURL(/#card-request-shadcn$/);
   await expect(page.getByTestId("card-request-shadcn-title")).toBeVisible();
   await expect(page.getByTestId("card-request-shadcn-actionbar")).toBeVisible();
 });

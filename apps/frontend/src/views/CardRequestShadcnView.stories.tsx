@@ -19,10 +19,11 @@ import {
  * ровно те же, что использует роут приложения. Экран и его состояния живут в
  * одном коде: история и маршрут не расходятся по определению.
  *
- * Раскладка историй по темам:
- *   • `default`  — два состояния, чтобы было видно штатный shadcn «из коробки»;
- *   • `branded`  — полный набор состояний, потому что именно брендовая тема
- *                  является предметом проверки.
+ * Все истории идут на штатной теме реестра. Раньше полный набор состояний висел
+ * на теме `branded` (она была предметом проверки), а на `default` оставались две
+ * истории; темы эксперимента удалены 2026-07-28, и набор состояний переехал на
+ * оставшуюся тему целиком — терять покрытие состояний вместе с темой было бы
+ * подменой: состояния описывают ЭКРАН, а не оформление.
  *
  * Тег `vr-page` включает съёмку в высоком вьюпорте: экран выше 800px, кадром
  * вьюпорта попал бы только первый экран.
@@ -46,60 +47,28 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-/** Штатный shadcn, пустая заявка: базовая точка отсчёта «как из коробки». */
-export const DefaultThemeEmptyDraft: Story = {
-  args: { initialValues: emptyCardRequestValues, theme: "default" },
+/** Пустая заявка: базовая точка отсчёта «как из коробки». */
+export const EmptyDraft: Story = {
+  args: { initialValues: emptyCardRequestValues },
 }
 
-/** Штатный shadcn, заполненный черновик — прямая пара к брендовой версии ниже. */
-export const DefaultThemeFilledDraft: Story = {
-  args: { initialValues: draftCardRequestValues, theme: "default" },
-}
-
-/** Брендовая тема, то же самое содержание: вся разница — в токенах. */
-export const BrandedFilledDraft: Story = {
-  args: { initialValues: draftCardRequestValues, theme: "branded" },
-}
-
-/**
- * ─── ЧЕТЫРЁХТОЧЕЧНОЕ СРАВНЕНИЕ ──────────────────────────────────────────────
- *
- * Четыре истории ниже и выше держат ОДНО состояние (`draftCardRequestValues`)
- * в четырёх темах. Смысл — разделить факторы, которые в `branded` смешаны:
- *
- *   DefaultThemeFilledDraft  штатный shadcn: штатная геометрия, штатный цвет
- *   BrandedFilledDraft       брендовый цвет + сжатая геометрия + снятые тени
- *   CalmFilledDraft          брендовый цвет + ШТАТНАЯ геометрия
- *   CalmTypedFilledDraft     то же + реально подгруженные гарнитуры
- *
- * Разница снимков `Branded` ↔ `Calm` — это вклад геометрии, разница
- * `Calm` ↔ `CalmTyped` — вклад гарнитуры. Состояние выбрано самое насыщенное:
- * заполненный черновик показывает поля, бейджи, суммы, переключатели и
- * карточки одновременно, то есть все места, где геометрия и типографика видны.
- */
-
-/** Цвет `branded` при штатной геометрии shadcn: замер вклада геометрии. */
-export const CalmFilledDraft: Story = {
-  args: { initialValues: draftCardRequestValues, theme: "calm" },
-}
-
-/** Та же тема с реально подгруженными шрифтами: замер вклада гарнитуры. */
-export const CalmTypedFilledDraft: Story = {
-  args: { initialValues: draftCardRequestValues, theme: "calm-typed" },
+/** Заполненный черновик — самое насыщенное состояние: поля, бейджи, суммы, переключатели. */
+export const FilledDraft: Story = {
+  args: { initialValues: draftCardRequestValues },
 }
 
 /** Перевыпуск раскрывает блок с номером старой карты. */
-export const BrandedReissue: Story = {
-  args: { initialValues: reissueCardRequestValues, theme: "branded" },
+export const Reissue: Story = {
+  args: { initialValues: reissueCardRequestValues },
 }
 
 /** Лимит выше порога добавляет предупреждение о втором круге согласования. */
-export const BrandedNeedsSecondApproval: Story = {
-  args: { initialValues: highLimitCardRequestValues, theme: "branded" },
+export const NeedsSecondApproval: Story = {
+  args: { initialValues: highLimitCardRequestValues },
 }
 
 /** Провал валидации: ошибки считает та же функция, что и роут. */
-export const BrandedValidationFailed: Story = {
+export const ValidationFailed: Story = {
   args: {
     errors: validateCardRequest(invalidCardRequestValues),
     initialValues: invalidCardRequestValues,
@@ -109,17 +78,16 @@ export const BrandedValidationFailed: Story = {
       tone: "error",
     },
     status: "error",
-    theme: "branded",
   },
 }
 
 /** Отправка в процессе: обе кнопки заблокированы, подпись основной изменена. */
-export const BrandedSubmitting: Story = {
-  args: { initialValues: draftCardRequestValues, status: "submitting", theme: "branded" },
+export const Submitting: Story = {
+  args: { initialValues: draftCardRequestValues, status: "submitting" },
 }
 
 /** Успех: уведомление sonner поверх панели действий. */
-export const BrandedSubmitted: Story = {
+export const Submitted: Story = {
   args: {
     initialValues: draftCardRequestValues,
     notice: {
@@ -128,13 +96,12 @@ export const BrandedSubmitted: Story = {
       tone: "success",
     },
     status: "success",
-    theme: "branded",
   },
 }
 
 /** Меню «ещё» в верхней панели: состояние портала, которое иначе не снять. */
-export const BrandedActionsMenuOpen: Story = {
-  args: { initialValues: draftCardRequestValues, openActionsMenu: true, theme: "branded" },
+export const ActionsMenuOpen: Story = {
+  args: { initialValues: draftCardRequestValues, openActionsMenu: true },
 }
 
 /**
@@ -142,8 +109,8 @@ export const BrandedActionsMenuOpen: Story = {
  * Скриншот показал бы только конечный кадр, поэтому связка «выбор -> пересчёт»
  * проверяется play-функцией, а не эталоном.
  */
-export const BrandedCategoryToggleIsHandled: Story = {
-  args: { initialValues: draftCardRequestValues, theme: "branded" },
+export const CategoryToggleIsHandled: Story = {
+  args: { initialValues: draftCardRequestValues },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const summary = canvas.getByTestId("card-request-shadcn-categories-summary")

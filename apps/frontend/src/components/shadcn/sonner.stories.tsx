@@ -55,4 +55,3 @@ function ToastStage({ theme }: { theme: ShadcnTheme }) {
 }
 
 export const Default: Story = { render: () => <ToastStage theme="default" /> }
-export const Branded: Story = { render: () => <ToastStage theme="branded" /> }
