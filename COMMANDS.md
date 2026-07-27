@@ -408,7 +408,7 @@ yarn workflow:test-agentic
 yarn qa:playwright
 ```
 
-Проверить только studio/AgentFlow app:
+Дымовая проверка собранного приложения (корневой указатель маршрутов и пилотный экран):
 
 ```bash
 yarn qa:studio
@@ -450,19 +450,29 @@ yarn preview
 
 ### Токены дизайн-системы
 
-Источник правды для токенов — DTCG-файлы в `design/tokens/` (не Figma). Пересобрать
-CSS-переменные фронтенда и DTCG-экспорт для Figma Variables:
+Источник правды для токенов — DTCG-файлы в `design/tokens/shadcn/` (не Figma).
+Тем четыре: `default`, `branded`, `calm`, `calm-typed`. Пересобрать
+CSS-переменные фронтенда:
 
 ```bash
 yarn tokens:build
 ```
 
-Собирает `apps/frontend/src/styles/tokens.generated.css` и
-`design/tokens/dist/figma/<mode>.json`. Команда сверяет результат с
-`design/tokens/baseline/styles-root.baseline.json` и падает, если состав переменных
-или их вычисленные значения разошлись с baseline; отличия в записи значения
-показываются отдельным списком и сборку не блокируют. Подробности — в
-`design/tokens/README.md`.
+Собирает `apps/frontend/src/styles/shadcn/tokens.generated.css` — блок
+`@theme inline` с регистрацией цветовых имён в Tailwind и по блоку значений
+`[data-shadcn-theme="…"]` на каждую тему. Команда сверяет тему `default` со
+снимком реестра `design/tokens/shadcn/_registry/theme-slate.css` и падает при
+расхождении: штатный shadcn обязан оставаться штатным, иначе сравнение с
+брендовой темой теряет смысл. В конце печатается дистанция между темами —
+сколько токенов и в каких группах переопределено.
+
+Проверить, что сгенерированный CSS не отстал от источника, не переписывая файл:
+
+```bash
+yarn tokens:check
+```
+
+Подробности — в `design/tokens/shadcn/README.md`.
 
 #### Добавление компонентов shadcn/ui
 
@@ -480,37 +490,9 @@ CLI объявлен как devDependency и запускается через `
 официальной документации не применяется — в 4.x она скаффолдит новый проект;
 токены темы приходят отдельным элементом реестра (`yarn shadcn add @shadcn/theme-slate`).
 
-#### Токены альтернативной основы (shadcn/ui)
-
-Рядом с A3 в репозитории лежит вторая, независимая основа — shadcn/ui с двумя
-темами (`default` и `branded`). Её токены живут в `design/tokens/shadcn/` и
-собираются отдельной командой: конвейеры не смешиваются, у каждой основы свой
-baseline и своя политика изменений.
-
-```bash
-yarn tokens:build:shadcn
-```
-
-Собирает `apps/frontend/src/styles/shadcn/tokens.generated.css` — блок
-`@theme inline` с регистрацией цветовых имён в Tailwind и два блока значений
-`[data-shadcn-theme="default"]` / `[data-shadcn-theme="branded"]`. Команда
-сверяет тему `default` со снимком реестра
-`design/tokens/shadcn/_registry/theme-slate.css` и падает при расхождении:
-штатный shadcn обязан оставаться штатным, иначе сравнение с брендовой темой
-теряет смысл. В конце печатается дистанция между темами — сколько токенов и в
-каких группах переопределено.
-
-Проверить, что сгенерированный CSS не отстал от источника, не переписывая файл:
-
-```bash
-yarn tokens:check:shadcn
-```
-
-Подробности — в `design/tokens/shadcn/README.md`.
-
 ### Storybook
 
-Витрина компонентов A3. Конфигурация — `apps/frontend/.storybook/`, она подключает
+Витрина компонентов. Конфигурация — `apps/frontend/.storybook/`, она подключает
 `apps/frontend/vite.config.ts` (React + Tailwind) и `apps/frontend/src/styles.css`,
 поэтому истории рендерятся на тех же токенах, что и приложение.
 
@@ -638,19 +620,10 @@ yarn qa:mobile
 пяти сценариев нормы и строкой `engine_limitation`. Коды выхода: `0` — приёмка
 пройдена, `1` — есть провалившийся сценарий, `2` — `CONFIG` не заполнен.
 
-Тот же экран, собранный на альтернативной основе (shadcn/ui, брендовая тема),
-принимается отдельной командой:
-
-```bash
-yarn qa:mobile:shadcn
-```
-
-Файл `tests/mobile-acceptance-shadcn.check.mjs` — копия того же каркаса с
-`CONFIG` под маршрут `#card-request-shadcn-branded`. Отдельный файл, а не флаг в
-исходном: у двух реализаций одного экрана разные селекторы и разный набор
-применимых сценариев (у shadcn-версии нет горизонтального скроллера — ряд
-категорий переносится, а не прокручивается вбок). Результат:
-`test-results/mobile-acceptance-shadcn/mobile-acceptance.json`.
+`CONFIG` заполнен под маршрут `#card-request-shadcn-branded` — единственный
+продуктовый экран приложения. Горизонтальная ось скролла помечена как
+неприменимая осознанно: ряд категорий собран на `ToggleGroup` с переносом
+строк, а не на карусели.
 
 ## Notion
 

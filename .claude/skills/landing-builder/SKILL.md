@@ -21,9 +21,9 @@ Skill реализует landing, console или product UI на React + Vite + 
 
 ## Ключевые шаги
 - Прочитай `prd.md`, `ia-brief.md`, `design-brief.md`, `screens.md`, `copy-deck.md`, `prototype-report.md` перед изменением кода.
-- Для базового лендинга используй `LandingView.tsx`; для отдельного продукта — новый `<ProductName>View.tsx`; не смешивай с `ConsoleView.tsx`.
+- Один экран — один файл: заводи новый `<ProductName>View.tsx`, а не переписывай чужой экран; маршрут добавляй и в список корневого указателя `StudioIndexView.tsx`.
 - Выведи стиль из design-артефактов или reference-analysis; используй финальные тексты из copy-deck.
-- Значения бери из `design/tokens/` (`yarn tokens:build`; для shadcn-темы — `design/tokens/shadcn/`, `yarn tokens:build:shadcn`), а не из Figma-файла и не сырыми hex/px.
+- Значения бери из `design/tokens/` (`yarn tokens:build`; для shadcn-темы — `design/tokens/shadcn/`, `yarn tokens:build`), а не из Figma-файла и не сырыми hex/px.
 - Реализуй экраны/секции и состояния из screens; сохрани workflow gates.
 - Заведи composition story для экрана (`ds-to-storybook`): витрина обязательна, а не опциональна.
 - Запиши `frontend-result.md` с локальным URL, командами запуска и выбранной основой.

@@ -10,7 +10,7 @@ Skill извлекает visual tokens из Figma (styles, variables, выбра
 **Полная процедура, входы/выходы, gates и validation-команды — в [`agent-pack/skills/figma-token-extractor/SKILL.md`](../../../agent-pack/skills/figma-token-extractor/SKILL.md). Следуй ей.**
 
 ## Применимость
-**Извлечение разовое и однонаправленное.** Источник правды для токенов — репозиторий: `design/tokens/` (`yarn tokens:build`; для shadcn-тем — `design/tokens/shadcn/`, `yarn tokens:build:shadcn`). Figma — донор решения, а не хранилище; обратной синхронизации нет (`CLAUDE.md` §6.1). Расхождение Figma-переменной и токена после переноса — не дефект.
+**Извлечение разовое и однонаправленное.** Источник правды для токенов — репозиторий: `design/tokens/` (`yarn tokens:build`; для shadcn-тем — `design/tokens/shadcn/`, `yarn tokens:build`). Figma — донор решения, а не хранилище; обратной синхронизации нет (`CLAUDE.md` §6.1). Расхождение Figma-переменной и токена после переноса — не дефект.
 
 ## Когда использовать
 - Workflow содержит Figma URL/file id/node id и нужно извлечь visual tokens.

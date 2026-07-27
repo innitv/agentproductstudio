@@ -1,7 +1,7 @@
 import type { Preview } from "@storybook/react-vite";
 
-// Единственный источник визуального слоя: Tailwind + сгенерированные токены A3
-// (design/tokens -> yarn tokens:build -> src/styles/tokens.generated.css).
+// Единственный источник визуального слоя: Tailwind + сгенерированные токены
+// (design/tokens/shadcn -> yarn tokens:build -> src/styles/shadcn/tokens.generated.css).
 // Без этого импорта компоненты рендерятся без стилей.
 import "../src/styles.css";
 import "./canvas.css";

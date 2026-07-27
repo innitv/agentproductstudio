@@ -31,7 +31,7 @@ contract_schema: agent-pack/templates/skill.template.md
 
 Применяй skill, когда workflow содержит Figma URL/file/node id и нужно извлечь visual tokens как evidence для `design-brief.md` или frontend implementation. Canvas write/update является отдельным действием и требует `figma_write` approval.
 
-**Извлечение разовое и однонаправленное.** По решению от 2026-07-27 (`CLAUDE.md` §6.1) источник правды для токенов — репозиторий: `design/tokens/` (DTCG, три тиера, сборка `yarn tokens:build`; для shadcn-тем — `design/tokens/shadcn/` и `yarn tokens:build:shadcn`). Figma в этом маршруте — донор решения, а не хранилище: значение из макета переносится в токены один раз, обратной синхронизации нет и Figma-кит не ведётся.
+**Извлечение разовое и однонаправленное.** По решению от 2026-07-27 (`CLAUDE.md` §6.1) источник правды для токенов — репозиторий: `design/tokens/` (DTCG, три тиера, сборка `yarn tokens:build`; для shadcn-тем — `design/tokens/shadcn/` и `yarn tokens:build`). Figma в этом маршруте — донор решения, а не хранилище: значение из макета переносится в токены один раз, обратной синхронизации нет и Figma-кит не ведётся.
 
 Отсюда два следствия для процедуры ниже:
 
@@ -59,7 +59,7 @@ contract_schema: agent-pack/templates/skill.template.md
 
 ## 4. Frontend mapping
 
-На `08-frontend` перенос идёт в `design/tokens/` — правку значений делай там и пересобирай `yarn tokens:build`. Сгенерированные файлы (`apps/frontend/src/styles/tokens.generated.css`, `apps/frontend/src/styles/shadcn/tokens.generated.css`) руками не редактируются: сборка их перезапишет, а baseline-гейт отклонит незаявленное изменение значений. Не меняй `apps/frontend/src/styles.css` на design stage только ради extraction.
+На `08-frontend` перенос идёт в `design/tokens/shadcn/` — правку значений делай там и пересобирай `yarn tokens:build`. Сгенерированный файл `apps/frontend/src/styles/shadcn/tokens.generated.css` руками не редактируется: сборка его перезапишет, а baseline-гейт отклонит незаявленное изменение значений. Не меняй `apps/frontend/src/styles.css` на design stage только ради extraction.
 
 Пример формата в `design-brief.md`:
 

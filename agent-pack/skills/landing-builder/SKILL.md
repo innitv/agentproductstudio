@@ -33,7 +33,7 @@ contract_schema: agent-pack/templates/skill.template.md
 
 Применяй skill только для `08-frontend`, когда уже есть `prd.md`, `ia-brief.md`, `design-brief.md`, `screens.md`, `copy-deck.md` и `prototype-report.md`. Frontend в полном workflow нельзя начинать раньше этих артефактов, кроме явно отмеченного `quick draft`.
 
-Стек по умолчанию: React + Vite + Tailwind CSS. Верстка целевого лендинга и калькуляторов живет в `apps/frontend/src/views/`. Для базового лендинга используй `apps/frontend/src/views/LandingView.tsx`; для отдельного продукта допустим новый `<ProductName>View.tsx`. `ConsoleView.tsx` не смешивай с кодом лендинга. `App.tsx` держи тонким роутером.
+Стек по умолчанию: React + Vite + Tailwind CSS. Верстка целевого лендинга и калькуляторов живет в `apps/frontend/src/views/` — один экран, один файл. Заводи новый `<ProductName>View.tsx`, а не переписывай чужой экран под свою задачу. `App.tsx` держи тонким роутером; маршрут добавляй и в список корневого указателя `StudioIndexView.tsx`, иначе он не будет виден никому, кроме исходников роутера.
 
 ## 1.1. Выбор основы: shadcn по умолчанию, bespoke по характеру
 
@@ -51,7 +51,7 @@ Bespoke без такого обоснования — не «характер»
 
 Границы правки shadcn (измерены на паре тем `default`/`branded`, детали — `docs/architecture/storybook-figma-research-2026-07-27.md`):
 
-- **Меняй смело:** цветовые токены, гарнитуру, кольцо фокуса — через `design/tokens/shadcn/` и `yarn tokens:build:shadcn`, не правкой значений в компоненте.
+- **Меняй смело:** цветовые токены, гарнитуру, кольцо фокуса — через `design/tokens/shadcn/` и `yarn tokens:build`, не правкой значений в компоненте.
 - **Не трогай `--spacing` и шкалу радиусов.** В Tailwind 4 от `--spacing` считаются все отступы и высоты; сжатие даёт дробные пиксели и ломает ритм.
 - **Порталы** (`SelectContent`, `DropdownMenuContent`, `TooltipContent`, `sonner`) рендерятся вне контейнера темы — атрибут темы зеркалится на корень документа. Тени Tailwind впечатаны константой и токеном не управляются.
 
@@ -81,7 +81,7 @@ Bespoke без такого обоснования — не «характер»
 4. Выбери основу по таблице §1.1 и зафиксируй выбор с причиной. Для shadcn-основы собери экран из компонентов реестра и вкладывай характер в тему (цвет, гарнитура, фокус) и композицию, а не в переписывание примитивов. Для bespoke-основы собирай UI на CSS Grid/Flexbox, где Tailwind — только запись значений из design/reference artifacts: не используй готовые шаблоны, дефолтные сетки и стандартный "component library look".
 5. В reference-driven задаче layout, gaps, column counts, aspect ratios и section order бери только из `reference-analysis.md`; не подставляй Bootstrap-like/12-column defaults.
 6. В обычной задаче стиль выводи из `design-brief.md`, `STYLE_GUIDE.md` и `figma-handoff-bundle.md` при наличии. Не навязывай glassmorphism, gradients, blur или темную тему, если они не заданы дизайном.
-7. Синхронизируй tokens/components. Источник правды для значений — `design/tokens/` (DTCG, сборка `yarn tokens:build`; для shadcn-темы `design/tokens/shadcn/` и `yarn tokens:build:shadcn`), а не Figma-файл: правка значения делается в токенах, иначе baseline-гейт отклонит незаявленное изменение. Если решение пришло из Figma-черновика `04-design`, оно переносится в токены один раз; обратной синхронизации нет.
+7. Синхронизируй tokens/components. Источник правды для значений — `design/tokens/` (DTCG, сборка `yarn tokens:build`; для shadcn-темы `design/tokens/shadcn/` и `yarn tokens:build`), а не Figma-файл: правка значения делается в токенах, иначе baseline-гейт отклонит незаявленное изменение. Если решение пришло из Figma-черновика `04-design`, оно переносится в токены один раз; обратной синхронизации нет.
    - design tokens -> CSS custom properties или Tailwind theme values;
    - Figma Auto Layout intent -> Flex/Grid, gap, padding, min/max, fixed/fill/hug equivalents;
    - component states/variants -> React props, data attributes или local state.

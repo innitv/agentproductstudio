@@ -45,7 +45,7 @@ Figma в этом маршруте не участвует. Ветвление `
 2. Проверь, что каждый экран из `screens.md` имеет composition story с тегом `vr-page` и что story рендерит тот же компонент, что и роут. Экран без истории — пробел покрытия, он записывается в `storybook-result.md`, а не замалчивается.
 3. Опиши stories по категориям: forms, async buttons, tabs/toggles, overlays, search/pagination, data visualization.
 4. Проверь states: default, hover, focus, disabled, loading, error, empty, selected, active. Для интерактивных состояний, которые нельзя снять статикой, пиши play-функцию — она же становится тестом в `yarn test-storybook`.
-5. Сверь токены: значения приходят из `design/tokens/` через `yarn tokens:build` (для shadcn-тем — `design/tokens/shadcn/` и `yarn tokens:build:shadcn`). Сырые hex/px в сторях запрещены — они делают витрину вторым источником правды.
+5. Сверь токены: значения приходят из `design/tokens/` через `yarn tokens:build` (для shadcn-тем — `design/tokens/shadcn/` и `yarn tokens:build`). Сырые hex/px в сторях запрещены — они делают витрину вторым источником правды.
 6. Прогони `yarn test-storybook`, затем `yarn vr:test`. Новый эталон снимается только `yarn vr:update` и только внутри Docker: имя снапшота содержит платформу, эталон с Windows-хоста на Linux не сравнивается, а создаёт новый файл — регрессия молча не замечается.
 7. Применяй motion/a11y checklist из `design-engineering`; для мобильной поверхности — Mobile Device Acceptance Gate оттуда же (`yarn qa:mobile`).
 8. Запиши `storybook-result.md` по `agent-pack/artifacts/frontend/storybook-result.template.md`: покрытие компонентов и экранов, вердикт `yarn test-storybook`, вердикт из `reports/visual-regression/summary.json`, пробелы и accepted deviations.

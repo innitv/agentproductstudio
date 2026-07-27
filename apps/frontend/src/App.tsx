@@ -1,34 +1,21 @@
 import * as React from "react";
-import { ComponentsPlayground } from "./components-playground";
-import { LandingView } from "./views/LandingView";
-import { ConsoleView } from "./views/ConsoleView";
-import { CardRequestRoute } from "./views/CardRequestRoute";
 import { CardRequestShadcnRoute } from "./views/CardRequestShadcnRoute";
+import { StudioIndexView } from "./views/StudioIndexView";
 
 /** Экраны, доступные по хешу. Разметка каждого живёт в своём файле в views/. */
 type HashView =
-  | "landing"
-  | "console"
-  | "cardRequest"
+  | "index"
   | "cardRequestShadcn"
   | "cardRequestShadcnBranded"
   | "cardRequestShadcnCalm"
   | "cardRequestShadcnCalmTyped";
 
 function readHashView(): HashView {
-  if (window.location.hash === "#console" || window.location.pathname === "/console") {
-    return "console";
-  }
-
-  if (window.location.hash === "#card-request") {
-    return "cardRequest";
-  }
-
-  // Тот же экран на альтернативной основе: shadcn/ui в четырёх темах.
-  // Две последние — контрольные точки эксперимента «геометрия против шрифта»:
-  // calm держит цвет branded при штатной геометрии, calm-typed добавляет
-  // реально подгруженные гарнитуры. Хеши нужны, чтобы сравнивать их в живом
-  // приложении, а не только по скриншотам Storybook.
+  // Пилотный экран в четырёх темах. Две последние — контрольные точки
+  // эксперимента «геометрия против шрифта»: calm держит цвет branded при
+  // штатной геометрии, calm-typed добавляет реально подгруженные гарнитуры.
+  // Хеши нужны, чтобы сравнивать их в живом приложении, а не только по
+  // скриншотам Storybook.
   if (window.location.hash === "#card-request-shadcn") {
     return "cardRequestShadcn";
   }
@@ -45,14 +32,10 @@ function readHashView(): HashView {
     return "cardRequestShadcnCalmTyped";
   }
 
-  return "landing";
+  return "index";
 }
 
 export function App() {
-  if (window.location.pathname === "/components") {
-    return <ComponentsPlayground />;
-  }
-
   const [view, setView] = React.useState<HashView>(readHashView);
 
   React.useEffect(() => {
@@ -60,24 +43,6 @@ export function App() {
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
-
-  const handleSwitchToConsole = () => {
-    window.location.hash = "console";
-    setView("console");
-  };
-
-  const handleSwitchToLanding = () => {
-    window.location.hash = "";
-    setView("landing");
-  };
-
-  if (view === "console") {
-    return <ConsoleView onBack={handleSwitchToLanding} />;
-  }
-
-  if (view === "cardRequest") {
-    return <CardRequestRoute />;
-  }
 
   if (view === "cardRequestShadcn") {
     return <CardRequestShadcnRoute theme="default" />;
@@ -95,5 +60,5 @@ export function App() {
     return <CardRequestShadcnRoute theme="calm-typed" />;
   }
 
-  return <LandingView onConsole={handleSwitchToConsole} />;
+  return <StudioIndexView />;
 }

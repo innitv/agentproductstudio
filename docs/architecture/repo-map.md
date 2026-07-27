@@ -42,9 +42,11 @@
 
 | Surface | Код | Route | QA target |
 |---|---|---|---|
-| Studio/AgentFlow console | `apps/frontend/src/App.tsx` (роутер), `apps/frontend/src/views/ConsoleView.tsx`, `apps/frontend/src/views/LandingView.tsx` | `/`, `/console`, `/#console`, `/components` | `yarn qa:studio` |
+| Оболочка студии | `apps/frontend/src/App.tsx` (роутер), `apps/frontend/src/views/StudioIndexView.tsx` (указатель маршрутов), `apps/frontend/src/views/CardRequestShadcnView.tsx` (пилотный экран) | `/`, `#card-request-shadcn[-branded\|-calm\|-calm-typed]` | `yarn qa:studio` |
 
 > Runnable surface в репозитории ровно одна. Строка про «A3Pay demo» удалена 2026-07-25: ни ветки, ни каталога `apps/a3pay-demo` никогда не существовало, а колонки Route и QA target в ней были перепутаны местами. Продуктовые демо, как и портфолио, живут в отдельных репозиториях — сюда они попадают только как ledger в `outputs/<slug>/<date>/`. <!-- docs-audit-ignore: упоминание `apps/a3pay-demo` намеренное — строка утверждает, что каталога не существует -->
+>
+> Демо вымышленного продукта «AgentFlow» (лендинг + консоль) и слой дизайн-системы A3 удалены 2026-07-28: демо не обслуживало реальных задач, а слой A3 держался только на нём. Приложение осталось оболочкой студии с одним пилотным экраном на shadcn/ui в четырёх темах. Витрина компонентов — Storybook, а не роут `/components`.
 
 ## Ledger Boundaries
 
@@ -82,7 +84,7 @@ plugins/                  # плагины Claude Code (переносимое �
   figma-ds/               # /figma-ds:build (механика Figma) + /figma-ds:standard (канон DS); junction из ~/.claude/skills
   subsystem-audit/        # /subsystem-audit:audit (доказательный шаблон аудита подсистемы); junction из ~/.claude/skills
 runtime/typescript/       # workflow engine, validators, тесты, CLI (yarn workflow:*)
-apps/frontend/            # studio shell (ConsoleView, LandingView, App)
+apps/frontend/            # оболочка студии (App-роутер, StudioIndexView, пилотный экран, компоненты shadcn, Storybook)
 integrations/ design/ docs/architecture/ tooling/scripts/ tests/playwright/
 
 # — Ledgers (история работы; не source of truth для правил) —

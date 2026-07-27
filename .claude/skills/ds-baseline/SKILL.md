@@ -10,7 +10,7 @@ Skill защищает от главной ошибки: сборки foundation
 **Полная процедура, quality gates и failure modes — в [`agent-pack/skills/ds-baseline/SKILL.md`](../../../agent-pack/skills/ds-baseline/SKILL.md). Следуй ей.** Нормативный workflow — [`agent-pack/workflows/ds-baseline.workflow.md`](../../../agent-pack/workflows/ds-baseline.workflow.md).
 
 ## Когда использовать
-**Своя DS — исключение, а не старт.** По `CLAUDE.md` §6.1 дизайн-система по умолчанию — shadcn/ui. Skill открывается только после preflight (§1.1 полной версии): записано, почему тема поверх shadcn (`design/tokens/shadcn/`, `yarn tokens:build:shadcn`) задачу не закрывает. Без этого — `blocked`.
+**Своя DS — исключение, а не старт.** По `CLAUDE.md` §6.1 дизайн-система по умолчанию — shadcn/ui. Skill открывается только после preflight (§1.1 полной версии): записано, почему тема поверх shadcn (`design/tokens/shadcn/`, `yarn tokens:build`) задачу не закрывает. Без этого — `blocked`.
 
 - `design_system_mode = product_specific`, либо `extend`, требующий нового foundation.
 - Продукту нужен самостоятельный визуальный язык: сильный визуальный характер или нестандартный интерфейс (редактор, канвас, плотная таблица).

@@ -6,12 +6,12 @@ import type { StorybookConfig } from "@storybook/react-vite";
 const configDir = path.dirname(fileURLToPath(import.meta.url));
 
 /**
- * Конфигурация Storybook как витрины дизайн-системы A3.
+ * Конфигурация Storybook как витрины дизайн-системы проекта (shadcn/ui).
  *
  * Vite-конфиг приложения (`apps/frontend/vite.config.ts`) подключается явным
  * `viteConfigPath`: @storybook/react-vite сам НЕ добавляет @vitejs/plugin-react
  * и @tailwindcss/vite, поэтому без него не соберутся ни JSX, ни Tailwind-слой,
- * через который приходят токены `tokens.generated.css`.
+ * через который приходят токены `styles/shadcn/tokens.generated.css`.
  *
  * `builder-vite` берёт projectRoot как `dirname(configDir)`, то есть
  * `apps/frontend` — он совпадает с `root` в vite.config.ts, поэтому конфликта

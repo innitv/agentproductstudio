@@ -65,7 +65,7 @@ Deployment branches можно использовать только как publ
 | Command | Что проверяет |
 |---|---|
 | `yarn qa:quick` | TypeScript, config validation, docs audit. |
-| `yarn qa:studio` | Studio/AgentFlow Playwright tests на `apps/frontend`. |
+| `yarn qa:studio` | Playwright-дымовая проверка `apps/frontend`: корневой указатель маршрутов и пилотный экран. |
 | `yarn qa:playwright` | Последовательно запускает studio и firecrawl targets. |
 | `yarn qa:all` | Быстрые проверки + все Playwright targets. |
 

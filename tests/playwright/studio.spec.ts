@@ -1,52 +1,38 @@
 import { expect, test } from "@playwright/test";
 
-test("renders the AgentFlow SaaS Console dashboard", async ({ page }) => {
-  await page.goto("/#console");
+/**
+ * Дымовая проверка приложения студии.
+ *
+ * До удаления демо здесь лежали тесты консоли AgentFlow. Экрана больше нет, но
+ * сам прогон нужен: `yarn vr:test` и `yarn test-storybook` проверяют витрину, а
+ * не собранное приложение, и «сборка поднимается, но роутер отдаёт пустой
+ * экран» на них не ловится. Поэтому проверяются ровно две вещи: корневой
+ * указатель маршрутов и переход по нему на пилотный экран.
+ */
 
-  await expect(
-    page.getByRole("heading", { name: "SaaS-платформа для создания и продажи ИИ-агентов" }),
-  ).toBeVisible();
+test("корневой маршрут показывает указатель живых экранов", async ({ page }) => {
+  await page.goto("/");
 
-  await expect(page.locator(".console-sidebar")).toBeVisible();
-  await expect(page.locator(".console-sidebar").getByRole("button", { name: "Панель управления" })).toBeVisible();
-  await expect(page.locator(".console-sidebar").getByRole("button", { name: "Создать ИИ-агента" })).toBeVisible();
-  await expect(page.locator(".console-sidebar").getByRole("button", { name: "Тарифы и биллинг" })).toBeVisible();
-  await expect(page.locator(".console-sidebar").getByRole("button", { name: "Частые вопросы" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Маршруты приложения" })).toBeVisible();
 
-  await expect(page.locator(".metric-card")).toHaveCount(3);
-  await expect(page.getByText("Лидов обработано")).toBeVisible();
-  await expect(page.getByText("Конверсия в Демо")).toBeVisible();
-  await expect(page.getByText("Сэкономлено костов")).toBeVisible();
-
-  await expect(page.locator(".agents-table")).toBeVisible();
-  await expect(page.locator(".agent-row")).toHaveCount(3);
-  await expect(page.locator(".chat-messages-box")).toBeVisible();
+  // Четыре темы пилотного экрана. Число, а не список: состав маршрутов —
+  // предмет правок, а вот «указатель пустой» это поломка роутера.
+  await expect(page.locator('[data-testid^="studio-route-"]')).toHaveCount(4);
 });
 
-test("supports interacting with chat simulator and switching tabs", async ({ page }) => {
-  await page.goto("/#console");
+test("с указателя открывается пилотный экран заявки", async ({ page }) => {
+  await page.goto("/");
 
-  const chatInput = page.getByPlaceholder("Спросите агента про тарифы, ошибки или регламент...");
-  await expect(chatInput).toBeVisible();
-  await chatInput.fill("Привет! Какая цена?");
+  await page.getByTestId("studio-route-card-request-shadcn-branded").click();
 
-  const submitBtn = page.locator(".chat-submit-btn");
-  await submitBtn.click({ force: true });
+  await expect(page).toHaveURL(/#card-request-shadcn-branded$/);
+  await expect(page.getByTestId("card-request-shadcn-title")).toBeVisible();
+  await expect(page.getByTestId("card-request-shadcn-actionbar")).toBeVisible();
+});
 
-  await expect(page.getByText("Привет! Какая цена?")).toBeVisible();
+test("прямой переход по хешу отдаёт пилотный экран", async ({ page }) => {
+  await page.goto("/#card-request-shadcn");
 
-  await page.locator(".console-sidebar").getByRole("button", { name: "Создать ИИ-агента" }).click();
-  await expect(page.getByRole("heading", { name: "No-code конструктор нового ИИ-агента" })).toBeVisible();
-
-  await expect(page.getByLabel("Имя ИИ-агента")).toBeVisible();
-  await expect(page.getByLabel("Роль ИИ-агента")).toBeVisible();
-  await expect(page.getByLabel("Регламент ИИ-агента и база знаний")).toBeVisible();
-
-  await page.locator(".console-sidebar").getByRole("button", { name: "Тарифы и биллинг" }).click();
-  await expect(page.getByRole("heading", { name: "Гибкие SaaS тарифы под любой масштаб" })).toBeVisible();
-  await expect(page.locator(".tariff-card")).toHaveCount(3);
-
-  await page.locator(".console-sidebar").getByRole("button", { name: "Частые вопросы" }).click();
-  await expect(page.getByRole("heading", { name: "Часто задаваемые вопросы" })).toBeVisible();
-  await expect(page.locator(".faq-item")).toHaveCount(3);
+  await expect(page.getByTestId("card-request-shadcn-title")).toBeVisible();
+  await expect(page.getByTestId("card-request-shadcn-submit")).toBeVisible();
 });
