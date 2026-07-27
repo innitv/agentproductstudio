@@ -1,0 +1,70 @@
+{
+  "function-button": {
+    "height": {
+      "$type": "dimension",
+      "$value": "{size.s}"
+    },
+    "gap": {
+      "$type": "dimension",
+      "$value": "{spacing.1x}"
+    },
+    "icon-size": {
+      "$type": "dimension",
+      "$value": {
+        "value": 24,
+        "unit": "px"
+      }
+    },
+    "font": {
+      "family": {
+        "$type": "fontFamily",
+        "$value": "{font.family.mont}"
+      },
+      "size": {
+        "$type": "dimension",
+        "$value": "{font.description-l.size}"
+      },
+      "weight": {
+        "$type": "fontWeight",
+        "$value": "{font.weight.strong}"
+      }
+    },
+    "line-height": {
+      "$type": "dimension",
+      "$value": "{font.description-l.line}"
+    },
+    "primary-fg": {
+      "$type": "color",
+      "$value": "{base.accent}"
+    },
+    "secondary-fg": {
+      "$type": "color",
+      "$value": "{neutral.1000}"
+    },
+    "tertiary-fg": {
+      "$type": "color",
+      "$value": "{neutral.300}"
+    },
+    "hover-fg": {
+      "$type": "color",
+      "$value": "{accent.600}"
+    },
+    "pressed-fg": {
+      "$type": "color",
+      "$value": "{accent.700}"
+    },
+    "disabled-fg": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.48627450980392156,
+          0.5411764705882353,
+          0.6196078431372549
+        ],
+        "alpha": 0.8,
+        "hex": "#7c8a9e"
+      }
+    }
+  }
+}

@@ -1,0 +1,210 @@
+{
+  "toast": {
+    "width": {
+      "$type": "dimension",
+      "$value": {
+        "value": 375,
+        "unit": "px"
+      }
+    },
+    "min-height": {
+      "$type": "dimension",
+      "$value": {
+        "value": 112,
+        "unit": "px"
+      }
+    },
+    "radius": {
+      "$type": "dimension",
+      "$value": "{border-radius.m}"
+    },
+    "bg": {
+      "$type": "color",
+      "$value": "{neutral.0}"
+    },
+    "shadow": {
+      "$type": "shadow",
+      "$value": "{shadow.bottom.l}"
+    },
+    "padding": {
+      "$type": "dimension",
+      "$value": "{spacing.3x}"
+    },
+    "gap": {
+      "$type": "dimension",
+      "$value": "{spacing.3x}"
+    },
+    "icon": {
+      "container-size": {
+        "$type": "dimension",
+        "$value": {
+          "value": 48,
+          "unit": "px"
+        }
+      },
+      "size": {
+        "$type": "dimension",
+        "$value": {
+          "value": 24,
+          "unit": "px"
+        }
+      },
+      "radius": {
+        "$type": "dimension",
+        "$value": "{border-radius.m}"
+      }
+    },
+    "title": {
+      "$type": "color",
+      "$value": "{neutral.1000}"
+    },
+    "subtitle": {
+      "$type": "color",
+      "$value": "{neutral.700}"
+    },
+    "title-size": {
+      "$type": "dimension",
+      "$value": "{font.description-l.size}"
+    },
+    "title-line": {
+      "$type": "dimension",
+      "$value": "{font.description-l.line}"
+    },
+    "title-weight": {
+      "$type": "fontWeight",
+      "$value": 700
+    },
+    "subtitle-size": {
+      "$type": "dimension",
+      "$value": "{font.description-l.size}"
+    },
+    "subtitle-line": {
+      "$type": "dimension",
+      "$value": "{font.description-l.line}"
+    },
+    "subtitle-weight": {
+      "$type": "fontWeight",
+      "$value": "{font.weight.strong}"
+    },
+    "close": {
+      "size": {
+        "$type": "dimension",
+        "$value": "{size.s}"
+      },
+      "radius": {
+        "$type": "dimension",
+        "$value": "{border-radius.m}"
+      },
+      "bg": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.48627450980392156,
+            0.5411764705882353,
+            0.6196078431372549
+          ],
+          "alpha": 0.1,
+          "hex": "#7c8a9e"
+        }
+      },
+      "bg-hover": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.48627450980392156,
+            0.5411764705882353,
+            0.6196078431372549
+          ],
+          "alpha": 0.2,
+          "hex": "#7c8a9e"
+        }
+      },
+      "fg": {
+        "$type": "color",
+        "$value": "{base.neutral}"
+      }
+    },
+    "actions-gap": {
+      "$type": "dimension",
+      "$value": "{spacing.4x}"
+    },
+    "info": {
+      "bg": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.09803921568627451,
+            0.596078431372549,
+            1
+          ],
+          "alpha": 0.1,
+          "hex": "#1998ff"
+        }
+      },
+      "fg": {
+        "$type": "color",
+        "$value": "{base.info}"
+      }
+    },
+    "success": {
+      "bg": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.16862745098039217,
+            0.7137254901960784,
+            0.45098039215686275
+          ],
+          "alpha": 0.1,
+          "hex": "#2bb673"
+        }
+      },
+      "fg": {
+        "$type": "color",
+        "$value": "{base.success}"
+      }
+    },
+    "warning": {
+      "bg": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1,
+            0.7058823529411765,
+            0.3568627450980392
+          ],
+          "alpha": 0.2,
+          "hex": "#ffb45b"
+        }
+      },
+      "fg": {
+        "$type": "color",
+        "$value": "{base.warning}"
+      }
+    },
+    "error": {
+      "bg": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.9568627450980393,
+            0.34901960784313724,
+            0.34901960784313724
+          ],
+          "alpha": 0.1,
+          "hex": "#f45959"
+        }
+      },
+      "fg": {
+        "$type": "color",
+        "$value": "{base.error}"
+      }
+    }
+  }
+}

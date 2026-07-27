@@ -1,0 +1,72 @@
+{
+  "$description": "Тема shadcn/ui `calm` — контрольная точка эксперимента «геометрия против шрифта». Цветовые решения взяты из `branded.json` БЕЗ ИЗМЕНЕНИЙ (стальной акцент, приглушённый destructive, кольцо от акцента, тонированное полотно, затемнённые границы), а форма, плотность и типографический масштаб возвращены к штатным значениям `default.json`. Отличие `calm` от `branded` — ровно 24 токена, и все они про геометрию: 8 радиусов, 1 плотность, 15 типографических (масштаб и интерлиньяж). Ни один цвет не расходится. Поэтому разница между скриншотами `calm` и `branded` измеряет вклад ОДНОЙ переменной — геометрии; шрифтовые стеки (`font-sans`, `font-mono`) намеренно оставлены брендовыми, иначе сравнение поймало бы два фактора сразу. Пара к теме: `calm-typed.json` = эта же тема с реально подгруженным шрифтом.",
+  "color": {
+    "background": { "$type": "color", "$value": "oklch(0.978 0.004 240)" },
+    "foreground": { "$type": "color", "$value": "oklch(0.235 0.026 252)" },
+    "card": { "$type": "color", "$value": "oklch(1 0 0)" },
+    "card-foreground": { "$type": "color", "$value": "oklch(0.235 0.026 252)" },
+    "popover": { "$type": "color", "$value": "oklch(1 0 0)" },
+    "popover-foreground": { "$type": "color", "$value": "oklch(0.235 0.026 252)" },
+    "primary": { "$type": "color", "$value": "oklch(0.47 0.105 233)" },
+    "primary-foreground": { "$type": "color", "$value": "oklch(0.985 0.004 230)" },
+    "secondary": { "$type": "color", "$value": "oklch(0.94 0.008 245)" },
+    "secondary-foreground": { "$type": "color", "$value": "oklch(0.3 0.03 250)" },
+    "muted": { "$type": "color", "$value": "oklch(0.952 0.007 245)" },
+    "muted-foreground": { "$type": "color", "$value": "oklch(0.5 0.024 250)" },
+    "accent": { "$type": "color", "$value": "oklch(0.935 0.022 233)" },
+    "accent-foreground": { "$type": "color", "$value": "oklch(0.33 0.07 234)" },
+    "destructive": { "$type": "color", "$value": "oklch(0.495 0.155 27)" },
+    "border": { "$type": "color", "$value": "oklch(0.882 0.012 245)" },
+    "input": { "$type": "color", "$value": "oklch(0.855 0.016 245)" },
+    "ring": { "$type": "color", "$value": "oklch(0.55 0.115 233)" },
+    "chart-1": { "$type": "color", "$value": "oklch(0.47 0.105 233)" },
+    "chart-2": { "$type": "color", "$value": "oklch(0.6 0.095 195)" },
+    "chart-3": { "$type": "color", "$value": "oklch(0.68 0.085 155)" },
+    "chart-4": { "$type": "color", "$value": "oklch(0.72 0.115 85)" },
+    "chart-5": { "$type": "color", "$value": "oklch(0.55 0.13 35)" },
+    "sidebar": { "$type": "color", "$value": "oklch(0.955 0.006 242)" },
+    "sidebar-foreground": { "$type": "color", "$value": "oklch(0.235 0.026 252)" },
+    "sidebar-primary": { "$type": "color", "$value": "oklch(0.47 0.105 233)" },
+    "sidebar-primary-foreground": { "$type": "color", "$value": "oklch(0.985 0.004 230)" },
+    "sidebar-accent": { "$type": "color", "$value": "oklch(0.925 0.022 233)" },
+    "sidebar-accent-foreground": { "$type": "color", "$value": "oklch(0.33 0.07 234)" },
+    "sidebar-border": { "$type": "color", "$value": "oklch(0.875 0.013 245)" },
+    "sidebar-ring": { "$type": "color", "$value": "oklch(0.55 0.115 233)" }
+  },
+  "shape": {
+    "radius": { "$type": "dimension", "$value": "0.625rem" },
+    "radius-sm": { "$type": "dimension", "$value": "calc(var(--radius) * 0.6)" },
+    "radius-md": { "$type": "dimension", "$value": "calc(var(--radius) * 0.8)" },
+    "radius-lg": { "$type": "dimension", "$value": "var(--radius)" },
+    "radius-xl": { "$type": "dimension", "$value": "calc(var(--radius) * 1.4)" },
+    "radius-2xl": { "$type": "dimension", "$value": "calc(var(--radius) * 1.8)" },
+    "radius-3xl": { "$type": "dimension", "$value": "calc(var(--radius) * 2.2)" },
+    "radius-4xl": { "$type": "dimension", "$value": "calc(var(--radius) * 2.6)" }
+  },
+  "density": {
+    "spacing": { "$type": "dimension", "$value": "0.25rem" }
+  },
+  "typography": {
+    "font-sans": {
+      "$type": "fontFamily",
+      "$value": "\"Inter Tight\", Inter, ui-sans-serif, system-ui, sans-serif"
+    },
+    "font-mono": {
+      "$type": "fontFamily",
+      "$value": "ui-monospace, \"JetBrains Mono\", \"IBM Plex Mono\", \"Liberation Mono\", \"DejaVu Sans Mono\", monospace"
+    },
+    "text-xs": { "$type": "dimension", "$value": "0.75rem" },
+    "text-xs--line-height": { "$type": "number", "$value": "calc(1 / 0.75)" },
+    "text-sm": { "$type": "dimension", "$value": "0.875rem" },
+    "text-sm--line-height": { "$type": "number", "$value": "calc(1.25 / 0.875)" },
+    "text-base": { "$type": "dimension", "$value": "1rem" },
+    "text-base--line-height": { "$type": "number", "$value": "calc(1.5 / 1)" },
+    "text-lg": { "$type": "dimension", "$value": "1.125rem" },
+    "text-lg--line-height": { "$type": "number", "$value": "calc(1.75 / 1.125)" },
+    "text-xl": { "$type": "dimension", "$value": "1.25rem" },
+    "text-xl--line-height": { "$type": "number", "$value": "calc(1.75 / 1.25)" },
+    "text-2xl": { "$type": "dimension", "$value": "1.5rem" },
+    "text-2xl--line-height": { "$type": "number", "$value": "calc(2 / 1.5)" },
+    "tracking-tight": { "$type": "dimension", "$value": "-0.025em" }
+  }
+}

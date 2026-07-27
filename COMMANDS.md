@@ -424,6 +424,210 @@ yarn build:studio
 yarn preview
 ```
 
+### Токены дизайн-системы
+
+Источник правды для токенов — DTCG-файлы в `design/tokens/` (не Figma). Пересобрать
+CSS-переменные фронтенда и DTCG-экспорт для Figma Variables:
+
+```bash
+yarn tokens:build
+```
+
+Собирает `apps/frontend/src/styles/tokens.generated.css` и
+`design/tokens/dist/figma/<mode>.json`. Команда сверяет результат с
+`design/tokens/baseline/styles-root.baseline.json` и падает, если состав переменных
+или их вычисленные значения разошлись с baseline; отличия в записи значения
+показываются отдельным списком и сборку не блокируют. Подробности — в
+`design/tokens/README.md`.
+
+#### Добавление компонентов shadcn/ui
+
+Дизайн-система по умолчанию для нового product UI (`CLAUDE.md` §6.1). Компоненты
+ставятся из официального реестра `ui.shadcn.com` и копируются в
+`apps/frontend/src/components/shadcn/` — после установки это код проекта, его
+можно править.
+
+```bash
+yarn shadcn add button
+```
+
+CLI объявлен как devDependency и запускается через `yarn`: `npx` в этой среде
+не работает (`npm` завершается с кодом 1 и пустым выводом). Команда `init` из
+официальной документации не применяется — в 4.x она скаффолдит новый проект;
+токены темы приходят отдельным элементом реестра (`yarn shadcn add @shadcn/theme-slate`).
+
+#### Токены альтернативной основы (shadcn/ui)
+
+Рядом с A3 в репозитории лежит вторая, независимая основа — shadcn/ui с двумя
+темами (`default` и `branded`). Её токены живут в `design/tokens/shadcn/` и
+собираются отдельной командой: конвейеры не смешиваются, у каждой основы свой
+baseline и своя политика изменений.
+
+```bash
+yarn tokens:build:shadcn
+```
+
+Собирает `apps/frontend/src/styles/shadcn/tokens.generated.css` — блок
+`@theme inline` с регистрацией цветовых имён в Tailwind и два блока значений
+`[data-shadcn-theme="default"]` / `[data-shadcn-theme="branded"]`. Команда
+сверяет тему `default` со снимком реестра
+`design/tokens/shadcn/_registry/theme-slate.css` и падает при расхождении:
+штатный shadcn обязан оставаться штатным, иначе сравнение с брендовой темой
+теряет смысл. В конце печатается дистанция между темами — сколько токенов и в
+каких группах переопределено.
+
+Проверить, что сгенерированный CSS не отстал от источника, не переписывая файл:
+
+```bash
+yarn tokens:check:shadcn
+```
+
+Подробности — в `design/tokens/shadcn/README.md`.
+
+### Storybook
+
+Витрина компонентов A3. Конфигурация — `apps/frontend/.storybook/`, она подключает
+`apps/frontend/vite.config.ts` (React + Tailwind) и `apps/frontend/src/styles.css`,
+поэтому истории рендерятся на тех же токенах, что и приложение.
+
+Dev-режим на `http://localhost:6006`:
+
+```bash
+yarn storybook
+```
+
+Статическая сборка в `dist/storybook`:
+
+```bash
+yarn build-storybook
+```
+
+Прогон историй как тестов (play-функции в Chromium через Playwright):
+
+```bash
+yarn test-storybook
+```
+
+Проверка доступности (`@storybook/addon-a11y`, axe-core) включена в режиме
+предупреждений: нарушения видны в панели Accessibility, но сборку и
+`yarn test-storybook` не валят. Режим переключается параметром `a11y.test`
+в `apps/frontend/.storybook/preview.ts` (`todo` -> `error`).
+
+### Визуальная регрессия Storybook
+
+Скриншот-тесты всех историй витрины: замена ручной сверки макета с Figma.
+Список story-id берётся программно из `index.json` собранной витрины, каждая
+история открывается изолированно (`iframe.html?id=<storyId>`).
+
+Прогнать против эталонов:
+
+```bash
+yarn vr:test
+```
+
+Перегенерировать эталоны (после осознанного изменения компонента):
+
+```bash
+yarn vr:update
+```
+
+**Обе команды выполняются только внутри Docker.** Это не удобство, а условие
+корректности: имя файла снапшота содержит платформу, поэтому эталон, снятый
+на Windows, на Linux не сравнивается, а создаёт новый файл — регрессия просто
+не будет замечена. Дока Playwright требует запускать тесты в той же среде, где
+сгенерирован эталон, а в `microsoft/playwright#20097` рендеринг расходился даже
+между двумя машинами с одинаковой ОС, то есть «та же ОС» недостаточно — нужен
+идентичный образ.
+
+Базовый образ пиннут по версии `@playwright/test` из `package.json`
+(`mcr.microsoft.com/playwright:v<version>-noble`); тонкий слой поверх него
+описан в `tooling/visual-regression/Dockerfile`. Версия образа обязана
+совпадать с версией раннера, иначе Playwright не найдёт браузеры — сверка
+выполняется на каждом запуске. Архитектура пиннута как `linux/amd64`: в имени
+снапшота Playwright пишет платформу, но не архитектуру, и на arm64-хосте
+эталоны молча сравнивались бы с другим рендерингом под тем же именем.
+
+Случайно снять эталон на Windows-хосте нельзя: `tooling/scripts/run-visual-regression.mjs`
+никогда не вызывает Playwright локально, а `tests/visual-regression/playwright.vr.config.ts`
+падает с объяснением, если `process.platform !== "linux"` или в среде нет `/.dockerenv`.
+Статическая сборка витрины при этом делается на хосте (в контейнере нет
+Windows-сборки `node_modules`), но платформа рендеринга в HTML/JS/CSS не зашита.
+
+Что где лежит:
+
+| Путь | Содержимое |
+| --- | --- |
+| `tests/visual-regression/storybook-visual.spec.ts` | Спека: перечисление историй и съёмка |
+| `tests/visual-regression/playwright.vr.config.ts` | Гейт среды, гейт версии, пороги, JSON reporter |
+| `tests/visual-regression/__screenshots__/` | Эталоны, снятые в контейнере (в git) |
+| `tooling/visual-regression/Dockerfile` | Тонкий слой поверх пиннутого образа Playwright |
+| `tooling/scripts/run-visual-regression.mjs` | Обёртка: сборка витрины, образ, запуск контейнера |
+| `tooling/scripts/summarize-visual-regression.mjs` | Сжатие отчёта Playwright в плоский вердикт |
+| `tooling/scripts/serve-static.mjs` | Статический сервер витрины внутри контейнера |
+
+Машинно-читаемый вердикт: `reports/visual-regression/verdict.json` (JSON reporter
+Playwright целиком) и `reports/visual-regression/summary.json` (плоский список:
+story-id, статус, число различающихся пикселей, пути к `-expected` / `-actual` /
+`-diff`). Пороги задаются декларативно в конфиге (`maxDiffPixels`,
+`maxDiffPixelRatio`, `threshold`), из текста ошибки их читать нельзя — ratio там
+округлён до двух знаков.
+
+Отладочные переменные окружения: `VR_STORY_FILTER` (регулярное выражение по
+story-id), `VR_WORKERS`, `VR_PORT`. Флаги обёртки: `--no-build` (не пересобирать
+витрину), `--grep=<regex>` (подмножество историй).
+
+#### Истории-страницы (composition stories)
+
+Помимо компонентов витрина держит целые экраны приложения (`Pages/*`). Такая
+история помечается тегом `vr-page`, и спека снимает её иначе: в вьюпорте
+1280×2000 и целиком. Причина в фиксированных слоях — панель действий, тост:
+при съёмке длинной страницы в обычном вьюпорте Playwright рисует их на позиции
+текущего скролла, и фиксированная панель ложится поперёк середины снимка. В
+высоком вьюпорте страница помещается целиком и фиксированный слой стоит там же,
+где его видит человек. Эталоны компонентов этим не затронуты: они снимаются
+прежним кадром 1280×800.
+
+### Мобильная приёмка
+
+Проверка UI в профиле устройства (`isMobile`, `hasTouch`, настоящие тач-жесты),
+норма — `agent-pack/skills/design-engineering/SKILL.md`. Узкий desktop-вьюпорт
+приёмкой не считается.
+
+Нужен поднятый превью собранного приложения:
+
+```bash
+yarn build
+node tooling/scripts/serve-static.mjs dist/frontend 4173
+```
+
+В другом окне:
+
+```bash
+yarn qa:mobile
+```
+
+Адрес перекрывается флагом: `yarn qa:mobile --base=http://127.0.0.1:5173`.
+Продуктовая часть (маршруты, селекторы, ожидания) заполнена в блоке `CONFIG`
+файла `tests/mobile-acceptance.check.mjs`, механика в нём — из шаблона
+`agent-pack/templates/mobile-acceptance.template.mjs` и не правится.
+Результат: `test-results/mobile-acceptance/mobile-acceptance.json` со статусами
+пяти сценариев нормы и строкой `engine_limitation`. Коды выхода: `0` — приёмка
+пройдена, `1` — есть провалившийся сценарий, `2` — `CONFIG` не заполнен.
+
+Тот же экран, собранный на альтернативной основе (shadcn/ui, брендовая тема),
+принимается отдельной командой:
+
+```bash
+yarn qa:mobile:shadcn
+```
+
+Файл `tests/mobile-acceptance-shadcn.check.mjs` — копия того же каркаса с
+`CONFIG` под маршрут `#card-request-shadcn-branded`. Отдельный файл, а не флаг в
+исходном: у двух реализаций одного экрана разные селекторы и разный набор
+применимых сценариев (у shadcn-версии нет горизонтального скроллера — ряд
+категорий переносится, а не прокручивается вбок). Результат:
+`test-results/mobile-acceptance-shadcn/mobile-acceptance.json`.
+
 ## Notion
 
 Проверить локальный Notion token:
@@ -474,7 +678,7 @@ yarn workflow:doctor --repair
 | `yarn workflow:approval-request <run-dir> <action>` | Интерактивный запрос approval с точным `target` (Interactive Question Gate). |
 | `yarn plugin:link` | Ставит плагины из `plugins/` junction'ом в `~/.claude/skills/`. |
 | `yarn figma:check` | Проверка локального Figma token. |
-| `yarn figma:audit` | Аудит Figma component contracts против live-файла (`figma:audit:a3` — преднастроенный вариант для A3 DS). |
+| `yarn figma:audit` | Аудит Figma component contracts против live-файла. Систему указывать явно: `--registry design/figma/<slug>/component-contracts.json --out design/figma/<slug>/live-audit.latest.md`. |
 | `yarn figma:verify-layout` | Проверка `figma-layout-ir.json` против собранных экранов. |
 | `yarn notion:publish-research-hub`, `yarn notion:publish-stories`, `yarn notion:test-export` | Notion publish/export скрипты; требуют approval `notion_research_publish`. |
 | `yarn workflow:test-*` | Отдельные runtime-тесты. Обычно запускаются пачкой через `yarn workflow:test-agentic`; поштучный запуск нужен при отладке конкретной подсистемы. |

@@ -1,0 +1,20 @@
+{
+  "border-radius": {
+    "m": {
+      "$type": "dimension",
+      "$value": "{border-radius.base}"
+    },
+    "inputs": {
+      "$type": "dimension",
+      "$value": "{border-radius.m}"
+    },
+    "buttons": {
+      "$type": "dimension",
+      "$value": "{border-radius.m}"
+    },
+    "controls": {
+      "$type": "dimension",
+      "$value": "{border-radius.xs}"
+    }
+  }
+}

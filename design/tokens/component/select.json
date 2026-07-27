@@ -1,0 +1,12 @@
+{
+  "select": {
+    "dropdown-offset": {
+      "$type": "dimension",
+      "$value": "{spacing.1x}"
+    },
+    "z-index": {
+      "$type": "number",
+      "$value": 20
+    }
+  }
+}

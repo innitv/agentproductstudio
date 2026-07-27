@@ -1,0 +1,21 @@
+{
+  "segmented": {
+    "bg": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.48627450980392156,
+          0.5411764705882353,
+          0.6196078431372549
+        ],
+        "alpha": 0.1,
+        "hex": "#7c8a9e"
+      }
+    },
+    "radius": {
+      "$type": "dimension",
+      "$value": "{border-radius.2xl}"
+    }
+  }
+}

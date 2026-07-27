@@ -33,7 +33,7 @@
 | `design/` | active | Design-system context, Figma maps, design artifacts. | Менять вместе с design/rules docs, если меняются tokens/components. |
 | `integrations/` | active | MCP, observability и integration docs/config examples. | Не хранить secrets; реальные external writes требуют approval. |
 | `docs/architecture/` | active | Навигация по repo, git workflow, deployment boundaries. | Обновлять при изменении структуры или branch/deploy политики. |
-| `archive/` | archive | Историческое/legacy: `legacy-codex/` (старый Codex config), `plans/` (датированные планы), `project-plans/`, старые `reports/`. | Не источник правил; не редактировать как активные контракты. |
+| `archive/` | archive | Историческое/legacy: `legacy-codex/` (старый Codex config), `plans/` (датированные планы), `project-plans/`, старые `reports/`, `design-systems/` (выведенные из работы локальные индексы Figma-DS). | Не источник правил; не редактировать как активные контракты. |
 | `reports/`, `test-results/`, `dist/`, `node_modules/` | generated | Logs, Playwright artifacts, build output, зависимости. | Не коммитить (в `.gitignore`). |
 
 > Личный сайт-портфолио вынесен в отдельный репозиторий и в карте этого репо больше не описывается.
@@ -91,7 +91,7 @@ outputs/                  # product workflow runs (+ temp, archive)
 
 # — Генерируемое / архив —
 dist/ reports/ test-results/ node_modules/   # generated, не коммитить (.gitignore)
-archive/                  # legacy-codex, plans, project-plans
+archive/                  # legacy-codex, plans, project-plans, design-systems
 ```
 
 ## Migration Rules

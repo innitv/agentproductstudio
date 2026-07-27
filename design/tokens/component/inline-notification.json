@@ -1,0 +1,201 @@
+{
+  "inline-notification": {
+    "width": {
+      "$type": "dimension",
+      "$value": {
+        "value": 375,
+        "unit": "px"
+      }
+    },
+    "min-height": {
+      "$type": "dimension",
+      "$value": {
+        "value": 110,
+        "unit": "px"
+      }
+    },
+    "radius": {
+      "$type": "dimension",
+      "$value": "{border-radius.m}"
+    },
+    "border-width": {
+      "$type": "dimension",
+      "$value": {
+        "value": 2,
+        "unit": "px"
+      }
+    },
+    "bg": {
+      "$type": "color",
+      "$value": "{neutral.0}"
+    },
+    "icon": {
+      "container-width": {
+        "$type": "dimension",
+        "$value": {
+          "value": 48,
+          "unit": "px"
+        }
+      },
+      "size": {
+        "$type": "dimension",
+        "$value": {
+          "value": 24,
+          "unit": "px"
+        }
+      }
+    },
+    "content": {
+      "padding": {
+        "x": {
+          "$type": "dimension",
+          "$value": "{spacing.4x}"
+        },
+        "y": {
+          "$type": "dimension",
+          "$value": "{spacing.3x}"
+        }
+      },
+      "gap": {
+        "$type": "dimension",
+        "$value": "{spacing.4x}"
+      }
+    },
+    "body-gap": {
+      "$type": "dimension",
+      "$value": "{spacing.3x}"
+    },
+    "title": {
+      "$type": "color",
+      "$value": "{neutral.1000}"
+    },
+    "subtitle": {
+      "$type": "color",
+      "$value": "{neutral.700}"
+    },
+    "title-size": {
+      "$type": "dimension",
+      "$value": "{font.description-l.size}"
+    },
+    "title-line": {
+      "$type": "dimension",
+      "$value": "{font.description-l.line}"
+    },
+    "title-weight": {
+      "$type": "fontWeight",
+      "$value": 700
+    },
+    "subtitle-size": {
+      "$type": "dimension",
+      "$value": "{font.description-l.size}"
+    },
+    "subtitle-line": {
+      "$type": "dimension",
+      "$value": "{font.description-l.line}"
+    },
+    "subtitle-weight": {
+      "$type": "fontWeight",
+      "$value": "{font.weight.strong}"
+    },
+    "close": {
+      "size": {
+        "$type": "dimension",
+        "$value": "{size.s}"
+      },
+      "radius": {
+        "$type": "dimension",
+        "$value": "{border-radius.m}"
+      },
+      "bg": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.48627450980392156,
+            0.5411764705882353,
+            0.6196078431372549
+          ],
+          "alpha": 0.1,
+          "hex": "#7c8a9e"
+        }
+      },
+      "bg-hover": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.48627450980392156,
+            0.5411764705882353,
+            0.6196078431372549
+          ],
+          "alpha": 0.2,
+          "hex": "#7c8a9e"
+        }
+      },
+      "fg": {
+        "$type": "color",
+        "$value": "{base.neutral}"
+      }
+    },
+    "actions-gap": {
+      "$type": "dimension",
+      "$value": "{spacing.4x}"
+    },
+    "info": {
+      "bg": {
+        "$type": "color",
+        "$value": "{toast.info.bg}"
+      },
+      "fg": {
+        "$type": "color",
+        "$value": "{toast.info.fg}"
+      },
+      "border": {
+        "$type": "color",
+        "$value": "{info.200}"
+      }
+    },
+    "success": {
+      "bg": {
+        "$type": "color",
+        "$value": "{toast.success.bg}"
+      },
+      "fg": {
+        "$type": "color",
+        "$value": "{toast.success.fg}"
+      },
+      "border": {
+        "$type": "color",
+        "$value": "{success.200}"
+      }
+    },
+    "warning": {
+      "bg": {
+        "$type": "color",
+        "$value": "{toast.warning.bg}"
+      },
+      "fg": {
+        "$type": "color",
+        "$value": "{toast.warning.fg}"
+      },
+      "border": {
+        "$type": "color",
+        "$value": "{warning.200}"
+      }
+    },
+    "error": {
+      "bg": {
+        "$type": "color",
+        "$value": "{toast.error.bg}"
+      },
+      "fg": {
+        "$type": "color",
+        "$value": "{toast.error.fg}"
+      },
+      "border": {
+        "$type": "color",
+        "$value": "{error.200}"
+      }
+    }
+  }
+}

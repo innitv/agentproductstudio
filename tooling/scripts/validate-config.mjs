@@ -38,8 +38,6 @@ const requiredFiles = [
   "design/figma/registry.json",
   "design/figma/registry.schema.json",
   "design/figma/design-system-index.schema.json",
-  "design/figma/a3-design-system/ds-baseline-policy.md",
-  "design/figma/a3-design-system/ds.config.json",
   "agent-pack/guardrails/guardrails.policy.md",
   "agent-pack/guardrails/approval-matrix.md",
 ];
@@ -194,16 +192,8 @@ const researchEnforcementFiles = [
     requiredSnippets: ["registry.json", "selected_design_system_slug", "локальным индексом"],
   },
   {
-    file: "design/figma/registry.json",
-    requiredSnippets: ["a3-design-system", "component_contracts", "unavailable_plan"],
-  },
-  {
     file: "design/figma/design-system-index.schema.json",
     requiredSnippets: ["foundation", "components", "component_contracts_path"],
-  },
-  {
-    file: "design/figma/a3-design-system/ds-baseline-policy.md",
-    requiredSnippets: ["product_specific", "A3 не является обязательным foundation", "Component Contract Matrix", "visual regression"],
   },
   {
     file: "agent-pack/artifacts/release/release-notes.template.md",
@@ -398,6 +388,98 @@ for (const { file, requiredSnippets } of researchEnforcementFiles) {
   for (const snippet of requiredSnippets) {
     if (!content.includes(snippet)) {
       errors.push(`${file}: missing research enforcement snippet: ${snippet}`);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Реестр Figma дизайн-систем: структурная проверка, а не привязка к конкретной DS.
+//
+// Состав систем — продуктовое решение, оно меняется (систему индексируют, потом
+// архивируют). Раньше валидатор требовал файлы конкретной системы (A3), поэтому
+// её архивация роняла проверку, хотя в проекте ничего не ломалось. Теперь
+// проверяется инвариант реестра: каждая ОБЪЯВЛЕННАЯ система должна иметь на диске
+// те файлы, которые объявила сама — в поле `paths`. Пустой список систем законен;
+// битая запись (запись есть, файлов нет) остаётся ошибкой.
+// ---------------------------------------------------------------------------
+
+const designSystemRegistryPath = "design/figma/registry.json";
+const registryStatuses = new Set(["indexed", "partial", "planned", "blocked", "archived"]);
+const registryAbsolutePath = join(root, designSystemRegistryPath);
+
+if (existsSync(registryAbsolutePath)) {
+  let registry;
+  try {
+    registry = JSON.parse(readFileSync(registryAbsolutePath, "utf8"));
+  } catch (error) {
+    errors.push(`${designSystemRegistryPath}: invalid JSON (${error.message}).`);
+  }
+
+  if (registry) {
+    if (!Number.isInteger(registry.version) || registry.version < 1) {
+      errors.push(`${designSystemRegistryPath}: "version" must be an integer >= 1.`);
+    }
+
+    if (!Array.isArray(registry.systems)) {
+      errors.push(`${designSystemRegistryPath}: "systems" must be an array (empty array is valid).`);
+    } else {
+      const slugs = new Set();
+
+      registry.systems.forEach((system, index) => {
+        const label = `${designSystemRegistryPath}: systems[${index}]`;
+        const slug = typeof system?.slug === "string" ? system.slug : undefined;
+
+        if (!slug || !/^[a-z0-9][a-z0-9-]*$/.test(slug)) {
+          errors.push(`${label}: "slug" is required and must match ^[a-z0-9][a-z0-9-]*$.`);
+        } else if (slugs.has(slug)) {
+          errors.push(`${label}: duplicate slug "${slug}".`);
+        } else {
+          slugs.add(slug);
+        }
+
+        const named = slug ? `${designSystemRegistryPath}: system "${slug}"` : label;
+
+        if (typeof system?.name !== "string" || !system.name.trim()) {
+          errors.push(`${named}: "name" is required and must be a non-empty string.`);
+        }
+
+        if (!registryStatuses.has(system?.status)) {
+          errors.push(
+            `${named}: "status" must be one of ${[...registryStatuses].join("|")} (got ${JSON.stringify(system?.status)}).`,
+          );
+        }
+
+        if (typeof system?.paths !== "object" || system.paths === null || Array.isArray(system.paths)) {
+          errors.push(`${named}: "paths" is required and must be an object with at least "root".`);
+          return;
+        }
+
+        if (typeof system.paths.root !== "string" || !system.paths.root.trim()) {
+          errors.push(`${named}: "paths.root" is required and must be a non-empty string.`);
+        }
+
+        for (const [pathKey, pathValue] of Object.entries(system.paths)) {
+          if (typeof pathValue !== "string" || !pathValue.trim()) {
+            errors.push(`${named}: "paths.${pathKey}" must be a non-empty string.`);
+            continue;
+          }
+
+          if (!existsSync(join(root, pathValue))) {
+            errors.push(
+              `${named}: declared "paths.${pathKey}" does not exist on disk: ${pathValue}. ` +
+                `Either restore the file or remove the system from ${designSystemRegistryPath}.`,
+            );
+          }
+        }
+      });
+
+      if (registry.default_system !== undefined) {
+        if (typeof registry.default_system !== "string" || !slugs.has(registry.default_system)) {
+          errors.push(
+            `${designSystemRegistryPath}: "default_system" must reference a declared system slug (got ${JSON.stringify(registry.default_system)}).`,
+          );
+        }
+      }
     }
   }
 }
