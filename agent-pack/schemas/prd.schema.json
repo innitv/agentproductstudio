@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://product-agent-studio.local/schemas/prd.schema.json",
+  "$id": "https://agent-product-studio.local/schemas/prd.schema.json",
   "title": "PRD",
   "type": "object",
   "required": ["status", "inputs_used", "problem", "goals", "non_goals", "requirements", "moscow", "acceptance_criteria", "analytics"],

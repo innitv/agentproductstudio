@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://product-agent-studio.local/schemas/research-summary.schema.json",
+  "$id": "https://agent-product-studio.local/schemas/research-summary.schema.json",
   "title": "Research Summary",
   "type": "object",
   "required": ["status", "inputs_used", "research_questions", "audience", "jobs_to_be_done", "proto_personas", "simulated_interviews", "findings", "sources", "validation_plan", "unknowns"],

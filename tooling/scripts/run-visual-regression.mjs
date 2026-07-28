@@ -83,7 +83,7 @@ if (!playwrightVersion || !/^\d+\.\d+\.\d+$/.test(playwrightVersion)) {
 }
 
 const baseImage = `mcr.microsoft.com/playwright:v${playwrightVersion}-noble`;
-const localImage = `product-agent-studio-vr:${playwrightVersion}`;
+const localImage = `agent-product-studio-vr:${playwrightVersion}`;
 
 // ---------------------------------------------------------------------------
 // 2. Docker обязателен
