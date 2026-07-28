@@ -46,6 +46,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - `apps/frontend/src/components/shadcn/` — фактический состав компонентов; `apps/frontend/.storybook` — витрина
 - `run-state.json` — оси запуска
 - При работе по переданному Figma-файлу: `integrations/mcp/figma-canvas-write-guide.md`, `design/figma/registry.json`
+- `design/figma/shadcn-ui-community/components.md` — для экранов в Figma на shadcn: 172 компонента и сета с Node ID, ключами и матрицами вариантов; инстансы создавать внутри файла кита (`getNodeByIdAsync(nodeId).createInstance()`), импорт по ключу снаружи не работает. Пустое состояние и загрузка — готовые компоненты `Empty` и `Spinner`. Известные дефекты кита: сет `Buttons` (`73:3681`) не отдаёт матрицу вариантов, страницы `Aspect Ratio` и `Chart` пусты
 - `design/figma/<selected_design_system_slug>/ds.config.json`, если выбран `reuse|extend`
 - `design/figma/<selected_design_system_slug>/foundation.md|token-map.md`, если выбран `reuse|extend`
 - `design/figma/<selected_design_system_slug>/components.md|component-map.md`, если выбран `reuse|extend`

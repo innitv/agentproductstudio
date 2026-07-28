@@ -45,6 +45,7 @@ Skill превращает `screens.md` и дизайн-контекст в `fig
 - `design-brief.md`: visual direction, design_system_mode, visual evidence grounding.
 - `copy-deck.md`: CTA, labels, microcopy and long-copy constraints.
 - `design/figma/registry.json` и выбранный DS index, если `design_system_mode=reuse|extend`.
+- `design/figma/shadcn-ui-community/components.md`, если экраны собираются в Figma на shadcn: Node ID, ключи и матрицы вариантов для 172 компонентов. Инстансы — `getNodeByIdAsync(nodeId).createInstance()` **внутри файла кита**: он не опубликован, импорт по ключу снаружи даёт `not found`. Пустое состояние и загрузка — готовые `Empty` и `Spinner`, не рисовать заново.
 - `figma-handoff-bundle.md`, если уже есть target file/page/node.
 
 ## 3. Процедура

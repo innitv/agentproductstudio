@@ -47,7 +47,7 @@ contract_schema: agent-pack/templates/skill.template.md
 1. Прочитай `STYLE_GUIDE.md`, `design-brief.md`, `screens.md` и при наличии `design-loop-report.md`.
 1a. Если surface `figma_board|product_ui|prototype`, убедись, что `figma-screen-compiler` уже создал `figma-layout-ir.json`. Если нет, остановись на `partial` и сначала выполни compiler. Figma write без IR запрещен.
 2. Прочитай `integrations/mcp/figma-canvas-write-guide.md` и зафиксируй `design_system_mode`: `reuse|extend|product_specific|bespoke`, rationale и rejected alternatives.
-2a. Для `reuse|extend` выбери `selected_design_system_slug` из `design/figma/registry.json` и прочитай локальный индекс. Если индекс отсутствует, остановись на `partial` и направь в `figma-ds-ingest`.
+2a. Для `reuse|extend` выбери `selected_design_system_slug` из `design/figma/registry.json` и прочитай локальный индекс. Если индекс отсутствует, остановись на `partial` и направь в `figma-ds-ingest`. Для shadcn-макетов индекс уже есть — `shadcn-ui-community`; целевой файл для write в этом случае **сам файл кита** (`pCDj1p7ItjKJcXPJZDqXi6`), потому что он не опубликован как библиотека и снаружи его компоненты не импортируются.
 2b. Для внесенной ДС подтягивай только нужные категории `components/<category>.md`, а не весь Figma файл.
 2c. Для `extend|product_specific` проверь visual calibration verdict по 2-3 ключевым экранам. Без него component systemization блокируется.
 2d. Подготовь primitive variables, semantic aliases, text styles, paint/effect styles, components и screen list.

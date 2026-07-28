@@ -55,6 +55,7 @@ contract_schema: agent-pack/templates/skill.template.md
    - Figma style/node id;
    - usage context.
 4. Сверь с выбранной системой из `design/figma/registry.json`: `design/figma/<selected_design_system_slug>/foundation.md`. Если реестр не содержит выбранной системы, сверять не с чем — извлечённые значения остаются гипотезой и помечаются `needs_validation`. Заархивированные индексы из `archive/design-systems/` источником сверки не являются.
+   - 🔴 **Расхождение с `shadcn-ui-community` — не дефект и не повод «исправлять» токен.** Имена токенов там совпадают с `design/tokens/shadcn/default.json`, а значения цвета нет: кит на базе `neutral`, наша тема `default` — на `slate` (радиусы при этом совпадают численно). Источник правды для токенов — репозиторий, а не Figma. Совпадение имени при разном значении — ожидаемое состояние, фиксировать как факт, а не как конфликт для эскалации.
 5. Запиши результат в `design-brief.md` в секцию `## Visual Direction` или `## Design Tokens`.
 
 ## 4. Frontend mapping

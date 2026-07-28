@@ -95,6 +95,7 @@ UI Kit и дизайн-система используются только ка
 - `design/tokens/` и `design/tokens/shadcn/README.md` — токены и темы
 - `run-state.json` — оси запуска
 - `design/figma/registry.json` — при работе по переданному Figma-файлу
+- `design/figma/shadcn-ui-community/foundation.md` — **обязателен, если задача требует макетов в Figma**: кит shadcn/ui уже заингестен (172 компонента с Node ID), повторный ingest не нужен. Два ограничения, которые обязаны попасть в `design-brief.md` как явное решение, а не остаться молчаливыми: кит не опубликован как библиотека (макеты собираются внутри его файла, импорт по ключу снаружи не работает) и его цветовая база `neutral` против нашей `slate` (макет не равен коду попиксельно)
 - `design/figma/<selected_design_system_slug>/ds.config.json`, если выбран `reuse|extend`
 - `design/figma/<selected_design_system_slug>/foundation.md|token-map.md`, если выбран `reuse|extend`
 - `design/figma/<selected_design_system_slug>/components.md|component-map.md`, если выбран `reuse|extend`

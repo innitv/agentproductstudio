@@ -29,6 +29,7 @@ disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 - `CLAUDE.md` §6.1, `apps/frontend/src/components/shadcn/`, `apps/frontend/.storybook`
 - `run-state.json` — оси запуска
 - При работе по переданному Figma-файлу: `integrations/mcp/figma-canvas-write-guide.md`, `design/figma/registry.json`, DS-файлы выбранной системы
+- **Для экранов в Figma на shadcn:** готовый индекс кита — `design/figma/shadcn-ui-community/components.md` (172 компонента и сета с Node ID, ключами и матрицами вариантов). Инстансы создавать `getNodeByIdAsync(nodeId).createInstance()` **внутри файла кита** — он не опубликован как библиотека, импорт по ключу снаружи даёт `not found` (протокол проверки — в `foundation.md` кита). Пустые состояния и загрузку брать из готовых компонентов `Empty` и `Spinner`, а не рисовать заново. Известные дефекты кита, которые нельзя принять за свою ошибку: у сета `Buttons` (`73:3681`) Figma не отдаёт матрицу вариантов, у страниц `Aspect Ratio` и `Chart` компонентов нет вовсе.
 
 ## Внутренний процесс
 

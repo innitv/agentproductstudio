@@ -32,6 +32,7 @@ disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 - `apps/frontend/src/components/shadcn/` (фактический состав), `design/tokens/`, `design/tokens/shadcn/README.md`
 - `run-state.json` — оси запуска
 - При работе по переданному Figma-файлу: `integrations/mcp/figma-canvas-write-guide.md`, `design/figma/registry.json`, `ds.config.json`/`foundation.md`/`components.md` выбранной ДС
+- **Если задача требует макетов в Figma:** кит shadcn/ui уже заингестен — `design/figma/shadcn-ui-community/`. Компоненты брать оттуда по Node ID, а не рисовать заново и не ингестить повторно. Два ограничения кита, влияющие на решение: (1) он **не опубликован как библиотека**, поэтому макеты собираются внутри его файла — импорт по ключу снаружи не работает; (2) его цвет на базе `neutral`, а наша тема `default` — на `slate`, то есть макет по киту как есть не равен коду попиксельно. Оба разобраны в `design/figma/shadcn-ui-community/foundation.md`; выбор способа фиксировать в `design-brief.md`, а не решать молча.
 
 ## Внутренний процесс
 
