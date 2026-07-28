@@ -1,6 +1,6 @@
 # Реестр ворот качества (Stage Gate Ledger)
 
-## Запуск (Run)
+## Run (Запуск)
 
 - Project slug:
 - Date:
@@ -8,7 +8,7 @@
 - Profile: standard | reference
 - Scale: full | increment | patch   <!-- CLAUDE.md §0.2; не уверен — full -->
 
-## Правило (Rule)
+## Rule (Правило)
 
 Каждый этап считается завершенным только когда:
 
@@ -24,7 +24,7 @@
 - если run идёт не на полном масштабе, стадии вне масштаба отмечены статусом `skipped_by_scale` с указанием масштаба ДО их старта; масштаб не понижается задним числом (валидатор отклонит run, где стадия вне масштаба уже отработала);
 - в случае настройки интеграции с Notion на стадии релиза подготовлен Agile export plan/dry-run, а внешняя запись Agile-доски выполнена только при наличии exact approval `notion_agile_export` для целевой страницы/базы.
 
-## Статус этапов (Stage Status)
+## Stage Status (Статус этапов)
 
 Статусы: `pending` | `success` | `partial` | `blocked` | `skipped_with_reason` | `skipped_by_scale`.
 Ниже — полный набор стадий (масштаб `full`). При `increment`/`patch` отметь исключённые стадии как `skipped_by_scale`, а не удаляй строки: пропуск должен быть виден. Это проверяется машинно — на полном прогоне `yarn workflow:validate` возвращает ошибку для каждой стадии вне масштаба, у которой здесь нет строки `skipped_by_scale`.
@@ -43,7 +43,7 @@
 | 11-qa | qa-review | `qa-report.md` | pending |  |
 | 12-release | release | `release-notes.md` | pending | Вне масштаба patch -> `skipped_by_scale` |
 
-## Запуски валидации (Validation Runs)
+## Validation Runs (Запуски валидации)
 
 | Время | Команда | Результат | Заметки |
 |---|---|---|---|

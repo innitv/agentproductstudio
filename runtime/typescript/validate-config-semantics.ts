@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import {
@@ -21,6 +21,7 @@ import {
   getRequiredArtifactsForStage,
   getRequiredSectionsForStage,
   getWorkflowStagesForProfile,
+  workflowProfiles,
   workflowStages,
   type WorkflowProfile,
 } from "./workflow-stages";
@@ -102,6 +103,7 @@ export function validateConfigSemantics(root = process.cwd()): string[] {
   validateWorkflowStages(errors);
   validatePackageScripts(root, errors);
   validateApprovalMatrix(root, errors);
+  validateArtifactTemplates(root, errors);
   errors.push(...validateAgentMetadata(root));
   errors.push(...validateSkillMetadata(root));
   errors.push(...validateSkillWrappers());
@@ -196,6 +198,80 @@ function validateWorkflowStages(errors: string[]): void {
       }
     }
   }
+}
+
+/**
+ * Шаблон артефакта обязан содержать секции, которые валидатор потребует от заполненного
+ * файла. Иначе запуск, собранный по шаблону, падает на `workflow:validate` — а автор
+ * шаблона узнаёт об этом только от пользователя.
+ *
+ * Реальный случай 2026-07-28: `stage-gate-ledger.template.md` писал заголовки по-русски
+ * (`## Запуск (Run)`), а манифест требует `## Run`. Подстроки там нет, и любой ledger,
+ * собранный руками по шаблону, был невалиден. Скаффолд при этом писал английские заголовки,
+ * поэтому дефект не всплывал на обычных запусках и прожил незамеченным.
+ *
+ * Отсутствие шаблона ошибкой НЕ считается: он есть не у каждого артефакта (JSON-артефакты
+ * описаны схемой, ledger-файлы обычно создаёт скаффолд). Проверяется только обещание: если
+ * шаблон существует, он обязан быть заполнимым до валидного артефакта.
+ */
+export function validateArtifactTemplates(root: string, errors: string[]): void {
+  const templates = collectTemplates(root);
+  const checked = new Set<string>();
+
+  for (const profile of workflowProfiles) {
+    for (const stage of getWorkflowStagesForProfile(profile)) {
+      for (const artifact of getRequiredArtifactsForStage(stage, profile)) {
+        const fileName = artifactFiles[artifact];
+        const key = `${stage.id}|${artifact}`;
+        if (!fileName || checked.has(key)) {
+          continue;
+        }
+
+        checked.add(key);
+        const templatePath = templates.get(fileName);
+        if (!templatePath) {
+          continue;
+        }
+
+        const body = readFileSync(join(root, templatePath), "utf8");
+        const missing = getRequiredSectionsForStage(stage, artifact).filter((section) => !body.includes(section));
+        if (missing.length > 0) {
+          errors.push(
+            `${templatePath}: шаблон '${fileName}' не содержит секций, обязательных для стадии ` +
+              `'${stage.id}': ${missing.join(", ")}. Запуск, собранный по этому шаблону, не пройдёт workflow:validate.`,
+          );
+        }
+      }
+    }
+  }
+}
+
+/** Шаблоны ищутся по конвенции `<имя-артефакта>.template.md` в двух каталогах пакета. */
+function collectTemplates(root: string): Map<string, string> {
+  const found = new Map<string, string>();
+
+  const artifactsRoot = join(root, "agent-pack", "artifacts");
+  if (existsSync(artifactsRoot)) {
+    for (const dir of readdirSync(artifactsRoot, { withFileTypes: true })) {
+      if (!dir.isDirectory()) continue;
+      for (const file of readdirSync(join(artifactsRoot, dir.name))) {
+        if (file.endsWith(".template.md")) {
+          found.set(file.replace(/\.template\.md$/, ".md"), `agent-pack/artifacts/${dir.name}/${file}`);
+        }
+      }
+    }
+  }
+
+  const templatesRoot = join(root, "agent-pack", "templates");
+  if (existsSync(templatesRoot)) {
+    for (const file of readdirSync(templatesRoot)) {
+      if (file.endsWith(".template.md")) {
+        found.set(file.replace(/\.template\.md$/, ".md"), `agent-pack/templates/${file}`);
+      }
+    }
+  }
+
+  return found;
 }
 
 function validatePackageScripts(root: string, errors: string[]): void {
