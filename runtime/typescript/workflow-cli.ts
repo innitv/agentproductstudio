@@ -18,6 +18,7 @@ import { archiveWorkflowRun, cleanupTempOutputs, formatArchiveWorkflowRunResult,
 import { formatWorkflowOutputsGuide, formatWorkflowRunInspection, formatWorkflowRunList, inspectWorkflowRun, listWorkflowRuns } from "./output-metadata";
 import { formatOutputsRegistrySync, syncOutputsRegistry } from "./outputs-registry";
 import { formatSkillUsageInspection, inspectSkillUsage } from "./skill-usage";
+import { buildWorkflowMap, formatWorkflowMap } from "./workflow-map";
 import { getWorkflowEngineStatus, rerunWorkflowStage, resumeWorkflowEngine, startWorkflowEngine } from "./workflow-engine";
 import { workflowScales, workflowStages, type WorkflowScale } from "./workflow-stages";
 import type { WorkflowExecutionMode } from "./workflow-state";
@@ -30,6 +31,7 @@ const explicitWorkflowCommands = new Set([
   "inspect",
   "outputs",
   "skills",
+  "map",
   "cleanup-temp",
   "archive",
   "registry-sync",
@@ -117,6 +119,11 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
 
   if (command === "skills") {
     console.log(formatSkillUsageInspection(inspectSkillUsage(resolve(process.cwd()))));
+    return;
+  }
+
+  if (command === "map") {
+    console.log(formatWorkflowMap(buildWorkflowMap(resolve(process.cwd()))));
     return;
   }
 
@@ -317,7 +324,7 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
     return;
   }
 
-  throw new Error("Usage: workflow engine command must be one of: start, resume, status, list, inspect, outputs, skills, cleanup-temp, archive, registry-sync, run-stage, approve, deny, approval-request, approvals, agentic-stages, agentic-readiness, agentic-approval-commands, agentic-preflight\nOr use a natural trigger phrase!");
+  throw new Error("Usage: workflow engine command must be one of: start, resume, status, list, inspect, outputs, skills, map, cleanup-temp, archive, registry-sync, run-stage, approve, deny, approval-request, approvals, agentic-stages, agentic-readiness, agentic-approval-commands, agentic-preflight\nOr use a natural trigger phrase!");
 }
 
 async function tryRunIntentCommand(command: string | undefined, rest: string[], rawArgs: string[]): Promise<boolean> {

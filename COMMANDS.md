@@ -344,6 +344,14 @@ yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
 yarn workflow:skills
 ```
 
+Посмотреть карту всей студии — стадии с владельцами и артефактами, агенты со стадиями и навыками, навыки без агента, хуки с событиями и триггерами, junction-плагины:
+
+```bash
+yarn workflow:map
+```
+
+Карта не хранится файлом и собирается на каждый запуск из `workflow.manifest.ts`, `agents.registry.ts`, контрактов агентов, навыков и `.claude/settings.json`. Рукописной копии нет намеренно: она разъезжалась бы с манифестом молча. Проверка целостности — `yarn workflow:test-workflow-map` (ловит пустой вывод из-за переименованного источника).
+
 ## Уборка и архивация
 
 Для задач типа `cleanup/sorting`. Инвентаризация выполняется до удаления; необратимое удаление требует approval `delete_data` (см. skill `outputs-cleanup`).
