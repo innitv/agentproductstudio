@@ -23,7 +23,7 @@ color: orange
 
 ## Обязательные входы
 
-- `qa-report.md`, `frontend-result.md`, `test-bench-result.md`
+- `qa-report.md`, `frontend-result.md`
 - `handoff-bundle.md`, `stage-gate-ledger.md`, `artifact-manifest.json`, `run-index.md`
 - Список фактически изменённых файлов из git и логи тестовых/валидационных команд
 

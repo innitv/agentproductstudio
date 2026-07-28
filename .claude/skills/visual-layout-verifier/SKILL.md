@@ -1,34 +1,94 @@
 ---
+id: visual-layout-verifier
 name: visual-layout-verifier
-description: Использовать после создания Figma-экранов или systemization, чтобы проверить screenshots/object inventory против figma-layout-ir.json: обнаружить обрезанный текст, наезды, unsafe top/bottom зоны, проблемы плотности/иерархии, DS instance dishonesty, route incoherence и systemization-регрессии до отметки макета как ready.
+title: "Visual Layout Verifier"
+description: "Использовать после создания Figma-экранов или systemization, чтобы проверить screenshots/object inventory против figma-layout-ir.json: обнаружить обрезанный текст, наезды, unsafe top/bottom зоны, проблемы плотности/иерархии, DS instance dishonesty, route incoherence и systemization-регрессии до отметки макета как ready."
+platforms:
+  - claude
+mcp_servers:
+  - figma
+  - playwright
+strictness_profile: strict
+owner_stage_ids:
+  - 06-screens
+  - 08-frontend
+  - 11-qa
+required_inputs:
+  - figma_layout_ir
+  - figma_handoff_bundle
+required_outputs:
+  - figma_visual_qa
+approval_actions:
+  - figma_write
+validation_commands:
+  - yarn validate:config
+  - yarn workflow:test-skill-metadata
+contract_schema: agent-pack/templates/skill.template.md
 ---
 
-# Visual Layout Verifier
+# Skill: Visual Layout Verifier
 
-Skill защищает от результата, который структурно выглядит правильным в слоях, но визуально разваливается: обрезанный текст, наезды, слабая плотность, неверная иерархия, отсутствие app route. Применяй после Figma write, calibration write или component systemization, сверяя screenshots с `figma-layout-ir.json`.
+## 1. Назначение
 
-**Полная процедура, входы/выходы, gates и validation-команды — в [`agent-pack/skills/visual-layout-verifier/SKILL.md`](../../../agent-pack/skills/visual-layout-verifier/SKILL.md). Следуй ей.**
+**Применимость: только работа по переданному Figma-файлу.** Skill проверяет Figma-макет против `figma-layout-ir.json` и вне Figma-поверхности не запускается.  По решению от 2026-07-27 (`CLAUDE.md` §6.1) Figma сузилась до дивергентной фазы на `04-design` и разового извлечения решений в токены; постоянной синхронизации кода и Figma нет.
 
-## Когда использовать
-**Только когда Figma реально в деле.** По `CLAUDE.md` §6.1 Figma сузилась до дивергентной фазы на `04-design` и разового извлечения решений в токены — постоянной синхронизации нет.
+Для поверхности, которая живёт в коде, эквивалентная проверка — другая и не подменяется этим skill:
 
-- После Figma write, calibration write или component systemization.
-- Этапы 06-screens, 08-frontend, 11-qa перед отметкой **макета** как ready.
-- Нужно проверить screenshots/object inventory против `figma-layout-ir.json`.
-- Есть подозрение на обрезанный текст, наезды, DS instance dishonesty или route incoherence.
+| Поверхность | Чем проверяется | Вердикт |
+|---|---|---|
+| Figma-макет | этот skill: screenshots + object inventory против `figma-layout-ir.json` | `figma-visual-qa.json` |
+| UI в коде | `yarn vr:test` (пиксельная регрессия историй витрины), `yarn test-storybook` (интеракции + a11y), `yarn qa:mobile` (профиль устройства) | `reports/visual-regression/summary.json` + exit code |
 
-**Только маршрут `track: figma`** из `run-state.json` (CLAUDE.md §0.3); определять маршрут по наличию `figma-layout-ir.json` запрещено. **Не использовать для UI в коде.** Там приёмка другая: `yarn vr:test` (пиксельная регрессия историй витрины, вердикт в `reports/visual-regression/summary.json`), `yarn test-storybook` (интеракции + a11y), `yarn qa:mobile` (профиль устройства).
+Внутри своей области skill защищает от результата, который структурно выглядит правильным в слоях, но визуально разваливается: обрезанный текст, наезды, слабая плотность, неверная иерархия, отсутствие app route.
 
-На маршруте `track: code` `figma-visual-qa.json` не создаётся и **записи в ledger не требует вовсе** — это штатный маршрут, а не пропуск проверки: приёмка идёт по трём машинным осям и обязательна. Писать `skipped_with_reason` **запрещено** (замена прежнего указания). Записи требуют только маршрут-условные **секции** `frontend-result.md` (`## Figma Visual QA Gate Summary`, `## Figma Roundtrip Deviations` и др.) — строкой `skipped_by_track` в таблице «Секции вне маршрута» `stage-gate-ledger.md`. Каноническая формулировка — `agent-pack/workflows/claude-operating-rules.md` §5, раздел «Маршрут (`track`)».
+## 2. Обязательные inputs
 
-## Ключевые шаги
-- Проверь target: file key, page, board node, screen node IDs.
-- Собери Figma screenshots по всем calibration screens и board; object inventory/metadata по frames.
-- Обнаружь clipped text, overlap, unsafe top/bottom зоны, проблемы density/hierarchy.
-- Проверь DS instance honesty и route coherence.
-- При systemization сравни before/after screenshots на регрессии; запиши `figma-visual-qa`.
-- Прогони post-write чек-лист гигиены сборки из `/figma-ds:build` (мастер в своей панели, хвосты клона, сырые заливки, слот ↔ семья семантики, дубли стилей, оси вариантов, подписи значений против фактических).
+- `figma-layout-ir.json`.
+- `figma-handoff-bundle.md` с target file/page/node IDs.
+- Figma screenshots по всем calibration screens и board.
+- Object inventory или metadata по screen frames.
+- Before/after screenshots, если была systemization.
 
-## Обязательные проверки
-- `yarn validate:config`
-- `yarn workflow:test-skill-metadata`
+## 3. Процедура
+
+1. Проверь target: file key, page, board node, screen node IDs.
+2. Сними или прочитай screenshot evidence для board и каждого required screen из IR.
+3. Проверь object inventory:
+   - подозрительно низкая высота text nodes;
+   - text width меньше ожидаемой зоны;
+   - screen/card clipping;
+   - detached/local copies там, где IR требует DS instances;
+   - при `reuse|extend`: наличие visible instances именно выбранной DS по `component_source`/`main_component_id`, а не локальных компонентов с похожими именами.
+4. Проверь screenshot вручную или инструментально:
+   - safe area title/header;
+   - overlap amount/subtitle/button/list rows;
+   - bottom nav position;
+   - visual hierarchy and density;
+   - app-likeness: экран должен выглядеть как реальный product UI, а не technical board/audit board/wireframe/component inventory/route map/generic card grid;
+   - route coherence across screens.
+5. Прогони post-write чек-лист гигиены сборки — skill `/figma-ds:build` (`plugins/figma-ds/skills/build/SKILL.md`, раздел «После КАЖДОГО write»): мастер внутри своей панели, хвосты клона, ничего не вылезает за витрину, ноль сырых заливок, слот ↔ семья семантики (`icon/*` vs `text/*`), дубли effect/style по подписи, оси вариантов, рукописные подписи значений против фактических. Этот чек-лист ловит класс дефектов, который IR-сверка не видит.
+6. Запиши `repair_actions`; если repair применялся, повтори screenshot evidence.
+7. Сравни calibration/systemized screenshots. Если systemization ухудшила композицию, gate блокируется.
+8. Запиши `figma-visual-qa.json`.
+
+## 4. Evidence и failure modes
+
+Обязательный output: `figma-visual-qa.json` по `agent-pack/schemas/figma-visual-qa.schema.json`.
+
+`ready_allowed=false`, если:
+
+- любой required screen имеет clipped text, overlap или unsafe header;
+- нет screenshot evidence по required screens;
+- DS reuse/extend заявлен без real instances/imports/component mapping выбранной DS;
+- `local_components_with_deviation` используется как замена выбранной DS, а не как wrapper/gap вокруг подтвержденных DS instances;
+- route walkthrough не читается из board/screens;
+- отсутствует `app_likeness_review` или screenshot выглядит как technical board, wireframe, component inventory, route map, generic card grid или empty UI shell;
+- visual regression после systemization не исправлен.
+
+## 5. Validation gates
+
+- [ ] Screenshot evidence есть для board и required screens.
+- [ ] Checks cover text height, overflow, overlap, clipping, safe area, hierarchy, route coherence and DS honesty.
+- [ ] Checks include `app_likeness`, backed by screenshot review against `ui_fidelity_target`.
+- [ ] Repair actions записаны.
+- [ ] `gate_result.ready_allowed=true` только при `verdict=passed|passed_with_notes`.

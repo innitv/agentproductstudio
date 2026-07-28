@@ -9,15 +9,12 @@ import { pathToFileURL } from "node:url";
 import {
   artifactFiles,
   defaultWorkflowScale,
-  defaultWorkflowTrack,
   getRequiredArtifactsForStage,
-  getSectionsSkippedByTrack,
   getStagesSkippedByScale,
   getWorkflowStagesForProfile,
   intakeSurveyUnrecordedMarker,
   workflowStages,
   type WorkflowScale,
-  type WorkflowTrack,
 } from "./workflow-stages";
 
 // Local no-API-key runner for Claude Code agent pack mode.
@@ -45,11 +42,9 @@ export async function runLandingWorkflow(input: LandingWorkflowInput): Promise<s
   const axes: RunAxes = {
     profile,
     scale: input.scale ?? defaultWorkflowScale,
-    track: input.track ?? defaultWorkflowTrack,
     recorded: {
       profile: Boolean(input.axes_recorded?.profile ?? input.profile),
       scale: Boolean(input.axes_recorded?.scale ?? input.scale),
-      track: Boolean(input.axes_recorded?.track ?? input.track),
     },
   };
   const routePlan = getRoutePlanForProfile(profile, axes.scale);
@@ -91,7 +86,6 @@ export async function runLandingWorkflow(input: LandingWorkflowInput): Promise<s
     `- Route tools: ${agentsSdkLayer.routeToolNames.join(", ")}`,
     "",
     `Scale: ${axes.scale}`,
-    `Track: ${axes.track}`,
     "",
     "Required artifacts:",
     ...getCoreBundleArtifactsForProfile(profile, axes.scale).map((artifact) => `- ${artifact}`),
@@ -145,8 +139,7 @@ function createSlug(value: string): string {
 interface RunAxes {
   profile: RouteProfile;
   scale: WorkflowScale;
-  track: WorkflowTrack;
-  recorded: { profile: boolean; scale: boolean; track: boolean };
+  recorded: { profile: boolean; scale: boolean };
 }
 
 // Как ось попала в run: явным флагом на старте — или умолчанием, то есть никак.
@@ -156,8 +149,7 @@ interface RunAxes {
 // что знает: ось, переданная флагом, — это и есть записанный ответ (оркестратор задал
 // вопрос до создания каталога и закодировал ответ во флаге); ось, взятая умолчанием,
 // помечается `intakeSurveyUnrecordedMarker`, и валидатор считает раздел незаписанным.
-// Итог: запуск, сделанный по процессу (`yarn workflow:start "<цель>" --track ... --profile
-// ... --scale ...`), валиден сразу; запуск молча, без ответов, называет ошибкой ровно то,
+// Итог: запуск, сделанный по процессу (`yarn workflow:start "<цель>" --profile ... --scale ...`), валиден сразу; запуск молча, без ответов, называет ошибкой ровно то,
 // чего не хватает, — вместо прежнего «нет раздела», которое падало у любого нового run.
 function axisProvenance(recorded: boolean, flag: string, value: string): string {
   return recorded ? `передано на старте: \`${flag} ${value}\`` : intakeSurveyUnrecordedMarker;
@@ -190,7 +182,6 @@ function createRunPlan(goal: string, date: string, axes: RunAxes): string {
     "",
     "| Вопрос | Ответ | Как получен | Ось |",
     "|---|---|---|---|",
-    `| Нужен макет в Figma перед вёрсткой? | ${axes.track === "figma" ? "Да" : "Нет"} | ${axisProvenance(axes.recorded.track, "--track", axes.track)} | \`track\` = \`${axes.track}\` |`,
     `| Есть конкретный образец, с которым сверять результат? | ${axes.profile === "reference" ? "Да" : "Нет"} | ${axisProvenance(axes.recorded.profile, "--profile", axes.profile)} | \`profile\` = \`${axes.profile}\` |`,
     "",
     // Пометку нельзя называть в пояснении дословно: валидатор ищет её по всему файлу, и
@@ -204,14 +195,6 @@ function createRunPlan(goal: string, date: string, axes: RunAxes): string {
     axes.scale === "full"
       ? "- Стадий вне масштаба нет: `full` включает весь pipeline."
       : "- Стадии вне масштаба записаны в `stage-gate-ledger.md` как `skipped_by_scale`.",
-    "",
-    "## Маршрут",
-    "",
-    `- \`track\`: \`${axes.track}\``,
-    `- Источник: ответ на вопрос 1 (${axisProvenance(axes.recorded.track, "--track", axes.track)}).`,
-    axes.track === "figma"
-      ? "- Маршрут `figma` требует все условные секции: снятых маршрутом ожиданий нет."
-      : "- Секции вне маршрута записаны в `stage-gate-ledger.md` как `skipped_by_track`.",
     "",
     "## План этапов",
     "",
@@ -243,10 +226,6 @@ function createHandoffBundle(goal: string, axes: RunAxes): string {
     "## Workflow Scale",
     "",
     axes.scale,
-    "",
-    "## Workflow Track",
-    "",
-    axes.track,
     "",
     "## Visual Reference Required",
     "",
@@ -293,10 +272,6 @@ function createHandoffBundle(goal: string, axes: RunAxes): string {
 
 function createStageGateLedger(slug: string, date: string, goal: string, axes: RunAxes): string {
   const outOfScale = new Set(getStagesSkippedByScale(axes.profile, axes.scale).map((stage) => stage.id));
-  // Ожидания, которые снимает маршрут. Их надо закрыть положительной записью: незакрытое
-  // ожидание неотличимо от забытой секции, и валидатор требует строку, как только стадия
-  // отдаст артефакт. Скаффолд выводит их из манифеста, а не из памяти автора.
-  const skippedSections = getSectionsSkippedByTrack(axes.track);
 
   return [
     "# Stage Gate Ledger",
@@ -308,7 +283,6 @@ function createStageGateLedger(slug: string, date: string, goal: string, axes: R
     `- Goal: ${goal}`,
     `- Workflow profile: ${axes.profile}`,
     `- Workflow scale: ${axes.scale}`,
-    `- Workflow track: ${axes.track}`,
     "",
     "## Rule",
     "",
@@ -331,19 +305,6 @@ function createStageGateLedger(slug: string, date: string, goal: string, axes: R
         const status = index === 0 ? "partial" : "pending";
         return `| ${stage.id} | ${stage.title} | ${stage.owner} | ${artifacts} | ${status} | Scaffold initialized |`;
       }),
-    "",
-    "## Секции вне маршрута (Sections Skipped By Track)",
-    "",
-    skippedSections.length
-      ? `Маршрут \`${axes.track}\` не требует секций ниже. Запись обязательна: без неё пропуск неотличим от забытой секции.`
-      : `Маршрут \`${axes.track}\` требует все условные секции — снятых ожиданий нет.`,
-    "",
-    "| Stage | Artifact | Section | Status | Reason |",
-    "|---|---|---|---|---|",
-    ...skippedSections.map(
-      (expectation) =>
-        `| ${expectation.stage.id} | \`${artifactFiles[expectation.artifact]}\` | \`${expectation.section}\` | \`skipped_by_track\` | Маршрут \`${axes.track}\`, зафиксирован на 00-intake |`,
-    ),
     "",
     "## Validation Runs",
     "",

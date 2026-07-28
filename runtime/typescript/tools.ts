@@ -10,11 +10,9 @@ export const toolNames = {
   createDesignBrief: "create_design_brief",
   createIaBrief: "create_ia_brief",
   generateScreens: "generate_screens",
-  buildPrototype: "build_prototype",
   createCopyDeck: "create_copy_deck",
   implementFrontend: "implement_frontend",
   createVisualReferenceReview: "create_visual_reference_review",
-  createTestBench: "create_test_bench",
   runQaReview: "run_qa_review",
   createReleaseNotes: "create_release_notes",
 } as const;
@@ -41,10 +39,8 @@ export const routeToolNames = [
   toolNames.createDesignBrief,
   toolNames.createCopyDeck,
   toolNames.generateScreens,
-  toolNames.buildPrototype,
   toolNames.implementFrontend,
   toolNames.createVisualReferenceReview,
-  toolNames.createTestBench,
   toolNames.runQaReview,
   toolNames.createReleaseNotes,
 ] as const;

@@ -77,9 +77,7 @@ export function beforeQa(bundle: HandoffBundle): HookResult {
     "design_brief",
     "screens",
     "copy_deck",
-    "prototype_report",
     "frontend_result",
-    "test_bench_result",
   ] as const;
 
   const missing = [

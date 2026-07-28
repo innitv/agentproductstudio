@@ -82,7 +82,7 @@ const testCases: TestCase[] = [
       assert(state.profile === "reference", "run should keep reference profile");
       assert(state.status === "blocked", "reference run should block at visual gate instead of failing");
       assert(state.stages["09-visual-reference"]?.status === "blocked", "09-visual-reference should be blocked");
-      assert(state.stages["10-test-bench"]?.status === "pending", "test bench should not run after blocked visual gate");
+      assert(state.stages["11-qa"]?.status === "pending", "qa should not run after blocked visual gate");
       assert(existsSync(join(tempDir, "visual-reference-review.md")), "visual-reference-review.md should be created");
 
       const review = await readFile(join(tempDir, "visual-reference-review.md"), "utf8");

@@ -22,7 +22,6 @@ import {
   getRequiredSectionsForStage,
   getWorkflowStagesForProfile,
   workflowStages,
-  workflowTracks,
   type WorkflowProfile,
 } from "./workflow-stages";
 import { approvalActions } from "./approval-gate";
@@ -105,7 +104,7 @@ export function validateConfigSemantics(root = process.cwd()): string[] {
   validateApprovalMatrix(root, errors);
   errors.push(...validateAgentMetadata(root));
   errors.push(...validateSkillMetadata(root));
-  errors.push(...validateSkillWrappers(root));
+  errors.push(...validateSkillWrappers());
   errors.push(...validateWorkflowGraph());
   errors.push(...validateInstructionTexts(root));
 
@@ -192,69 +191,8 @@ function validateWorkflowStages(errors: string[]): void {
         errors.push(`workflow-stages.ts: stage '${stage.id}' artifact '${artifact}' has no required sections.`);
       }
 
-      // Ни один маршрут не имеет права остаться без секций: маршрут сужает требования, но
-      // не отменяет стадию целиком.
-      for (const track of workflowTracks) {
-        if (getRequiredSectionsForStage(stage, artifact, track).length === 0) {
-          errors.push(
-            `workflow-stages.ts: stage '${stage.id}' artifact '${artifact}' has no required sections on track '${track}'.`,
-          );
-        }
-      }
-    }
-  }
-
-  validateTrackDeclarations(errors);
-}
-
-// Ось маршрута объявляет условность, а не новые требования. Поэтому каждое имя, названное
-// условным, обязано существовать в каноническом источнике: секция — в
-// `requiredSectionsByArtifact`, поле схемы — в `required` соответствующей JSON-схемы.
-// Без этой сверки протухшее объявление молча перестаёт что-либо значить.
-function validateTrackDeclarations(errors: string[], root = process.cwd()): void {
-  for (const stage of workflowStages) {
-    for (const track of workflowTracks) {
-      for (const [artifact, sections] of Object.entries(stage.requiredSectionsByTrack?.[track] ?? {})) {
-        const canonical = stage.requiredSectionsByArtifact[artifact];
-        if (!canonical) {
-          errors.push(
-            `workflow-stages.ts: stage '${stage.id}' declares track sections for unknown artifact '${artifact}'.`,
-          );
-          continue;
-        }
-
-        for (const section of sections) {
-          if (!canonical.includes(section)) {
-            errors.push(
-              `workflow-stages.ts: stage '${stage.id}' track '${track}' section '${section}' is missing from requiredSectionsByArtifact['${artifact}'].`,
-            );
-          }
-        }
-      }
-
-      for (const [artifact, fields] of Object.entries(stage.requiredSchemaFieldsByTrack?.[track] ?? {})) {
-        const schemaPath = artifactSchemas[artifact];
-        if (!schemaPath) {
-          errors.push(
-            `workflow-stages.ts: stage '${stage.id}' declares track schema fields for artifact '${artifact}' without a schema.`,
-          );
-          continue;
-        }
-
-        const absolute = join(root, schemaPath);
-        if (!existsSync(absolute)) {
-          continue;
-        }
-
-        const schema = JSON.parse(readFileSync(absolute, "utf8")) as { required?: unknown };
-        const required = Array.isArray(schema.required) ? schema.required : [];
-        for (const field of fields) {
-          if (!required.includes(field)) {
-            errors.push(
-              `workflow-stages.ts: stage '${stage.id}' track '${track}' schema field '${field}' is missing from required in ${schemaPath}.`,
-            );
-          }
-        }
+      if (getRequiredSectionsForStage(stage, artifact).length === 0) {
+        errors.push(`workflow-stages.ts: stage '${stage.id}' artifact '${artifact}' has no required sections.`);
       }
     }
   }

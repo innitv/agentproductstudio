@@ -8,7 +8,7 @@ allowed-tools: Bash(yarn workflow:retro:*), Bash(yarn workflow:list), Read, Grep
 
 Порядок действий:
 
-- Подключи skill `run-retrospective` и работай по нему. Полная процедура, пороги и Definition of Done — `agent-pack/skills/run-retrospective/SKILL.md`.
+- Подключи skill `run-retrospective` и работай по нему. Полная процедура, пороги и Definition of Done — `.claude/skills/run-retrospective/SKILL.md`.
 - Если `$ARGUMENTS` пуст, выполни `yarn workflow:list` и спроси, какой run разбирать. Не выбирай сам: разбор чужого run — потраченное время.
 - Выполни `yarn workflow:retro $ARGUMENTS`. Прочитай раздел «Чего эти числа не видят» **первым**, до таблицы метрик.
 - Пройди пороги §5 skill. Каждый сработавший порог даёт кандидата в находки; отбери не больше пяти, приоритет — по цене канала обнаружения (`user_device` дороже всего).

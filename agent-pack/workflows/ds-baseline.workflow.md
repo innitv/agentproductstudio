@@ -25,9 +25,8 @@
 - витрина и матрица состояний — истории Storybook;
 - приёмка — `yarn vr:test` (только в Docker), `yarn test-storybook`, `yarn qa:mobile`.
 
-Участвует ли Figma, решает **ось `track` в `run-state.json`** (CLAUDE.md §0.3), а не наличие файлов: везде ниже «Figma-маршрут» = `track: figma`, «дефолтный маршрут» = `track: code`. На Figma-маршруте она играет роль дивергентного черновика на `04-design` и разового показа человеку; поддерживать её синхронной с кодом не нужно. Нормативный SOP: `integrations/mcp/figma-canvas-write-guide.md`.
+Figma участвует только тогда, когда пользователь передал файл или попросил макет. В этом случае она играет роль дивергентного черновика на `04-design` и разового показа человеку; поддерживать её синхронной с кодом не нужно. Нормативный SOP: `integrations/mcp/figma-canvas-write-guide.md`.
 
-На `track: code` Figma-**артефакты** (`figma-layout-ir.json`, `figma-handoff-bundle.md`, `figma-visual-qa.json`) не создаются и **записи в ledger не требуют вовсе**; `skipped_with_reason: Figma не участвует` писать запрещено. Маршрут-условные **секции** `screens.md`/`frontend-result.md` закрываются строкой `skipped_by_track`. Approval `figma_write` и `yarn figma:audit` на этом маршруте не запрашиваются: approval на запись, которой не будет, — `process_deviation`. Их место занимает Machine Acceptance Gate (`yarn tokens:check`, `yarn test-storybook`, `yarn vr:test`, `yarn qa:mobile`), обязательный на обоих маршрутах. Каноническая формулировка — `agent-pack/workflows/claude-operating-rules.md` §5, раздел «Маршрут (`track`)».
 
 ## Входы
 
@@ -35,7 +34,7 @@
 - visual evidence plan и reference cards;
 - platform, locale, accessibility and brand constraints;
 - existing libraries audit;
-- маршрут (`track`) из `run-state.json`; на `track: figma` — exact Figma target и approval только перед write.
+- при работе в Figma — exact Figma target и approval только перед write.
 
 ## Процесс
 

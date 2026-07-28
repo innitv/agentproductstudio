@@ -9,5 +9,5 @@ argument-hint: "[run-dir]"
 - Убедись, что `prd.md` создан и завершён; IA строится поверх PRD и research. Если PRD нет, направь на `/prd`.
 - Прочитай `prd.md`, research pack и `handoff-bundle.md`; зафиксируй `inputs_used`.
 - Делегируй этап через `Agent` tool с `subagent_type: ia`. Цель: собрать `ia-brief.md` с sitemap, primary user flow, главным экраном и главным действием.
-- Обеспечь согласованность IA с будущими screens и prototype flow (Quality Gate, CLAUDE.md раздел 11).
+- Обеспечь согласованность IA с будущими screens (Quality Gate, CLAUDE.md раздел 11).
 - Синтез собирает оркестратор. После этапа обнови `handoff-bundle.md` и `stage-gate-ledger.md` и укажи следующий требуемый артефакт (`design-brief.md`).

@@ -14,7 +14,6 @@
 - `design-brief.md`
 - `screens.md`
 - `copy-deck.md`
-- `prototype-report.md`
 
 ## Changed Files
 

@@ -30,14 +30,12 @@ export interface LandingWorkflowInput {
   // `run-plan.md` перечисляет все 13 стадий независимо от масштаба, а `stage-gate-ledger.md`
   // не содержит ни строк `skipped_by_scale`, ни таблицы секций вне маршрута.
   scale?: "full" | "increment" | "patch";
-  track?: "code" | "figma";
   // Какие оси названы явно на старте, а какие взяты умолчанием. Нужно, чтобы скаффолд
   // записал ответ там, где он есть, и пометил незаписанным там, где его не было: иначе
   // скаффолд закрывал бы гейт опроса сам за себя.
   axes_recorded?: {
     profile?: boolean;
     scale?: boolean;
-    track?: boolean;
   };
 }
 
@@ -55,10 +53,8 @@ export interface HandoffBundle {
   design_brief?: unknown;
   screens?: unknown;
   copy_deck?: unknown;
-  prototype_report?: unknown;
   frontend_result?: unknown;
   visual_reference_review?: unknown;
-  test_bench_result?: unknown;
   qa_report?: unknown;
   release_notes?: unknown;
   risks: string[];

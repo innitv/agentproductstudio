@@ -19,7 +19,7 @@
 | Scale | Исключаются | Остаются |
 |---|---|---|
 | `full` (дефолт) | — | вся последовательность |
-| `increment` | `01-research` (research pack), `02-prd`, `03-ia`, `07-prototype`, `10-test-bench` | intake, design, copy, screens, frontend, qa, release |
+| `increment` | `01-research` (research pack), `02-prd`, `03-ia` | intake, design, copy, screens, frontend, qa, release |
 | `patch` | то же + `05-copy`, `06-screens`, `12-release` | intake, design, frontend, qa |
 
 Правила: масштаб режет **только глубину** — run ledger, approval gates, `00-intake` и `11-qa` обязательны на любом уровне; `09-visual-reference` определяется профилем, а не масштабом, и остаётся при reference-driven задаче любого размера. Не уверен в масштабе — `full`. Понижать масштаб после того, как стадия отработала, нельзя.
@@ -46,12 +46,10 @@
   -> [только Figma-маршрут] figma-handoff-bundle.md
   -> [только Figma-маршрут] Figma canvas write (approval-gated)
   -> [только Figma-маршрут] figma-visual-qa.json (обязателен после Figma write перед ready_for_review)
-  -> prototype-report.md
   -> frontend-result.md
   -> истории Storybook: компонентные + composition story на каждый экран (обязательно для product_ui/frontend surface)
   -> машинная приёмка: yarn vr:test + yarn test-storybook + yarn qa:mobile (обязательно для product_ui/frontend surface)
   -> visual-reference-review.md (если был задан визуальный референс)
-  -> test-bench-result.md
   -> qa-report.md
   -> release-notes.md
   -> Запись о публикации исследования в Notion (обязательно для полного воркфлоу)
@@ -59,23 +57,6 @@
   -> storybook-result.md (опциональный файл-обёртка; сама витрина и вердикты приёмки обязательны, см. ниже)
 ```
 
-## Маршрут (track): через какой инструмент производится макет
-
-Третья ось запуска, независимая от `profile` и `scale` (CLAUDE.md §0.3). Значение живёт в `run-state.json` (`track`), фиксируется на `00-intake` ответом человека и дублируется в поле `Track` шапки `stage-gate-ledger.md`. Каноническая формулировка — `agent-pack/workflows/claude-operating-rules.md` §5, раздел «Маршрут (`track`) и как оформляется „Figma не участвует“».
-
-| Track | Что это | Что добавляется к последовательности |
-|---|---|---|
-| `code` (дефолт студии) | спецификация экранов + shadcn/ui + Storybook как витрина состояний | ничего сверх ядра |
-| `figma` | макет собирается на холсте Figma | шаги, помеченные ниже `[только Figma-маршрут]`, и Figma-специфичные секции `screens.md` / `frontend-result.md` |
-
-Правила оформления (обязательные):
-
-- **Маршрут-условные артефакты** (`figma-layout-ir.json`, `figma-handoff-bundle.md`, `figma-visual-qa.json`) на маршруте `code` не создаются и **записи в ledger не требуют вовсе**: это штатный маршрут, а не пропуск. `skipped_with_reason: Figma не участвует` писать запрещено.
-- **Маршрут-условные секции** (`## Layout Compiler Contract`, `## Figma Readiness` в `screens.md`; `## Design System Implementation`, `## Component Contract Implementation`, `## Frame / State Implementation Map`, `## Figma Visual QA Gate Summary`, `## Figma Roundtrip Deviations` в `frontend-result.md`) закрываются строкой `skipped_by_track` в таблице «Секции вне маршрута» `stage-gate-ledger.md` с указанием стадии и секции. Проверяется машинно в три стороны; незакрытая секция — ошибка валидатора.
-- **Маршрут читается из `run-state.json`, а не выводится по наличию файлов.** Детекция по `figma-layout-ir.json` запрещена. Задним числом маршрут не меняется: если `06-screens`/`08-frontend` отработали, валидатор отклонит смену.
-- Маршрут режет только состав Figma-специфичных секций. Стадии, approval gates, run ledger, Storybook Acceptance Gate и машинная приёмка одинаковы на обоих маршрутах.
-
-Проверка: `yarn workflow:validate <run-dir> --track <track>`; старт — `yarn workflow:start "<goal>" --track <track>`. Обоснование ветвления (решение владельца продукта от 2026-07-27, CLAUDE.md §6.1) — `docs/architecture/storybook-figma-research-2026-07-27.md`.
 
 ## Жесткий контроль этапов (Hard Stage Enforcement)
 
@@ -212,7 +193,7 @@ NOT_STARTED -> IN_PROGRESS -> GENERATED -> VALIDATED -> HANDED_OFF -> COMPLETE
 
 ## Блокировка фронтенда (Frontend Lock)
 
-Разработка фронтенда не может быть начата до завершения этапов PRD, информационной архитектуры (IA), дизайна, копирайтинга, спецификации экранов и прототипа, за исключением специального демонстрационного режима быстрого наброска (`quick draft`).
+Разработка фронтенда не может быть начата до завершения этапов PRD, информационной архитектуры (IA), дизайна, копирайтинга, спецификации экранов, за исключением специального демонстрационного режима быстрого наброска (`quick draft`).
 
 `quick draft` разрешен только при явном запросе пользователя: `quick draft`, «быстрый набросок», `demo only` или эквивалентная формулировка. В этом режиме frontend может стартовать раньше полного upstream пакета, но workflow обязан создать минимальные `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, записать пропущенные стадии как `partial`/`skipped_with_reason` и не возвращать финальный `success`. `quick draft` запрещен для reference-driven задач, внешних публикаций, Figma write, deploy и production-quality acceptance.
 
@@ -279,7 +260,7 @@ Storybook перестал быть опциональным слоем: для 
 - Токены для витрины и приложения общие: DTCG в `design/tokens/`, сборка `yarn tokens:build`.
 - Недоступность оси (нет Docker, не поднято превью) не понижает требование до визуального осмотра: пиши `skipped_with_reason` и downstream risk, статус surface — не выше `partial`.
 
-Этот gate заменяет ручную сверку макета с Figma. На маршруте `track: code` парная сверка с Figma не требуется и записи не требует; машинная приёмка обязательна на **обоих** маршрутах.
+Этот gate заменяет ручную сверку макета с Figma. Без Figma-работы парная сверка с Figma не требуется; машинная приёмка обязательна всегда.
 
 ### Порядок Skills В Design Enhancement Layer
 
@@ -294,7 +275,7 @@ Design skills применяются в таком порядке:
 7. `design-engineering` на `08-frontend` и `11-qa`: проверяет motion, focus, hover, active, disabled/loading/error/empty states и reduced motion, включая мобильную приёмку в профиле устройства (`yarn qa:mobile`).
 8. `ds-to-storybook` на `08-frontend`: **обязателен для `product_ui|frontend` surface**, а не «только если нужен export». Skill ведёт покрытие вариантов/состояний историями и связывает Component Contract Matrix с историями и вердиктами приёмки (`yarn vr:test`, `yarn test-storybook`).
 
-Пункты 3-6 применяются только на маршруте `track: figma`. На маршруте `track: code` (`reuse` shadcn/ui, витрина в Storybook) они не выполняются, их артефакты не создаются и их отсутствие не фиксируется как пропуск; записи требуют только маршрут-условные **секции** — строкой `skipped_by_track`.
+Пункты 3-6 применяются только при работе по переданному Figma-файлу. Иначе (`reuse` shadcn/ui, витрина в Storybook) они не выполняются, их артефакты не создаются и их отсутствие пропуском не считается.
 
 Figma canvas strategy выбирается по задаче: если пользователь дал anchor frame, он может использоваться как точка привязки, но полноценная дизайн-доска должна создаваться отдельными frames на canvas, если это улучшает читаемость handoff.
 
@@ -331,7 +312,7 @@ Figma canvas strategy выбирается по задаче: если поль�
 
 ## Ворота публикации исследования в Notion (Notion Research Publication Gate)
 
-Для полного воркфлоу публикация результатов исследования в Notion является строго обязательной перед подготовкой финального ответа.
+Публикация результатов исследования в Notion выполняется **по явной просьбе пользователя**. Обязательным шагом полного воркфлоу она быть перестала 2026-07-28: стадии в манифесте у неё нет, а за всю историю студии она выполнялась один раз (`docs/architecture/studio-scope-audit-2026-07-28.md` §2, P0-3). Требования ниже действуют, когда публикация запрошена.
 
 Требования к публикации:
 - публикуется исключительно пакет результатов исследования (research-only human-readable pack): `research-summary.md`, `scenario-user-flows.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`, а также `reference-analysis.md` (при наличии);

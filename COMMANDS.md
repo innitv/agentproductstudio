@@ -20,10 +20,8 @@
 | `/design` | `04-design`: design-brief, design-system mode, visual evidence. |
 | `/copy` | `05-copy`: hero, CTA, секции, FAQ, SEO, claims to validate. |
 | `/screens` | `06-screens`: спецификация экранов на основе design и copy. |
-| `/prototype` | `07-prototype`: transition map и инструкции кликабельного прототипа. |
 | `/frontend` | `08-frontend`: реализация UI, состояния, адаптивность, analytics hooks. |
 | `/visual-diff` | `09-visual-reference`: парные скриншоты и pixel diff против референса. |
-| `/test-bench` | `10-test-bench`: проверка воронки и analytics главного сценария. |
 | `/qa` | `11-qa`: аудит PRD fit, UX, a11y, responsive, secrets. |
 | `/release` | `12-release`: release notes, validation, deployment/rollback notes. |
 | `/notion-publish` | Публикация research pack в Notion после human approval. |
@@ -39,7 +37,7 @@
 | `/ui-craft:build` | Ремесло вёрстки безотносительно основы: композиция и семантика, значения в переменных, адаптивность от мобильного, полный набор состояний, доступность, движение и `prefers-reduced-motion`, проверка сборкой и скриншотами. Выбор «библиотека или своя вёрстка» не диктует — это решение проекта. |
 | `/ui-craft:reference-check` | Сверка реализации с внешним образцом: парные поблочные скриншоты desktop и mobile, числа измерением вместо оценки на глаз, наезды на фактической высоте вьюпорта, негативный контроль ассертов, список расхождений со статусом. Машинная регрессия проекта, если есть, идёт первой. |
 
-Skills (`.claude/skills/`, детально — `agent-pack/skills/`) slash-команд не имеют: Claude Code подключает их автоматически по описанию. Покрытие стадий: `yarn workflow:skills`.
+Skills (`.claude/skills/`) slash-команд не имеют: Claude Code подключает их автоматически по описанию. Покрытие стадий: `yarn workflow:skills`.
 
 ## Локальные команды
 
@@ -131,22 +129,6 @@ yarn workflow:start "поправить copy в hero" --scale patch
 release; `patch` — intake, design, frontend, qa. Масштаб режет только глубину: approval gates,
 run ledger, `00-intake` и `11-qa` остаются на любом уровне. Масштаб пишется в `run-state.json`
 и не может быть понижен задним числом.
-
-Выбрать маршрут производства макета (ось `track`, см. CLAUDE.md §0.3). Без флага — `code`,
-умолчание студии (shadcn/ui + Storybook):
-
-```bash
-yarn workflow:start "консоль выплат" --track figma
-```
-
-`code` не требует Figma-специфичных секций и полей схемы (`## Layout Compiler Contract`,
-`## Figma Readiness` в `screens.md`; `## Design System Implementation`,
-`## Component Contract Implementation`, `## Frame / State Implementation Map`,
-`## Figma Visual QA Gate Summary`, `## Figma Roundtrip Deviations` в `frontend-result.md`) —
-валидатор их не спрашивает вовсе. Маршрут пишется в `run-state.json` и `run-meta.json`, берётся
-оттуда (а не по наличию `figma-layout-ir.json`) и не может быть сменён после того, как
-`06-screens` или `08-frontend` отработали. Пропущенные по маршруту секции перечисляются в
-`stage-gate-ledger.md` со статусом `skipped_by_track`.
 
 Запустить persisted workflow engine в agentic mode для staged rollout специалистов:
 
@@ -348,14 +330,6 @@ yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
 
 ```bash
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard --scale increment
-```
-
-Перепроверить чужой run под другим маршрутом (флаг не нужен для своего run — валидатор читает
-`track` из `run-state.json`; на run, где маршрут-зависимая стадия уже отработала, попытка
-переобъявить маршрут вернёт ошибку anti-backdating):
-
-```bash
-yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard --track code
 ```
 
 Проверить полный reference workflow:
@@ -625,7 +599,7 @@ story-id), `VR_WORKERS`, `VR_PORT`. Флаги обёртки: `--no-build` (н�
 ### Мобильная приёмка
 
 Проверка UI в профиле устройства (`isMobile`, `hasTouch`, настоящие тач-жесты),
-норма — `agent-pack/skills/design-engineering/SKILL.md`. Узкий desktop-вьюпорт
+норма — `.claude/skills/design-engineering/SKILL.md`. Узкий desktop-вьюпорт
 приёмкой не считается.
 
 Нужен поднятый превью собранного приложения:
@@ -718,7 +692,7 @@ yarn workflow:doctor --repair
 Стандартный продуктовый сценарий без визуального референса (маршрут `code`, дефолт):
 
 ```bash
-yarn workflow:start "Лендинг для AI-сервиса записи в салон" --scale full --track code
+yarn workflow:start "Лендинг для AI-сервиса записи в салон" --scale full
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through 01-research
 yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
 ```
@@ -726,7 +700,7 @@ yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
 Сценарий с визуальным референсом:
 
 ```bash
-yarn workflow:start "Лендинг как https://example.com для сервиса X" --scale full --track code
+yarn workflow:start "Лендинг как https://example.com для сервиса X" --scale full
 yarn reference:scan https://example.com example-reference
 yarn reference:diff reports/visual-review/example-reference reports/visual-review/example-local reports/visual-review/example-reference
 yarn reference:section-diff https://example.com http://127.0.0.1:4173 reports/visual-review/example-reference
@@ -765,10 +739,8 @@ yarn workflow:start "<фраза-триггер>"
 - **Design spec (04-design)**: `подготовь дизайн-бриф`, `создай дизайн`, `сделай дизайн-спеку`, `analyze reference`.
 - **Copy deck (05-copy)**: `напиши тексты`, `сделай copy deck`, `копирайт`, `write copywriting deck`, `generate copy`.
 - **Screens (06-screens)**: `сгенерируй спецификацию экранов`, `создай экраны`, `опиши экраны`, `generate screens`.
-- **Prototype (07-prototype)**: `создай прототип`, `transition map`, `карту переходов`, `make transition map`.
 - **Frontend UI (08-frontend)**: `напиши код`, `сверстай лендинг`, `реализуй фронтенд`, `собери интерфейс`, `update ui`.
 - **Visual Diff (09-visual-reference)**: `сравни с референсом`, `проверь скриншоты`, `visual diff`, `compare screens`.
-- **Test Bench (10-test-bench)**: `запусти тест-бенч`, `протестируй воронку`, `проверь аналитику`, `run test bench`.
 - **QA Review (11-qa)**: `проверь качество`, `запусти qa`, `проведи аудит качества`, `run qa review`.
 - **Release (12-release)**: `выкатывай релиз`, `подготовь релиз`, `сделай релиз-ноутс`, `release now`.
 - **Notion Export**: `опубликуй в notion`, `выложи в ноушен`, `publish to notion`.

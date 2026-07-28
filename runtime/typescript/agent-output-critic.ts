@@ -389,7 +389,7 @@ export async function verifyAgentOutput(options: VerifyAgentOutputOptions): Prom
         args.push("--through", claims.stage_id);
       }
 
-      // Ни одна ось не передаётся флагом: валидатор читает `profile`, `scale` и `track`
+      // Ни одна ось не передаётся флагом: валидатор читает `profile` и `scale`
       // из `run-state.json` сам. Раньше здесь стоял костыль `--profile`, потому что
       // валидатор угадывал профиль по тексту и на `contractor-payment-demo` отвечал
       // `standard` (19 ошибок) при `profile: reference` в состоянии (26 ошибок). Корень

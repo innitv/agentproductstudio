@@ -15,7 +15,6 @@
 
 - `qa-report.md`
 - `frontend-result.md`
-- `test-bench-result.md`
 - `stage-gate-ledger.md`
 - `handoff-bundle.md`
 - `artifact-manifest.json`

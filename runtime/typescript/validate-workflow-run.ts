@@ -7,27 +7,19 @@ import {
   artifactFiles,
   artifactSchemas,
   defaultWorkflowScale,
-  figmaOnlyArtifacts,
   getRequiredArtifactsForStage,
   getRequiredSectionsForStage,
-  getSchemaFieldsNotRequiredForTrack,
-  getSectionsSkippedByTrack,
   getStagesSkippedByScale,
-  getTrackConditionalSections,
-  getTrackSensitiveStages,
   getWorkflowStagesForProfile,
   intakeSurveyIntroducedOn,
   intakeSurveySection,
   intakeSurveyUnrecordedMarker,
   isStageInScale,
-  legacyWorkflowTrack,
   workflowProfiles,
   workflowScales,
   workflowStages,
-  workflowTracks,
   type WorkflowProfile,
   type WorkflowScale,
-  type WorkflowTrack,
 } from "./workflow-stages";
 import { canReleaseFromQaStatus, isIncompleteArtifactStatus, isStageIncomplete } from "./status-resolver";
 
@@ -49,18 +41,12 @@ interface RunStateLike {
   status?: StageStateStatus;
   profile?: WorkflowProfile;
   scale?: WorkflowScale;
-  track?: WorkflowTrack;
-  // Append-only журнал маршрутов run. Нужен потому, что `run-state.json` и `run-meta.json`
-  // переписываются согласованно (`yarn workflow:sync`), и расхождение двух файлов ловит
-  // только рассинхрон, а не саму смену маршрута.
-  track_history?: Array<{ track?: WorkflowTrack; recorded_at?: string }>;
   created_at?: string;
   stages?: Record<string, { status?: StageStateStatus; artifacts?: string[] }>;
 }
 
 interface RunMetaLike {
   workflow_profile?: WorkflowProfile;
-  workflow_track?: WorkflowTrack;
 }
 
 interface StageResultLike {
@@ -72,7 +58,6 @@ export function validateWorkflowRun(
   throughStageId?: string,
   profileInput?: WorkflowProfile | "auto",
   scaleInput?: WorkflowScale,
-  trackInput?: WorkflowTrack,
 ): Finding[] {
   const outputDir = resolve(process.cwd(), outputDirInput);
   const findings: Finding[] = [];
@@ -97,10 +82,6 @@ export function validateWorkflowRun(
   // выглядел бы как честный маленький.
   const persistedScale = persistedState?.scale;
   const scale = scaleInput ?? persistedScale ?? defaultWorkflowScale;
-  // Маршрут — по той же причине из persisted state, а НЕ по наличию `figma-layout-ir.json`
-  // и прочих файлов: Figma-запуск, не создавший файл, выглядел бы как честный не-Figma и
-  // обошёл бы гейт. Отсутствие поля читается строго (`figma`).
-  const track = trackInput ?? persistedState?.track ?? legacyWorkflowTrack;
   const stages = getWorkflowStagesForProfile(profile, scale);
   const predatesIntakeSurvey = runPredatesIntakeSurvey(persistedState?.created_at);
 
@@ -141,7 +122,7 @@ export function validateWorkflowRun(
         });
       }
 
-      const requiredSections = getRequiredSectionsForStage(stage, artifact, track);
+      const requiredSections = getRequiredSectionsForStage(stage, artifact);
       for (const section of requiredSections) {
         // Раздел опроса проверяется не по наличию заголовка, а по существу: скаффолд ставит
         // метку `intakeSurveyUnrecordedMarker` для оси, ответ на которую ему не передали, и
@@ -197,11 +178,7 @@ export function validateWorkflowRun(
               message: `${stage.id} ${stage.title}: schema file is missing for ${fileName}: ${schemaPath}`,
             });
           } else {
-            const rawSchema = JSON.parse(readFileSync(absoluteSchemaPath, "utf8")) as JsonObject;
-            const schema = withoutTrackConditionalRequired(
-              rawSchema,
-              getSchemaFieldsNotRequiredForTrack(stage, artifact, track),
-            );
+            const schema = JSON.parse(readFileSync(absoluteSchemaPath, "utf8")) as JsonObject;
             for (const error of validateSchemaSubset(structured, schema)) {
               findings.push({
                 level: "error",
@@ -237,30 +214,12 @@ export function validateWorkflowRun(
     stageLimit,
     profile,
     scale,
-    track,
-    trackInput,
     throughStageId,
     artifactPayloads,
     artifactContents,
   }));
 
   return findings;
-}
-
-// Схема описывает максимальный маршрут. Условность выражается не через `if`/`then` внутри
-// схемы (измеренная дыра: опечатка в значении условия молча снимает все требования), а
-// снятием полей из `required` по закрытому перечню маршрутов.
-function withoutTrackConditionalRequired(schema: JsonObject, notRequired: ReadonlySet<string>): JsonObject {
-  if (notRequired.size === 0 || !Array.isArray(schema.required)) {
-    return schema;
-  }
-
-  return {
-    ...schema,
-    required: (schema.required as unknown[]).filter(
-      (field) => typeof field !== "string" || !notRequired.has(field),
-    ),
-  };
 }
 
 // Запуск создан до того, как опрос intake появился? Тогда записать его результат было
@@ -302,7 +261,7 @@ function describeMissingSection(
       message:
         `${stage.id} ${stage.title}: ${fileName} still carries '${intakeSurveyUnrecordedMarker}', ` +
         `so section '${intakeSurveySection}' is not fully recorded. The scaffold fills in only the axes passed on ` +
-        "start (`--track`, `--profile`, `--scale`); every remaining line must be closed by the orchestrator with the " +
+        "start (`--profile`, `--scale`); every remaining line must be closed by the orchestrator with the " +
         "answer and how it was obtained, or with the reason the question was legitimately not asked.",
     };
   }
@@ -320,8 +279,8 @@ function describeMissingSection(
     level: "error",
     message:
       `${stage.id} ${stage.title}: ${fileName} does not record the intake survey (section '${intakeSurveySection}'). ` +
-      "Record both answers — 'Нужен макет в Figma перед вёрсткой?' (track) and 'Есть конкретный образец, с которым сверять результат?' (profile) — " +
-      "together with how each answer was obtained. If the survey was legitimately not run (the answer was already given in the request, " +
+      "Record the answer — 'Есть конкретный образец, с которым сверять результат?' (profile) — " +
+      "together with how it was obtained. If the survey was legitimately not run (the answer was already given in the request, " +
       "the task is not a product workflow, or the mode is quick draft), record that reason in the same section: " +
       "the gate checks the record, not the question, and silence is none of the three.",
   };
@@ -333,8 +292,6 @@ function validateGateSemantics(options: {
   stageLimit: number;
   profile: WorkflowProfile;
   scale: WorkflowScale;
-  track: WorkflowTrack;
-  trackInput?: WorkflowTrack;
   throughStageId?: string;
   artifactPayloads: Map<string, unknown>;
   artifactContents: Map<string, string>;
@@ -343,7 +300,6 @@ function validateGateSemantics(options: {
   const checkedStages = options.stages.slice(0, options.stageLimit + 1);
   const runState = readJsonIfExists<RunStateLike>(join(options.outputDir, runStateFileName));
 
-  findings.push(...validateTrackGates(options, runState));
   findings.push(...validateScaleSkipRecords(options.outputDir, options.profile, options.scale));
   findings.push(...validateExpectationClosure(options));
 
@@ -470,104 +426,6 @@ function validateGateSemantics(options: {
 
 const workedStageStatuses = new Set<StageStateStatus>(["running", "completed", "partial", "failed"]);
 
-// Гейты оси маршрута: (1) маршрут нельзя сменить задним числом; (2) записи о пропуске
-// секций проверяются в обе стороны — «пропустили обязательное» и «пропуск протух».
-function validateTrackGates(
-  options: {
-    outputDir: string;
-    track: WorkflowTrack;
-    trackInput?: WorkflowTrack;
-  },
-  runState: RunStateLike | undefined,
-): Finding[] {
-  const findings: Finding[] = [];
-  const meta = readJsonIfExists<RunMetaLike>(join(options.outputDir, runMetaFileName));
-
-  const recordedTracks = new Set<WorkflowTrack>();
-  if (runState?.track) {
-    recordedTracks.add(runState.track);
-  }
-  if (meta?.workflow_track) {
-    recordedTracks.add(meta.workflow_track);
-  }
-
-  // Смена маршрута задним числом — единственный способ превратить run, который обязан был
-  // сделать Figma-работу, в «честный код-маршрут». Ловим по факту, как и занижение
-  // масштаба: run, где стадии с маршрут-зависимыми требованиями уже отработали, не
-  // является run другого маршрута.
-  const workedTrackStages = getTrackSensitiveStages().filter((stage) => {
-    const status = runState?.stages?.[stage.id]?.status;
-    return Boolean(status && workedStageStatuses.has(status));
-  });
-  const workedList = workedTrackStages.map((stage) => stage.id).join(", ");
-  const conflicting = [...recordedTracks].filter((recorded) => recorded !== options.track);
-
-  if (conflicting.length > 0) {
-    const recordedList = conflicting.map((value) => `'${value}'`).join(", ");
-    findings.push(
-      workedTrackStages.length > 0
-        ? {
-          level: "error",
-          message:
-            `track '${options.track}' conflicts with the track recorded for this run (${recordedList}), ` +
-            `but ${workedList} already ran. ` +
-            "Track cannot be changed after track-sensitive stages have run — restore the recorded track or record a process_deviation.",
-        }
-        : {
-          level: "warning",
-          message: `run records track ${recordedList}, but validation track is '${options.track}'`,
-        },
-    );
-  }
-
-  // Расхождение `run-state.json` и `run-meta.json` выше ловит только рассинхрон двух
-  // файлов. Штатная `yarn workflow:sync --track <другой>` переписывает оба согласованно, и
-  // сигнал исчезает — измерено: 19 ошибок -> 9 без единого срабатывания защиты. Поэтому
-  // ниже две проверки, не зависящие от согласия этих файлов.
-  //
-  // Первая — append-only журнал маршрутов: смена маршрута оставляет след в самом run.
-  if (workedTrackStages.length > 0) {
-    const previousTracks = [...new Set(
-      (runState?.track_history ?? [])
-        .map((entry) => entry?.track)
-        .filter((value): value is WorkflowTrack => Boolean(value) && workflowTracks.includes(value as WorkflowTrack)),
-    )].filter((value) => value !== options.track);
-
-    if (previousTracks.length > 0) {
-      findings.push({
-        level: "error",
-        message:
-          `track '${options.track}' was recorded after this run already ran on ` +
-          `${previousTracks.map((value) => `'${value}'`).join(", ")} (run-state.json track_history), ` +
-          `and ${workedList} already ran. ` +
-          "Track cannot be changed after track-sensitive stages have run — restore the recorded track or record a process_deviation.",
-      });
-    }
-
-    // Вторая — факт на диске: артефакты, которые производит только Figma-маршрут. Проверка
-    // работает в одну сторону (объявленный `code` при наличии Figma-артефактов — ошибка) и
-    // никогда не выводит маршрут из отсутствия файлов: обратное направление запрещено.
-    if (options.track === "code") {
-      const present = figmaOnlyArtifacts
-        .map((artifact) => artifactFiles[artifact])
-        .filter((fileName) => existsSync(join(options.outputDir, fileName)));
-
-      if (present.length > 0) {
-        findings.push({
-          level: "error",
-          message:
-            `track 'code' is declared, but the run carries Figma-only artifacts (${present.join(", ")}) ` +
-            `and ${workedList} already ran. Only the figma track produces them — ` +
-            "restore the recorded track or record a process_deviation.",
-        });
-      }
-    }
-  }
-
-  findings.push(...validateTrackSkipRecords(options.outputDir, options.track));
-
-  return findings;
-}
 
 interface TrackSkipRecord {
   line: number;
@@ -667,139 +525,37 @@ function validateScaleSkipRecords(outputDir: string, profile: WorkflowProfile, s
   return findings;
 }
 
-function validateTrackSkipRecords(outputDir: string, track: WorkflowTrack): Finding[] {
-  const ledgerPath = join(outputDir, artifactFiles.stage_gate_ledger);
-  if (!existsSync(ledgerPath)) {
-    return [];
-  }
-
-  const findings: Finding[] = [];
-  const where = `${artifactFiles.stage_gate_ledger}`;
-
-  for (const record of parseLedgerSkipRecords(readFileSync(ledgerPath, "utf8"), "skipped_by_track")) {
-    if (!record.stageId) {
-      findings.push({
-        level: "error",
-        message: `${where}:${record.line}: skipped_by_track record does not name a stage id (expected a cell like '08-frontend'): ${record.raw}`,
-      });
-      continue;
-    }
-
-    const stage = workflowStages.find((item) => item.id === record.stageId);
-    if (!stage) {
-      findings.push({
-        level: "error",
-        message: `${where}:${record.line}: skipped_by_track record names unknown stage '${record.stageId}'`,
-      });
-      continue;
-    }
-
-    if (!record.section) {
-      findings.push({
-        level: "error",
-        message:
-          `${where}:${record.line}: skipped_by_track record for ${record.stageId} does not name a section ` +
-          "(expected a cell like '## Figma Readiness'). The track axis skips sections, not stages.",
-      });
-      continue;
-    }
-
-    const artifacts = Object.keys(stage.requiredSectionsByArtifact);
-    const requiredNow = new Set(artifacts.flatMap((artifact) => getRequiredSectionsForStage(stage, artifact, track)));
-    const conditionalAnywhere = new Set(
-      artifacts.flatMap((artifact) => [...getTrackConditionalSections(stage, artifact)]),
-    );
-
-    // Модель `pytest.mark.xfail(strict=True)`: помеченное как пропущенное, но фактически
-    // требуемое — ошибка, иначе запись прикрывает настоящий пропуск.
-    if (requiredNow.has(record.section)) {
-      findings.push({
-        level: "error",
-        message:
-          `${where}:${record.line}: ${record.stageId} section '${record.section}' is recorded as skipped_by_track, ` +
-          `but track '${track}' requires it. Fill the section or fix the track.`,
-      });
-      continue;
-    }
-
-    // Модель `mypy warn_unused_ignores` / ESLint `reportUnusedDisableDirectives`:
-    // пропуск того, чего ни один маршрут не требует, — протухшая запись.
-    if (!conditionalAnywhere.has(record.section)) {
-      findings.push({
-        level: "error",
-        message:
-          `${where}:${record.line}: ${record.stageId} section '${record.section}' is recorded as skipped_by_track, ` +
-          `but no track declares it as conditional. Remove the stale record or fix the section title.`,
-      });
-    }
-  }
-
-  return findings;
-}
 
 // Вторая фаза журнала ожиданий: незакрытое ожидание становится видимым статусом.
 //
-// Что здесь НОВОГО по сравнению с уже работающим. Существующие проверки идут от записи к
-// требованию: запись `skipped_by_track` обязана быть законной (`xfail(strict=True)`) и не
-// протухшей (`warn_unused_ignores`). Но ни одна не шла от требования к записи: run, где
-// секции просто нет и записи о ней тоже нет, проходил молча, хотя `CLAUDE.md` §0.2 и §0.3
-// требуют явной фиксации. Именно поэтому «пропущено намеренно» и «забыто» до сих пор
-// различались только ручной сверкой.
+// Проверки записей идут от записи к требованию: запись `skipped_by_scale` обязана быть
+// законной (`xfail(strict=True)`) и не протухшей (`warn_unused_ignores`). Здесь — обратное
+// направление: run, где стадии просто нет и записи о ней тоже нет, проходил бы молча, хотя
+// `CLAUDE.md` §0.2 требует явной фиксации.
 //
 // Момент фиксации ожидания отдельным файлом НЕ вводится намеренно: ожидание уже
-// зафиксировано осями `track`/`scale` в `run-state.json` на `00-intake`, и обе оси
-// защищены от смены задним числом. Набор ожиданий выводится из них манифестом
-// детерминированно, поэтому копия на диске была бы вторым источником правды.
+// зафиксировано осью `scale` в `run-state.json` на `00-intake`, и ось защищена от смены
+// задним числом. Набор ожиданий выводится из неё манифестом детерминированно, поэтому
+// копия на диске была бы вторым источником правды.
+//
+// Секционная половина этой проверки (ось `track`) удалена 2026-07-28 вместе с самой осью.
 function validateExpectationClosure(options: {
   outputDir: string;
   stages: ReturnType<typeof getWorkflowStagesForProfile>;
   stageLimit: number;
   profile: WorkflowProfile;
   scale: WorkflowScale;
-  track: WorkflowTrack;
   throughStageId?: string;
 }): Finding[] {
   const ledgerPath = join(options.outputDir, artifactFiles.stage_gate_ledger);
   if (!existsSync(ledgerPath)) {
     // Отсутствие самого ledger уже ловится как отсутствующий обязательный артефакт
-    // `00-intake`; дублировать это N раз для каждой секции — шум, а не сигнал.
+    // `00-intake`; дублировать это N раз — шум, а не сигнал.
     return [];
   }
 
   const ledger = readFileSync(ledgerPath, "utf8");
   const findings: Finding[] = [];
-  const checkedStageIds = new Set(options.stages.slice(0, options.stageLimit + 1).map((stage) => stage.id));
-
-  const closedSections = new Set(
-    parseLedgerSkipRecords(ledger, "skipped_by_track")
-      .filter((record) => record.stageId && record.section)
-      .map((record) => skipRecordKey(record.stageId as string, record.section as string)),
-  );
-
-  for (const expectation of getSectionsSkippedByTrack(options.track)) {
-    if (!checkedStageIds.has(expectation.stage.id)) {
-      continue;
-    }
-
-    // Ожидание закрывается тогда, когда стадия отдала артефакт: до этого закрывать нечего,
-    // и требовать запись авансом значило бы валить каждый только что созданный run.
-    if (!existsSync(join(options.outputDir, artifactFiles[expectation.artifact]))) {
-      continue;
-    }
-
-    if (closedSections.has(skipRecordKey(expectation.stage.id, expectation.section))) {
-      continue;
-    }
-
-    findings.push({
-      level: "error",
-      message:
-        `${expectation.stage.id} ${expectation.stage.title}: track '${options.track}' does not require section ` +
-        `'${expectation.section}' of ${artifactFiles[expectation.artifact]}, but ${artifactFiles.stage_gate_ledger} has no ` +
-        "`skipped_by_track` row for it. An unclosed expectation is indistinguishable from a forgotten section — " +
-        "add a row naming the stage, the section and the reason.",
-    });
-  }
 
   // Стадии вне масштаба резолвятся на полном прогоне: они не «отдают артефакт», поэтому
   // момента «после стадии» у них нет — обещание закрывается к концу run (модель Dagster).
@@ -1065,7 +821,7 @@ async function main(): Promise<void> {
   const outputDir = args[0];
   if (!outputDir) {
     throw new Error(
-      "Usage: yarn workflow:validate <run-dir> [--through <stage-id>] [--profile standard|reference] [--scale full|increment|patch] [--track code|figma]",
+      "Usage: yarn workflow:validate <run-dir> [--through <stage-id>] [--profile standard|reference] [--scale full|increment|patch]",
     );
   }
 
@@ -1091,24 +847,11 @@ async function main(): Promise<void> {
     throw new Error(`--scale must be one of: ${workflowScales.join(", ")}`);
   }
 
-  // `--track` нужен только чтобы перепроверить чужой запуск под другим маршрутом. Свой
-  // маршрут валидатор берёт из `run-state.json`, а на попытку переобъявить маршрут уже
-  // отработавшего run отвечает ошибкой anti-backdating.
-  const trackIndex = args.indexOf("--track");
-  const track = trackIndex >= 0 ? args[trackIndex + 1] : undefined;
-  if (trackIndex >= 0 && !track) {
-    throw new Error(`--track requires a value: ${workflowTracks.join(" | ")}`);
-  }
-  if (track && !workflowTracks.includes(track as WorkflowTrack)) {
-    throw new Error(`--track must be one of: ${workflowTracks.join(", ")}`);
-  }
-
   const findings = validateWorkflowRun(
     outputDir,
     throughStageId,
     profile as WorkflowProfile | "auto",
     scale as WorkflowScale | undefined,
-    track as WorkflowTrack | undefined,
   );
   for (const finding of findings) {
     const prefix = finding.level === "error" ? "ERROR" : "WARN";

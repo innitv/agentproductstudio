@@ -11,7 +11,7 @@ export const workflowProfiles = ["standard", "reference"] as const satisfies rea
 // в один enum нельзя: reference-driven задача бывает любого масштаба, и наоборот.
 //
 // full      — новый продукт: весь pipeline 00→12.
-// increment — новая секция/экран в существующем продукте: без research/PRD/IA/prototype.
+// increment — новая секция/экран в существующем продукте: без research/PRD/IA.
 // patch     — правка готового: intake, design, frontend, qa.
 //
 // Режется ТОЛЬКО глубина проработки. Approval gates, run ledger и статусы действуют на
@@ -22,42 +22,13 @@ export const workflowScales = ["full", "increment", "patch"] as const satisfies 
 
 export const defaultWorkflowScale: WorkflowScale = "full";
 
-// Третья ось запуска, независимая от `WorkflowProfile` и `WorkflowScale`. Profile —
-// «какого типа задача» (reference-driven или нет), scale — «какого она размера»,
-// track — «через какой инструмент идёт производство макета».
-//
-// code  — умолчание студии: спецификация экранов + shadcn/ui + Storybook как витрина
-//         состояний. Figma в производстве не участвует.
-// figma — макет собирается на холсте Figma; появляются layout IR, visual QA, roundtrip.
-//
-// Маршрут режет ТОЛЬКО состав секций и полей схемы, специфичных для Figma. Стадии,
-// approval gates, run ledger и статусы одинаковы на обоих маршрутах.
-//
-// Перечень закрытый и валидируется отдельно от самих требований. Это не украшение:
-// при подходе «условие на каждом требовании» (JSON Schema `if`/`then`) опечатка в
-// значении маршрута молча отключает все условные требования разом — измерено на ajv,
-// см. docs/architecture/conditional-sections-research-2026-07-27.md §2.
-export type WorkflowTrack = "code" | "figma";
-
-export const workflowTracks = ["code", "figma"] as const satisfies readonly WorkflowTrack[];
-
-// Что получает НОВЫЙ запуск, если маршрут не задан явно на `00-intake`.
-export const defaultWorkflowTrack: WorkflowTrack = "code";
-
-// Как читается запуск БЕЗ поля `track`. Намеренно НЕ равен `defaultWorkflowTrack`.
-// У оси `scale` дефолт `full` означал «как было раньше», и обратная совместимость
-// доставалась бесплатно. Здесь «как было раньше» — это Figma-маршрут: до появления оси
-// манифест требовал Figma-секции у каждого запуска. Прочитать отсутствие поля как `code`
-// значило бы задним числом освободить все исторические запуски от проверок, которые они
-// фактически проходили.
-export const legacyWorkflowTrack: WorkflowTrack = "figma";
-
-// Артефакты, которые производит ТОЛЬКО Figma-маршрут. Ни один шаг маршрута `code` их не
-// создаёт, поэтому их присутствие — независимый от записей факт: run делал Figma-работу.
-// Используется только чтобы УЖЕСТОЧИТЬ проверку (объявленный `code` при наличии этих
-// файлов), но НИКОГДА чтобы вывести маршрут: обратное направление («файла нет, значит
-// code») запрещено — Figma-run, не создавший файл, выглядел бы как честный код-маршрут.
-export const figmaOnlyArtifacts = ["figma_layout_ir", "figma_visual_qa"] as const;
+// Ось `track` (маршрут производства макета: code / figma) удалена 2026-07-28.
+// Причина — аудит объёма (docs/architecture/studio-scope-audit-2026-07-28.md §2, P0-1):
+// маршрут `figma` не имел исполнителя проверки, `figma_layout_ir` и `figma_visual_qa` не
+// производились ни одним шагом графа, а ось не дошла ни до одного workflow-документа.
+// Figma осталась инструментом (плагин `figma-ds`, MCP, извлечение токенов, чужой файл),
+// но перестала быть осью конфигурации запуска: Figma-специфичные секции больше не
+// требуются ни от одного артефакта.
 
 // Косвенный гейт опроса на intake. Прямого гейта быть не может: два вопроса и план работ
 // показываются пользователю ДО того, как каталог запуска существует, поэтому валидатор не
@@ -108,11 +79,9 @@ export const artifactNames = {
   figmaVisualQa: "figma_visual_qa",
   screens: "screens",
   copyDeck: "copy_deck",
-  prototypeReport: "prototype_report",
   frontendResult: "frontend_result",
   storybookResult: "storybook_result",
   visualReferenceReview: "visual_reference_review",
-  testBenchResult: "test_bench_result",
   qaReport: "qa_report",
   releaseNotes: "release_notes",
 } as const;
@@ -123,19 +92,9 @@ export interface WorkflowStage {
   owner: string;
   requiredArtifacts: readonly string[];
   requiredArtifactsByProfile?: Partial<Record<WorkflowProfile, readonly string[]>>;
-  // Канонический список секций артефакта: полный набор в каноническом ПОРЯДКЕ, то есть
-  // набор максимального маршрута (`figma`). Маршрут его только сужает — см.
-  // `requiredSectionsByTrack` и единственную точку выбора `getRequiredSectionsForStage`.
+  // Канонический список секций артефакта в каноническом ПОРЯДКЕ. Условных секций больше
+  // нет: ось маршрута удалена 2026-07-28, требования одинаковы для любого запуска.
   requiredSectionsByArtifact: Readonly<Record<string, readonly string[]>>;
-  // Секции, обязательные ТОЛЬКО на перечисленном маршруте. Каждая обязана присутствовать
-  // в `requiredSectionsByArtifact` (проверяет `yarn validate:config`): здесь объявляется
-  // условность, а не новая секция. Секция, не упомянутая ни в одном маршруте, обязательна
-  // на всех — «неизвестное по умолчанию включается».
-  requiredSectionsByTrack?: Partial<Record<WorkflowTrack, Readonly<Record<string, readonly string[]>>>>;
-  // То же самое для верхнеуровневых `required`-полей JSON-схемы артефакта: схема
-  // описывает максимальный маршрут, а валидатор снимает поля, которых текущий маршрут не
-  // требует. Условность живёт рядом со стадией, а не внутри схемы через `if`/`then`.
-  requiredSchemaFieldsByTrack?: Partial<Record<WorkflowTrack, Readonly<Record<string, readonly string[]>>>>;
   mustUpdateHandoff: boolean;
   blocksFrontendUntilComplete?: boolean;
   profile?: WorkflowProfile;
@@ -153,10 +112,8 @@ export const artifactSchemas: Readonly<Record<string, string>> = {
   [artifactNames.figmaVisualQa]: "agent-pack/schemas/figma-visual-qa.schema.json",
   [artifactNames.screens]: "agent-pack/schemas/screens.schema.json",
   [artifactNames.copyDeck]: "agent-pack/schemas/copy-deck.schema.json",
-  [artifactNames.prototypeReport]: "agent-pack/schemas/prototype-report.schema.json",
   [artifactNames.frontendResult]: "agent-pack/schemas/frontend-result.schema.json",
   [artifactNames.visualReferenceReview]: "agent-pack/schemas/visual-reference-review.schema.json",
-  [artifactNames.testBenchResult]: "agent-pack/schemas/test-bench-result.schema.json",
   [artifactNames.qaReport]: "agent-pack/schemas/qa-report.schema.json",
   [artifactNames.releaseNotes]: "agent-pack/schemas/release-notes.schema.json",
 };
@@ -185,11 +142,9 @@ export const artifactFiles: Readonly<Record<string, string>> = {
   [artifactNames.figmaVisualQa]: "figma-visual-qa.json",
   [artifactNames.screens]: "screens.md",
   [artifactNames.copyDeck]: "copy-deck.md",
-  [artifactNames.prototypeReport]: "prototype-report.md",
   [artifactNames.frontendResult]: "frontend-result.md",
   [artifactNames.storybookResult]: "storybook-result.md",
   [artifactNames.visualReferenceReview]: "visual-reference-review.md",
-  [artifactNames.testBenchResult]: "test-bench-result.md",
   [artifactNames.qaReport]: "qa-report.md",
   [artifactNames.releaseNotes]: "release-notes.md",
 };
@@ -320,82 +275,32 @@ export const workflowStages: readonly WorkflowStage[] = [
         "## Component Contract Matrix",
         "## Frame / State Implementation Map",
         "## State Inventory",
-        "## Layout Compiler Contract",
-        "## Figma Readiness",
       ],
     },
-    // `## Component Contract Matrix` и `## Frame / State Implementation Map` остаются
-    // обязательными на обоих маршрутах: контракт design-generator называет маршрут без
-    // Figma штатным дефолтом, в котором Storybook stories заменяют Figma-фрейм, — то есть
-    // мэппинг «состояние -> реализация» нужен и там, меняется только адресат.
-    requiredSectionsByTrack: {
-      figma: {
-        [artifactNames.screens]: ["## Layout Compiler Contract", "## Figma Readiness"],
-      },
-    },
-    requiredSchemaFieldsByTrack: {
-      figma: {
-        [artifactNames.screens]: ["layout_compiler_contract", "figma_readiness"],
-      },
-    },
+    // `## Component Contract Matrix` и `## Frame / State Implementation Map` обязательны
+    // всегда: мэппинг «состояние -> реализация» нужен и без Figma — адресатом становится
+    // Storybook story, а не Figma-фрейм.
     mustUpdateHandoff: true,
     blocksFrontendUntilComplete: true,
     scales: ["full", "increment"],
-  },
-  {
-    id: "07-prototype",
-    title: "Prototype",
-    owner: "prototype",
-    requiredArtifacts: [artifactNames.prototypeReport],
-    requiredSectionsByArtifact: {
-      [artifactNames.prototypeReport]: [
-        "## Input Readiness Pass",
-        "## Prototype Type",
-        "## Flow Goal",
-        "## Start Screen",
-        "## Transition Map",
-        "## State Inventory",
-        "## Manual Test Script",
-        "## Frontend Handoff Contract",
-        "## Missing Interactions",
-      ],
-    },
-    mustUpdateHandoff: true,
-    blocksFrontendUntilComplete: true,
-    scales: ["full"],
   },
   {
     id: "08-frontend",
     title: "Frontend",
     owner: "frontend",
     requiredArtifacts: [artifactNames.frontendResult],
+    // Четыре Figma-специфичные секции (Component Contract Implementation, Frame / State
+    // Implementation Map, Figma Visual QA Gate Summary, Figma Roundtrip Deviations) убраны
+    // вместе с осью маршрута 2026-07-28: их работу делают `## Component Contract Matrix`
+    // в `screens.md` и машинная приёмка.
+    //
+    // `## Design System Implementation` намеренно ОСТАВЛЕНА обязательной на любом запуске
+    // (решение владельца продукта 2026-07-28). Она не про Figma: это единственное место,
+    // где реализация обязана назвать режим (`reuse` по умолчанию), основу (shadcn/ui) и
+    // — главное — каждый самописный компонент с причиной, почему его нет в реестре (§6.1).
+    // Без неё свои дубли библиотечных компонентов появляются молча.
     requiredSectionsByArtifact: {
-      [artifactNames.frontendResult]: ["## Changed Files", "## Implementation Notes", "## Design System Implementation", "## Component Contract Implementation", "## Frame / State Implementation Map", "## Figma Visual QA Gate Summary", "## Commands Run", "## Known Limitations", "## Figma Roundtrip Deviations"],
-    },
-    // Figma-условные секции стоят внутри канонического списка (позиции 3-6 и 9), а не
-    // хвостом. Поэтому маршрут их ФИЛЬТРУЕТ, а не отрезает: порядок оставшихся секций
-    // сохраняется, и скелет в промпте агента остаётся сверяемым как максимальный набор.
-    requiredSectionsByTrack: {
-      figma: {
-        [artifactNames.frontendResult]: [
-          "## Design System Implementation",
-          "## Component Contract Implementation",
-          "## Frame / State Implementation Map",
-          "## Figma Visual QA Gate Summary",
-          "## Figma Roundtrip Deviations",
-        ],
-      },
-    },
-    requiredSchemaFieldsByTrack: {
-      figma: {
-        [artifactNames.frontendResult]: [
-          "design_system_implementation",
-          "component_contract_implementation",
-          "frame_state_implementation_map",
-          "figma_visual_qa_gate_summary",
-          "figma_roundtrip_deviations",
-        ],
-      },
+      [artifactNames.frontendResult]: ["## Changed Files", "## Implementation Notes", "## Design System Implementation", "## Commands Run", "## Known Limitations"],
     },
     mustUpdateHandoff: true,
   },
@@ -417,17 +322,6 @@ export const workflowStages: readonly WorkflowStage[] = [
     },
     mustUpdateHandoff: true,
     profile: "reference",
-  },
-  {
-    id: "10-test-bench",
-    title: "Test Bench",
-    owner: "test-bench",
-    requiredArtifacts: [artifactNames.testBenchResult],
-    requiredSectionsByArtifact: {
-      [artifactNames.testBenchResult]: ["## Main Funnel", "## Analytics Spec", "## Executable Checks", "## Result"],
-    },
-    mustUpdateHandoff: true,
-    scales: ["full"],
   },
   {
     id: "11-qa",
@@ -647,21 +541,6 @@ export const routeTools = {
     outputs: [artifactNames.screens],
     dependsOn: [artifactNames.prd, artifactNames.iaBrief, artifactNames.designBrief, artifactNames.copyDeck],
   },
-  prototype: {
-    stageId: "07-prototype",
-    tool: toolNames.buildPrototype,
-    agent: agentNames.prototype,
-    inputs: [
-      artifactNames.prd,
-      artifactNames.iaBrief,
-      artifactNames.designBrief,
-      artifactNames.screens,
-      artifactNames.copyDeck,
-      artifactNames.handoffBundle,
-    ],
-    outputs: [artifactNames.prototypeReport],
-    dependsOn: [artifactNames.prd, artifactNames.iaBrief, artifactNames.designBrief, artifactNames.screens, artifactNames.copyDeck],
-  },
   frontend: {
     stageId: "08-frontend",
     tool: toolNames.implementFrontend,
@@ -673,7 +552,6 @@ export const routeTools = {
       artifactNames.designBrief,
       artifactNames.screens,
       artifactNames.copyDeck,
-      artifactNames.prototypeReport,
     ],
     outputs: [artifactNames.frontendResult],
     dependsOn: [
@@ -682,7 +560,6 @@ export const routeTools = {
       artifactNames.designBrief,
       artifactNames.screens,
       artifactNames.copyDeck,
-      artifactNames.prototypeReport,
       artifactNames.handoffBundle,
     ],
   },
@@ -707,41 +584,6 @@ export const routeTools = {
       artifactNames.frontendResult,
     ],
   },
-  testBench: {
-    stageId: "10-test-bench",
-    tool: toolNames.createTestBench,
-    agent: agentNames.testBench,
-    inputs: [
-      artifactNames.recursiveBrief,
-      artifactNames.researchSummary,
-      artifactNames.scenarioUserFlows,
-      artifactNames.prd,
-      artifactNames.iaBrief,
-      artifactNames.prototypeReport,
-      artifactNames.frontendResult,
-    ],
-    outputs: [artifactNames.testBenchResult],
-    dependsOn: [
-      artifactNames.prd,
-      artifactNames.iaBrief,
-      artifactNames.prototypeReport,
-      artifactNames.frontendResult,
-    ],
-    referenceInputs: [artifactNames.visualReferenceReview],
-    referenceDependsOn: [artifactNames.visualReferenceReview],
-    companionMode: {
-      canStartAfter: [artifactNames.recursiveBrief],
-      mustRefreshAfter: [
-        artifactNames.researchSummary,
-        artifactNames.scenarioUserFlows,
-        artifactNames.prd,
-        artifactNames.iaBrief,
-        artifactNames.prototypeReport,
-        artifactNames.frontendResult,
-      ],
-      referenceMustRefreshAfter: [artifactNames.visualReferenceReview],
-    },
-  },
   qaReview: {
     stageId: "11-qa",
     tool: toolNames.runQaReview,
@@ -759,9 +601,7 @@ export const routeTools = {
       artifactNames.designBrief,
       artifactNames.screens,
       artifactNames.copyDeck,
-      artifactNames.prototypeReport,
       artifactNames.frontendResult,
-      artifactNames.testBenchResult,
       artifactNames.stageGateLedger,
       artifactNames.handoffBundle,
     ],
@@ -779,11 +619,7 @@ export const routeTools = {
       artifactNames.designBrief,
       artifactNames.screens,
       artifactNames.copyDeck,
-      artifactNames.prototypeReport,
       artifactNames.frontendResult,
-      artifactNames.figmaLayoutIr,
-      artifactNames.figmaVisualQa,
-      artifactNames.testBenchResult,
       artifactNames.stageGateLedger,
       artifactNames.handoffBundle,
     ],
@@ -797,7 +633,6 @@ export const routeTools = {
     inputs: [
       artifactNames.qaReport,
       artifactNames.frontendResult,
-      artifactNames.testBenchResult,
       artifactNames.handoffBundle,
       artifactNames.stageGateLedger,
       "artifact_manifest",
@@ -809,7 +644,6 @@ export const routeTools = {
     dependsOn: [
       artifactNames.qaReport,
       artifactNames.frontendResult,
-      artifactNames.testBenchResult,
       artifactNames.handoffBundle,
       artifactNames.stageGateLedger,
     ],
@@ -828,9 +662,7 @@ export const standardRoutePlan = [
   "design",
   "copywriting",
   "screens",
-  "prototype",
   "frontend",
-  "testBench",
   "qaReview",
   "release",
 ] as const satisfies readonly RouteStepName[];
@@ -843,10 +675,8 @@ export const referenceRoutePlan = [
   "design",
   "copywriting",
   "screens",
-  "prototype",
   "frontend",
   "visualReferenceReview",
-  "testBench",
   "qaReview",
   "release",
 ] as const satisfies readonly RouteStepName[];
@@ -875,9 +705,7 @@ export const coreBundleArtifacts = [
   artifactNames.designBrief,
   artifactNames.screens,
   artifactNames.copyDeck,
-  artifactNames.prototypeReport,
   artifactNames.frontendResult,
-  artifactNames.testBenchResult,
   artifactNames.qaReport,
   artifactNames.releaseNotes,
 ] as const;
@@ -964,111 +792,16 @@ export function getRequiredArtifactsForStage(stage: WorkflowStage, profile: Work
   return stage.requiredArtifactsByProfile?.[profile] ?? stage.requiredArtifacts;
 }
 
-// --- Ось маршрута (track) ---
-
-function collectConditional(
-  byTrack: Partial<Record<WorkflowTrack, Readonly<Record<string, readonly string[]>>>> | undefined,
-  artifact: string,
-): ReadonlySet<string> {
-  const all = new Set<string>();
-  for (const track of workflowTracks) {
-    for (const item of byTrack?.[track]?.[artifact] ?? []) {
-      all.add(item);
-    }
-  }
-
-  return all;
-}
-
-// Секции артефакта, объявленные условными хотя бы на одном маршруте. Нужны, чтобы
-// отличить «секция не требуется на этом маршруте» от «секции нет в манифесте вообще».
-export function getTrackConditionalSections(stage: WorkflowStage, artifact: string): ReadonlySet<string> {
-  return collectConditional(stage.requiredSectionsByTrack, artifact);
-}
-
 // ЕДИНСТВЕННАЯ точка выбора обязательных секций. Все читатели (валидатор, agentic
 // executor, config-semantics, тест скелетов) обязаны идти сюда, а не в
-// `requiredSectionsByArtifact` напрямую: иначе маршрут будет исполняться в одном месте и
-// игнорироваться в другом.
-//
-// Валидатор на маршруте `code` НЕ СПРАШИВАЕТ Figma-секцию, а не «прощает» её отсутствие:
-// сужение до генерации сильнее прощения после. Промпт специалиста строится тем же
-// хелпером, поэтому неприменимая секция не попадает и в задание агенту.
-export function getRequiredSectionsForStage(
-  stage: WorkflowStage,
-  artifact: string,
-  track: WorkflowTrack = legacyWorkflowTrack,
-): readonly string[] {
-  const canonical = stage.requiredSectionsByArtifact[artifact] ?? [];
-  const conditional = getTrackConditionalSections(stage, artifact);
-  if (conditional.size === 0) {
-    return canonical;
-  }
-
-  const requiredOnTrack = new Set(stage.requiredSectionsByTrack?.[track]?.[artifact] ?? []);
-  // Фильтр сохраняет канонический порядок: условные секции стоят внутри списка, а не хвостом.
-  return canonical.filter((section) => !conditional.has(section) || requiredOnTrack.has(section));
+// `requiredSectionsByArtifact` напрямую: один источник требований дешевле двух, даже
+// когда условности больше нет. Хелпер сохранён после удаления оси маршрута именно
+// поэтому — чтобы читатели не расползлись обратно по прямому доступу к полю.
+export function getRequiredSectionsForStage(stage: WorkflowStage, artifact: string): readonly string[] {
+  return stage.requiredSectionsByArtifact[artifact] ?? [];
 }
 
-// Верхнеуровневые поля схемы, которые текущий маршрут не требует. Валидатор снимает их из
-// `required` перед проверкой payload — вторая, параллельная проверка тех же фактов обязана
-// знать про маршрут, иначе ось работает наполовину.
-export function getSchemaFieldsNotRequiredForTrack(
-  stage: WorkflowStage,
-  artifact: string,
-  track: WorkflowTrack = legacyWorkflowTrack,
-): ReadonlySet<string> {
-  const conditional = collectConditional(stage.requiredSchemaFieldsByTrack, artifact);
-  const requiredOnTrack = new Set(stage.requiredSchemaFieldsByTrack?.[track]?.[artifact] ?? []);
-  return new Set([...conditional].filter((field) => !requiredOnTrack.has(field)));
-}
-
-export function isStageTrackConditional(stage: WorkflowStage): boolean {
-  return Boolean(stage.requiredSectionsByTrack) || Boolean(stage.requiredSchemaFieldsByTrack);
-}
-
-// Стадии, у которых состав требований зависит от маршрута. Нужно anti-backdating gate:
-// смена маршрута опасна ровно тогда, когда такая стадия уже отработала.
-export function getTrackSensitiveStages(): readonly WorkflowStage[] {
-  return workflowStages.filter(isStageTrackConditional);
-}
-
-export interface SkippedSectionExpectation {
-  stage: WorkflowStage;
-  artifact: string;
-  section: string;
-}
-
-// Ожидания, которые данный маршрут СНИМАЕТ, — вторая фаза оси маршрута.
-//
-// Первая фаза (фиксация) уже существует и защищена: маршрут выбирается на `00-intake`,
-// пишется в `run-state.json` и не меняется задним числом. Отсюда набор ожиданий выводится
-// детерминированно, поэтому отдельный журнал ожиданий на диске не нужен — он был бы
-// денормализованной копией манифеста и разъехался бы с ним.
-//
-// Вторая фаза (закрытие) — это то, чего не было: ничто не требовало, чтобы каждое снятое
-// ожидание получило положительную запись `skipped_by_track`. Проверка записей работала
-// только в обе стороны ПО СУЩЕСТВУЮЩИМ записям, поэтому «пропущено намеренно» и «забыто»
-// оставались неразличимы, пока никто не сверил вручную (модель Dagster: незакрытое
-// обещание резолвится в отдельный статус, а не исчезает).
-export function getSectionsSkippedByTrack(track: WorkflowTrack): readonly SkippedSectionExpectation[] {
-  const skipped: SkippedSectionExpectation[] = [];
-
-  for (const stage of workflowStages) {
-    for (const artifact of Object.keys(stage.requiredSectionsByArtifact)) {
-      const conditional = getTrackConditionalSections(stage, artifact);
-      if (conditional.size === 0) {
-        continue;
-      }
-
-      const requiredNow = new Set(getRequiredSectionsForStage(stage, artifact, track));
-      for (const section of conditional) {
-        if (!requiredNow.has(section)) {
-          skipped.push({ stage, artifact, section });
-        }
-      }
-    }
-  }
-
-  return skipped;
-}
+// Журнал ожиданий, снятых маршрутом (`getSectionsSkippedByTrack`, `getTrackSensitiveStages`,
+// `SkippedSectionExpectation`), удалён вместе с осью 2026-07-28: снимать больше нечего —
+// состав требований одинаков для любого запуска. Аналогичный механизм для оси `scale`
+// (`skipped_by_scale`) остаётся живым и не затронут.

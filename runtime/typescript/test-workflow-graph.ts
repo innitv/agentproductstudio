@@ -3,9 +3,11 @@
  *
  * Требование к тесту: он обязан ВОСПРОИЗВЕСТИ уже случившийся дефект, а не только
  * зафиксировать текущее зелёное состояние. Дефект: `figma_layout_ir` и `figma_visual_qa`
- * стоят в `qaReview.dependsOn`, не производясь ни одним шагом маршрута
- * (`docs/architecture/studio-audit-2026-07-28.md` §1). Проверка достижимости в
- * `agent-metadata.ts` его пропускает — именно поэтому существует эта.
+ * стояли в `qaReview.dependsOn`, не производясь ни одним шагом маршрута
+ * (`docs/architecture/studio-audit-2026-07-28.md` §1). Зависимость снята 2026-07-28 вместе
+ * с осью маршрута, поэтому дефект воспроизводится подменой графа: проверка, зелёная при
+ * любом входе, бесполезна. Проверка достижимости в `agent-metadata.ts` такой случай
+ * пропускает — именно поэтому существует эта.
  */
 
 import assert from "node:assert/strict";
@@ -24,24 +26,34 @@ function assertError(errors: string[], pattern: RegExp): void {
   );
 }
 
-// 1. Текущее состояние: ошибок нет, потому что оба нарушения записаны как известные.
+// 1. Текущее состояние: нарушений нет, и списка известных отклонений тоже нет.
 assert.deepEqual(validateWorkflowGraph(), []);
+assert.deepEqual(knownGraphDeviations, []);
 
-// 2. Воспроизведение исторического дефекта: без записи об исключении проверка обязана
-//    назвать оба артефакта поимённо.
-const withoutKnownDeviations = validateWorkflowGraph([]);
-assertError(withoutKnownDeviations, /'qaReview' требует артефакт 'figma_layout_ir'.*не производит ни один шаг/s);
-assertError(withoutKnownDeviations, /'qaReview' требует артефакт 'figma_visual_qa'.*не производит ни один шаг/s);
+// 2. Воспроизведение исторического дефекта на подменённом графе: вход без производителя
+//    обязан быть назван поимённо. В самом манифесте такого больше нет — зависимость QA от
+//    Figma-артефактов снята 2026-07-28 вместе с осью маршрута.
+const routesWithOrphanInput = Object.fromEntries(
+  Object.entries(
+    (await import("./workflow.manifest")).routeTools as unknown as Record<string, RouteLike>,
+  ).map(([step, route]) => [step, { ...route }]),
+) as Record<string, RouteLike>;
+routesWithOrphanInput.qaReview = {
+  ...routesWithOrphanInput.qaReview,
+  dependsOn: [...routesWithOrphanInput.qaReview.dependsOn, artifactNames.figmaLayoutIr],
+};
+
+const orphanInput = validateWorkflowGraph([], routesWithOrphanInput);
+assertError(orphanInput, /'qaReview' требует артефакт 'figma_layout_ir'.*не производит ни один шаг/s);
 assert.equal(
-  withoutKnownDeviations.length,
-  2,
-  `Ожидались ровно два нарушения графа, получено:\n${withoutKnownDeviations.join("\n")}`,
+  orphanInput.length,
+  1,
+  `Ожидалось ровно одно нарушение графа, получено:\n${orphanInput.join("\n")}`,
 );
 
 // 3. Список исключений двусторонний: запись, которой не соответствует нарушение, — ошибка.
 assertError(
   validateWorkflowGraph([
-    ...knownGraphDeviations,
     { step: "release", artifact: artifactNames.prd, kind: "never_produced", reason: "фикстура", source: "тест" },
   ]),
   /запись об известном отклонении 'release' -> 'prd'.*больше не соответствует реальности/s,
@@ -68,7 +80,7 @@ const untouched = Object.fromEntries(
 ) as Record<string, RouteLike>;
 assert.deepEqual(validateWorkflowGraph(knownGraphDeviations, untouched), []);
 
-// 6. Само перечисление нарушений остаётся стабильным (защита от «сканер сломался, всё зелено»).
-assert.equal(findGraphInputViolations().length, 2);
+// 6. В текущем манифесте нарушений нет; способность их находить проверена пунктом 2.
+assert.equal(findGraphInputViolations().length, 0);
 
 console.log("workflow graph regression tests passed");

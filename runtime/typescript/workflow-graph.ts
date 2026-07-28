@@ -6,7 +6,8 @@
  * provide metadata required_input`). Этого мало: требование удовлетворяется само собой,
  * если артефакт вписать в `dependsOn` той же стадии, которая его требует. Именно так
  * `figma_layout_ir` и `figma_visual_qa` оказались в `qaReview.dependsOn`, не производясь
- * НИ ОДНИМ шагом маршрута (`docs/architecture/studio-audit-2026-07-28.md` §1, «Аномалия»).
+ * НИ ОДНИМ шагом маршрута (`docs/architecture/studio-audit-2026-07-28.md` §1, «Аномалия»);
+ * зависимость снята вместе с осью маршрута 2026-07-28.
  *
  * Прообраз — `validate_context_no_future_tasks` у crewAI: задача не может ссылаться на
  * задачу, идущую позже. Здесь то же самое на уровне артефактов, плюс более сильное
@@ -52,26 +53,7 @@ export interface KnownGraphDeviation {
  * печатается предупреждением на каждом прогоне `yarn validate:config` и требует
  * первоисточника. Список должен уменьшаться, а не расти.
  */
-export const knownGraphDeviations: readonly KnownGraphDeviation[] = [
-  {
-    step: "qaReview",
-    artifact: artifactNames.figmaLayoutIr,
-    kind: "never_produced",
-    reason:
-      "Артефакт Figma-маршрута стоит в dependsOn безусловно, но ни один шаг маршрута его не " +
-      "производит: у оси `figma` нет исполнителя, который создаёт IR. Решение (сделать шаг " +
-      "производителем либо снять зависимость) принимает владелец продукта — проверка его называет.",
-    source: "docs/architecture/studio-audit-2026-07-28.md §1 «Аномалия», P0-4",
-  },
-  {
-    step: "qaReview",
-    artifact: artifactNames.figmaVisualQa,
-    kind: "never_produced",
-    reason:
-      "То же самое для visual QA: QA обязан его прочитать, но производителя в графе нет.",
-    source: "docs/architecture/studio-audit-2026-07-28.md §1 «Аномалия», P0-4",
-  },
-];
+export const knownGraphDeviations: readonly KnownGraphDeviation[] = [];
 
 const knownArtifacts = new Set<string>(Object.values(artifactNames));
 
@@ -179,7 +161,7 @@ export function findGraphInputViolations(
 /**
  * Ошибки графа для `validate:config`: новые нарушения и протухшие записи об известных.
  * Проверка двусторонняя намеренно — односторонняя превращает список исключений в
- * бессрочную амнистию (тот же принцип, что у `skipped_by_track` в валидаторе запуска).
+ * бессрочную амнистию (тот же принцип, что у `skipped_by_scale` в валидаторе запуска).
  */
 export function validateWorkflowGraph(
   known: readonly KnownGraphDeviation[] = knownGraphDeviations,

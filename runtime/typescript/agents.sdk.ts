@@ -25,10 +25,8 @@ const specialistDescriptions: Partial<Record<AgentRegistryKey, string>> = {
   ia: "Create information architecture, sitemap and primary user flow.",
   design: "Create UX/UI design brief, sections, components, responsive and accessibility notes.",
   designGenerator: "Generate screen specifications from IA, design direction and copy.",
-  prototype: "Create prototype transition map and manual clickable prototype instructions.",
   copywriting: "Create landing copy deck, CTA text, FAQ, SEO and claims to validate.",
-  frontend: "Implement or specify frontend delivery from PRD, IA, screens, copy and prototype.",
-  testBench: "Create funnel analytics checks and test bench result.",
+  frontend: "Implement or specify frontend delivery from PRD, IA, screens and copy.",
   qaReview: "Review PRD fit, UX, accessibility, responsive behavior, secrets and checks.",
   release: "Create release notes with changed files, validation, deployment and rollback notes.",
 };

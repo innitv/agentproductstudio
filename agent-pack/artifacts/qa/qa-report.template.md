@@ -26,9 +26,7 @@
 - `design-brief.md`
 - `copy-deck.md`
 - `screens.md`
-- `prototype-report.md`
 - `frontend-result.md`
-- `test-bench-result.md`
 - `stage-gate-ledger.md`
 - `handoff-bundle.md`
 

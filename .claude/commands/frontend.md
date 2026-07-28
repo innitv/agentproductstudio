@@ -6,8 +6,8 @@ argument-hint: "[run-dir]"
 Ты — оркестратор (главная сессия). Пользователь просит код (триггеры: «напиши код», «сверстай лендинг», «implement frontend»). Run-dir — в `$ARGUMENTS`.
 
 Порядок действий:
-- Frontend Lock: реализация запрещена до завершённых PRD, IA, design, copy, screens и prototype (кроме явного `quick draft`). Если чего-то не хватает, направь на соответствующий этап и не начинай frontend.
-- Начиная с этого этапа передавай специалисту сжатый `handoff-bundle.md`, а не всю переписку (State Truncation Gate, CLAUDE.md раздел 3). Прочитай `prd.md`, `ia-brief.md`, `design-brief.md`, `screens.md`, `copy-deck.md`, `prototype-report.md`; зафиксируй `inputs_used`.
+- Frontend Lock: реализация запрещена до завершённых PRD, IA, design, copy и screens (кроме явного `quick draft`). Если чего-то не хватает, направь на соответствующий этап и не начинай frontend.
+- Начиная с этого этапа передавай специалисту сжатый `handoff-bundle.md`, а не всю переписку (State Truncation Gate, CLAUDE.md раздел 3). Прочитай `prd.md`, `ia-brief.md`, `design-brief.md`, `screens.md`, `copy-deck.md`; зафиксируй `inputs_used`.
 - Делегируй этап через `Agent` tool с `subagent_type: frontend`. Цель: собрать `frontend-result.md` и реализацию на компонентах реестра shadcn/ui (CLAUDE.md §6.1) с состояниями, адаптивностью, accessibility и analytics hooks. Витрина — Storybook: экран существует как composition story и как роут. Bespoke-вёрстка с нуля — только при записанном в `design-brief.md` обосновании (`product_specific`/`bespoke`).
 - Приёмка машинная, до отчёта: `yarn vr:test` (в Docker), `yarn test-storybook`, `yarn qa:mobile`. Вердикты прикладываются к `frontend-result.md`; красный `vr:test` нельзя гасить через `vr:update`.
 - Reference-driven: layout, сетка, breakpoints и порядок секций берутся только из reference-analysis, не из дефолтных grid/шаблонов (CLAUDE.md раздел 7). Для reference-driven задач далее обязательна визуальная сверка (`/visual-diff`).

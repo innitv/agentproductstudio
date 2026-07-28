@@ -112,15 +112,6 @@ const stagePatterns: Record<string, RegExp[]> = {
     /generate\s+screens/i,
     /create\s+screens/i,
   ],
-  "07-prototype": [
-    /создай\s+прототип/i,
-    /сделай\s+transition\s+map/i,
-    /разработай\s+карту\s+переходов/i,
-    /обнови\s+прототип/i,
-    /переделай\s+карту\s+переходов/i,
-    /make\s+transition\s+map/i,
-    /create\s+prototype/i,
-  ],
   "08-frontend": [
     /напиши\s+код/i,
     /сверстай\s+лендинг/i,
@@ -142,16 +133,6 @@ const stagePatterns: Record<string, RegExp[]> = {
     /visual\s+diff/i,
     /compare\s+screens/i,
     /screenshot\s+comparison/i,
-  ],
-  "10-test-bench": [
-    /запусти\s+тест-бенч/i,
-    /протестируй\s+воронку/i,
-    /проверь\s+аналитику/i,
-    /обнови\s+тесты/i,
-    /перезапусти\s+тест-бенч/i,
-    /run\s+test\s+bench/i,
-    /test\s+funnel/i,
-    /rerun\s+test\s+bench/i,
   ],
   "11-qa": [
     /проверь\s+качество/i,
@@ -233,17 +214,11 @@ export function parseUserIntent(prompt: string): ParsedIntent | null {
   if (/экран|screens/i.test(trimmed)) {
     return { command: "run-stage", stageId: "06-screens", args: [], confidence: "medium" };
   }
-  if (/прототип|prototype|переход/i.test(trimmed)) {
-    return { command: "run-stage", stageId: "07-prototype", args: [], confidence: "medium" };
-  }
   if (/верстк|код|фронтенд|frontend|ui/i.test(trimmed)) {
     return { command: "run-stage", stageId: "08-frontend", args: [], confidence: "medium" };
   }
   if (/скрин|diff|референс/i.test(trimmed)) {
     return { command: "run-stage", stageId: "09-visual-reference", args: [], confidence: "medium" };
-  }
-  if (/тест|аналитик|воронк|bench/i.test(trimmed)) {
-    return { command: "run-stage", stageId: "10-test-bench", args: [], confidence: "medium" };
   }
   if (/qa|качество|аудит/i.test(trimmed)) {
     return { command: "run-stage", stageId: "11-qa", args: [], confidence: "medium" };

@@ -16,15 +16,6 @@
 // Чего тест намеренно НЕ требует. Свёрнутый скелет (`screens: |` + `...` без секций)
 // ошибкой не считается: файл в этом случае не претендует быть шаблоном и не может
 // ввести агента в заблуждение. Ловим расхождение, а не отсутствие.
-//
-// Ось маршрута (`track`). Скелет остаётся МАКСИМАЛЬНЫМ набором — набором маршрута
-// `figma`, в каноническом порядке. Так и должно быть: скелет — это форма артефакта, а
-// маршрут её сужает; учить скелет «двум формам» значило бы держать в промпте две
-// расходящиеся копии одного шаблона. Поэтому проверка состава/порядка не меняется, а
-// добавляется вторая: файл с развёрнутым скелетом обязан ОБЪЯСНИТЬ условность —
-// назвать каждую маршрут-условную секцию и слово `skipped_by_track`. Именно эта прозаичная
-// пометка (а не сам список) говорит субагенту, что делать вне Figma-маршрута, и именно она
-// уже один раз протухла (см. docs/architecture/consistency-audit-2026-07-25.md).
 
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
@@ -33,7 +24,6 @@ import {
   artifactFiles,
   artifactNames,
   getRequiredSectionsForStage,
-  getTrackConditionalSections,
   workflowStages,
 } from "./workflow.manifest";
 
@@ -45,35 +35,15 @@ const scannedDirs = [
   path.join(repoRoot, "agent-pack", "agent-contracts"),
 ];
 
-// artifact -> { stageId, sections, trackConditional }
-// `sections` — максимальный набор (маршрут `figma`); `trackConditional` — те из них,
-// которых на других маршрутах не спрашивают.
-const requiredByArtifact = new Map<
-  string,
-  { stageId: string; sections: readonly string[]; trackConditional: readonly string[] }
->();
+// artifact -> { stageId, sections }
+const requiredByArtifact = new Map<string, { stageId: string; sections: readonly string[] }>();
 for (const stage of workflowStages) {
   for (const [artifact, sections] of Object.entries(stage.requiredSectionsByArtifact)) {
     if (sections.length === 0) continue;
     requiredByArtifact.set(artifact, {
       stageId: stage.id,
-      sections: getRequiredSectionsForStage(stage, artifact, "figma"),
-      trackConditional: [...getTrackConditionalSections(stage, artifact)],
+      sections: getRequiredSectionsForStage(stage, artifact),
     });
-  }
-}
-
-// Скелет обязан быть максимальным набором: маршрут только сужает требования, поэтому
-// набор `figma` обязан включать набор `code`.
-for (const stage of workflowStages) {
-  for (const artifact of Object.keys(stage.requiredSectionsByArtifact)) {
-    const figma = new Set(getRequiredSectionsForStage(stage, artifact, "figma"));
-    for (const section of getRequiredSectionsForStage(stage, artifact, "code")) {
-      assert.ok(
-        figma.has(section),
-        `${stage.id}/${artifact}: секция ${section} требуется на маршруте code, но не на figma — маршрут обязан сужать, а не менять набор`,
-      );
-    }
   }
 }
 
@@ -149,7 +119,6 @@ function extractSkeletons(file: string, content: string): Skeleton[] {
 const errors: string[] = [];
 let checkedSkeletons = 0;
 let collapsedSkeletons = 0;
-let trackNotesChecked = 0;
 
 for (const dir of scannedDirs) {
   const files = readdirSync(dir).filter((name) => name.endsWith(".md"));
@@ -187,30 +156,6 @@ for (const dir of scannedDirs) {
       );
     }
 
-    // Вторая проверка: маршрут-условность объяснена в том же файле, который читает агент.
-    const fileText = readFileSync(filePath, "utf8");
-    for (const skeleton of skeletons) {
-      const required = requiredByArtifact.get(skeleton.artifact);
-      if (!required || skeleton.sections.length === 0 || required.trackConditional.length === 0) continue;
-
-      trackNotesChecked += 1;
-      const missingNotes = required.trackConditional.filter(
-        (section) => !fileText.includes(section.replace(/^##\s+/, "")),
-      );
-      if (missingNotes.length > 0) {
-        errors.push(
-          `${skeleton.file}:${skeleton.line} — скелет ${artifactFiles[skeleton.artifact] ?? skeleton.artifact} ` +
-            `(стадия ${required.stageId}) не объясняет маршрут-условные секции: ${missingNotes.join(", ")}`
-        );
-      }
-
-      if (!fileText.includes("skipped_by_track")) {
-        errors.push(
-          `${skeleton.file}:${skeleton.line} — файл содержит развёрнутый скелет ${artifactFiles[skeleton.artifact] ?? skeleton.artifact} ` +
-            "с маршрут-условными секциями, но не называет `skipped_by_track`: агент не узнает, как оформить пропуск вне Figma-маршрута"
-        );
-      }
-    }
   }
 }
 
@@ -226,10 +171,8 @@ if (errors.length > 0) {
 assert.deepEqual(errors, []);
 // Защита от «тест ничего не нашёл и потому зелёный»: скелеты должны реально парситься.
 assert.ok(checkedSkeletons >= 10, `ожидалось минимум 10 развёрнутых скелетов, найдено ${checkedSkeletons}`);
-// Та же защита для новой проверки: маршрут-условные скелеты должны реально находиться.
-assert.ok(trackNotesChecked >= 2, `ожидалось минимум 2 скелета с маршрут-условными секциями, найдено ${trackNotesChecked}`);
 
 console.log(
   `agent output skeleton tests passed (проверено развёрнутых скелетов: ${checkedSkeletons}, ` +
-    `из них с маршрут-условными секциями: ${trackNotesChecked}, свёрнутых пропущено: ${collapsedSkeletons})`
+    `свёрнутых пропущено: ${collapsedSkeletons})`
 );

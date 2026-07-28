@@ -6,7 +6,6 @@ import { formatSkillUsageInspection, inspectSkillUsage } from "./skill-usage";
 const rows = inspectSkillUsage();
 const frontend = rows.find((row) => row.stageId === "08-frontend");
 const qa = rows.find((row) => row.stageId === "11-qa");
-const testBench = rows.find((row) => row.stageId === "10-test-bench");
 
 assert.ok(frontend, "frontend stage should be present");
 assert.ok(frontend.skills.some((skill) => skill.id === "landing-builder"), "frontend should use landing-builder");
@@ -16,8 +15,6 @@ assert.ok(frontend.skills.some((skill) => skill.id === "visual-layout-verifier")
 assert.ok(frontend.skills.some((skill) => skill.id === "design-engineering"), "frontend should use design-engineering");
 assert.ok(frontend.skills.some((skill) => skill.id === "ds-to-storybook"), "frontend should use ds-to-storybook");
 
-assert.ok(testBench, "test-bench stage should be present");
-assert.ok(testBench.skills.some((skill) => skill.id === "funnel-analytics-verifier"), "test-bench should use funnel analytics verifier");
 
 assert.ok(qa, "qa stage should be present");
 assert.ok(qa.skills.some((skill) => skill.id === "visual-diff-verifier"), "qa should use visual diff verifier");
@@ -55,7 +52,7 @@ for (const stageId of mobileGateStages) {
     `${stageId} (${row.agentName}) обязана использовать design-engineering: в нём живёт Mobile Device ` +
       "Acceptance Gate, у гейта нет отдельного валидатора. Проверь skills: в " +
       `agent-pack/agent-contracts/${row.agentName}.agent.md и owner_stage_ids в ` +
-      "agent-pack/skills/design-engineering/SKILL.md.",
+      ".claude/skills/design-engineering/SKILL.md.",
   );
 
   // Обёртка — то, что реально преднагружается субагенту. `inspectSkillUsage` читает
@@ -72,7 +69,6 @@ for (const stageId of mobileGateStages) {
 }
 
 const designEngineeringFiles = [
-  join(process.cwd(), "agent-pack", "skills", "design-engineering", "SKILL.md"),
   join(process.cwd(), ".claude", "skills", "design-engineering", "SKILL.md"),
 ];
 
@@ -95,7 +91,7 @@ const gateBody = fullGate.slice(fullGate.indexOf("## Mobile Device Acceptance Ga
 const scenarioCount = (gateBody.match(/^\d\.\s+\*\*/gm) ?? []).length;
 assert.ok(
   scenarioCount >= 5,
-  `agent-pack/skills/design-engineering/SKILL.md: в Mobile Device Acceptance Gate осталось ${scenarioCount} ` +
+  `.claude/skills/design-engineering/SKILL.md: в Mobile Device Acceptance Gate осталось ${scenarioCount} ` +
     "сценариев из пяти обязательных (скролл от касания, safe-area, оверлей, две ширины, позиция прокрутки).",
 );
 

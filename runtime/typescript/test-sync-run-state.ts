@@ -67,11 +67,7 @@ await withRun(async (runDir) => {
   assert.equal(written.status, "partial");
 });
 
-// --- Ось маршрута: `sync` и есть точка обхода anti-backdating -------------------------
-//
-// Измеренный дефект: `yarn workflow:sync --track code` переписывал `run-state.json` и
-// `run-meta.json` согласованно, поэтому расхождение записей — единственный сигнал, на
-// который смотрел валидатор, — исчезало (19 ошибок -> 9 без единого срабатывания защиты).
+// --- Общие помощники ------------------------------------------------------------------
 
 function writeIntakeArtifacts(runDir: string): void {
   writeArtifact(runDir, "run-plan.md", ["## Запрос", "## Ответы на вопросы intake", "## План этапов", "## Ограничения"]);
@@ -80,12 +76,12 @@ function writeIntakeArtifacts(runDir: string): void {
   writeArtifact(runDir, "recursive-brief.md", ["## Expansion", "## Deepening", "## Consolidation", "## Assumptions", "## Open Questions"]);
 }
 
-function writeTrackState(runDir: string, state: Record<string, unknown>): void {
+function writeRunState(runDir: string, state: Record<string, unknown>): void {
   writeFileSync(
     join(runDir, "run-state.json"),
     JSON.stringify({
-      run_id: "track-run",
-      goal: "Track goal",
+      run_id: "sync-run",
+      goal: "Sync goal",
       profile: "standard",
       scale: "full",
       status: "completed",
@@ -99,57 +95,6 @@ function writeTrackState(runDir: string, state: Record<string, unknown>): void {
   );
 }
 
-// Смена маршрута у run, где маршрут-зависимая стадия уже отработала, — отклонение, а не
-// синхронизация: `sync` обязан отказать, а не переписать обе записи молча.
-await withRun(async (runDir) => {
-  writeIntakeArtifacts(runDir);
-  writeTrackState(runDir, { track: "figma", stages: { "08-frontend": { id: "08-frontend", title: "Frontend", status: "completed", attempts: 1, artifacts: [], updated_at: "" } } });
-
-  await assert.rejects(
-    () => syncWorkflowRunState({ outputDir: runDir, track: "code", preview: false }),
-    /Track cannot be changed from 'figma' to 'code'/,
-  );
-});
-
-// Отсутствие поля маршрута читается так же строго, как его читает валидатор (`figma`):
-// иначе исторический run молча переобъявлялся бы как честный `code`.
-await withRun(async (runDir) => {
-  writeIntakeArtifacts(runDir);
-  writeTrackState(runDir, { stages: { "06-screens": { id: "06-screens", title: "Screens", status: "completed", attempts: 1, artifacts: [], updated_at: "" } } });
-
-  await assert.rejects(
-    () => syncWorkflowRunState({ outputDir: runDir, track: "code", preview: false }),
-    /Track cannot be changed from 'figma' to 'code'/,
-  );
-});
-
-// Смена маршрута ДО того, как маршрут-зависимая стадия отработала, законна — но остаётся
-// видимой в append-only журнале.
-await withRun(async (runDir) => {
-  writeIntakeArtifacts(runDir);
-  writeTrackState(runDir, { track: "figma" });
-
-  const result = await syncWorkflowRunState({ outputDir: runDir, track: "code", preview: false });
-  assert.deepEqual(
-    result.nextState.track_history?.map((record) => record.track),
-    ["figma", "code"],
-    "журнал маршрутов обязан хранить обе записи, а не только текущую",
-  );
-
-  // Повторный sync без смены маршрута ничего не добавляет: журнал append-only, а не лог вызовов.
-  const again = await syncWorkflowRunState({ outputDir: runDir, preview: false });
-  assert.deepEqual(again.nextState.track_history?.map((record) => record.track), ["figma", "code"]);
-});
-
-// `--force-track` разрешает отклонение явно — и всё равно оставляет след в журнале.
-await withRun(async (runDir) => {
-  writeIntakeArtifacts(runDir);
-  writeTrackState(runDir, { track: "figma", stages: { "08-frontend": { id: "08-frontend", title: "Frontend", status: "completed", attempts: 1, artifacts: [], updated_at: "" } } });
-
-  const forced = await syncWorkflowRunState({ outputDir: runDir, track: "code", forceTrack: true, preview: false });
-  assert.deepEqual(forced.nextState.track_history?.map((record) => record.track), ["figma", "code"]);
-});
-
 // --- Тот же обход у оси масштаба: sync стирал улику ------------------------------------
 //
 // Anti-backdating масштаба смотрит на записи о стадиях вне масштаба («масштаб исключает
@@ -158,9 +103,8 @@ await withRun(async (runDir) => {
 // измерено 32 ошибки -> 29.
 await withRun(async (runDir) => {
   writeIntakeArtifacts(runDir);
-  writeTrackState(runDir, {
+  writeRunState(runDir, {
     scale: "increment",
-    track: "code",
     stages: {
       "06-screens": { id: "06-screens", title: "Screens", status: "completed", attempts: 1, artifacts: [], updated_at: "" },
       "10-test-bench": { id: "10-test-bench", title: "Test Bench", status: "pending", attempts: 0, artifacts: [], updated_at: "" },

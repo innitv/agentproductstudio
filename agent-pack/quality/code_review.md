@@ -15,7 +15,7 @@
 
 ## Проектные проверки
 
-- Frontend должен соответствовать текущим артефактам `prd.md`, `ia-brief.md`, `design-brief.md`, `screens.md`, `copy-deck.md`, `prototype-report.md`.
+- Frontend должен соответствовать текущим артефактам `prd.md`, `ia-brief.md`, `design-brief.md`, `screens.md`, `copy-deck.md`.
 - Если есть visual reference, проверяй `reference-analysis.md` и `visual-reference-review.md`.
 - Не допускай claims без источников или пометки `needs_validation`.
 - Не коммить `.env`, traces, screenshots, local logs и generated reports без явной причины.

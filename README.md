@@ -20,14 +20,12 @@
 ## Как это работает
 
 ```text
-request → recursive brief → research → PRD → IA → design → copy → screens → prototype
-                                                                                 │
-                                              🔴 только track=figma: человек утверждает макеты
-                                                                                 │
-                                                    frontend → test bench → QA → release
+request → recursive brief → research → PRD → IA → design → copy → screens
+                                                                       │
+                                                                       │
+                                                    frontend → QA → release
 ```
 
-На умолчании `track: code` гейта утверждения нет: макета, который можно утвердить до вёрстки, там не существует. Вместо него человек смотрит готовые экраны в витрине Storybook, а качество держит машинная приёмка.
 
 Оркестратор — это главная сессия Claude Code. Она владеет маршрутизацией, гейтами и финальным ответом, а специалистов вызывает как ограниченные capabilities: они получают входы, возвращают структурированный результат и не подменяют общий статус workflow.
 
@@ -50,11 +48,11 @@ yarn workflow:doctor
 | --- | --- |
 | `/workflow-start`, `/workflow-resume`, `/workflow-status` | Управление запуском: intake и scaffold, продолжение с последнего этапа, статус стадий и gates |
 | `/doctor` | Self-check окружения, ключей и шаблонов |
-| `/research` → `/prd` → `/ia` → `/design` → `/copy` → `/screens` → `/prototype` | Стадии `01`-`07`: от research pack до карты переходов |
-| `/frontend` → `/visual-diff` → `/test-bench` → `/qa` → `/release` | Стадии `08`-`12`: реализация, сверка с референсом, воронка, аудит, релиз |
+| `/research` → `/prd` → `/ia` → `/design` → `/copy` → `/screens` | Стадии `01`-`06`: от research pack до спецификации экранов |
+| `/frontend` → `/visual-diff` → `/qa` → `/release` | Стадии `08`-`12`: реализация, сверка с референсом, аудит, релиз |
 | `/notion-publish` | Публикация research pack в Notion после approval |
 
-### Три оси запуска
+### Две оси запуска
 
 Запуск описывается тремя независимыми осями, которые фиксируются на intake и живут в `run-state.json`:
 
@@ -62,7 +60,6 @@ yarn workflow:doctor
 | --- | --- | --- |
 | `profile` | `standard` · `reference` | нужна ли сверка с внешним визуальным референсом (`09-visual-reference`) |
 | `scale` | `full` · `increment` · `patch` | глубина: сколько стадий реально нужно |
-| `track` | `code` (дефолт) · `figma` | через какой инструмент производится макет |
 
 #### Масштаб: не каждая задача стоит 13 стадий
 
@@ -81,17 +78,6 @@ yarn workflow:doctor
 ```bash
 yarn workflow:start "цель" --scale increment
 yarn workflow:validate outputs/<slug>/<date> --scale increment
-```
-
-#### Маршрут: через что производится макет
-
-`track` — третья ось, независимая от двух других. Дефолт студии — `code`: спецификация экранов плюс shadcn/ui и Storybook как витрина состояний, без Figma. `figma` включается, когда макет действительно собирается на холсте.
-
-Маршрут режет **только состав Figma-специфичных секций** `screens.md` и `frontend-result.md`. Стадии, approval gates, run ledger и машинная приёмка одинаковы на обоих. Figma-**артефакты** на `code` не создаются и записи в журнале не требуют вовсе; Figma-**секции** закрываются строкой `skipped_by_track` в `stage-gate-ledger.md` и проверяются машинно. Маршрут читается из `run-state.json`, а не угадывается по наличию файлов, и задним числом не меняется. Правила — CLAUDE.md §0.3.
-
-```bash
-yarn workflow:start "цель" --track figma
-yarn workflow:validate outputs/<slug>/<date> --track figma
 ```
 
 ### Дизайн-система и витрина
@@ -119,13 +105,12 @@ Skills подключаются автоматически по описанию
 | --- | --- |
 | `CLAUDE.md` | Главные правила: маршрутизация, язык, approvals, gates, source of truth |
 | `.claude/agents/` | Нативные обёртки 12 субагентов-специалистов + чек-лист оркестратора (вызов через `Agent`, `subagent_type` = имя; `Task` работает как alias). Оркестратор — это главная сессия, а не субагент: его спавн запрещён механически через `permissions.deny` в `.claude/settings.json` |
-| `.claude/skills/` | Обёртки skills; полные процедуры — в `agent-pack/skills/` |
+| `.claude/skills/` | Навыки: процедура, метаданные и validation commands в одном файле |
 | `.claude/commands/` | Slash-команды этапов и управления workflow |
 | `.claude/hooks/` | Hooks сессии: session-start, orchestrator-reminder, guard-write, guard-bash, post-edit-sync |
 | `.claude/settings.json` | Модель, permissions, разрешённые команды, hooks |
 | `.mcp.json` | MCP-серверы: figma, figmaDesktop, notion, tavily, playwright, github, gitlab, lazyweb |
-| `agent-pack/agent-contracts/` | Детальные контракты специалистов: orchestrator, research, prd, ia, design, design-generator, copywriting, prototype, frontend, test-bench, qa-review, release, notion-publisher |
-| `agent-pack/skills/` | Детальные процедуры skills: approval-gate, research-pack, anti-ai-slop, run-ledger, figma-*, visual-*, landing-builder и другие |
+| `agent-pack/agent-contracts/` | Детальные контракты специалистов: orchestrator, research, prd, ia, design, design-generator, copywriting, frontend, qa-review, release, notion-publisher |
 | `agent-pack/workflows/` | Маршруты, handoff-контракты, детальные gates (`claude-operating-rules.md`), продуктовый pipeline |
 | `agent-pack/quality/`, `agent-pack/guardrails/` | Quality gates, approval matrix, sensitive data policy |
 | `agent-pack/schemas/`, `agent-pack/artifacts/` | JSON Schema для structured outputs и шаблоны артефактов |
@@ -144,13 +129,12 @@ Skills подключаются автоматически по описанию
 Читать в этом порядке, а не пересказ здесь:
 
 - [CLAUDE.md](CLAUDE.md) — операционный контракт Claude Code в этом репозитории. Если README и контракт расходятся, прав контракт.
-- [agent-pack/workflows/claude-operating-rules.md](agent-pack/workflows/claude-operating-rules.md) — полный текст детальных gates: Surface-Aware Output Framework, Visual Evidence Grounding, Anti-AI-Slop, research и Notion, маршрут `track` и оформление «Figma не участвует», Design System Strategy Gate, Storybook Showcase Gate, Machine Acceptance Gate, Figma и product UI, approval.
+- [agent-pack/workflows/claude-operating-rules.md](agent-pack/workflows/claude-operating-rules.md) — полный текст детальных gates: Surface-Aware Output Framework, Visual Evidence Grounding, Anti-AI-Slop, research и Notion, Design System Strategy Gate, Storybook Showcase Gate, Machine Acceptance Gate, Figma и product UI, approval.
 - [agent-pack/workflows/artifact-driven-pipeline.md](agent-pack/workflows/artifact-driven-pipeline.md) — полный product workflow и run ledger.
 - [agent-pack/guardrails/approval-matrix.md](agent-pack/guardrails/approval-matrix.md) — что требует подтверждения человека и с какой точной целью.
 
 Коротко о главном: `quick draft` включается только по явной фразе пользователя; новое создаётся только для доказанного gap, а существующее переиспользуется; нарушение уже существующего правила записывается как `process_deviation`, а не как «поправка пользователя».
 
-**Гейт утверждения макетов — только на маршруте `figma`.** Там frontend заблокирован до явного «ок» человека (`agent-pack/workflows/claude-operating-rules.md`, порядок reference-scan и Figma write). На умолчании `track: code` этого гейта нет намеренно: макета, который можно утвердить до вёрстки, там не существует — вместо него человек смотрит готовые экраны в витрине Storybook и правит словами, а качество держит машинная приёмка (`vr:test`, `test-storybook`, `qa:mobile`). Прежняя формулировка обещала гейт безусловно и на кодовом маршруте была невыполнима.
 
 `AGENTS.md` — только указатель на `CLAUDE.md` для сторонних агентов (Codex, OpenCode), а не источник правил.
 

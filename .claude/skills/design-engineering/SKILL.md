@@ -1,43 +1,98 @@
 ---
+id: design-engineering
 name: design-engineering
-description: Использовать на этапах 08-frontend и 11-qa для проверки UI motion, interaction states, easing, reduced motion, focus и hover behavior, а также для обязательной мобильной приёмки в профиле устройства (тач-скролл, safe-area, оверлеи, позиция прокрутки). Skill проверяет невидимые детали интерфейса, которые не воспроизводятся узким desktop-вьюпортом.
+title: "Motion И Interaction Polish"
+description: "Использовать на этапах 08-frontend и 11-qa для проверки UI motion, interaction states, easing, reduced motion, focus и hover behavior, а также для обязательной мобильной приёмки в профиле устройства (тач-скролл, safe-area, оверлеи, позиция прокрутки). Skill проверяет невидимые детали интерфейса, которые не воспроизводятся узким desktop-вьюпортом."
+platforms:
+  - claude
+mcp_servers:
+  - playwright
+strictness_profile: strict
+owner_stage_ids:
+  - 08-frontend
+  - 11-qa
+required_inputs:
+  - design_brief
+  - screens
+  - frontend_result
+required_outputs:
+  - frontend_result
+approval_actions: []
+validation_commands:
+  - yarn typecheck
+  - yarn build
+contract_schema: agent-pack/templates/skill.template.md
 ---
 
-# Motion И Interaction Polish
+# Skill: Motion И Interaction Polish
 
-Skill проверяет невидимые детали интерфейса: feedback, motion, focus, active states и reduced-motion behavior. Применяется, когда UI уже реализован и нужно убедиться, что критичные user actions ведут себя корректно во всех состояниях. Работает поверх `design-brief.md`, `screens.md`, `prototype-report.md` и `frontend-result.md`.
+## Назначение
 
-**Полная процедура, входы/выходы, gates и validation-команды — в [`agent-pack/skills/design-engineering/SKILL.md`](../../../agent-pack/skills/design-engineering/SKILL.md). Следуй ей.**
+Проверяет невидимые детали интерфейса: feedback, motion, focus, active states и reduced-motion behavior.
 
-## Когда использовать
-- Этап 08-frontend: проверка motion, interaction states и easing после реализации UI.
-- Этап 11-qa: финальная проверка focus/hover/active/reduced-motion поведения.
-- Поверхность мобильная (сценарий на телефоне, мобильные макеты, деплой открывают с телефона) — обязательна мобильная приёмка, см. ниже.
-- Есть `figma-handoff-bundle.md` и нужно убедиться, что motion/state rules и component variants не потерялись при переносе в код.
-- Нужно проверить Component Contract Matrix: Figma properties/values имеют React prop mapping.
+## Порядок Работы
 
-## Ключевые шаги
-- Прочитай `design-brief.md`, `screens.md`, `prototype-report.md`, `frontend-result.md`.
-- Определи критичные user actions: primary CTA, navigation, form submit, modal open/close, selected row/card, filter/sort/search.
-- Проверь каждый action в состояниях default, hover, focus, active/pressed, disabled, loading, error, success.
-- Проверь reduced-motion behavior и focus visibility.
-- Зафиксируй результат в `frontend-result.md`.
+1. Прочитай `design-brief.md`, `screens.md` и `frontend-result.md`.
+2. Если есть `figma-handoff-bundle.md`, проверь, что motion/state rules и component variants не потерялись при переносе в код.
+2a. Проверь Component Contract Matrix: Figma properties/values должны иметь React prop mapping, state story/test/locator или explicit deviation.
+3. Определи критичные user actions: primary CTA, navigation, form submit, modal/open close, selected row/card, filter/sort/search.
+4. Проверь каждый action в состояниях default, hover, focus, active/pressed, disabled, loading, error и success.
+5. Для визуально значимой UI-задачи проверь desktop/mobile через browser/Playwright screenshots или зафиксируй blocker. Мобильную часть веди по **Mobile Device Acceptance Gate** ниже: профиль устройства, а не узкий desktop-вьюпорт.
 
-## Mobile Device Acceptance Gate (полная норма — §Mobile Device Acceptance Gate)
+## Checklist
 
-Без приёмки в **профиле устройства** (`isMobile: true`, `hasTouch: true`, настоящие тач-жесты) мобильная поверхность не получает `success` на 08 (потолок `partial`) и на 11 не получает **ни `pass`, ни `pass_with_known_limitations`** — непроверенный обязательный гейт это `blocker`, вердикт `blocked`. Узкий desktop-вьюпорт (`setViewportSize`) приёмкой **не считается** — картинка похожа, touch/safe-area/`visualViewport` не воспроизводятся.
+- Не использовать `transition: all`.
+- UI-анимации имеют цель и обычно короче 300ms.
+- Entry UI motion использует responsive easing, не `ease-in`.
+- Не начинать появление интерактивных элементов с `scale(0)`.
+- Hover-анимации включать только через `@media (hover: hover) and (pointer: fine)`.
+- Transform-based motion имеет `prefers-reduced-motion`.
+- Кнопки и pressable elements имеют active feedback.
+- Focus states видимы с клавиатуры.
+- Disabled/loading/error/empty/success states не ломают layout.
+- Частые keyboard actions не получают декоративную анимацию.
+- Длинный текст не меняет высоту fixed controls, не выталкивает icons и не создает horizontal overflow.
+- Figma-driven component имеет state story/route и paired screenshot для must-cover states.
+- Новый bespoke primitive не дублирует существующий production contract без `gap_reason`.
+- Dashboard/console interactions не превращаются в декоративный motion; priority отдается scanability, predictability и repeated-use ergonomics.
+- Landing/marketing interactions поддерживают narrative flow, но не скрывают primary CTA и brand/product signal.
 
-Минимум пять сценариев с `pass|fail|not_applicable`:
-1. скролл от касания **интерактивного** элемента, обе оси (ассерт по `scrollTop`/`scrollLeft`);
-2. fixed/sticky и фон против `env(safe-area-inset-*)`, `viewport-fit=cover`, `theme-color`;
-3. появление оверлея/баннера/клавиатуры: не обрезан, не сжимает страницу;
-4. композиция минимум на **двух** реальных ширинах устройств (например 390 и 430);
-5. `scrollTop` не прыгает при смене состояния (частая причина — размонтирование узла).
+## Mobile Device Acceptance Gate
 
-Каркас не пишется с нуля: шаблон [`agent-pack/templates/mobile-acceptance.template.mjs`](../../../agent-pack/templates/mobile-acceptance.template.mjs) копируется в тесты продукта (`mobile-acceptance.check.mjs`), заполняется только блок `CONFIG`; незаполненный падает с кодом 2, заполненный пишет `mobile-acceptance.json` со статусами пяти сценариев и строкой `engine_limitation`. В этом репозитории запуск — `yarn qa:mobile` поверх поднятого превью сборки.
+Норма мобильной приёмки живёт здесь; остальные документы ссылаются сюда и не повторяют её.
 
-Строка `engine_limitation` (Chromium ≠ WebKit, что именно не проверено, подтверждение — живое устройство) пишется **каждый раз**; если приёмка выполнена, но строки нет, статус не выше `pass_with_known_limitations`. Результат — в `frontend-result.md` / секцию `Responsive` в `qa-report.md`.
+**Когда применяется.** Поверхность мобильная, если верно хотя бы одно: целевой сценарий заявлен на телефоне в `prd.md`/`design-brief.md`/`screens.md`; макеты сделаны в мобильной ширине; результат деплоится и открывается пользователем с телефона; в scope есть mobile web/app. Сомневаешься — считай мобильной.
 
-## Обязательные проверки
-- `yarn typecheck`
-- `yarn build`
+**Гейт.** Без приёмки в профиле устройства мобильная поверхность не получает `success` на `08-frontend` (потолок — `partial`) и не получает на `11-qa` **ни `pass`, ни `pass_with_known_limitations`**: непроверенный обязательный гейт — это `blocker` по QA Severity Model, вердикт `blocked`. Формулировка «известное ограничение» не покрывает непроведённую проверку — ограничением можно назвать только то, что измерено. Отдельный случай: приёмка выполнена, но строка `engine_limitation` не записана — тогда потолок `pass_with_known_limitations`. Приёмка — прогон в device profile (Playwright `devices['iPhone 15']` или эквивалент: `isMobile: true`, `hasTouch: true`, `deviceScaleFactor` устройства) с настоящими тач-жестами (`page.touchscreen.*`, `touchstart/touchmove/touchend`), а не мышью. **Узкий desktop-вьюпорт (`setViewportSize`, `--window-size`) приёмкой не считается**: картинка похожа, но touch-события, safe-area и `visualViewport` не воспроизводятся. В отчёте называй использованный профиль; «проверено на мобильном разрешении» записью приёмки не является.
+
+**Минимальный набор сценариев.** Каждый выведен из бага, который прошёл все desktop-проверки и всплыл на живом iPhone (`contractor-payment-demo`, 2026-07-23…25). Для каждого — `pass|fail|not_applicable` с причиной:
+
+1. **Скролл от касания контента.** Свайп начинается на интерактивном элементе (карточка, строка, кнопка), а не на пустом фоне; проверяются **обе оси**. Ассерт — изменение `scrollTop`/`scrollLeft` после жеста. Типичные причины провала: pointer/drag-обработчик глушит жест; `overflow-x` делает контейнер скроллером в обеих осях и перехватывает вертикальную.
+2. **Fixed/sticky и фон против safe-area.** `env(safe-area-inset-*)`, `viewport-fit=cover`, `theme-color`: закреплённые панели не заезжают под системные зоны, фон страницы не «протекает» в них чужим цветом. Ассерт — координаты элемента относительно вьюпорта плюс фактический цвет пикселя в зоне вставки.
+3. **Появление оверлея/баннера/клавиатуры.** Элемент не обрезан, перекрывает контент, а не сжимает страницу (нет layout shift основной композиции).
+4. **Композиция минимум на двух реальных ширинах устройств** (например 390 и 430 CSS px). Одна ширина скрывает переполнение и точки переноса.
+5. **Позиция прокрутки при смене состояния.** После появления/исчезновения оверлея, смены таба или перерисовки списка `scrollTop` не прыгает. Типичная причина: узел размонтирован (смена ключа `AnimatePresence`, условный рендер) — `scrollTop` живёт в DOM, а не в состоянии React, и теряется вместе с узлом.
+
+Новый ассерт проходит негативный контроль: на коде до исправления он обязан падать (см. `visual-diff-verifier` §3.3).
+
+**Каркас приёмки.** Исполняемый шаблон пяти сценариев — `agent-pack/templates/mobile-acceptance.template.mjs`: копируется в тесты продукта (обычно под именем `mobile-acceptance.check.mjs`), заполняется блок `CONFIG` (маршруты, селекторы, ожидания), механика (профиль устройства, тач-жесты через CDP, замер `scrollTop`, пиксель системной зоны, перебор ширин) не переписывается. В этом репозитории заполненный каркас запускается командой `yarn qa:mobile` поверх поднятого превью сборки; коды выхода: `0` — приёмка пройдена, `1` — есть провалившийся сценарий, `2` — `CONFIG` не заполнен. Незаполненный шаблон падает с кодом 2 и списком полей, приёмку не запускает. Результат — `mobile-acceptance.json` (`schema: mobile-acceptance/v1`): профиль устройства, статус `pass|fail|not_applicable` по каждому из пяти сценариев со стабильными `id`, строка `engine_limitation`; структура описана в шапке шаблона.
+
+**Граница движка — записывается в отчёт каждый раз.** Chromium с профилем устройства — не WebKit. Локально не воспроизводятся: тонирование системных панелей Safari по `theme-color`/фону страницы, поведение `visualViewport` при появлении панелей и клавиатуры, захват оси вложенным скроллером, resize от сворачивания адресной строки. Формулировка для отчёта:
+
+`engine_limitation: приёмка в Chromium device profile <profile>; WebKit/Safari-специфика (<что именно не проверено>) локально не воспроизводится, финальное подтверждение — живое устройство.`
+
+Без этой строки статус не выше `pass_with_known_limitations`: отсутствие записи означает, что ограничение не осознано, а не что его нет.
+
+**Куда пишется:** `frontend-result.md` (08-frontend) и секция `Responsive` в `qa-report.md` (11-qa) — профиль, таблица пяти сценариев, строка `engine_limitation`.
+
+## Evidence
+
+Результат проверки фиксируется в `frontend-result.md`, `qa-report.md` или `storybook-result.md` в зависимости от stage.
+
+Минимальная evidence-запись:
+
+- какие critical actions проверены;
+- какие viewport checks выполнены; для мобильной поверхности — использованный device profile, таблица пяти сценариев Mobile Device Acceptance Gate и строка `engine_limitation`;
+- где проверены keyboard focus и reduced motion;
+- какие deviations от `figma-handoff-bundle.md` оставлены намеренно;
+- какие issues требуют follow-up.

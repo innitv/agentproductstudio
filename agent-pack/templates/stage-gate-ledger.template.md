@@ -7,7 +7,6 @@
 - Goal:
 - Profile: standard | reference
 - Scale: full | increment | patch   <!-- CLAUDE.md §0.2; не уверен — full -->
-- Track: code | figma   <!-- CLAUDE.md §0.3; дефолт нового запуска — code (shadcn/ui + Storybook) -->
 
 ## Правило (Rule)
 
@@ -22,14 +21,12 @@
 - external writes имеют явную approval-запись в `approval-state.json`; если последняя matching-запись является denial, действие считается заблокированным;
 - `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard` не возвращает ошибок для пакета стандартного профиля (standard profile) без визуального референса;
 - `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference` не возвращает ошибок для пакета профиля референса (reference profile) с визуальным референсом;
-- маршрут (`track`) зафиксирован ДО первых стадий; секции, которые маршрут не требует, перечислены ниже со статусом `skipped_by_track` (стадия + секция). Маршрут не меняется задним числом: валидатор отклонит run, где маршрут-зависимая стадия уже отработала под другим маршрутом. Определять маршрут по наличию `figma-layout-ir.json` запрещено — он берётся из `run-state.json`;
 - если run идёт не на полном масштабе, стадии вне масштаба отмечены статусом `skipped_by_scale` с указанием масштаба ДО их старта; масштаб не понижается задним числом (валидатор отклонит run, где стадия вне масштаба уже отработала);
 - в случае настройки интеграции с Notion на стадии релиза подготовлен Agile export plan/dry-run, а внешняя запись Agile-доски выполнена только при наличии exact approval `notion_agile_export` для целевой страницы/базы.
 
 ## Статус этапов (Stage Status)
 
 Статусы: `pending` | `success` | `partial` | `blocked` | `skipped_with_reason` | `skipped_by_scale`.
-Статус `skipped_by_track` относится к СЕКЦИЯМ, а не к стадиям, и живёт в таблице «Секции вне маршрута» ниже.
 Ниже — полный набор стадий (масштаб `full`). При `increment`/`patch` отметь исключённые стадии как `skipped_by_scale`, а не удаляй строки: пропуск должен быть виден. Это проверяется машинно — на полном прогоне `yarn workflow:validate` возвращает ошибку для каждой стадии вне масштаба, у которой здесь нет строки `skipped_by_scale`.
 
 | Этап | Владелец | Обязательные артефакты | Статус | Заметки ворот качества |
@@ -41,21 +38,10 @@
 | 04-design | design | `design-brief.md` | pending |  |
 | 05-copy | copywriting | `copy-deck.md` | pending | Вне масштаба patch -> `skipped_by_scale` |
 | 06-screens | design-generator | `screens.md` | pending | Вне масштаба patch -> `skipped_by_scale` |
-| 07-prototype | prototype | `prototype-report.md` | pending | Вне масштабов increment/patch -> `skipped_by_scale` |
 | 08-frontend | frontend | `frontend-result.md` | pending |  |
 | 09-visual-reference | qa-review | `visual-reference-review.md` | skipped | Только для reference profile |
-| 10-test-bench | test-bench | `test-bench-result.md` | pending | Вне масштабов increment/patch -> `skipped_by_scale` |
 | 11-qa | qa-review | `qa-report.md` | pending |  |
 | 12-release | release | `release-notes.md` | pending | Вне масштаба patch -> `skipped_by_scale` |
-
-## Секции вне маршрута (Sections Skipped By Track)
-
-Положительная запись о пропуске: она проверяется машинно в три стороны. Пропуск секции, которую текущий маршрут требует, — ошибка; пропуск секции, которой нет ни в одном маршруте, — тоже ошибка (протухшая запись); секция, снятая маршрутом, но **не закрытая строкой** здесь, — ошибка, как только стадия отдала свой артефакт. Строка обязана называть стадию и секцию.
-
-Маршрут `code` не требует: `06-screens` -> `## Layout Compiler Contract`, `## Figma Readiness`; `08-frontend` -> `## Design System Implementation`, `## Component Contract Implementation`, `## Frame / State Implementation Map`, `## Figma Visual QA Gate Summary`, `## Figma Roundtrip Deviations`. Точный список даёт `yarn workflow:validate <run-dir> --track <track>`.
-
-| Этап | Артефакт | Секция | Статус | Причина |
-|---|---|---|---|---|
 
 ## Запуски валидации (Validation Runs)
 

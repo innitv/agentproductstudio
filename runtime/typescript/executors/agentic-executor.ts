@@ -15,7 +15,7 @@ import { formatEnabledAgenticStages, isAgenticStageEnabled } from "../agentic-ro
 import { requireApproval } from "../approval-gate";
 import { routeTools } from "../route.config";
 import { agentOutputStatusToStageStatus } from "../status-resolver";
-import { artifactFiles, getRequiredArtifactsForStage, getRequiredSectionsForStage, legacyWorkflowTrack } from "../workflow-stages";
+import { artifactFiles, getRequiredArtifactsForStage, getRequiredSectionsForStage } from "../workflow-stages";
 import { nowIso, type WorkflowStageResult, type WorkflowStageStatus } from "../workflow-state";
 import { formatLedgerCell, stageResult } from "./executor-common";
 import type { WorkflowStageExecutorContext } from "./types";
@@ -87,7 +87,7 @@ export async function executeAgenticStage(context: WorkflowStageExecutorContext)
 
   for (const artifactName of requiredArtifacts) {
     const file = artifactFiles[artifactName];
-    const sections = getRequiredSectionsForStage(context.stage, artifactName, context.track ?? legacyWorkflowTrack);
+    const sections = getRequiredSectionsForStage(context.stage, artifactName);
     if (parsedOutput.envelope && !hasArtifactOutput(parsedOutput.envelope, artifactName, file)) {
       warnings.push(`${file}: agent output contract did not include outputs.${artifactName} or outputs.${file}`);
     }
@@ -161,7 +161,7 @@ async function writeBlockedAgenticArtifacts(
       continue;
     }
 
-    const sections = getRequiredSectionsForStage(context.stage, artifactName, context.track ?? legacyWorkflowTrack);
+    const sections = getRequiredSectionsForStage(context.stage, artifactName);
     const content = renderBlockedAgenticArtifact({
       title: context.stage.title,
       stageId: context.stage.id,
@@ -233,7 +233,7 @@ async function buildSpecialistPrompt(
   // секция не должна попадать даже в задание агенту — сужение до генерации сильнее
   // прощения после.
   const requiredSections = requiredArtifacts.flatMap((artifact) =>
-    getRequiredSectionsForStage(context.stage, artifact, context.track ?? legacyWorkflowTrack),
+    getRequiredSectionsForStage(context.stage, artifact),
   );
 
   return [

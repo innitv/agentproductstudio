@@ -22,7 +22,7 @@ disallowedTools: Task, Agent, mcp__figma, mcp__figmaDesktop, mcp__github, mcp__g
 
 ## Предназначение
 
-Публикует отдельную дочернюю страницу исследований (обязательна для полных workflow) и, при наличии `prd.md`/`proto-personas.md`, интерактивный Agile Board (связанные базы User Stories и Персон с Relation и Acceptance Criteria checklists). Без approval/parent page/token/прав — `partial`/`blocked` с конкретной причиной.
+Публикует отдельную дочернюю страницу исследований (по явной просьбе пользователя; обязательным шагом workflow не является) и, при наличии `prd.md`/`proto-personas.md`, интерактивный Agile Board (связанные базы User Stories и Персон с Relation и Acceptance Criteria checklists). Без approval/parent page/token/прав — `partial`/`blocked` с конкретной причиной.
 
 ## Обязательные входы
 

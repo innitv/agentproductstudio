@@ -10,7 +10,7 @@
 
 - **Оркестратор** — это главная сессия Claude Code (main loop). Она владеет пользовательским запросом, маршрутизацией, gates и финальным ответом. Инструкция оркестратора: `.claude/agents/orchestrator.md`.
 - **Специалисты** — субагенты в `.claude/agents/*.md`. Оркестратор вызывает их через `Agent` tool (в Claude Code v2.1.63 `Task` переименован в `Agent`; `Task` продолжает работать как alias). Параметр `subagent_type` = имя агента. Каждый субагент работает в изолированном контексте, возвращает структурированный результат и не подменяет общий статус workflow. Полные контракты специалистов (frontmatter, required inputs/outputs, gates) остаются в `agent-pack/agent-contracts/*.agent.md` и являются детальным источником правды; `.claude/agents/*.md` — это нативная Claude-обёртка, которая ссылается на них.
-- **Навыки (skills)** — в `.claude/skills/*/SKILL.md`. Claude Code обнаруживает их автоматически и подключает по описанию. Детальные процедуры навыков остаются в `agent-pack/skills/*/SKILL.md` (их валидирует runtime).
+- **Навыки (skills)** — в `.claude/skills/*/SKILL.md`. Claude Code обнаруживает их автоматически и подключает по описанию. Процедура навыка, метаданные и validation commands живут в одном файле — его же валидирует runtime.
 - **Slash-команды** — в `.claude/commands/*.md`. Они запускают этапы workflow (`/research`, `/prd`, `/frontend`, `/workflow-start`, `/workflow-status` и т.д.). Соответствуют триггер-фразам из раздела 12.
 - **Конфигурация** — `.claude/settings.json` (модель, permissions, разрешённые команды) и `.mcp.json` (MCP-серверы: figma, figmaDesktop, notion, tavily, playwright, github, gitlab, lazyweb). Пример MCP-конфигурации: `integrations/mcp/mcp-servers.example.json`. Секреты — только в `.env` по `.env.example`.
 
@@ -20,7 +20,7 @@
 
 В начале каждой задачи Claude обязан определить тип работы и выбрать минимально достаточный маршрут:
 
-- `full product workflow`: новый продуктовый запрос, где нужны intake, research, PRD, IA, design, copy, screens, prototype, frontend, QA и release artifacts.
+- `full product workflow`: новый продуктовый запрос, где нужны intake, research, PRD, IA, design, copy, screens, frontend, QA и release artifacts.
 - `reference-driven workflow`: пользователь дал URL, screenshot, Dribbble/Figma/reference или просит «как этот сайт»; обязательны reference scan, `reference-analysis.md`, visual spec и `visual-reference-review.md`.
 - `quick draft`: разрешен только по явной фразе пользователя; результат помечается `partial`/`draft`, а не `success`.
 - `limited engineering task`: узкая правка кода, документации, runtime или rules; можно использовать task-scoped ExecPlan вместо полного product workflow.
@@ -51,27 +51,6 @@
 - **Опрос записывается в `run-plan.md`** разделом `## Ответы на вопросы intake` — это косвенный гейт опроса. Прямого быть не может: вопросы задаются до создания каталога запуска, поэтому валидатор видит не факт вопроса, а только запись о нём. Три легитимных случая «не спрашивали» (ответ уже дан в запросе, непродуктовый тип работы, `quick draft`) **тоже требуют записи** с причиной: проверяется наличие записи, а не факт вопроса, и пустота не является ни одним из трёх случаев. Отсутствие раздела — ошибка `yarn workflow:validate`.
 
 Проверка: `yarn workflow:validate <run-dir> --scale <scale>`; старт — `yarn workflow:start "<goal>" --scale <scale>`; run без поля `scale` читается как `full`.
-
-### 0.3. Track: маршрут производства макета
-
-Третья ось запуска, независимая от `profile` и `scale`. Profile — «какого типа задача», scale — «какого она размера», **track — через какой инструмент идёт производство макета**. Маршрут фиксируется на `00-intake` ответом на вопрос «Нужен макет в Figma перед вёрсткой?» (§0.2, опрос на старте), пишется в `run-state.json` (`track`) и передаётся флагом `--track`.
-
-| Track | Когда | Что добавляется |
-|---|---|---|
-| `code` (дефолт нового запуска) | Умолчание студии (§6.1): спецификация экранов + shadcn/ui + Storybook как витрина состояний | ничего сверх ядра |
-| `figma` | Макет собирается на холсте Figma | `## Layout Compiler Contract`, `## Figma Readiness` в `screens.md`; `## Design System Implementation`, `## Component Contract Implementation`, `## Frame / State Implementation Map`, `## Figma Visual QA Gate Summary`, `## Figma Roundtrip Deviations` в `frontend-result.md`; те же поля в схемах |
-
-Правила (обязательные):
-
-- **Режется только состав Figma-специфичных секций и полей схемы.** Стадии, approval gates, run ledger, Anti-AI-Slop, Russian Publication Gate и статусы одинаковы на обоих маршрутах. Маршрут — НЕ способ обойти гейт. `## Component Contract Matrix` и `## Frame / State Implementation Map` в `screens.md` обязательны на обоих маршрутах: на `code` мэппинг «состояние → реализация» ведёт в Storybook story, а не в Figma-node.
-- **Валидатор вне маршрута не спрашивает секцию, а не «прощает» её отсутствие.** Промпт специалиста строится тем же источником, поэтому неприменимая секция не попадает и в задание агенту.
-- **Маршрут не определяется по наличию файлов.** Он берётся из `run-state.json`. Детекция по `figma-layout-ir.json` запрещена: Figma-запуск, не создавший файл, выглядел бы как честный не-Figma и обошёл бы гейт.
-- **Маршрут нельзя сменить задним числом.** Если маршрут-зависимая стадия (`06-screens`, `08-frontend`) уже отработала, а записи маршрута в `run-state.json` и `run-meta.json` разошлись, `yarn workflow:validate` вернёт error. Смена возможна только как `process_deviation` с reason.
-- **Пропущенные по маршруту секции фиксируются явно** в `stage-gate-ledger.md` в таблице «Секции вне маршрута» строкой со статусом `skipped_by_track`, называющей стадию и секцию. Запись проверяется в три стороны: пропуск секции, которую маршрут требует, — ошибка; пропуск секции, которой нет ни в одном маршруте, — тоже ошибка (протухшая запись); **снятая маршрутом секция без строки в ledger — ошибка**, как только стадия отдала свой артефакт. Последнее и есть вторая фаза журнала ожиданий: ожидание зафиксировано осью на `00-intake`, и незакрытое ожидание обязано быть видимым, а не растворяться в тишине.
-- **Секции — да, артефакты — нет.** Маршрут-условные Figma-**артефакты** (`figma-layout-ir.json`, `figma-handoff-bundle.md`, `figma-visual-qa.json`) на `track: code` не создаются и записи в ledger **не требуют вовсе**: это штатный маршрут, а не пропуск. Писать `skipped_with_reason: Figma не участвует` запрещено — он означает пропущенный *применимый* слой, а не неприменимый маршрут, и создаёт видимость долга там, где долга нет.
-- **Run без поля `track` читается как `figma`, а не как `code`** — строже дефолта новых запусков намеренно: до появления оси манифест требовал Figma-секции у каждого запуска, и чтение пустого поля как `code` задним числом освободило бы исторические run от проверок, которые они проходили.
-
-Проверка: `yarn workflow:validate <run-dir> --track <track>` (флаг нужен только чтобы перепроверить чужой запуск; свой маршрут валидатор читает из state); старт — `yarn workflow:start "<goal>" --track <track>`. Обоснование конструкции — `docs/architecture/conditional-sections-research-2026-07-27.md`.
 
 Для selective commit/push используй `agent-pack/templates/selective-commit-sop.md`: сначала выписать include/exclude scope, staged делать только явными путями, затем выполнить `yarn git:check-staged`. Agentic handoff исполняется через runtime-контракты (Delegation Packet + Agent Output Critic). Agent Capability Registry — `runtime/typescript/agent-capability-registry.ts`; при изменении агента/маршрута/skill/approval проверяй `yarn workflow:test-agent-capabilities`. Перед началом полного workflow запусти `yarn workflow:doctor`; для поздних handoff от `08-frontend` используй сжатый `handoff-bundle.md`.
 
@@ -144,22 +123,19 @@ Run ledger (обязательные файлы до первых стадий):
 4. IA: sitemap, primary user flow, главный экран и главное действие.
 5. Design: `design-brief.md`, user journey, секции, компоненты, responsive, accessibility.
 6. Copywriting: hero, CTA, sections, FAQ, SEO, claims to validate.
-7. Screens: `screens.md` или Figma-ready screen specification, явно использующая copy.
-8. Prototype: transition map / clickable prototype instructions.
-9. Frontend: реализация, состояния, адаптивность, analytics hooks.
-10. Visual Reference Review: только если был visual reference.
-11. Test Bench: funnel analytics и результат проверки главного сценария.
-12. QA Review: PRD fit, UX, visual/reference gates, accessibility, responsive, secrets.
-13. Release: changed files, validation, deployment notes, rollback notes.
-14. Notion Research Publication: research-only child page или явный blocker/partial.
+7. Screens: `screens.md` или Figma-ready screen specification, явно использующая copy. Состояния интерфейса (загрузка, пусто, ошибка, успех) описываются здесь же — отдельной стадии прототипа нет.
+8. Frontend: реализация, состояния, адаптивность, analytics hooks.
+9. Visual Reference Review: только если был visual reference.
+10. QA Review: PRD fit, UX, visual/reference gates, accessibility, responsive, secrets. Аналитика воронки проверяется здесь же.
+11. Release: changed files, validation, deployment notes, rollback notes.
 
-Frontend нельзя начинать до PRD, IA, design, copy, screens и prototype artifacts — кроме стадий, легитимно исключённых текущим `scale` (раздел 0.2; они записаны как `skipped_by_scale`), и кроме явного режима `quick draft`. Отсутствие артефакта по масштабу и отсутствие по забывчивости — разные вещи: первое зафиксировано в ledger до старта, второе блокирует frontend. `quick draft` разрешён только по явной фразе пользователя, запрещён для reference-driven задач и задач с внешней публикацией/Figma write/deploy; результат помечается `partial`/`draft`. Optional visual/design enhancement layer (visual-evidence-grounding, Lazyweb evidence, `STYLE_GUIDE.md`, `design-generator-prompt.md`, `design-loop-report.md`, `storybook-result.md`) описан в `agent-pack/workflows/artifact-driven-pipeline.md`; пропуск **применимого** слоя фиксируется как `skipped_with_reason`. `figma-handoff-bundle.md` в этот список не входит: он маршрут-условный, и на `track: code` неприменим (раздел 0.3).
+Frontend нельзя начинать до PRD, IA, design, copy и screens artifacts — кроме стадий, легитимно исключённых текущим `scale` (раздел 0.2; они записаны как `skipped_by_scale`), и кроме явного режима `quick draft`. Отсутствие артефакта по масштабу и отсутствие по забывчивости — разные вещи: первое зафиксировано в ledger до старта, второе блокирует frontend. `quick draft` разрешён только по явной фразе пользователя, запрещён для reference-driven задач и задач с внешней публикацией/Figma write/deploy; результат помечается `partial`/`draft`. Optional visual/design enhancement layer (visual-evidence-grounding, Lazyweb evidence, `STYLE_GUIDE.md`, `design-generator-prompt.md`, `design-loop-report.md`, `storybook-result.md`) описан в `agent-pack/workflows/artifact-driven-pipeline.md`; пропуск **применимого** слоя фиксируется как `skipped_with_reason`.
 
 ## 6. Детальные gates (читать по требованию)
 
 Полный нормативный текст gates вынесен из этого индекса в отдельные документы, чтобы не грузить контекст каждой сессии. Claude обязан ПРОЧИТАТЬ соответствующий файл перед работой:
 
-- **research, Notion-публикация, visual reference, Figma canvas write, product UI, approval** → `agent-pack/workflows/claude-operating-rules.md`. Там полный текст: Surface-Aware Output Framework, Universal Visual Evidence Grounding, Anti-AI-Slop Gate, Research и Notion (все publication gates), Visual Reference и Figma (Маршрут `track` и как оформляется «Figma не участвует», Design System Strategy Gate, **Storybook Showcase Gate**, **Machine Acceptance Gate**, Two-Pass Figma Build Gate, Figma Make-like Product UI Gate, Primary App Flow Gate, Component Contract и Roundtrip Gate, порядок reference-scan, «Запрещено»), детальные Approval rules (Interactive Question Gate, Process Deviation Record, КРИТИЧЕСКИ ВАЖНО). Два выделенных гейта действуют на **обоих** маршрутах: для `product_ui|frontend` статус `success` без машинного вердикта запрещён.
+- **research, Notion-публикация, visual reference, Figma canvas write, product UI, approval** → `agent-pack/workflows/claude-operating-rules.md`. Там полный текст: Surface-Aware Output Framework, Universal Visual Evidence Grounding, Anti-AI-Slop Gate, Research и Notion (все publication gates), Visual Reference и Figma (Design System Strategy Gate, **Storybook Showcase Gate**, **Machine Acceptance Gate**, Two-Pass Figma Build Gate, Figma Make-like Product UI Gate, Primary App Flow Gate, Component Contract и Roundtrip Gate, порядок reference-scan, «Запрещено»), детальные Approval rules (Interactive Question Gate, Process Deviation Record, КРИТИЧЕСКИ ВАЖНО). Два выделенных гейта: для `product_ui|frontend` статус `success` без машинного вердикта запрещён.
 - **полный pipeline, run ledger, optional design layers** → `agent-pack/workflows/artifact-driven-pipeline.md`.
 - **Figma canvas write SOP** → `integrations/mcp/figma-canvas-write-guide.md` (только процесс студии: гейты, стадии, Contract Matrix, статусы); skill `figma-roundtrip` обязателен для Figma/roundtrip задач.
 - **Механика Figma и канон дизайн-систем** → плагин `figma-ds` (`plugins/figma-ds/`): `/figma-ds:build` — как собирать в Plugin API, грабли, обязательная финальная самопроверка перед отчётом/handoff (пакетный гейт, НЕ после каждого write); `/figma-ds:standard` — что правильно по канону (тиеры токенов, DTCG, modes, slots, WCAG 2.2, versioning). Канон нормативен наравне с guide; отклонения фиксируются как `deviation` с reason. Правило границы: про Figma вообще → плагин, про процесс студии → guide, про конкретный продукт → `design/figma/<slug>/`. Копий не заводить.
@@ -208,21 +184,21 @@ Sensitive data: не сохраняй secrets в коде, outputs, traces ил�
 Перед финальным ответом проверь:
 
 - соответствие PRD; наличие recursive brief с expansion/deepening/consolidation; наличие MoSCoW;
-- наличие источников для research-выводов; согласованность IA, screens и prototype flow;
+- наличие источников для research-выводов; согласованность IA и screens;
 - доступность, адаптивность, корректность funnel analytics; отсутствие секретов;
 - успешный lint/typecheck/test/build, если команды доступны;
 - соответствие `agent-pack/quality/quality-gates.md` и `agent-pack/guardrails/guardrails.policy.md`;
 - успешный `yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard` или `--profile reference` (масштаб валидатор читает из `run-state.json`; флаг `--scale` нужен только чтобы проверить run под другим масштабом);
-- Notion research page publication record или явный blocker/partial для полного workflow;
+- если публикация в Notion была запрошена — publication record или явный blocker/partial (сама публикация обязательным шагом workflow не является);
 - `visual-reference-review.md`, если задача reference-driven;
-- для run не на масштабе `full` — стадии вне масштаба записаны как `skipped_by_scale` (раздел 0.2), а не молча отсутствуют; секции вне маршрута — как `skipped_by_track` (раздел 0.3);
-- **машинная приёмка для `product_ui|frontend` surface — три вердикта в ledger, на обоих маршрутах:** `yarn vr:test` → `reports/visual-regression/summary.json`, `yarn test-storybook` → exit code, `yarn qa:mobile` → `test-results/mobile-acceptance/mobile-acceptance.json`. Плюс витрина: история на каждый компонент, composition story (`vr-page`) на каждый экран. «Похоже» и просмотренный человеком скриншот приёмкой не считаются; недоступность оси (нет Docker) даёт `skipped_with_reason` и статус surface не выше `partial`, а не `success`. Полный текст — `claude-operating-rules.md` §5.
+- для run не на масштабе `full` — стадии вне масштаба записаны как `skipped_by_scale` (раздел 0.2), а не молча отсутствуют;
+- **машинная приёмка для `product_ui|frontend` surface — три вердикта в ledger:** `yarn vr:test` → `reports/visual-regression/summary.json`, `yarn test-storybook` → exit code, `yarn qa:mobile` → `test-results/mobile-acceptance/mobile-acceptance.json`. Плюс витрина: история на каждый компонент, composition story (`vr-page`) на каждый экран. «Похоже» и просмотренный человеком скриншот приёмкой не считаются; недоступность оси (нет Docker) даёт `skipped_with_reason` и статус surface не выше `partial`, а не `success`. Полный текст — `claude-operating-rules.md` §5.
 
 Для code review используй `agent-pack/quality/code_review.md`. Приоритет: user-facing bugs, security/secrets, architecture, accessibility/UX, performance, readability.
 
 ## 11. Субагенты
 
-Нативные Claude-обёртки — в `.claude/agents/` (вызываются главной сессией через `Agent` tool, `subagent_type` = имя): research, prd, ia, design, design-generator, copywriting, prototype, frontend, test-bench, qa-review, release, notion-publisher. Оркестратор — это сама главная сессия (`.claude/agents/orchestrator.md` — её чек-лист), не спавни его как субагента; это закреплено механически через `permissions.deny` в `.claude/settings.json`. Специалисты не спавнят субагентов (`disallowedTools: Task, Agent` в обёртках) — вложенная делегация нарушила бы manager-style. Детальные контракты — `agent-pack/agent-contracts/*.agent.md`. Skills — в `.claude/skills/` (детально — `agent-pack/skills/`).
+Нативные Claude-обёртки — в `.claude/agents/` (вызываются главной сессией через `Agent` tool, `subagent_type` = имя): research, prd, ia, design, design-generator, copywriting, frontend, qa-review, release, notion-publisher. Оркестратор — это сама главная сессия (`.claude/agents/orchestrator.md` — её чек-лист), не спавни его как субагента; это закреплено механически через `permissions.deny` в `.claude/settings.json`. Специалисты не спавнят субагентов (`disallowedTools: Task, Agent` в обёртках) — вложенная делегация нарушила бы manager-style. Детальные контракты — `agent-pack/agent-contracts/*.agent.md`. Skills — в `.claude/skills/` .
 
 Кросс-стадийные skills, которые действуют вне зависимости от этапа:
 
@@ -234,6 +210,7 @@ Sensitive data: не сохраняй secrets в коде, outputs, traces ил�
 - `outputs-cleanup` — задачи типа `cleanup/sorting`, архивация run.
 - `run-retrospective` — разбор завершённого run: `yarn workflow:retro <run-dir>` считает пять метрик процесса (повторные заходы, канал находок, отклонения, долг валидатора, слепые зоны ledger), skill задаёт пороги и правило «одна находка — одно из трёх решений: машинная проверка, норма, осознанный отказ». Slash-команда `/retro`. Разбирает **хронику одного run**; расхождения устройства системы («правило заявлено, код не исполняет») — это `/subsystem-audit:audit`, не ретро.
 - `/subsystem-audit:audit` — задачи типа аудит/ревью подсистемы («проверь/оцени/улучши X», сравнение с best practice, поиск пробелов): доказательный повторяемый шаблон с верификацией находок первоисточником, GitHub-сравнением по реальным URL и инженерными эвристиками против ложных находок. Junction-плагин (`plugins/subsystem-audit/`), как `figma-ds`; ставится `yarn plugin:link`.
+- `/ui-craft:build` и `/ui-craft:reference-check` — переносимое ремесло интерфейса: `build` = как качественно реализовать (композиция, состояния, адаптивность, доступность, движение), `reference-check` = чем доказать соответствие внешнему образцу (парные скриншоты, измерение вместо оценки на глаз). Junction-плагин (`plugins/ui-craft/`). Основу интерфейса плагин не выбирает — это решает проект (§6.1: shadcn/ui), и проектные навыки `landing-builder`/`visual-diff-verifier` остаются на месте: плагин отвечает «как правильно вообще», проектный навык — «как это делается у нас».
 
 Текущее покрытие стадий skills: `yarn workflow:skills`.
 
@@ -267,7 +244,7 @@ Sensitive data: не сохраняй secrets в коде, outputs, traces ил�
 Триггер-фразы работают в свободном чате; им соответствуют slash-команды в `.claude/commands/` (полный список триггеров каждой команды — в её теле).
 
 - Управление: `/workflow-start` (начать воркфлоу, новый проект, start landing), `/workflow-resume` (продолжить запуск, resume workflow), `/workflow-status` (покажи статус, что готово), `/doctor`.
-- Этапы: `/research`, `/prd`, `/ia`, `/design`, `/screens`, `/prototype`, `/copy`, `/frontend`, `/visual-diff`, `/test-bench`, `/qa`, `/release`, `/notion-publish`.
+- Этапы: `/research`, `/prd`, `/ia`, `/design`, `/screens`, `/copy`, `/frontend`, `/visual-diff`, `/qa`, `/release`, `/notion-publish`.
 - После run: `/retro` (сделай ретро, разбери запуск, что пошло не так в run).
 
 ## 13. Финальный ответ

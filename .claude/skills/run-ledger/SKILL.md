@@ -1,29 +1,90 @@
 ---
+id: run-ledger
 name: run-ledger
-description: Использовать при старте продуктового run и после каждого этапа, чтобы вести run ledger: run-plan, handoff-bundle, stage-gate-ledger, run-state, artifact-manifest. Skill фиксирует inputs_used, статусы стадий и gate notes, синхронизирует состояние через yarn workflow:sync после ручных правок и не позволяет закрыть workflow как success при незаписанных blocker и skipped_with_reason.
+title: "Run Ledger (Ведение Журнала Запуска)"
+description: "Использовать при старте продуктового run и после каждого этапа, чтобы вести run ledger: run-plan, handoff-bundle, stage-gate-ledger, run-state, artifact-manifest. Skill фиксирует inputs_used, статусы стадий и gate notes, синхронизирует состояние через yarn workflow:sync после ручных правок и не позволяет закрыть workflow как success при незаписанных blocker и skipped_with_reason."
+platforms:
+  - claude
+  - open-code
+mcp_servers: []
+strictness_profile: standard
+owner_stage_ids:
+  - 00-intake
+  - 12-release
+required_inputs:
+  - run_plan
+  - handoff_bundle
+  - stage_gate_ledger
+required_outputs:
+  - run_plan
+  - handoff_bundle
+  - stage_gate_ledger
+approval_actions: []
+validation_commands:
+  - yarn workflow:sync
+  - yarn workflow:validate
+contract_schema: agent-pack/templates/skill.template.md
 ---
 
-# Run Ledger (Ведение Журнала Запуска)
+# Skill: Run Ledger (Ведение Журнала Запуска)
 
-Состояние workflow должно быть записано, а не восстанавливаться по памяти сессии. Главная ошибка: этап «сделан», но `handoff-bundle.md` и `stage-gate-ledger.md` не обновлены — и следующий агент (или следующая сессия после сжатия контекста) не знает, на чём стоит.
+## 1. Назначение
 
-**Полная процедура и Definition of Done — в [`agent-pack/skills/run-ledger/SKILL.md`](../../../agent-pack/skills/run-ledger/SKILL.md). Следуй ей.** Нормативный pipeline — [`agent-pack/workflows/artifact-driven-pipeline.md`](../../../agent-pack/workflows/artifact-driven-pipeline.md).
+Skill применяется при старте продуктового run и **после каждого этапа**. Он отвечает за то, чтобы состояние workflow было записано, а не восстанавливалось по памяти сессии: какие артефакты готовы, какие решения приняты, какие gates пройдены, что осталось риском.
 
-## Когда использовать
-- Старт продуктового run: создать ledger до первых стадий.
-- После завершения каждого этапа.
-- После ручной правки файлов run.
+Нормативный процесс — [`agent-pack/workflows/artifact-driven-pipeline.md`](../../../agent-pack/workflows/artifact-driven-pipeline.md). Skill даёт исполняемый минимум.
 
-## Ключевые шаги
-- Ledger до стадий: `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, `run-state.json`, `run-meta.json`, `artifact-manifest.json`, `run-index.md`.
-- После этапа: в `handoff-bundle.md` — completed artifacts, решения, риски, следующий артефакт; в `stage-gate-ledger.md` — статус, gate notes, validation, **вердикт Agent Output Critic** для делегированных стадий.
-- Для стадии субагента: `yarn agent:verify-output <отчёт>`, вердикт пишется в ledger. `rejected` несовместим с `success` — отчёт заявляет, Critic сверяет с диском, git и валидатором.
-- `inputs_used` — реально прочитанные файлы, а не список по умолчанию.
-- Пропуски пишутся явно: `skipped_with_reason`, `skipped_by_scale`, `skipped_by_track`, `partial`, `blocked`. Молчаливый пропуск запрещён и проверяется машинно: незакрытое ожидание (стадия вне масштаба или снятая маршрутом секция без строки в ledger) — ошибка валидатора, а не тишина.
-- Масштаб (`full`/`increment`/`patch`, CLAUDE.md §0.2) фиксируется на старте в `run-plan.md` и `run-state.json`; стадии вне масштаба перечисляются как `skipped_by_scale`. Понижать масштаб задним числом нельзя — валидатор отклонит.
-- Маршрут (`code`/`figma`, CLAUDE.md §0.3) фиксируется на старте в `run-plan.md`, `run-state.json` и поле `Track` шапки ledger; секции вне маршрута перечисляются в таблице «Секции вне маршрута» как `skipped_by_track` с указанием стадии и секции. Менять маршрут задним числом нельзя — валидатор отклонит.
-- С `08-frontend` специалистам передаётся сжатый `handoff-bundle.md`, а не вся история.
+Главная ошибка, от которой он защищает: этап «сделан», но `handoff-bundle.md` и `stage-gate-ledger.md` не обновлены — и следующий агент (или следующая сессия после сжатия контекста) не знает, на чём стоит.
 
-## Обязательные проверки
-- `yarn workflow:sync <run-dir>` после ручных правок
-- `yarn workflow:validate <run-dir> --profile standard`
+## 2. Обязательные inputs
+
+- Директория run: `outputs/<project-slug>/<YYYY-MM-DD>/` или `research/projects/<research-slug>/<YYYY-MM-DD>/`.
+- Существующий ledger: `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, `run-state.json`, `run-meta.json`, `artifact-manifest.json`, `run-index.md`.
+- Артефакты завершённого этапа.
+
+## 3. Процедура
+
+### При старте run
+
+1. Создай директорию run по правилам маршрутизации: продуктовый workflow → `outputs/<project-slug>/<YYYY-MM-DD>/`; standalone research/CJM → `research/projects/<research-slug>/<YYYY-MM-DD>/`; тестовый прогон → `outputs/temp/`.
+2. Создай обязательный ledger **до первых стадий**: `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, `run-state.json`, `run-meta.json`, `artifact-manifest.json`, `run-index.md`.
+3. Зафиксируй в `run-plan.md`: тип работы, профиль (`standard`/`reference`), **масштаб** (`full`/`increment`/`patch`, см. CLAUDE.md §0.2), **маршрут** (`code`/`figma`, см. CLAUDE.md §0.3), последовательность стадий и non-goals. Это три независимые оси: профиль — «какого типа задача», масштаб — «какого размера», маршрут — «через какой инструмент делается макет». Не уверен в масштабе — бери `full`.
+3a. Стадии, которые масштаб исключает, перечисли сразу в `stage-gate-ledger.md` как `skipped_by_scale` с указанием масштаба. Пропуск по масштабу — легальное решение, но только записанное: молчаливый пропуск неотличим от забытой стадии. Это проверяется машинно: на полном прогоне валидатор возвращает ошибку для каждой стадии вне масштаба, у которой нет строки `skipped_by_scale`. Список даёт `getStagesSkippedByScale` (или `yarn workflow:validate <run-dir> --scale <scale>`).
+
+### После каждого этапа
+
+4. **`handoff-bundle.md`:** completed artifacts, принятые решения, риски, следующий артефакт. Это то, что реально читает следующий агент.
+5. **`stage-gate-ledger.md`:** статус стадии (`success`/`partial`/`blocked`), gate notes, результат validation, **вердикт Agent Output Critic** для делегированных стадий.
+5a. **Вердикт Critic — часть записи, а не устная оценка.** Для стадии, выполненной субагентом, оркестратор прогоняет `yarn agent:verify-output <отчёт>` и пишет вердикт (`accepted` / `accepted_with_warnings` / `rejected`) рядом с validation notes. `rejected` несовместим с `success`: отчёт заявляет, а Critic сверяет с диском, git и валидатором. Причина правила — два реальных случая в run `contractor-payment-demo`: прерванный агент оставил состояние, выглядевшее завершённым, и отчёт `success` о правке, не изменившей результат валидатора.
+6. **`inputs_used`:** перечисли файлы, которые этап реально прочитал. Не «recursive-brief.md» по умолчанию, а фактический список.
+7. **Незакрытое — записывается.** Пропущенный слой → `skipped_with_reason`. Стадия вне масштаба → `skipped_by_scale`. Недоступный provider/approval → `blocked`/`partial`. Молчаливый пропуск запрещён.
+7a. **Масштаб не понижается задним числом.** Обнаружил, что задача крупнее — поднимай масштаб и добирай стадии. Понижение ради пропуска уже начатой стадии — `process_deviation` с reason; валидатор такой run отклонит.
+8. **После ручной правки файлов** run — `yarn workflow:sync <run-dir>`, иначе `run-state.json` разойдётся с реальностью.
+
+### Обзор
+
+- `yarn workflow:list` — активные run.
+- `yarn workflow:inspect <run-dir>` — состояние стадий и gates.
+- `yarn workflow:outputs <run-dir>` — созданные артефакты.
+
+### Начиная с 08-frontend
+
+Оркестратор передаёт специалистам сжатый `handoff-bundle.md` (через `runtime/typescript/context-truncator.ts`), а не всю историю сессии. Качество bundle прямо определяет качество позднего handoff.
+
+## 4. Evidence и failure modes
+
+Definition of Done для этапа: обязательные артефакты созданы/обновлены; `inputs_used` зафиксирован; `handoff-bundle.md` и `stage-gate-ledger.md` обновлены; validation выполнена или blocker записан.
+
+- **`partial`** — артефакты есть, но gate/validation не пройдены и это записано.
+- **`blocked`** — отсутствует обязательный вход, provider или approval.
+- **Нарушение** — этап закрыт как `success`, а ledger не обновлён: workflow не может считаться завершённым, статус пересматривается.
+
+## 5. Validation gates
+
+- [ ] Ledger создан до первых стадий (7 файлов).
+- [ ] После каждого этапа обновлены `handoff-bundle.md` и `stage-gate-ledger.md`.
+- [ ] `inputs_used` отражает реально прочитанные файлы.
+- [ ] Все пропуски записаны как `skipped_with_reason`, `skipped_by_scale`, `partial` или `blocked`.
+- [ ] Масштаб зафиксирован в `run-plan.md` и `run-state.json`; стадии вне масштаба перечислены как `skipped_by_scale`.
+- [ ] `yarn workflow:sync <run-dir>` выполнен после ручных правок.
+- [ ] `yarn workflow:validate <run-dir> --profile standard` (или `--profile reference`) пройден.

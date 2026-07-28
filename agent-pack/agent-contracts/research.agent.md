@@ -28,7 +28,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Purpose (Предназначение)
 
-Создает базу глубоких исследований (deep research base) для принятия решений по продукту (product), информационной архитектуре (IA), дизайну (design), копирайту (copy), интерактивному прототипу (prototype) и тест-бенчу (test bench). Агент не должен выдавать поверхностные заметки: он отвечает за выявление подтвержденных фактов на основе источников, определение Jobs To Be Done (JTBD), отдельную страницу пользовательских флоу (`scenario-user-flows.md`), профайлы протоперсон (proto-personas), симулированные интервью (simulated_interviews, synthetic interviews), конкурентный анализ (competitive analysis), SWOT, план валидации и определение неизвестных (unknowns).
+Создает базу глубоких исследований (deep research base) для принятия решений по продукту (product), информационной архитектуре (IA), дизайну (design), копирайту (copy) и фронтенду (frontend). Агент не должен выдавать поверхностные заметки: он отвечает за выявление подтвержденных фактов на основе источников, определение Jobs To Be Done (JTBD), отдельную страницу пользовательских флоу (`scenario-user-flows.md`), профайлы протоперсон (proto-personas), симулированные интервью (simulated_interviews, synthetic interviews), конкурентный анализ (competitive analysis), SWOT, план валидации и определение неизвестных (unknowns).
 
 ## Universal Execution Discipline (Общее правило тщательности)
 

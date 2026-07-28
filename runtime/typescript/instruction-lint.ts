@@ -12,9 +12,6 @@
  * Образец — `tools/validate-file-refs.js` у BMAD-METHOD: линтер ссылок в CI, который
  * падает на битой ссылке и на утечке абсолютного пути.
  *
- * Вторая проверка файла (`lintRouteDetectionByFile`) закрывает системный дефект: маршрут
- * (`track`) определяли по наличию `figma-layout-ir.json` сразу два независимых потребителя.
- * Оба чинились руками, оба могут вернуться.
  *
  * Область: только нормативные инструкции. `docs/**` намеренно НЕ сканируется — датированные
  * снимки (аудиты, ресёрчи) обязаны цитировать формулировки, которых уже нет.
@@ -37,7 +34,7 @@ const instructionRoots = [
   ".claude/commands",
   ".claude/skills",
   "agent-pack/agent-contracts",
-  "agent-pack/skills",
+  ".claude/skills",
   "agent-pack/templates",
   "agent-pack/workflows",
   "agent-pack/guardrails",
@@ -131,13 +128,13 @@ export function lintInstructionReferences(root = process.cwd()): LintFinding[] {
         }
       }
 
-      // 4. Навык, названный по имени: должен существовать в `agent-pack/skills` или плагине.
+      // 4. Навык, названный по имени: должен существовать в `.claude/skills` или плагине.
       for (const match of line.matchAll(/\bskill[а-яё]*\s+`([a-z][a-z0-9-]+)`/gi)) {
         const skillId = match[1];
         if (!knownSkillIds.has(skillId)) {
           report(
             "skill-id",
-            `навыка '${skillId}' нет ни в agent-pack/skills, ни в plugins/*/skills. ` +
+            `навыка '${skillId}' нет ни в .claude/skills, ни в plugins/*/skills. ` +
               "Инструкция вызывает навык, которого не существует.",
           );
         }
@@ -158,64 +155,9 @@ export function lintInstructionReferences(root = process.cwd()): LintFinding[] {
   return findings;
 }
 
-/**
- * Запрет детекции маршрута по наличию файла.
- *
- * Правило (`CLAUDE.md` §0.3, `run-ledger/SKILL.md`, `validate-workflow-run.ts`): маршрут
- * читается из `run-state.json`. Определять его по наличию `figma-layout-ir.json` или
- * `figma-handoff-bundle.md` запрещено — Figma-запуск, не создавший файл, выглядел бы как
- * честный `code` и обошёл бы ровно тот гейт, ради которого проверка существует.
- *
- * Срабатывание требует ТРЁХ признаков в одном предложении, иначе линтер зарубил бы
- * законное чтение артефакта («есть `figma-handoff-bundle.md` — сверь его»):
- *   1. имя артефакта Figma-маршрута;
- *   2. лексика применимости/маршрута (применяется, маршрут, ветка, track);
- *   3. конструкция наличия (при наличии, есть X, существует X, прошедший).
- * Предложение с отрицанием («запрещено», «а не из наличия», «не выводится») исключается:
- * именно так выглядит правильная формулировка запрета.
- */
-export function lintRouteDetectionByFile(root = process.cwd()): LintFinding[] {
-  const findings: LintFinding[] = [];
-  const figmaArtifact = /figma-(?:layout-ir\.json|handoff-bundle\.md|visual-qa\.json)/;
-  const applicability = /применя|применим|применение|ветк[аиуе]|ветвлен|маршрут|track\b|относится к задач/i;
-  const presence =
-    /(?:по|при|из)\s+наличи[июея]|наличи[еяю]\s+`?figma-|есть\s+`?figma-|существует\s+`?figma-|создан[аоы]?\s+`?figma-|прошедш|если\s+(?:есть|создан|существует)|только\s+когда\s+(?:для\s+\S+\s+)?существует/i;
-  const negation =
-    /запрещ|нельзя|не\s+выводит|не\s+определя|не\s+из\s+наличи|а\s+не\s+(?:из|по|наличи)|не\s+по\s+наличи|не\s+признак|не\s+из\s+файл|не\s+из\s+типа/i;
-
-  for (const file of collectInstructionFiles(root)) {
-    const content = readFileSync(join(root, file), "utf8");
-    if (content.includes(`${ignoreMarker}-file`)) continue;
-
-    content.split(/\r?\n/).forEach((rawLine, index) => {
-      if (rawLine.includes(ignoreMarker)) return;
-
-      for (const sentence of splitSentences(rawLine)) {
-        if (!figmaArtifact.test(sentence)) continue;
-        if (!applicability.test(sentence)) continue;
-        if (!presence.test(sentence)) continue;
-        if (negation.test(sentence)) continue;
-
-        findings.push({
-          file,
-          line: index + 1,
-          rule: "route-detection-by-file",
-          message:
-            "маршрут определяется по наличию Figma-артефакта. Маршрут читается из `run-state.json` " +
-            "(поле `track`, CLAUDE.md §0.3): запуск на `track=figma`, не создавший файл, иначе " +
-            `выглядит как честный \`code\` и обходит гейт. Предложение: «${sentence.trim().slice(0, 160)}»`,
-        });
-        return;
-      }
-    });
-  }
-
-  return findings;
-}
-
-/** Обе проверки одной строкой — для `validate:config`. */
+/** Проверка текстов инструкций — для `validate:config`. */
 export function validateInstructionTexts(root = process.cwd()): string[] {
-  return [...lintInstructionReferences(root), ...lintRouteDetectionByFile(root)].map(
+  return lintInstructionReferences(root).map(
     (finding) => `${finding.file}:${finding.line}: [${finding.rule}] ${finding.message}`,
   );
 }
@@ -317,7 +259,7 @@ function loadProducedFileNames(root: string): Set<string> {
 
 function loadSkillIds(root: string): Set<string> {
   const ids = new Set<string>();
-  const skillsDir = join(root, "agent-pack/skills");
+  const skillsDir = join(root, ".claude/skills");
   if (existsSync(skillsDir)) {
     for (const entry of readdirSync(skillsDir, { withFileTypes: true })) {
       if (entry.isDirectory()) ids.add(entry.name);

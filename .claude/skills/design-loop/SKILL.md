@@ -1,28 +1,55 @@
 ---
+id: design-loop
 name: design-loop
-description: Использовать на этапе 06-screens, когда есть STYLE_GUIDE.md или высокий риск визуального качества. Skill создает design-generator-prompt.md и design-loop-report.md с конкретной критикой в формате "что выглядит дешево и почему" и revision blocks.
+title: "Design Prompt И Цикл Критики"
+description: "Использовать на этапе 06-screens, когда есть STYLE_GUIDE.md или высокий риск визуального качества. Skill создает design-generator-prompt.md и design-loop-report.md с конкретной критикой в формате \"что выглядит дешево и почему\" и revision blocks."
+platforms:
+  - claude
+mcp_servers: []
+strictness_profile: strict
+owner_stage_ids:
+  - 06-screens
+required_inputs:
+  - style_guide
+  - design_brief
+  - ia_brief
+  - copy_deck
+required_outputs:
+  - design_generator_prompt
+  - design_loop_report
+approval_actions: []
+validation_commands:
+  - yarn validate:config
+contract_schema: agent-pack/templates/skill.template.md
 ---
 
-# Design Prompt И Цикл Критики
+# Skill: Design Prompt И Цикл Критики
 
-Skill превращает `STYLE_GUIDE.md` и продуктовый контекст в точный prompt для генерации или ручной сборки экранов, затем фиксирует критику результата как дизайнерский QA, а не как вкусовую оценку. Применяется на этапе 06-screens при высоком визуальном риске.
+## Назначение
 
-**Полная процедура, входы/выходы, gates и validation-команды — в [`agent-pack/skills/design-loop/SKILL.md`](../../../agent-pack/skills/design-loop/SKILL.md). Следуй ей.**
+Превращает `STYLE_GUIDE.md` и продуктовый контекст в точный prompt для генерации/ручной сборки экранов, затем фиксирует критику результата в формате "что выглядит дешево и почему".
 
-## Когда использовать
-- Этап 06-screens и есть `STYLE_GUIDE.md`.
-- Высокий риск визуального качества или generic/default результата.
-- Нужен точный design-generator prompt для генерации/ручной сборки экранов.
-- Нужна структурированная критика результата с revision blocks.
+## Процедура
 
-## Ключевые шаги
-- Проверь наличие `STYLE_GUIDE.md`, `design-brief.md`, `ia-brief.md`, `copy-deck.md`; пометь copy gaps, не придумывай финальный copy.
-- Собери `design-generator-prompt.md` по шаблону.
-- Ограничь первичную генерацию 2-3 экранами как `visual_calibration`. Поверхность следует маршруту `track` из `run-state.json` (CLAUDE.md §0.3) и записывается явно: `track: code` — **экран в коде** + composition story (критика на реальном тексте, результат не выбрасывается, проверка машинная — `yarn vr:test`, `yarn test-storybook`); `track: figma` — Figma-черновик, который выбрасывается после переноса решений в `design/tokens/` и код.
-- На `track: code` Figma-артефакты не создаются и записи в ledger не требуют вовсе; маршрут-условные секции `screens.md`/`frontend-result.md` закрываются строкой `skipped_by_track` в `stage-gate-ledger.md`. `skipped_with_reason: Figma не участвует` писать запрещено.
-- Сравни результат с `STYLE_GUIDE.md`: tokens, composition, hierarchy, typography, spacing, interaction states.
-- Проведи критику: что generic/default, где нарушена иерархия; зафиксируй в `design-loop-report.md`.
-- Regression после systemization: для кода — `yarn vr:test`, для Figma — screenshot до/после. Визуально более слабый результат блокирует `ready`.
+1. Убедись, что есть `STYLE_GUIDE.md`, `design-brief.md`, `ia-brief.md` и `copy-deck.md`. Если `copy-deck.md` отсутствует, не придумывай финальный copy; пометь copy gaps.
+2. Собери `design-generator-prompt.md` по шаблону `agent-pack/artifacts/design/design-generator-prompt.template.md`.
+3. Ограничь первичную генерацию 2-3 экранами и считай ее `visual_calibration`: проверь композицию, плотность, сценарную иерархию, rhythm, copy fit и responsive direction до systemization. Поверхность калибровки — Storybook по умолчанию, Figma только при работе по переданному файлу; выбор записывается в отчёт:
+   - **по умолчанию — экран в коде** (`apps/frontend/src/views/`) плюс composition story: критику видно на реальном тексте и реальных состояниях, а результат калибровки не выбрасывается, а становится продуктом. Проверка машинная — `yarn vr:test`, `yarn test-storybook`;
+   - **Figma-черновик** — когда направление ещё расходится и нужно дёшево перебрать несколько несовместимых вариантов до кода. Такой черновик по `CLAUDE.md` §6.1 не поддерживается синхронизацией и выбрасывается после переноса решений в `design/tokens/` и код.
+4. Сравни результат с `STYLE_GUIDE.md`: tokens, composition metrics, hierarchy, accent usage, typography, spacing, data visualization, interaction states, mobile behavior.
+5. Проведи критику как дизайнерский QA, а не как общую вкусовую оценку:
+   - что выглядит generic/default;
+   - где нарушена предметная иерархия;
+   - где референс скопирован слишком буквально;
+   - где не хватает states или responsive behavior;
+   - где есть visual debt перед Figma/frontend.
+6. Запиши `design-loop-report.md` по шаблону `agent-pack/artifacts/design/design-loop-report.template.md`.
+7. Критика должна быть таблицей `Before | After | Why`, а не общим "сделай лучше".
+8. При Figma-работе добавь calibration verdict и revision notes для `figma-handoff-bundle.md`; иначе вердикт и revision blocks едут в `storybook-result.md` и `frontend-result.md`.
+9. После создания components/variables сравни результат до/после systemization: для кодовой поверхности — прогоном `yarn vr:test` (машинный вердикт в `reports/visual-regression/summary.json`), для Figma-поверхности — screenshot до/после. Структурно более правильный, но визуально более слабый результат считается regression и блокирует `ready`.
 
-## Обязательные проверки
-- `yarn validate:config`
+## Gate
+
+Если `design-loop-report.md` показывает unresolved style drift, frontend не должен трактовать дизайн как финально готовый без явного `passed_with_notes` или blocker в handoff.
+
+Для Figma canvas write `design-loop-report.md` должен быть прочитан до `figma-handoff`. Нельзя сначала рисовать canvas, а потом задним числом объяснять стиль.

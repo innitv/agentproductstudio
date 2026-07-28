@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Screens",
   "type": "object",
-  "$comment": "Схема описывает МАКСИМАЛЬНЫЙ маршрут запуска (`track=figma`). Поля layout_compiler_contract и figma_readiness обязательны только на нём; на `track=code` валидатор снимает их из required по объявлению requiredSchemaFieldsByTrack в runtime/typescript/workflow.manifest.ts (стадия 06-screens). Условность НЕ выражается через if/then внутри схемы намеренно — см. docs/architecture/conditional-sections-research-2026-07-27.md §2. Внутри Figma-маршрута честный отказ выражается уже существующим словарём: layout_compiler_contract.figma_layout_ir_required=false и layout_ir_status='not_required', figma_readiness[].status='not_applicable'. frame_state_implementation_map и component_contract_matrix обязательны на обоих маршрутах: на `track=code` адресатом мэппинга выступает Storybook story, а не Figma-node.",
+  "$comment": "Figma-специфичные поля (layout_compiler_contract, figma_readiness) не входят в required с 2026-07-28 — они заполняются только при работе по переданному Figma-файлу; честный отказ выражается словарём: layout_compiler_contract.figma_layout_ir_required=false и layout_ir_status='not_required', figma_readiness[].status='not_applicable'. frame_state_implementation_map и component_contract_matrix обязательны всегда: без Figma адресатом мэппинга выступает Storybook story.",
   "required": [
     "status",
     "inputs_used",
@@ -20,23 +20,50 @@
     "app_likeness_gate",
     "responsive_constraints",
     "accessibility_notes",
-    "layout_compiler_contract",
-    "figma_readiness",
     "acceptance_notes"
   ],
   "properties": {
-    "status": { "enum": ["draft", "partial", "blocked", "ready"] },
-    "inputs_used": { "type": "array", "items": { "type": "string" } },
+    "status": {
+      "enum": [
+        "draft",
+        "partial",
+        "blocked",
+        "ready"
+      ]
+    },
+    "inputs_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "input_readiness_pass": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["input", "required_signal", "status"],
+        "required": [
+          "input",
+          "required_signal",
+          "status"
+        ],
         "properties": {
-          "input": { "type": "string" },
-          "required_signal": { "type": "string" },
-          "status": { "enum": ["ready", "partial", "blocked", "not_applicable"] },
-          "notes": { "type": "string" }
+          "input": {
+            "type": "string"
+          },
+          "required_signal": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ready",
+              "partial",
+              "blocked",
+              "not_applicable"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
         }
       }
     },
@@ -44,39 +71,102 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["asset", "reuse_decision"],
+        "required": [
+          "asset",
+          "reuse_decision"
+        ],
         "properties": {
-          "asset": { "type": "string" },
-          "reuse_decision": { "type": "string" },
-          "gap_new_need": { "type": "string" },
-          "notes": { "type": "string" }
+          "asset": {
+            "type": "string"
+          },
+          "reuse_decision": {
+            "type": "string"
+          },
+          "gap_new_need": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
         }
       }
     },
     "design_system_strategy": {
       "type": "object",
-      "required": ["mode", "source_foundation", "visual_calibration_verdict"],
+      "required": [
+        "mode",
+        "source_foundation",
+        "visual_calibration_verdict"
+      ],
       "properties": {
-        "mode": { "enum": ["reuse", "extend", "product_specific", "bespoke"] },
-        "source_foundation": { "type": "string" },
-        "gap_rationale": { "type": "string" },
-        "intentionally_bespoke": { "type": "array", "items": { "type": "string" } },
-        "visual_calibration_verdict": { "enum": ["passed", "passed_with_notes", "blocked", "not_required"] }
+        "mode": {
+          "enum": [
+            "reuse",
+            "extend",
+            "product_specific",
+            "bespoke"
+          ]
+        },
+        "source_foundation": {
+          "type": "string"
+        },
+        "gap_rationale": {
+          "type": "string"
+        },
+        "intentionally_bespoke": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "visual_calibration_verdict": {
+          "enum": [
+            "passed",
+            "passed_with_notes",
+            "blocked",
+            "not_required"
+          ]
+        }
       }
     },
     "screen_list": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["screen", "purpose", "entry_point", "completion_action", "status"],
+        "required": [
+          "screen",
+          "purpose",
+          "entry_point",
+          "completion_action",
+          "status"
+        ],
         "properties": {
-          "screen": { "type": "string" },
-          "purpose": { "type": "string" },
-          "entry_point": { "type": "string" },
-          "completion_action": { "type": "string" },
-          "prd_requirement": { "type": "string" },
-          "ia_node": { "type": "string" },
-          "status": { "enum": ["draft", "partial", "blocked", "ready"] }
+          "screen": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "entry_point": {
+            "type": "string"
+          },
+          "completion_action": {
+            "type": "string"
+          },
+          "prd_requirement": {
+            "type": "string"
+          },
+          "ia_node": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "partial",
+              "blocked",
+              "ready"
+            ]
+          }
         }
       }
     },
@@ -84,32 +174,79 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["screen", "prd_requirement", "ia_node", "copy_source"],
+        "required": [
+          "screen",
+          "prd_requirement",
+          "ia_node",
+          "copy_source"
+        ],
         "properties": {
-          "screen": { "type": "string" },
-          "research_jtbd_signal": { "type": "string" },
-          "prd_requirement": { "type": "string" },
-          "ia_node": { "type": "string" },
-          "copy_source": { "type": "string" },
-          "prototype_test_signal": { "type": "string" }
+          "screen": {
+            "type": "string"
+          },
+          "research_jtbd_signal": {
+            "type": "string"
+          },
+          "prd_requirement": {
+            "type": "string"
+          },
+          "ia_node": {
+            "type": "string"
+          },
+          "copy_source": {
+            "type": "string"
+          },
+          "prototype_test_signal": {
+            "type": "string"
+          }
         }
       }
     },
-    "desktop_specification": { "type": "string" },
-    "tablet_specification": { "type": "string" },
-    "mobile_specification": { "type": "string" },
+    "desktop_specification": {
+      "type": "string"
+    },
+    "tablet_specification": {
+      "type": "string"
+    },
+    "mobile_specification": {
+      "type": "string"
+    },
     "sections": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["section", "layout", "copy_source", "components", "states"],
+        "required": [
+          "section",
+          "layout",
+          "copy_source",
+          "components",
+          "states"
+        ],
         "properties": {
-          "section": { "type": "string" },
-          "layout": { "type": "string" },
-          "copy_source": { "type": "string" },
-          "components": { "type": "array", "items": { "type": "string" } },
-          "states": { "type": "array", "items": { "type": "string" } },
-          "acceptance_notes": { "type": "string" }
+          "section": {
+            "type": "string"
+          },
+          "layout": {
+            "type": "string"
+          },
+          "copy_source": {
+            "type": "string"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "states": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "acceptance_notes": {
+            "type": "string"
+          }
         }
       }
     },
@@ -117,14 +254,37 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["component", "source", "states", "auto_layout_intent"],
+        "required": [
+          "component",
+          "source",
+          "states",
+          "auto_layout_intent"
+        ],
         "properties": {
-          "component": { "type": "string" },
-          "source": { "type": "string" },
-          "variants": { "type": "array", "items": { "type": "string" } },
-          "states": { "type": "array", "items": { "type": "string" } },
-          "auto_layout_intent": { "type": "string" },
-          "frontend_owner": { "type": "string" }
+          "component": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "states": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "auto_layout_intent": {
+            "type": "string"
+          },
+          "frontend_owner": {
+            "type": "string"
+          }
         }
       }
     },
@@ -132,18 +292,64 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["stable_id", "figma_source", "figma_properties", "react_target", "required_states", "evidence_status"],
+        "required": [
+          "stable_id",
+          "figma_source",
+          "figma_properties",
+          "react_target",
+          "required_states",
+          "evidence_status"
+        ],
         "properties": {
-          "stable_id": { "type": "string", "minLength": 1 },
-          "figma_source": { "type": "string" },
-          "figma_properties": { "type": "array", "items": { "type": "string" } },
-          "semantic_variables": { "type": "array", "items": { "type": "string" } },
-          "react_target": { "type": "string" },
-          "prop_mapping": { "type": "array", "items": { "type": "string" } },
-          "required_states": { "type": "array", "items": { "type": "string" } },
-          "story_test_locator": { "type": "string" },
-          "evidence_status": { "enum": ["planned", "mapped", "partial", "blocked", "not_applicable"] },
-          "deviation": { "type": "string" }
+          "stable_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "figma_source": {
+            "type": "string"
+          },
+          "figma_properties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "semantic_variables": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "react_target": {
+            "type": "string"
+          },
+          "prop_mapping": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "required_states": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "story_test_locator": {
+            "type": "string"
+          },
+          "evidence_status": {
+            "enum": [
+              "planned",
+              "mapped",
+              "partial",
+              "blocked",
+              "not_applicable"
+            ]
+          },
+          "deviation": {
+            "type": "string"
+          }
         }
       }
     },
@@ -151,13 +357,33 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["figma_frame_state", "frontend_target", "status"],
+        "required": [
+          "figma_frame_state",
+          "frontend_target",
+          "status"
+        ],
         "properties": {
-          "figma_frame_state": { "type": "string" },
-          "node_screenshot_evidence": { "type": "string" },
-          "frontend_target": { "type": "string" },
-          "behavior_test": { "type": "string" },
-          "status": { "enum": ["planned", "mapped", "partial", "blocked", "not_applicable"] }
+          "figma_frame_state": {
+            "type": "string"
+          },
+          "node_screenshot_evidence": {
+            "type": "string"
+          },
+          "frontend_target": {
+            "type": "string"
+          },
+          "behavior_test": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "planned",
+              "mapped",
+              "partial",
+              "blocked",
+              "not_applicable"
+            ]
+          }
         }
       }
     },
@@ -165,16 +391,35 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["surface", "default_state"],
+        "required": [
+          "surface",
+          "default_state"
+        ],
         "properties": {
-          "surface": { "type": "string" },
-          "default_state": { "type": "string" },
-          "loading": { "type": "string" },
-          "empty": { "type": "string" },
-          "error": { "type": "string" },
-          "validation": { "type": "string" },
-          "success": { "type": "string" },
-          "disabled_permission": { "type": "string" }
+          "surface": {
+            "type": "string"
+          },
+          "default_state": {
+            "type": "string"
+          },
+          "loading": {
+            "type": "string"
+          },
+          "empty": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "validation": {
+            "type": "string"
+          },
+          "success": {
+            "type": "string"
+          },
+          "disabled_permission": {
+            "type": "string"
+          }
         }
       }
     },
@@ -189,11 +434,17 @@
         "status"
       ],
       "properties": {
-        "required": { "type": "boolean" },
-        "target": { "type": "string" },
+        "required": {
+          "type": "boolean"
+        },
+        "target": {
+          "type": "string"
+        },
         "visual_evidence": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "forbidden_patterns": {
           "type": "array",
@@ -210,9 +461,20 @@
             ]
           }
         },
-        "screenshot_review_required": { "type": "boolean" },
-        "status": { "enum": ["passed", "needs_work", "blocked", "not_applicable"] },
-        "blocker_deviation": { "type": "string" }
+        "screenshot_review_required": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "passed",
+            "needs_work",
+            "blocked",
+            "not_applicable"
+          ]
+        },
+        "blocker_deviation": {
+          "type": "string"
+        }
       }
     },
     "layout_compiler_contract": {
@@ -227,28 +489,65 @@
         "verification_contract_compiled"
       ],
       "properties": {
-        "figma_layout_ir_required": { "type": "boolean" },
-        "layout_ir_status": { "enum": ["ready", "partial", "blocked", "not_required"] },
-        "layout_ir_path": { "type": "string" },
-        "route_compiled": { "type": "boolean" },
-        "screen_zones_compiled": { "type": "boolean" },
-        "copy_fit_constraints_compiled": { "type": "boolean" },
-        "component_sources_compiled": { "type": "boolean" },
-        "verification_contract_compiled": { "type": "boolean" },
-        "visual_qa_required": { "type": "boolean" },
-        "blocker_deviation": { "type": "string" }
+        "figma_layout_ir_required": {
+          "type": "boolean"
+        },
+        "layout_ir_status": {
+          "enum": [
+            "ready",
+            "partial",
+            "blocked",
+            "not_required"
+          ]
+        },
+        "layout_ir_path": {
+          "type": "string"
+        },
+        "route_compiled": {
+          "type": "boolean"
+        },
+        "screen_zones_compiled": {
+          "type": "boolean"
+        },
+        "copy_fit_constraints_compiled": {
+          "type": "boolean"
+        },
+        "component_sources_compiled": {
+          "type": "boolean"
+        },
+        "verification_contract_compiled": {
+          "type": "boolean"
+        },
+        "visual_qa_required": {
+          "type": "boolean"
+        },
+        "blocker_deviation": {
+          "type": "string"
+        }
       }
     },
     "responsive_constraints": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["viewport", "constraint", "required_behavior"],
+        "required": [
+          "viewport",
+          "constraint",
+          "required_behavior"
+        ],
         "properties": {
-          "viewport": { "type": "string" },
-          "constraint": { "type": "string" },
-          "risk": { "type": "string" },
-          "required_behavior": { "type": "string" }
+          "viewport": {
+            "type": "string"
+          },
+          "constraint": {
+            "type": "string"
+          },
+          "risk": {
+            "type": "string"
+          },
+          "required_behavior": {
+            "type": "string"
+          }
         }
       }
     },
@@ -256,11 +555,20 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["area", "requirement"],
+        "required": [
+          "area",
+          "requirement"
+        ],
         "properties": {
-          "area": { "type": "string" },
-          "requirement": { "type": "string" },
-          "evidence_notes": { "type": "string" }
+          "area": {
+            "type": "string"
+          },
+          "requirement": {
+            "type": "string"
+          },
+          "evidence_notes": {
+            "type": "string"
+          }
         }
       }
     },
@@ -268,12 +576,29 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["signal", "trigger", "pii_risk"],
+        "required": [
+          "signal",
+          "trigger",
+          "pii_risk"
+        ],
         "properties": {
-          "signal": { "type": "string" },
-          "trigger": { "type": "string" },
-          "expected_assertion": { "type": "string" },
-          "pii_risk": { "enum": ["none", "low", "medium", "high"] }
+          "signal": {
+            "type": "string"
+          },
+          "trigger": {
+            "type": "string"
+          },
+          "expected_assertion": {
+            "type": "string"
+          },
+          "pii_risk": {
+            "enum": [
+              "none",
+              "low",
+              "medium",
+              "high"
+            ]
+          }
         }
       }
     },
@@ -281,11 +606,25 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["check", "status"],
+        "required": [
+          "check",
+          "status"
+        ],
         "properties": {
-          "check": { "type": "string" },
-          "status": { "enum": ["passed", "needs_work", "blocked", "not_applicable"] },
-          "notes": { "type": "string" }
+          "check": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "passed",
+              "needs_work",
+              "blocked",
+              "not_applicable"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
         }
       }
     },
@@ -293,12 +632,24 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["asset", "source_rights", "usage"],
+        "required": [
+          "asset",
+          "source_rights",
+          "usage"
+        ],
         "properties": {
-          "asset": { "type": "string" },
-          "source_rights": { "type": "string" },
-          "usage": { "type": "string" },
-          "fallback": { "type": "string" }
+          "asset": {
+            "type": "string"
+          },
+          "source_rights": {
+            "type": "string"
+          },
+          "usage": {
+            "type": "string"
+          },
+          "fallback": {
+            "type": "string"
+          }
         }
       }
     },
@@ -306,14 +657,33 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["requirement", "screen_evidence", "status"],
+        "required": [
+          "requirement",
+          "screen_evidence",
+          "status"
+        ],
         "properties": {
-          "requirement": { "type": "string" },
-          "screen_evidence": { "type": "string" },
-          "status": { "enum": ["passed", "needs_work", "blocked"] }
+          "requirement": {
+            "type": "string"
+          },
+          "screen_evidence": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "passed",
+              "needs_work",
+              "blocked"
+            ]
+          }
         }
       }
     },
-    "open_questions": { "type": "array", "items": { "type": "string" } }
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
   }
 }

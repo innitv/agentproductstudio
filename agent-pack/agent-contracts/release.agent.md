@@ -5,7 +5,6 @@ owner_stage_ids:
 required_inputs:
   - qa_report
   - frontend_result
-  - test_bench_result
   - handoff_bundle
   - stage_gate_ledger
   - artifact_manifest
@@ -41,7 +40,6 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 - `qa-report.md` (вердикт тестирования, проверки доступности и адаптивности)
 - `frontend-result.md` (список измененных файлов кода, примечания к реализации)
-- `test-bench-result.md` (результаты Playwright-тестов, логи прохождения воронки)
 - `handoff-bundle.md` (проектные решения, допущения, дальнейшие шаги)
 - Список фактически измененных файлов из git-окружения
 - Логи выполнения тестовых и валидационных команд
