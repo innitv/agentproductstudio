@@ -3,7 +3,7 @@
 <!-- Каноническое имя студии — `agent-product-studio` (как в `package.json`). Прежние варианты «Product Agent Studio» и `product-agent-studio` устарели. -->
 
 
-Рабочая среда для Claude Code, которая превращает продуктовый запрос в проверяемый набор артефактов: исследование, PRD, информационную архитектуру, дизайн, тексты, экраны, прототип, frontend, QA и release notes.
+Рабочая среда для Claude Code, которая превращает продуктовый запрос в проверяемый набор артефактов: исследование, PRD, информационную архитектуру, дизайн, тексты, экраны, frontend, QA и release notes.
 
 Это не prompt pack. Студия задаёт операционный контур: какие роли подключать, какие файлы читать, где хранить результаты, какие проверки выполнять и когда останавливаться и спрашивать человека.
 
@@ -54,14 +54,14 @@ yarn workflow:doctor
 
 ### Две оси запуска
 
-Запуск описывается тремя независимыми осями, которые фиксируются на intake и живут в `run-state.json`:
+Запуск описывается двумя независимыми осями, которые фиксируются на intake и живут в `run-state.json`:
 
 | Ось | Значения | Что определяет |
 | --- | --- | --- |
 | `profile` | `standard` · `reference` | нужна ли сверка с внешним визуальным референсом (`09-visual-reference`) |
 | `scale` | `full` · `increment` · `patch` | глубина: сколько стадий реально нужно |
 
-#### Масштаб: не каждая задача стоит 13 стадий
+#### Масштаб: не каждая задача стоит всех стадий
 
 Глубина запуска выбирается на intake осью `scale`. Она не связана с типом задачи: reference-driven бывает любого размера.
 
@@ -104,10 +104,10 @@ Skills подключаются автоматически по описанию
 | Path | Назначение |
 | --- | --- |
 | `CLAUDE.md` | Главные правила: маршрутизация, язык, approvals, gates, source of truth |
-| `.claude/agents/` | Нативные обёртки 12 субагентов-специалистов + чек-лист оркестратора (вызов через `Agent`, `subagent_type` = имя; `Task` работает как alias). Оркестратор — это главная сессия, а не субагент: его спавн запрещён механически через `permissions.deny` в `.claude/settings.json` |
+| `.claude/agents/` | Нативные обёртки 10 субагентов-специалистов + чек-лист оркестратора (вызов через `Agent`, `subagent_type` = имя; `Task` работает как alias). Оркестратор — это главная сессия, а не субагент: его спавн запрещён механически через `permissions.deny` в `.claude/settings.json` |
 | `.claude/skills/` | Навыки: процедура, метаданные и validation commands в одном файле |
 | `.claude/commands/` | Slash-команды этапов и управления workflow |
-| `.claude/hooks/` | Hooks сессии: session-start, orchestrator-reminder, guard-write, guard-bash, post-edit-sync |
+| `.claude/hooks/` | Hooks: session-start, orchestrator-reminder (каждый промпт), guard-write, guard-bash, delegation-guard, post-edit-sync, figma-selfcheck. Полный список с событиями — `yarn workflow:map` |
 | `.claude/settings.json` | Модель, permissions, разрешённые команды, hooks |
 | `.mcp.json` | MCP-серверы: figma, figmaDesktop, notion, tavily, playwright, github, gitlab, lazyweb |
 | `agent-pack/agent-contracts/` | Детальные контракты специалистов: orchestrator, research, prd, ia, design, design-generator, copywriting, frontend, qa-review, release, notion-publisher |
@@ -194,7 +194,7 @@ yarn qa:playwright        # E2E
 yarn plugin:link --check  # ссылка ~/.claude/skills -> plugins/ на месте?
 ```
 
-Приёмка продуктового UI (обязательна до `success` для `product_ui|frontend`, на обоих маршрутах):
+Приёмка продуктового UI (обязательна до `success` для `product_ui|frontend`):
 
 ```bash
 yarn tokens:build         # DTCG design/tokens/ -> CSS-переменные

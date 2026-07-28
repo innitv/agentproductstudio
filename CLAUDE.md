@@ -196,12 +196,12 @@ Sensitive data: не сохраняй secrets в коде, outputs, traces ил�
 
 ## 11. Субагенты
 
-Нативные Claude-обёртки — в `.claude/agents/` (вызываются главной сессией через `Agent` tool, `subagent_type` = имя): research, prd, ia, design, design-generator, copywriting, frontend, qa-review, release, notion-publisher. Оркестратор — это сама главная сессия (`.claude/agents/orchestrator.md` — её чек-лист), не спавни его как субагента; это закреплено механически через `permissions.deny` в `.claude/settings.json`. Специалисты не спавнят субагентов (`disallowedTools: Task, Agent` в обёртках) — вложенная делегация нарушила бы manager-style. Детальные контракты — `agent-pack/agent-contracts/*.agent.md`. Skills — в `.claude/skills/` .
+Нативные Claude-обёртки — в `.claude/agents/` (вызываются главной сессией через `Agent` tool, `subagent_type` = имя): research, prd, ia, design, design-generator, copywriting, frontend, qa-review, release, notion-publisher. Оркестратор — это сама главная сессия (`.claude/agents/orchestrator.md` — её чек-лист), не спавни его как субагента; это закреплено механически через `permissions.deny` в `.claude/settings.json`. Специалисты не спавнят субагентов (`disallowedTools: Task, Agent` в обёртках) — вложенная делегация нарушила бы manager-style. Детальные контракты — `agent-pack/agent-contracts/*.agent.md`. Skills — в `.claude/skills/`.
 
 Кросс-стадийные skills, которые действуют вне зависимости от этапа:
 
 - `approval-gate` — перед любым внешним действием (Notion, Figma, git, deploy, секреты, удаление, provider call). Исполняет Interactive Question Gate: молчаливый пропуск approval-вопроса запрещён.
-- `recursive-brief` — `00-intake`: expansion → deepening → consolidation до research. Консолидация начинается с опроса: два вопроса (макет в Figma? образец для сверки?) и утверждаемый план работ, из которого выводится масштаб. Молчаливый выбор маршрута или масштаба запрещён.
+- `recursive-brief` — `00-intake`: expansion → deepening → consolidation до research. Консолидация начинается с опроса: вопрос про образец для сверки и утверждаемый план работ, из которого выводится масштаб. Молчаливый выбор масштаба запрещён.
 - `run-ledger` — ведение `handoff-bundle.md`/`stage-gate-ledger.md`/`run-state.json` после каждого этапа.
 - `anti-ai-slop` — перед записью research/CJM/PRD/copy и любой публикацией; провал `yarn research:lint` запрещает external write.
 - `selective-commit` — частичный коммит по include/exclude scope; broad staging запрещён.
