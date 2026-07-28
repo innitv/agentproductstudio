@@ -9,7 +9,9 @@ description: >-
   Триггеры: сборка Figma-DS, компоненты в Figma, макеты в Figma, design tokens
   в Figma, use_figma, финальная проверка перед отчётом по Figma, оверрайд слетел,
   иконка не красится, INSTANCE_SWAP принёс чужой цвет, get_metadata не видит
-  страницы, подпись значения врёт.
+  страницы, файл выглядит пустым, подпись значения врёт, importComponentByKeyAsync
+  not found, компонент не импортируется из другого файла, перепись большого
+  Figma-файла при лимите чтений.
 ---
 
 # Сборка токенизированной дизайн-системы в Figma (проверенный порядок)
@@ -85,7 +87,9 @@ description: >-
 | INSTANCE_SWAP принёс чужой цвет/текст | `references/platform-limits.md#instance_swap-тащит-чужое-поверх-слота` | после свапа перебиндить цвет/`strokeWeight` на токен слота, проверить текстовые пропы |
 | Ряд торчит за сетом / наезжает на подписи | `references/platform-limits.md#component-set-не-авто-растёт` | после правки сета `resize` сета и states-контейнера + подписи новых рядов |
 | unloaded font | `references/use-figma-pitfalls.md#шрифты` | `characters` СТРОГО до `appendChild` в auto-layout; шрифт канала может отсутствовать |
-| get_metadata не видит страницы / component set | `references/use-figma-pitfalls.md#читающие-инструменты-врут` | звать с явным `nodeId`; сеты — через `findAllWithCriteria` |
+| get_metadata не видит страницы / component set / файл выглядит пустым | `references/use-figma-pitfalls.md#читающие-инструменты-врут` | звать с явным `nodeId`; полный список страниц — только через Plugin API; сеты — через `findAllWithCriteria` |
+| `importComponentByKeyAsync` → `not found` | `references/components-and-slots.md#импорт-по-ключу-работает-только-для-опубликованных-библиотек` | ключ верен, файл не опубликован как библиотека; отделить контрольным импортом из опубликованной |
+| Нужна перепись большого файла, а лимит чтений мал | `references/use-figma-pitfalls.md#особенности-канала-use_figma` | читать write-каналом; `page.loadAsync()` берёт чужую страницу без переключения текущей |
 | Подпись значения врёт (хекс/px) | `references/file-and-build-order.md#подписи-протухают` | сверить рукописные подписи против фактических биндов |
 | Клон `danger` лёг поверх `primary` | `references/platform-limits.md#клонирование-варианта` | явно спозиционировать клон, проверить `overlaps==0`, снять effect-стиль донора |
 
