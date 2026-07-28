@@ -1,0 +1,234 @@
+{
+  "$schema": "../component-contracts.schema.json",
+  "designSystemSlug": "shadcn-ui-community",
+  "fileKey": "pCDj1p7ItjKJcXPJZDqXi6",
+  "fileName": "shadcn ui components with variables — Tailwind classes — Updated January 2026 (Community Copy)",
+  "codeConnectStatus": "not_configured",
+  "codeConnectCheckedAt": "2026-07-28",
+  "components": [
+    {
+      "name": "Alert",
+      "nodeId": "73:3445",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "feedback" },
+      "codeSource": "apps/frontend/src/components/shadcn/alert.tsx",
+      "codeExport": "Alert",
+      "expectedVariants": {},
+      "semanticVariables": ["card", "card-foreground", "muted-foreground", "border", "destructive"],
+      "slots": ["AlertTitle", "AlertDescription"],
+      "requiredStates": ["default", "destructive"],
+      "storyTestLocator": "apps/frontend/src/components/shadcn/alert.stories.tsx"
+    },
+    {
+      "name": "Badge",
+      "nodeId": "665:2024",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "data-display" },
+      "codeSource": "apps/frontend/src/components/shadcn/badge.tsx",
+      "codeExport": "Badge",
+      "expectedVariants": {
+        "Type": ["default", "default_number", "destructive", "destructive_number", "outline", "secondary", "secondary_icon", "secondary_number"]
+      },
+      "semanticVariables": ["primary", "primary-foreground", "secondary", "secondary-foreground", "destructive", "border"],
+      "requiredStates": ["default"],
+      "storyTestLocator": "apps/frontend/src/components/shadcn/badge.stories.tsx"
+    },
+    {
+      "name": "Breadcrumb",
+      "nodeId": "665:2036",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "navigation" },
+      "codeSource": "apps/frontend/src/components/shadcn/breadcrumb.tsx",
+      "codeExport": "Breadcrumb",
+      "expectedVariants": {
+        "Type": ["collapsed", "custom_seperator", "dropdown", "link_component", "responsive"]
+      },
+      "semanticVariables": ["foreground", "muted-foreground"],
+      "slots": ["BreadcrumbList", "BreadcrumbItem", "BreadcrumbLink", "BreadcrumbSeparator"],
+      "requiredStates": ["default", "hover"],
+      "storyTestLocator": "apps/frontend/src/components/shadcn/breadcrumb.stories.tsx"
+    },
+    {
+      "name": "Button",
+      "nodeId": "73:3681",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "actions" },
+      "codeSource": "apps/frontend/src/components/shadcn/button.tsx",
+      "codeExport": "Button",
+      "expectedVariants": {},
+      "semanticVariables": ["primary", "primary-foreground", "secondary", "secondary-foreground", "destructive", "accent", "border", "ring"],
+      "requiredStates": ["default", "hover", "focus-visible", "disabled"],
+      "resizeContract": "hug-content; высота фиксируется размером варианта",
+      "storyTestLocator": "apps/frontend/src/components/shadcn/button.stories.tsx"
+    },
+    {
+      "name": "Card",
+      "nodeId": "73:4454",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "data-display" },
+      "codeSource": "apps/frontend/src/components/shadcn/card.tsx",
+      "codeExport": "Card",
+      "expectedVariants": {},
+      "semanticVariables": ["card", "card-foreground", "border", "muted-foreground"],
+      "slots": ["CardHeader", "CardTitle", "CardDescription", "CardContent", "CardFooter"],
+      "requiredStates": ["default"],
+      "storyTestLocator": "apps/frontend/src/components/shadcn/card.stories.tsx"
+    },
+    {
+      "name": "Checkbox",
+      "nodeId": "511:809",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "forms" },
+      "codeSource": "apps/frontend/src/components/shadcn/checkbox.tsx",
+      "codeExport": "Checkbox",
+      "expectedVariants": {},
+      "semanticVariables": ["primary", "primary-foreground", "input", "border", "ring"],
+      "requiredStates": ["unchecked", "checked", "indeterminate", "disabled", "focus-visible"],
+      "storyTestLocator": "apps/frontend/src/components/shadcn/checkbox.stories.tsx"
+    },
+    {
+      "name": "DropdownMenu",
+      "nodeId": "597:279",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "overlays" },
+      "codeSource": "apps/frontend/src/components/shadcn/dropdown-menu.tsx",
+      "codeExport": "DropdownMenu",
+      "expectedVariants": { "State": ["default", "open"] },
+      "semanticVariables": ["popover", "popover-foreground", "accent", "accent-foreground", "border"],
+      "slots": ["DropdownMenuTrigger", "DropdownMenuContent", "DropdownMenuItem", "DropdownMenuSeparator"],
+      "requiredStates": ["closed", "open", "item-hover", "item-disabled"],
+      "storyTestLocator": "apps/frontend/src/components/shadcn/dropdown-menu.stories.tsx"
+    },
+    {
+      "name": "Input",
+      "nodeId": "520:3062",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "forms" },
+      "codeSource": "apps/frontend/src/components/shadcn/input.tsx",
+      "codeExport": "Input",
+      "expectedVariants": { "State": ["default", "active"] },
+      "semanticVariables": ["background", "foreground", "input", "border", "ring", "muted-foreground", "destructive"],
+      "requiredStates": ["default", "focus-visible", "disabled", "invalid"],
+      "resizeContract": "fill-width; высота фиксированная",
+      "storyTestLocator": "apps/frontend/src/components/shadcn/input.stories.tsx"
+    },
+    {
+      "name": "Label",
+      "nodeId": "76:8617",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "forms" },
+      "codeSource": "apps/frontend/src/components/shadcn/label.tsx",
+      "codeExport": "Label",
+      "expectedVariants": { "State": ["default", "checked"] },
+      "semanticVariables": ["foreground", "muted-foreground"],
+      "requiredStates": ["default", "disabled"]
+    },
+    {
+      "name": "RadioGroup",
+      "nodeId": "76:8953",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "forms" },
+      "codeSource": "apps/frontend/src/components/shadcn/radio-group.tsx",
+      "codeExport": "RadioGroup",
+      "expectedVariants": {},
+      "semanticVariables": ["primary", "input", "border", "ring"],
+      "slots": ["RadioGroupItem"],
+      "requiredStates": ["unchecked", "checked", "disabled", "focus-visible"],
+      "storyTestLocator": "apps/frontend/src/components/shadcn/radio-group.stories.tsx"
+    },
+    {
+      "name": "Select",
+      "nodeId": "614:1543",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "forms" },
+      "codeSource": "apps/frontend/src/components/shadcn/select.tsx",
+      "codeExport": "Select",
+      "expectedVariants": { "State": ["default", "open"] },
+      "semanticVariables": ["background", "popover", "popover-foreground", "input", "border", "ring", "accent"],
+      "slots": ["SelectTrigger", "SelectContent", "SelectItem", "SelectGroup", "SelectLabel"],
+      "requiredStates": ["closed", "open", "disabled", "focus-visible"],
+      "storyTestLocator": "apps/frontend/src/components/shadcn/select.stories.tsx"
+    },
+    {
+      "name": "Separator",
+      "nodeId": "76:10202",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "data-display" },
+      "codeSource": "apps/frontend/src/components/shadcn/separator.tsx",
+      "codeExport": "Separator",
+      "expectedVariants": {},
+      "semanticVariables": ["border"],
+      "requiredStates": ["horizontal", "vertical"]
+    },
+    {
+      "name": "Sonner",
+      "nodeId": "1468:6037",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "feedback" },
+      "codeSource": "apps/frontend/src/components/shadcn/sonner.tsx",
+      "codeExport": "Toaster",
+      "expectedVariants": {
+        "Type": ["promise", "default", "success", "info", "warning", "error"]
+      },
+      "semanticVariables": ["popover", "popover-foreground", "border", "destructive", "muted-foreground"],
+      "requiredStates": ["default", "success", "info", "warning", "error", "promise"],
+      "storyTestLocator": "apps/frontend/src/components/shadcn/sonner.stories.tsx"
+    },
+    {
+      "name": "Switch",
+      "nodeId": "76:10618",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "forms" },
+      "codeSource": "apps/frontend/src/components/shadcn/switch.tsx",
+      "codeExport": "Switch",
+      "expectedVariants": { "State": ["Off", "On"] },
+      "semanticVariables": ["primary", "input", "background", "ring"],
+      "requiredStates": ["off", "on", "disabled", "focus-visible"],
+      "storyTestLocator": "apps/frontend/src/components/shadcn/switch.stories.tsx"
+    },
+    {
+      "name": "Tabs",
+      "nodeId": "76:10806",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "navigation" },
+      "codeSource": "apps/frontend/src/components/shadcn/tabs.tsx",
+      "codeExport": "Tabs",
+      "expectedVariants": {},
+      "semanticVariables": ["muted", "muted-foreground", "background", "foreground", "border", "ring"],
+      "slots": ["TabsList", "TabsTrigger", "TabsContent"],
+      "requiredStates": ["inactive", "active", "disabled", "focus-visible"],
+      "storyTestLocator": "apps/frontend/src/components/shadcn/tabs.stories.tsx"
+    },
+    {
+      "name": "Textarea",
+      "nodeId": "623:3553",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "forms" },
+      "codeSource": "apps/frontend/src/components/shadcn/textarea.tsx",
+      "codeExport": "Textarea",
+      "expectedVariants": { "State": ["default", "active"] },
+      "semanticVariables": ["background", "foreground", "input", "border", "ring", "muted-foreground"],
+      "requiredStates": ["default", "focus-visible", "disabled", "invalid"],
+      "resizeContract": "fill-width; высота растёт по содержимому",
+      "storyTestLocator": "apps/frontend/src/components/shadcn/textarea.stories.tsx"
+    },
+    {
+      "name": "Toggle",
+      "nodeId": "79:11038",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "actions" },
+      "codeSource": "apps/frontend/src/components/shadcn/toggle.tsx",
+      "codeExport": "Toggle",
+      "expectedVariants": { "State": ["default", "active"] },
+      "semanticVariables": ["accent", "accent-foreground", "muted-foreground", "border", "ring"],
+      "requiredStates": ["off", "on", "hover", "disabled", "focus-visible"]
+    },
+    {
+      "name": "ToggleGroup",
+      "nodeId": "624:124",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "actions" },
+      "codeSource": "apps/frontend/src/components/shadcn/toggle-group.tsx",
+      "codeExport": "ToggleGroup",
+      "expectedVariants": { "State": ["default", "active"] },
+      "semanticVariables": ["accent", "accent-foreground", "muted-foreground", "border", "ring"],
+      "slots": ["ToggleGroupItem"],
+      "requiredStates": ["off", "on", "hover", "disabled", "focus-visible"],
+      "storyTestLocator": "apps/frontend/src/components/shadcn/toggle-group.stories.tsx"
+    },
+    {
+      "name": "Tooltip",
+      "nodeId": "624:291",
+      "source": { "designSystemSlug": "shadcn-ui-community", "category": "overlays" },
+      "codeSource": "apps/frontend/src/components/shadcn/tooltip.tsx",
+      "codeExport": "Tooltip",
+      "expectedVariants": { "State": ["default", "hover"] },
+      "semanticVariables": ["primary", "primary-foreground"],
+      "slots": ["TooltipTrigger", "TooltipContent", "TooltipProvider"],
+      "requiredStates": ["hidden", "visible"],
+      "storyTestLocator": "apps/frontend/src/components/shadcn/tooltip.stories.tsx"
+    }
+  ]
+}

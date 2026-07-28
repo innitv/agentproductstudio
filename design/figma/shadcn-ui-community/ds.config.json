@@ -1,0 +1,67 @@
+{
+  "$schema": "../design-system-index.schema.json",
+  "slug": "shadcn-ui-community",
+  "name": "shadcn/ui components with variables (Community Copy)",
+  "source": {
+    "figma_url": "https://www.figma.com/design/pCDj1p7ItjKJcXPJZDqXi6/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community---Copy-",
+    "file_key": "pCDj1p7ItjKJcXPJZDqXi6",
+    "scope": "full_component_library",
+    "source_type": "community_copy"
+  },
+  "ingest": {
+    "status": "indexed",
+    "last_ingested_at": "2026-07-28",
+    "manifest_path": "design/figma/shadcn-ui-community/_scan/manifest.md",
+    "census_path": "design/figma/shadcn-ui-community/_scan/census.md"
+  },
+  "foundation": {
+    "path": "design/figma/shadcn-ui-community/foundation.md",
+    "semantic_modes": ["light mode", "dark mode"],
+    "variable_collections": [
+      "mode",
+      "tokens",
+      "rdx/colors",
+      "tw/colors",
+      "tw/padding",
+      "tw/margin",
+      "tw/border-radius",
+      "tw/gap",
+      "tw/space",
+      "tw/max-width",
+      "tw/font",
+      "tw/border-width",
+      "tw/max-height",
+      "tw/height",
+      "tw/opacity",
+      "tw/stroke-width"
+    ],
+    "notes": [
+      "Семантический слой (коллекция `mode`, 47 переменных) совпадает по ИМЕНАМ с design/tokens/shadcn/default.json — все 31 цветовой токен shadcn плюс шкала radius.",
+      "Значения цвета РАСХОДЯТСЯ: библиотека на нейтральной базе neutral, наша тема default — на slate (@shadcn/theme-slate). Макет по библиотеке как есть не будет попиксельно равен коду.",
+      "Радиусы совпадают численно: 0/2/6/8/10/14/18/22/26/9999 против наших calc() от --radius: 0.625rem.",
+      "chart-1…5 в библиотеке — монохромная синяя шкала blue/8…12; у нас пять разных оттенков.",
+      "Переменные semantic-background / semantic-border / semantic-foreground / background-color — самодеятельность автора файла, к shadcn не относятся, в код не переносить.",
+      "Компонентного тира токенов нет; семантических алиасов типографики и density тоже нет — только примитивы tw/font, tw/padding, tw/margin, tw/gap."
+    ]
+  },
+  "components": {
+    "map_path": "design/figma/shadcn-ui-community/components.md",
+    "profile_dir": "design/figma/shadcn-ui-community/components",
+    "component_count": 172,
+    "component_set_count": 79,
+    "categories": [
+      "forms",
+      "actions",
+      "navigation",
+      "overlays",
+      "data-display",
+      "feedback",
+      "date-time",
+      "icons"
+    ]
+  },
+  "contracts": {
+    "component_contracts_path": "design/figma/shadcn-ui-community/component-contracts.json",
+    "code_connect_status": "not_configured"
+  }
+}

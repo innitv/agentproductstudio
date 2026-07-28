@@ -3,6 +3,26 @@
   "version": 1,
   "systems": [
     {
+      "slug": "shadcn-ui-community",
+      "name": "shadcn/ui components with variables (Community Copy)",
+      "file_key": "pCDj1p7ItjKJcXPJZDqXi6",
+      "figma_url": "https://www.figma.com/design/pCDj1p7ItjKJcXPJZDqXi6/shadcn-ui-components-with-variables---Tailwind-classes---Updated-January-2026--Community---Copy-",
+      "status": "indexed",
+      "source_type": "community_copy",
+      "code_connect_status": "not_configured",
+      "last_ingested_at": "2026-07-28",
+      "paths": {
+        "root": "design/figma/shadcn-ui-community",
+        "source": "design/figma/shadcn-ui-community/source.md",
+        "census": "design/figma/shadcn-ui-community/_scan/census.md",
+        "manifest": "design/figma/shadcn-ui-community/_scan/manifest.md",
+        "foundation": "design/figma/shadcn-ui-community/foundation.md",
+        "components": "design/figma/shadcn-ui-community/components.md",
+        "component_contracts": "design/figma/shadcn-ui-community/component-contracts.json"
+      },
+      "notes": "Figma-зеркало библиотеки, которая у нас установлена в коде (apps/frontend/src/components/shadcn/). 88 страниц, 172 компонента/сета на 55 компонентных страницах, 14 125 иконок в пяти наборах, 16 коллекций переменных. Семантический слой (коллекция mode) совпадает по именам с design/tokens/shadcn/default.json; значения цвета расходятся — библиотека на базе neutral, наша тема default на slate. Файл НЕ опубликован как Figma-библиотека: внутри файла компоненты адресуются Node ID (работает), импорт по component key снаружи файла НЕ работает — проверено экспериментом 2026-07-28 с негативным контролем на опубликованной библиотеке (протокол в foundation.md). Макеты собираются внутри файла либо после публикации копии в команде с платным планом. Дефект исходного файла: у component set Buttons (73:3681) не читаются варианты. Перепись снята через use_figma + page.loadAsync, потому что get_metadata по этому файлу отдаёт 1 страницу из 88."
+    },
+    {
       "slug": "a3-finance-visitka",
       "name": "A3 Финанс — сайт-визитка (фриланс-макеты)",
       "file_key": "uxJWafaNxGCMyGOamuoTWA",
