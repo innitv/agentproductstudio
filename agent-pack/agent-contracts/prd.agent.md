@@ -77,7 +77,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## PRD-To-Design Handoff
 
-В конце `prd.md` обязательно добавь блок для IA/design/prototype:
+В конце `prd.md` обязательно добавь блок для IA/design:
 
 - `primary_screen`: экран, с которого начинается главный сценарий.
 - `primary_action`: главное действие пользователя.

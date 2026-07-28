@@ -52,7 +52,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 11. **Правила навигации**: Спроектировать элементы управления навигацией (сайдбар, хлебные крошки, контекстные вкладки) и их адаптивное поведение на мобильных устройствах. Главная навигация должна быть сканируемой, предсказуемой и не глубже 2-3 уровней без причины. **Findability gate**: до primary action пользователь доходит не более чем за 3 клика/шага от любой точки входа; если сценарий требует больше — зафиксировать причину или пересобрать структуру.
 12. **Accessibility & Semantics Pass**: Зафиксировать H1/H2/H3, landmark regions, form labels, error associations, focus order и keyboard path для основного сценария.
 13. **Маппинг критериев валидации**: Связать каждый узел архитектуры с бизнес-метрикой, acceptance criterion, analytics event или контрольной точкой конверсии.
-14. **IA-To-Design Handoff**: Подготовить downstream block для design/copy/screens/prototype: primary screen, section order, navigation model, key states, content constraints, proof needs, mobile behavior и open questions.
+14. **IA-To-Design Handoff**: Подготовить downstream block для design/copy/screens: primary screen, section order, navigation model, key states, content constraints, proof needs, mobile behavior и open questions.
 
 ## IA Quality Model
 

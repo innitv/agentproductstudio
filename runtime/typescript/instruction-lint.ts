@@ -19,7 +19,12 @@
 
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
-import { artifactFiles, workflowStages } from "./workflow-stages";
+import {
+  artifactFiles,
+  getRequiredArtifactsForStage,
+  getWorkflowStagesForProfile,
+  workflowStages,
+} from "./workflow-stages";
 
 export interface LintFinding {
   file: string;
@@ -155,9 +160,120 @@ export function lintInstructionReferences(root = process.cwd()): LintFinding[] {
   return findings;
 }
 
+/**
+ * Матрица этапов в `stage-handoff-contract.md` пересказывает граф прозой: стадия, владелец,
+ * входы, выходы. Проза рядом с машинным источником живёт ровно до первой правки манифеста —
+ * 2026-07-28 из неё вручную вынимали строки удалённых стадий, и заметить это можно было
+ * только глазами.
+ *
+ * Сверяется то, что имеет однозначный машинный эквивалент: набор стадий, владелец каждой и
+ * присутствие каждого обязательного артефакта в колонке «Создает». Колонка «Получает» не
+ * сверяется: там законно живут не-артефактные входы (`goal`, `constraints`) и обобщения
+ * вроде «полный research pack».
+ */
+export function lintStageHandoffTable(root = process.cwd()): LintFinding[] {
+  const findings: LintFinding[] = [];
+  const file = "agent-pack/workflows/stage-handoff-contract.md";
+  const absolute = join(root, file);
+  if (!existsSync(absolute)) {
+    return findings;
+  }
+
+  const content = readFileSync(absolute, "utf8");
+  if (content.includes(`${ignoreMarker}-file`)) {
+    return findings;
+  }
+
+  // Максимальный набор стадий — reference: он включает standard плюс визуальную сверку.
+  const stages = getWorkflowStagesForProfile("reference");
+  const documented = new Map<string, { line: number; owner: string; creates: string }>();
+  const stageIdPattern = /^\d{2}-[a-z-]+$/;
+
+  content.split(NEWLINE).forEach((rawLine, index) => {
+    // | Этап | Владелец | Получает | Создает | Кто получает дальше |
+    const cells = rawLine.split("|").map((cell) => cell.trim());
+    if (cells.length < 6) return;
+    const stageId = (cells[1] ?? "").replaceAll("`", "");
+    if (!stageIdPattern.test(stageId)) return;
+    documented.set(stageId, {
+      line: index + 1,
+      owner: (cells[2] ?? "").replaceAll("`", ""),
+      creates: cells[4] ?? "",
+    });
+  });
+
+  if (documented.size === 0) {
+    findings.push({
+      file,
+      line: 1,
+      rule: "stage-handoff-table",
+      message:
+        "матрица этапов не распозналась: ни одной строки со стадией. Проверь формат таблицы — " +
+        "без него сверка с манифестом молча превращается в ничто.",
+    });
+    return findings;
+  }
+
+  for (const stage of stages) {
+    const row = documented.get(stage.id);
+    if (!row) {
+      findings.push({
+        file,
+        line: 1,
+        rule: "stage-handoff-table",
+        message: `стадии '${stage.id}' нет в матрице этапов, хотя она есть в манифесте.`,
+      });
+      continue;
+    }
+
+    if (row.owner !== stage.owner) {
+      findings.push({
+        file,
+        line: row.line,
+        rule: "stage-handoff-table",
+        message: `владелец '${stage.id}': в матрице '${row.owner}', в манифесте '${stage.owner}'.`,
+      });
+    }
+
+    const profile = stage.profile === "reference" ? "reference" : "standard";
+    for (const artifact of getRequiredArtifactsForStage(stage, profile)) {
+      const fileName = artifactFiles[artifact];
+      // Ledger стадия обновляет, а не создаёт: требовать его в колонке «Создает» у каждой
+      // строки значило бы заставить дублировать шум.
+      if (!fileName || ledgerArtifacts.has(artifact)) continue;
+      if (!row.creates.includes(fileName)) {
+        findings.push({
+          file,
+          line: row.line,
+          rule: "stage-handoff-table",
+          message: `'${stage.id}' обязан создать '${fileName}' (манифест), но матрица его не называет.`,
+        });
+      }
+    }
+  }
+
+  const knownStageIds = new Set(stages.map((stage) => stage.id));
+  for (const [stageId, row] of documented) {
+    if (!knownStageIds.has(stageId)) {
+      findings.push({
+        file,
+        line: row.line,
+        rule: "stage-handoff-table",
+        message: `матрица описывает стадию '${stageId}', которой нет в манифесте — строка протухла.`,
+      });
+    }
+  }
+
+  return findings;
+}
+
+const ledgerArtifacts = new Set(["run_plan", "handoff_bundle", "stage_gate_ledger"]);
+
+const NEWLINE = /\r?\n/;
+
 /** Проверка текстов инструкций — для `validate:config`. */
 export function validateInstructionTexts(root = process.cwd()): string[] {
-  return lintInstructionReferences(root).map(
+  return [...lintInstructionReferences(root), ...lintStageHandoffTable(root)].map(
     (finding) => `${finding.file}:${finding.line}: [${finding.rule}] ${finding.message}`,
   );
 }

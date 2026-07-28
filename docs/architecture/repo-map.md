@@ -23,8 +23,8 @@
 | `README.md`, `COMMANDS.md` | doc | Человекочитаемый обзор проекта (`README.md`) и справочник команд проекта — локальные `yarn`-команды и slash/триггеры (`COMMANDS.md`). | Обновлять при изменении onboarding-обзора или списка команд. |
 | `.claude/` | Claude канон | Нативный слой Claude Code: `agents/` (субагенты), `skills/`, `commands/`, `hooks/`, `settings.json`. | Менять по правилам Claude Code; синхронизировать с `agent-pack/agent-contracts`. |
 | `apps/` | active | Runnable frontend apps и app shells. Главный app target: `apps/frontend` для studio. | Менять через product/frontend tasks, проверять build и relevant QA target. |
-| `agent-pack/` | active | Агентная система (проектный слой): `agent-contracts/`, `skills/`, `workflows/`, `artifacts/`, `templates/`, `schemas/`, `guardrails/`, `quality/`. | При изменении правил синхронизировать `CLAUDE.md`, agent docs и validators/tests. |
-| `plugins/` | active | Плагины Claude Code — переносимое знание, не привязанное к процессу студии. Сейчас два: `figma-ds/` (`/figma-ds:build` — механика Figma Plugin API и чек-лист после write, `/figma-ds:standard` — textbook-канон DS) и `subsystem-audit/` (`/subsystem-audit:audit` — доказательный шаблон аудита подсистемы). Раздаются на машину junction'ом из `~/.claude/skills/<name>`, поэтому правка из любого проекта попадает сюда. | Всё Figma-знание вне процесса студии держать только здесь; копий в `.claude/skills` и guide не заводить. Граница — раздел «Границы знания» в `integrations/mcp/figma-canvas-write-guide.md`. |
+| `agent-pack/` | active | Агентная система (проектный слой): `agent-contracts/`, `workflows/`, `artifacts/`, `templates/`, `schemas/`, `guardrails/`, `quality/`. | При изменении правил синхронизировать `CLAUDE.md`, agent docs и validators/tests. |
+| `plugins/` | active | Плагины Claude Code — переносимое знание, не привязанное к процессу студии. Сейчас три: `figma-ds/` (`/figma-ds:build` — механика Figma Plugin API и чек-лист после write, `/figma-ds:standard` — textbook-канон DS) `subsystem-audit/` (`/subsystem-audit:audit` — доказательный шаблон аудита подсистемы) и `ui-craft/` (`/ui-craft:build` — ремесло вёрстки, `/ui-craft:reference-check` — сверка с внешним образцом измерением). Раздаются на машину junction'ом из `~/.claude/skills/<name>`, поэтому правка из любого проекта попадает сюда. | Всё Figma-знание вне процесса студии держать только здесь; копий в `.claude/skills` и guide не заводить. Граница — раздел «Границы знания» в `integrations/mcp/figma-canvas-write-guide.md`. |
 | `runtime/` | active | TypeScript workflow runtime: commands, validators, stage engine, route/intent logic. | Менять вместе с tests/runtime commands. |
 | `tooling/` | active | Скрипты для audit, publish, screenshots, cleanup, lint и git scope checks. | Проверять точечными командами и `docs:audit`/`validate:config`, если меняются контракты. |
 | `tests/` | active | Автотесты. Playwright tests разделяются по app/surface target. | Не смешивать studio и demo assertions в одном spec без явного shared scope. |
@@ -70,21 +70,21 @@ CLAUDE.md                 # корневые правила (лёгкий инд
 AGENTS.md                 # pointer на CLAUDE.md для сторонних агентов
 .mcp.json                 # MCP-серверы
 .claude/
-  agents/                 # 13 субагентов (нативные обёртки)
-  skills/                 # навыки (авто-обнаружение)
+  agents/                 # 10 субагентов + чек-лист оркестратора (нативные обёртки)
+  skills/                 # навыки: процедура, метаданные и validation commands в одном файле
   commands/               # slash-команды
-  hooks/                  # guard-write, guard-bash, session-start, orchestrator-reminder, post-edit-sync
+  hooks/                  # session-start, orchestrator-reminder, guard-write, guard-bash, delegation-guard, post-edit-sync, figma-selfcheck
   settings.json           # модель, permissions, hooks
 
 # — Проектная архитектура —
 agent-pack/               # агентная система
   agent-contracts/        # детальные контракты специалистов (runtime-валидация)
-  skills/                 # детальные процедуры навыков
   workflows/              # pipeline, handoff-контракты, claude-operating-rules
   artifacts/ templates/ schemas/ guardrails/ quality/
 plugins/                  # плагины Claude Code (переносимое знание вне процесса студии)
   figma-ds/               # /figma-ds:build (механика Figma) + /figma-ds:standard (канон DS); junction из ~/.claude/skills
   subsystem-audit/        # /subsystem-audit:audit (доказательный шаблон аудита подсистемы); junction из ~/.claude/skills
+  ui-craft/               # /ui-craft:build (ремесло вёрстки) + /ui-craft:reference-check (сверка с образцом); junction из ~/.claude/skills
 runtime/typescript/       # workflow engine, validators, тесты, CLI (yarn workflow:*)
 apps/frontend/            # оболочка студии (App-роутер, StudioIndexView, пилотный экран, компоненты shadcn, Storybook)
 integrations/ design/ docs/architecture/ tooling/scripts/ tests/playwright/

@@ -11,7 +11,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { lintInstructionReferences, validateInstructionTexts } from "./instruction-lint";
+import { lintInstructionReferences, lintStageHandoffTable, validateInstructionTexts } from "./instruction-lint";
 
 function withFixture(files: Record<string, string>, assertion: (root: string) => void): void {
   const root = mkdtempSync(join(tmpdir(), "instruction-lint-"));
@@ -110,9 +110,78 @@ withFixture(
 );
 
 // ---------------------------------------------------------------------------
-// 3. Детекция маршрута по наличию файла — системный дефект: так делали два независимых
-//    потребителя (QA и ds-to-storybook). Тексты дословные из `git show 31079c7`.
+// 3. Матрица этапов в stage-handoff-contract.md пересказывает граф прозой.
+//    Реальный дефект 2026-07-28: удалили стадии `07-prototype` и `10-test-bench`, строки в
+//    матрице остались, и убирать их пришлось руками. Ниже — три способа разъехаться.
 // ---------------------------------------------------------------------------
+
+const handoffHeader = "| Этап | Владелец | Получает | Создает | Кто получает дальше |\n|---|---|---|---|---|\n";
+
+function handoffRow(stageId: string, owner: string, creates: string): string {
+  return `| \`${stageId}\` | \`${owner}\` | \`goal\` | ${creates} | дальше |\n`;
+}
+
+// Полная матрица текущего графа: без неё каждая проверка утонет в «стадии нет в матрице».
+function fullMatrix(overrides: Record<string, string> = {}, extraRows = ""): string {
+  const rows: Array<[string, string, string]> = [
+    ["00-intake", "orchestrator", "`run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, `recursive-brief.md`"],
+    ["01-research", "research", "`research-summary.md`, `scenario-user-flows.md`, `competitive-analysis.md`, `proto-personas.md`, `synthetic-interviews.md`, `swot.md`"],
+    ["02-prd", "prd", "`prd.md`"],
+    ["03-ia", "ia", "`ia-brief.md`"],
+    ["04-design", "design", "`design-brief.md`, `reference-analysis.md`"],
+    ["05-copy", "copywriting", "`copy-deck.md`"],
+    ["06-screens", "design-generator", "`screens.md`"],
+    ["08-frontend", "frontend", "`frontend-result.md`"],
+    ["09-visual-reference", "qa-review", "`visual-reference-review.md`"],
+    ["11-qa", "qa-review", "`qa-report.md`"],
+    ["12-release", "release", "`release-notes.md`"],
+  ];
+
+  return handoffHeader + rows
+    .map(([id, owner, creates]) => handoffRow(id, overrides[`${id}:owner`] ?? owner, overrides[`${id}:creates`] ?? creates))
+    .join("") + extraRows;
+}
+
+// 3.1. Протухшая строка: стадия удалена из манифеста, из матрицы — нет.
+withFixture(
+  {
+    "agent-pack/workflows/stage-handoff-contract.md":
+      fullMatrix({}, handoffRow("07-prototype", "prototype", "`prototype-report.md`")),
+  },
+  (root) => {
+    assertFinding(lintStageHandoffTable(root), "stage-handoff-table", /'07-prototype', которой нет в манифесте/);
+  },
+);
+
+// 3.2. Разъехавшийся владелец.
+withFixture(
+  { "agent-pack/workflows/stage-handoff-contract.md": fullMatrix({ "06-screens:owner": "design" }) },
+  (root) => {
+    assertFinding(lintStageHandoffTable(root), "stage-handoff-table", /владелец '06-screens'.*'design'.*'design-generator'/s);
+  },
+);
+
+// 3.3. Забытый обязательный артефакт в колонке «Создает».
+withFixture(
+  { "agent-pack/workflows/stage-handoff-contract.md": fullMatrix({ "02-prd:creates": "нечего" }) },
+  (root) => {
+    assertFinding(lintStageHandoffTable(root), "stage-handoff-table", /'02-prd' обязан создать 'prd\.md'/);
+  },
+);
+
+// 3.4. Сломанный формат таблицы обязан жаловаться, а не молча возвращать «всё чисто».
+withFixture(
+  { "agent-pack/workflows/stage-handoff-contract.md": "## Матрица этапов\n\nСтадии перечислены прозой.\n" },
+  (root) => {
+    assertFinding(lintStageHandoffTable(root), "stage-handoff-table", /матрица этапов не распозналась/);
+  },
+);
+
+// 3.5. Корректная матрица ложных срабатываний не даёт.
+withFixture(
+  { "agent-pack/workflows/stage-handoff-contract.md": fullMatrix() },
+  (root) => assert.deepEqual(lintStageHandoffTable(root), []),
+);
 
 // ---------------------------------------------------------------------------
 // 4. Реальное состояние репозитория
