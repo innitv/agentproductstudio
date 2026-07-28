@@ -29,7 +29,9 @@ contract_schema: agent-pack/templates/skill.template.md
 
 ## 1. Назначение
 
-**Применимость: только когда Figma реально в деле.** IR — guardrail перед Figma canvas write и ни для чего другого не нужен. По `CLAUDE.md` §6.1 Figma сузилась до дивергентной фазы на `04-design` и разового показа человеку, поэтому в большинстве задач этот skill не запускается: экран собирается сразу в коде, а его контракт — composition story плюс приёмка `yarn vr:test` / `yarn test-storybook`. Отсутствие `figma-layout-ir.json` для кодовой поверхности — не пробел, а `skipped_with_reason: Figma не участвует`.
+**Применимость: только маршрут `track: figma`.** IR — guardrail перед Figma canvas write и ни для чего другого не нужен. Маршрут читается из `run-state.json` (CLAUDE.md §0.3), а не выводится по наличию `figma-layout-ir.json`. По `CLAUDE.md` §6.1 Figma сузилась до дивергентной фазы на `04-design` и разового показа человеку, поэтому в большинстве задач этот skill не запускается: экран собирается сразу в коде, а его контракт — composition story плюс приёмка `yarn vr:test` / `yarn test-storybook`.
+
+**Как оформляется «Figma не участвует» (на маршруте `track: code`).** `figma-layout-ir.json` — маршрут-условный **артефакт**: он не создаётся и **записи в ledger не требует вовсе**, это штатный маршрут, а не пропуск. Писать `skipped_with_reason: Figma не участвует` **запрещено**. Записи требуют только маршрут-условные **секции** `screens.md` (`## Layout Compiler Contract`, `## Figma Readiness`) — строкой `skipped_by_track` в таблице «Секции вне маршрута» `stage-gate-ledger.md`. `## Component Contract Matrix` и `## Frame / State Implementation Map` обязательны на обоих маршрутах: на `code` мэппинг ведёт в Storybook story. Каноническая формулировка — `agent-pack/workflows/claude-operating-rules.md` §5, раздел «Маршрут (`track`) и как оформляется „Figma не участвует“» (заменяет прежнее указание этого skill про `skipped_with_reason`).
 
 Применяй этот skill перед любым Figma canvas write для `figma_board`, `product_ui` или `prototype`, если результат должен быть похож на приложение, а не на набор декоративных страниц.
 

@@ -49,7 +49,19 @@ export async function startWorkflowEngine(options: StartWorkflowOptions): Promis
   const track = options.track ?? defaultWorkflowTrack;
   const executionMode = options.executionMode ?? "local";
 
-  const outputDir = await runLandingWorkflow({ goal: options.goal, profile });
+  // Скаффолд обязан знать все три оси и то, какие из них названы явно: иначе `run-plan.md`
+  // перечисляет весь pipeline независимо от масштаба, а гейт опроса нечем закрыть.
+  const outputDir = await runLandingWorkflow({
+    goal: options.goal,
+    profile,
+    scale,
+    track,
+    axes_recorded: {
+      profile: Boolean(options.profile),
+      scale: Boolean(options.scale),
+      track: Boolean(options.track),
+    },
+  });
 
   // Реестр `outputs/registry.json` ведёт runtime, а не человек: незарегистрированный
   // каталог `yarn outputs:cleanup` считает мусором и уводит в `outputs/temp/`.
@@ -303,6 +315,9 @@ function createInitialState(
     profile,
     scale,
     track,
+    // Первая запись журнала маршрутов. Дальше он только дополняется — по нему валидатор
+    // видит смену маршрута задним числом даже после согласованной перезаписи состояния.
+    track_history: [{ track, recorded_at: now }],
     execution_mode: executionMode,
     status: "pending",
     output_dir: outputDir,

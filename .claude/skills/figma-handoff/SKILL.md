@@ -10,7 +10,9 @@ Skill готовит текстовый foundation/components/screens bundle п�
 **Полная процедура, входы/выходы, gates и validation-команды — в [`agent-pack/skills/figma-handoff/SKILL.md`](../../../agent-pack/skills/figma-handoff/SKILL.md). Следуй ей.**
 
 ## Применимость
-**Только когда Figma реально в деле** — пользователь просит макет в Figma или показ человеку (`CLAUDE.md` §6.1). `design_system_mode` по умолчанию решается в пользу shadcn/ui в коде, а не Figma-библиотеки. Handoff не является предусловием frontend: код собирается из `design/tokens/` и shadcn. Нет Figma — `skipped_with_reason: Figma не участвует`, bundle ради формальности не создаётся.
+**Только маршрут `track: figma`** из `run-state.json` (CLAUDE.md §0.3) — пользователь просит макет в Figma или показ человеку (`CLAUDE.md` §6.1). Определять маршрут по наличию файлов запрещено. `design_system_mode` по умолчанию решается в пользу shadcn/ui в коде, а не Figma-библиотеки. Handoff не является предусловием frontend: код собирается из `design/tokens/` и shadcn.
+
+На маршруте `track: code` `figma-handoff-bundle.md` не создаётся и **записи в ledger не требует вовсе** — это штатный маршрут, а не пропуск. Писать `skipped_with_reason: Figma не участвует` **запрещено** (замена прежнего указания). Записи требуют только маршрут-условные **секции** `screens.md`/`frontend-result.md` — строкой `skipped_by_track` в таблице «Секции вне маршрута» `stage-gate-ledger.md`. Каноническая формулировка — `agent-pack/workflows/claude-operating-rules.md` §5, раздел «Маршрут (`track`)».
 
 ## Когда использовать
 - Пользователь просит Figma design system или canvas write.

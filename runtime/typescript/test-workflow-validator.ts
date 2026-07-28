@@ -363,6 +363,25 @@ withRun((runDir) => {
   assertError(findings, /missing required visual-diff-result\.json evidence/);
 });
 
+// Один факт — одно сообщение. Для артефактов, где `## Inputs Used` объявлена обязательной,
+// её отсутствие отчитывается ошибкой; мягкое напоминание о том же факте не дублируется.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "04-design", "reference");
+  writeFileSync(
+    join(runDir, artifactFiles[artifactNames.referenceAnalysis]),
+    ["## References", "- фикстура без раздела Inputs Used", "", "Длинный абзац, чтобы артефакт прошёл порог размера и дошёл до проверки секций."].join("\n"),
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "04-design", "reference");
+  assertError(findings, /reference-analysis\.md is missing section ## Inputs Used/);
+  assert.deepEqual(
+    findings.filter((finding) => finding.level === "warning" && /reference-analysis\.md should record ## Inputs Used/.test(finding.message)),
+    [],
+    "обязательная секция не должна отчитываться дважды — ошибкой и предупреждением",
+  );
+});
+
 // --- Ось масштаба (scale) ---
 
 // Дефолт обязан совпадать с поведением до появления оси, иначе старые run сломаются.
@@ -628,6 +647,207 @@ withRun((runDir) => {
   assert.ok(findings.some((finding) => finding.level === "warning" && /validation track is 'code'/.test(finding.message)));
 });
 
+// Anti-backdating через журнал маршрутов: `yarn workflow:sync --track` переписывает
+// `run-state.json` и `run-meta.json` СОГЛАСОВАННО, поэтому расхождение записей исчезает.
+// Журнал `track_history` — это след, который переписать нечем.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "08-frontend", "standard", { [artifactNames.frontendResult]: frontendCodeTrackPayload });
+  writeFileSync(
+    join(runDir, "run-state.json"),
+    JSON.stringify({
+      run_id: "fixture",
+      goal: "fixture",
+      profile: "standard",
+      scale: "full",
+      track: "code",
+      track_history: [{ track: "figma", recorded_at: "" }, { track: "code", recorded_at: "" }],
+      status: "completed",
+      output_dir: runDir,
+      created_at: "",
+      updated_at: "",
+      stages: { "08-frontend": { status: "completed" } },
+    }),
+    "utf8",
+  );
+  // Обе записи согласованы — старая проверка молчит, как и на реальном прогоне.
+  writeFileSync(join(runDir, "run-meta.json"), JSON.stringify({ workflow_track: "code" }), "utf8");
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard", "full");
+  assertError(findings, /was recorded after this run already ran on 'figma'/);
+});
+
+// Тот же журнал до того, как маршрут-зависимые стадии отработали, ошибкой не является:
+// маршрут на intake ещё можно поправить.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "08-frontend", "standard", { [artifactNames.frontendResult]: frontendCodeTrackPayload });
+  writeFileSync(
+    join(runDir, "run-state.json"),
+    JSON.stringify({
+      run_id: "fixture",
+      goal: "fixture",
+      profile: "standard",
+      scale: "full",
+      track: "code",
+      track_history: [{ track: "figma", recorded_at: "" }, { track: "code", recorded_at: "" }],
+      status: "completed",
+      output_dir: runDir,
+      created_at: "",
+      updated_at: "",
+      stages: {},
+    }),
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard", "full");
+  assert.deepEqual(
+    findings.filter((finding) => /track_history/.test(finding.message)),
+    [],
+    "смена маршрута до старта маршрут-зависимых стадий законна",
+  );
+});
+
+// Второй, независимый от записей факт: артефакты, которые производит только Figma-маршрут.
+// Проверка работает в одну сторону — объявленный `code` при их наличии, — и никогда не
+// выводит маршрут из отсутствия файлов.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "08-frontend", "standard", { [artifactNames.frontendResult]: frontendCodeTrackPayload });
+  writeTrackRunState(runDir, "code", { "08-frontend": { status: "completed" } });
+  writeFileSync(join(runDir, artifactFiles[artifactNames.figmaLayoutIr]), "{}", "utf8");
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard", "full");
+  assertError(findings, /track 'code' is declared, but the run carries Figma-only artifacts \(figma-layout-ir\.json\)/);
+});
+
+// Тот же файл на маршруте `figma` — норма, а не ошибка.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "08-frontend", "standard", { [artifactNames.frontendResult]: frontendCodeTrackPayload });
+  writeTrackRunState(runDir, "figma", { "08-frontend": { status: "completed" } });
+  writeFileSync(join(runDir, artifactFiles[artifactNames.figmaLayoutIr]), "{}", "utf8");
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard", "full");
+  assert.deepEqual(findings.filter((finding) => /Figma-only artifacts/.test(finding.message)), []);
+});
+
+// --- Записи `skipped_by_scale` проверяются в те же три стороны, что и `skipped_by_track` ---
+
+function writeScaleRunState(runDir: string, scale: WorkflowScale): void {
+  writeFileSync(
+    join(runDir, "run-state.json"),
+    JSON.stringify({ profile: "standard", scale, track: "code", status: "completed", created_at: "", updated_at: "", stages: {} }),
+    "utf8",
+  );
+}
+
+function appendScaleRows(runDir: string, rows: string[]): void {
+  const path = join(runDir, artifactFiles[artifactNames.stageGateLedger]);
+  const header = ["", "| Этап | Владелец | Артефакты | Статус | Заметки |", "|---|---|---|---|---|"];
+  writeFileSync(path, [readFileSync(path, "utf8"), ...header, ...rows, ""].join("\n"), "utf8");
+}
+
+const incrementSkippedStages = ["01-research", "02-prd", "03-ia", "07-prototype", "10-test-bench"];
+
+// Ложная запись: стадия входит в масштаб, но помечена как пропущенная по масштабу.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "11-qa", "standard", {}, "increment");
+  writeScaleRunState(runDir, "increment");
+  appendScaleRows(runDir, [
+    ...incrementSkippedStages.map((stageId) => `| ${stageId} | owner | artifacts | \`skipped_by_scale\` | Scale \`increment\` |`),
+    "| 04-design | design | `design-brief.md` | `skipped_by_scale` | стадия ВХОДИТ в increment |",
+  ]);
+
+  const findings = validateWorkflowRun(runDir, undefined, "standard", "increment", "code");
+  assertError(findings, /04-design Design Brief is recorded as skipped_by_scale, but scale 'increment' includes it/);
+});
+
+// Протухшая запись: такой стадии нет в манифесте вообще.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "11-qa", "standard", {}, "increment");
+  writeScaleRunState(runDir, "increment");
+  appendScaleRows(runDir, [
+    ...incrementSkippedStages.map((stageId) => `| ${stageId} | owner | artifacts | \`skipped_by_scale\` | Scale \`increment\` |`),
+    "| 99-nonexistent | owner | artifacts | `skipped_by_scale` | такой стадии нет |",
+  ]);
+
+  const findings = validateWorkflowRun(runDir, undefined, "standard", "increment", "code");
+  assertError(findings, /skipped_by_scale record names unknown stage '99-nonexistent'/);
+});
+
+// Запись без stage id неотличима от записи про другую стадию.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "11-qa", "standard", {}, "increment");
+  writeScaleRunState(runDir, "increment");
+  appendScaleRows(runDir, [
+    ...incrementSkippedStages.map((stageId) => `| ${stageId} | owner | artifacts | \`skipped_by_scale\` | Scale \`increment\` |`),
+    "| research | owner | artifacts | `skipped_by_scale` | без id стадии |",
+  ]);
+
+  const findings = validateWorkflowRun(runDir, undefined, "standard", "increment", "code");
+  assertError(findings, /skipped_by_scale record does not name a stage id/);
+});
+
+// --- Ось профиля читается из состояния run, а не угадывается по тексту ---
+
+// Дефект с реального прогона `contractor-payment-demo`: три источника говорили `reference`,
+// а валидатор угадывал `standard` по тексту run-plan и скрывал 7 ошибок, включая
+// невыполненный гейт `09-visual-reference`.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "04-design", "reference");
+  writeFileSync(
+    join(runDir, "run-state.json"),
+    JSON.stringify({ profile: "reference", scale: "full", track: "code", status: "completed", created_at: "", updated_at: "", stages: {} }),
+    "utf8",
+  );
+
+  // Ни одного текстового признака reference в артефактах — эвристика дала бы `standard`.
+  const findings = validateWorkflowRun(runDir, "04-design");
+  assert.deepEqual(
+    findings.filter((finding) => /profile is 'reference', but validation profile is 'standard'/.test(finding.message)),
+    [],
+    "профиль обязан читаться из run-state.json, а не угадываться",
+  );
+
+  // На профиле `standard` артефакт reference-стадии не требуется вовсе — значит, факт
+  // чтения профиля виден по требованию `reference-analysis.md`.
+  writeFileSync(join(runDir, artifactFiles[artifactNames.referenceAnalysis]), "", "utf8");
+  assertError(
+    validateWorkflowRun(runDir, "04-design"),
+    /reference-analysis\.md is too small to be a real stage output/,
+  );
+});
+
+// Профиль из `run-meta.json`, если `run-state.json` его не содержит.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "00-intake", "standard");
+  writeFileSync(join(runDir, "run-meta.json"), JSON.stringify({ workflow_profile: "reference" }), "utf8");
+  writeFileSync(
+    join(runDir, "run-state.json"),
+    JSON.stringify({ scale: "full", track: "code", status: "completed", created_at: "", updated_at: "", stages: {} }),
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "00-intake");
+  assert.ok(
+    findings.every((finding) => !/validation profile is 'standard'/.test(finding.message)),
+    "профиль обязан читаться и из run-meta.json",
+  );
+});
+
+// Явный флаг сильнее записанного состояния: им перепроверяют чужой run.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "00-intake", "standard");
+  writeFileSync(
+    join(runDir, "run-state.json"),
+    JSON.stringify({ profile: "reference", scale: "full", track: "code", status: "completed", created_at: "", updated_at: "", stages: {} }),
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "00-intake", "standard");
+  assert.ok(
+    findings.some((finding) => finding.level === "warning" && /profile is 'reference', but validation profile is 'standard'/.test(finding.message)),
+    "расхождение флага и состояния обязано оставаться видимым",
+  );
+});
+
 // --- Косвенный гейт опроса на intake ---
 
 // Раздел с ответами обязателен: валидатор не видит самого вопроса, только запись о нём.
@@ -683,6 +903,42 @@ withRun((runDir) => {
     [],
     "запись о том, почему опрос не проводился, закрывает гейт",
   );
+});
+
+// Заголовок раздела есть, но ось помечена скаффолдом как незаписанная. Это и есть решение
+// «гейт не закрывается сам»: скаффолд пишет раздел всегда, но закрывает только те оси,
+// значения которых ему передали на старте.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "00-intake", "standard");
+  writeFileSync(
+    join(runDir, artifactFiles[artifactNames.runPlan]),
+    [
+      "# Run Plan",
+      "",
+      "## Запрос",
+      "",
+      "фикстура",
+      "",
+      "## Ответы на вопросы intake",
+      "",
+      "| Вопрос | Ответ | Как получен | Ось |",
+      "|---|---|---|---|",
+      "| Нужен макет в Figma перед вёрсткой? | Нет | [ответ не записан] | `track` = `code` |",
+      "",
+      "## План этапов",
+      "",
+      "- 00-intake",
+      "",
+      "## Ограничения",
+      "",
+      "- фикстура со скаффолд-меткой, длинная строка для порога размера артефакта.",
+    ].join("\n"),
+    "utf8",
+  );
+  writeTrackRunState(runDir, "code");
+
+  const findings = validateWorkflowRun(runDir, "00-intake", "standard", "full", "code");
+  assertError(findings, /still carries '\[ответ не записан\]'/);
 });
 
 // Легаси: запуск, созданный до появления опроса, физически не мог его записать.

@@ -42,7 +42,7 @@ contract_schema: agent-pack/templates/skill.template.md
 - **Токены не ходят по кругу.** Источник правды — `design/tokens/` (DTCG, `yarn tokens:build`); из Figma решения извлекаются один раз (`figma-token-extractor`), обратно не возвращаются.
 - **Приёмка результата в коде — не через сверку с макетом:** `yarn vr:test`, `yarn test-storybook`, `yarn qa:mobile`. `figma-visual-qa.json` относится к Figma-поверхности, а не к коду.
 
-Если Figma в задаче нет, весь этот skill записывается как `skipped_with_reason: Figma не участвует`, а выбор основы делается по `landing-builder` §1.1.
+**Как оформляется «Figma не участвует».** Skill применяется только на маршруте `track: figma` из `run-state.json` (CLAUDE.md §0.3); определять маршрут по наличию `figma-layout-ir.json` запрещено. На маршруте `track: code` skill не запускается, его артефакты (`figma-layout-ir.json`, `figma-handoff-bundle.md`, `figma-visual-qa.json`) не создаются и **записи в ledger не требуют вовсе** — это штатный маршрут, а не пропуск. Писать `skipped_with_reason: Figma не участвует` **запрещено** (замена прежнего указания этого раздела): `skipped_with_reason` означает пропущенный применимый слой, а не неприменимый маршрут. Записи требуют только маршрут-условные **секции** `screens.md`/`frontend-result.md` — строкой `skipped_by_track` в таблице «Секции вне маршрута» `stage-gate-ledger.md`. Каноническая формулировка — `agent-pack/workflows/claude-operating-rules.md` §5, раздел «Маршрут (`track`) и как оформляется „Figma не участвует“». Выбор основы для не-Figma задачи делается по `landing-builder` §1.1.
 
 ## Нормативный источник
 

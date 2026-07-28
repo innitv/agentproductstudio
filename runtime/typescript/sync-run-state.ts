@@ -8,6 +8,7 @@ import {
   artifactFiles,
   defaultWorkflowScale,
   getRequiredArtifactsForStage,
+  getTrackSensitiveStages,
   getWorkflowStagesForProfile,
   legacyWorkflowTrack,
   workflowScales,
@@ -25,6 +26,7 @@ import {
   type WorkflowStageResult,
   type WorkflowStageState,
   type WorkflowStageStatus,
+  type WorkflowTrackRecord,
 } from "./workflow-state";
 
 interface SyncOptions {
@@ -32,6 +34,10 @@ interface SyncOptions {
   profile?: WorkflowProfile;
   scale?: WorkflowScale;
   track?: WorkflowTrack;
+  // Смена маршрута у run, где маршрут-зависимая стадия уже отработала, — процессное
+  // отклонение, а не рутинная синхронизация. Флаг делает его явным; сам факт смены при этом
+  // всё равно остаётся в `track_history` и остаётся ошибкой валидатора.
+  forceTrack?: boolean;
   executionMode?: WorkflowExecutionMode;
   preview: boolean;
 }
@@ -57,6 +63,7 @@ export async function syncWorkflowRunState(options: SyncOptions): Promise<SyncRe
     throw new Error(`Output directory does not exist: ${outputDir}`);
   }
 
+  const now = new Date().toISOString();
   const previousState = await readExistingRunState(outputDir);
   const runPlan = await readIfExists(join(outputDir, artifactFiles.run_plan));
   const profile = options.profile ?? previousState?.profile ?? detectProfile(runPlan);
@@ -67,9 +74,10 @@ export async function syncWorkflowRunState(options: SyncOptions): Promise<SyncRe
   // `figma-layout-ir.json`): Figma-run, не создавший файл, выглядел бы как честный
   // код-маршрут. Задаётся на intake, дальше только читается.
   const track = options.track ?? previousState?.track ?? legacyWorkflowTrack;
+  assertTrackChangeIsAllowed(previousState, track, Boolean(options.forceTrack));
+  const trackHistory = appendTrackRecord(previousState, track, now);
   const executionMode = options.executionMode ?? previousState?.execution_mode ?? "local";
   const goal = previousState?.goal ?? detectGoal(runPlan) ?? "Workflow run";
-  const now = new Date().toISOString();
   const stages = getWorkflowStagesForProfile(profile, scale);
   const stageStates: Record<string, WorkflowStageState> = {};
   const stageResults: WorkflowStageResult[] = [];
@@ -109,12 +117,28 @@ export async function syncWorkflowRunState(options: SyncOptions): Promise<SyncRe
     }
   }
 
+  // Записи о стадиях вне текущего профиля/масштаба нельзя терять: anti-backdating масштаба
+  // смотрит именно на них («масштаб исключает стадию, а состояние помнит, что она
+  // отработала»). Пересобирая `stages` только по стадиям в масштабе, sync стирал улику, и
+  // `yarn workflow:sync --scale patch` бесшумно снимал занижение масштаба — измерено:
+  // 32 ошибки -> 29, три ошибки anti-backdating исчезали. Сохраняем ТОЛЬКО записи о
+  // фактической работе: `pending` вне масштаба уликой не является и иначе навсегда удержал
+  // бы run в статусе `partial`.
+  for (const [stageId, stageState] of Object.entries(previousState?.stages ?? {})) {
+    if (stageStates[stageId] || !workedStageStatuses.has(stageState.status)) {
+      continue;
+    }
+
+    stageStates[stageId] = stageState;
+  }
+
   const nextState: WorkflowRunState = {
     run_id: previousState?.run_id ?? `${basename(outputDir)}-${Date.now()}`,
     goal,
     profile,
     scale,
     track,
+    track_history: trackHistory,
     execution_mode: executionMode,
     status: summarizeRunStatus(Object.values(stageStates).map((stage) => stage.status)),
     output_dir: outputDir,
@@ -129,6 +153,69 @@ export async function syncWorkflowRunState(options: SyncOptions): Promise<SyncRe
   }
 
   return { previousState, nextState, stageResults };
+}
+
+const workedStageStatuses = new Set<WorkflowStageStatus>(["running", "completed", "partial", "failed"]);
+
+// Маршрут, под которым run уже работал. Отсутствие поля читается так же строго, как его
+// читает валидатор (`legacyWorkflowTrack`), иначе исторический run можно было бы молча
+// переобъявить как `code` через штатный `sync` — ровно та дыра, которую этот гейт закрывает.
+function readPreviousTrack(previousState: WorkflowRunState | undefined): WorkflowTrack | undefined {
+  return previousState ? previousState.track ?? legacyWorkflowTrack : undefined;
+}
+
+function listWorkedTrackSensitiveStages(previousState: WorkflowRunState | undefined): string[] {
+  return getTrackSensitiveStages()
+    .filter((stage) => {
+      const status = previousState?.stages?.[stage.id]?.status;
+      return Boolean(status && workedStageStatuses.has(status));
+    })
+    .map((stage) => stage.id);
+}
+
+// `sync` — это та самая штатная команда, которой маршрут менялся задним числом: она
+// переписывала `run-state.json` и `run-meta.json` согласованно, и расхождение записей,
+// на которое смотрел валидатор, исчезало. Поэтому смена маршрута у run, где
+// маршрут-зависимая стадия уже отработала, здесь запрещена без явного `--force-track`.
+function assertTrackChangeIsAllowed(
+  previousState: WorkflowRunState | undefined,
+  nextTrack: WorkflowTrack,
+  force: boolean,
+): void {
+  const previousTrack = readPreviousTrack(previousState);
+  if (!previousTrack || previousTrack === nextTrack || force) {
+    return;
+  }
+
+  const worked = listWorkedTrackSensitiveStages(previousState);
+  if (!worked.length) {
+    return;
+  }
+
+  throw new Error(
+    `Track cannot be changed from '${previousTrack}' to '${nextTrack}': ${worked.join(", ")} already ran. ` +
+    "Changing the track after track-sensitive stages have run is a process_deviation, not a sync. " +
+    "Record the deviation and rerun with --force-track if that is really the intent.",
+  );
+}
+
+// Журнал append-only: существующие записи не переписываются, новая добавляется только когда
+// маршрут отличается от последнего записанного.
+function appendTrackRecord(
+  previousState: WorkflowRunState | undefined,
+  track: WorkflowTrack,
+  recordedAt: string,
+): WorkflowTrackRecord[] {
+  const history = [...(previousState?.track_history ?? [])];
+  if (!history.length && previousState?.track) {
+    history.push({ track: previousState.track, recorded_at: previousState.created_at ?? recordedAt });
+  }
+
+  if (history.at(-1)?.track !== track) {
+    history.push({ track, recorded_at: recordedAt });
+  }
+
+  return history;
 }
 
 function summarizeStageStatus(artifacts: ArtifactInspection[]): WorkflowStageStatus {
@@ -298,7 +385,7 @@ function parseArgs(args: string[]): SyncOptions {
   const outputDir = args.find((arg) => !arg.startsWith("--"));
   if (!outputDir) {
     throw new Error(
-      "Usage: yarn workflow:sync <run-dir> [--preview] [--profile standard|reference] [--scale full|increment|patch] [--track code|figma] [--mode local|agentic]",
+      "Usage: yarn workflow:sync <run-dir> [--preview] [--profile standard|reference] [--scale full|increment|patch] [--track code|figma] [--force-track] [--mode local|agentic]",
     );
   }
 
@@ -327,6 +414,7 @@ function parseArgs(args: string[]): SyncOptions {
     profile: profile as WorkflowProfile | undefined,
     scale: scale as WorkflowScale | undefined,
     track: track as WorkflowTrack | undefined,
+    forceTrack: args.includes("--force-track"),
     executionMode: executionMode as WorkflowExecutionMode | undefined,
     preview: args.includes("--preview"),
   };

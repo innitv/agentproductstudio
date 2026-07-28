@@ -16,6 +16,8 @@ description: Использовать перед любым действием, 
 
 Не нужен для локальной записи артефактов и локальных команд валидации.
 
+**Исключение (CLAUDE.md §7):** явно включённые non-blocking DeepSeek/Gemini advisory checks на `01-research` не являются отдельным provider opt-in, approval-вопроса не требуют и не блокируют readiness при сбое — но логируются в run ledger (`source-log.md`, `research-summary.md`, `stage-gate-ledger.md`, `handoff-bundle.md`). Любые внешние записи через них запрещены.
+
 ## Ключевые шаги
 - Определи exact target: matching строгий, targetless approval не покрывает targeted request.
 - `yarn workflow:approval-request <run-dir> <action> --target <exact-target> --by human --reason "<причина>"`.

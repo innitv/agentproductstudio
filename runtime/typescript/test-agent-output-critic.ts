@@ -182,11 +182,13 @@ try {
     "success без единой заявленной проверки обязан помечаться предупреждением.",
   );
 
-  // --- 5b. профиль run берётся из его состояния, а не из эвристики валидатора ---
-  // Дефект с реального прогона `contractor-payment-demo`: критик звал валидатор без
-  // `--profile`, тот определял профиль по тексту run-plan и на reference-run отвечал
-  // `standard`. Профиль меняет набор обязательных артефактов, поэтому это ложный вердикт
-  // и цифры, не совпадающие с прямым прогоном валидатора.
+  // --- 5b. критик не подменяет оси run флагами ------------------------------------
+  // Дефект с реального прогона `contractor-payment-demo`: валидатор определял профиль по
+  // тексту run-plan и на reference-run отвечал `standard`, поэтому критик обходил это,
+  // передавая `--profile` явно. Корень починен в валидаторе (он читает профиль из
+  // `run-state.json`), и костыль снят: критик обязан звать ту же команду, что и человек по
+  // `CLAUDE.md` §10, иначе их цифры снова разойдутся. Профиль критик по-прежнему читает —
+  // но для отчёта, а не для флага.
   const referenceRun = join(root, "outputs", "reference-product", "2026-07-25");
   await mkdir(referenceRun, { recursive: true });
   await writeFile(join(referenceRun, "prd.md"), filler("# Product Requirements"), "utf8");
@@ -213,11 +215,8 @@ try {
     `Профиль обязан читаться из run-state.json, получено: ${referenceProfile.run_profile}`,
   );
   assert(
-    profileCalls.some((args) => {
-      const index = args.indexOf("--profile");
-      return index >= 0 && args[index + 1] === "reference";
-    }),
-    `Валидатор обязан вызываться с профилем run: ${JSON.stringify(profileCalls)}`,
+    profileCalls.every((args) => !args.includes("--profile") && !args.includes("--scale") && !args.includes("--track")),
+    `Критик обязан звать валидатор без осей — тот читает их из run-state.json: ${JSON.stringify(profileCalls)}`,
   );
   assert(
     !hasCode(referenceProfile, "run_profile_unknown", "warning"),

@@ -25,6 +25,11 @@ export interface WorkflowStageState {
   notes?: string[];
 }
 
+export interface WorkflowTrackRecord {
+  track: "code" | "figma";
+  recorded_at: string;
+}
+
 export interface WorkflowRunState {
   run_id: string;
   goal: string;
@@ -35,6 +40,11 @@ export interface WorkflowRunState {
   // до появления оси манифест требовал Figma-секции у каждого запуска, и читать пустое
   // поле как "code" значило бы задним числом снять с исторических run их проверки.
   track?: "code" | "figma";
+  // Append-only журнал маршрутов. Существует потому, что `run-state.json` и `run-meta.json`
+  // переписываются согласованно одной командой `yarn workflow:sync`: расхождение двух файлов
+  // ловит рассинхрон, но не саму смену маршрута. Журнал делает смену видимой в самом run.
+  // Записи не удаляются и не переписываются — только добавляются.
+  track_history?: WorkflowTrackRecord[];
   execution_mode?: WorkflowExecutionMode;
   status: WorkflowStageStatus;
   output_dir: string;

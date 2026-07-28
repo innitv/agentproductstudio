@@ -21,7 +21,7 @@ disallowedTools: mcp__notion, mcp__github, mcp__gitlab, Task, Agent
 - **Чего в библиотеке нет** (из кода не вывести): `Chip`, `SegmentedControl`, `InputCard` со сбросом, уровень `warning` у `Alert` — дописывать точечно в своём слое. Грабли: порталы (`SelectContent`, `DropdownMenuContent`, `TooltipContent`, `sonner`) рендерятся вне контейнера темы — атрибут темы зеркалить на корень документа; тени Tailwind впечатаны константой; `ToggleGroup type="single"` допускает пустое значение.
 - **Витрина — Storybook** (`apps/frontend/.storybook`, `yarn storybook`): компонент и состояние существуют как story, экран — как composition story плюс роут приложения из одного кода. **Приёмка машинная:** `yarn vr:test` (визуальная регрессия в Docker), `yarn test-storybook` (поведение + доступность), `yarn qa:mobile` (профиль устройства). Это основной путь проверки вместо сверки с Figma.
 - **Bespoke-маршрут** (skill `landing-builder`) включается при записанном `design_system_mode=product_specific|bespoke` и для маркетинговой композиции, у которой нет прототипа в реестре.
-- **Figma — опционально:** если задача шла через Figma-ветку, `figma-layout-ir.json` приоритетнее угадывания по screenshot, токены — через `figma-token-extractor`; живьём Figma не читать (View-seat ≈ 6 чтений/мес). Для дефолтного маршрута Figma-гейты помечаются `not_applicable` с причиной.
+- **Маршрут макета читай из `run-state.json`** (поле `track`, `CLAUDE.md` §0.3), не из наличия файлов. На `track=figma` `figma-layout-ir.json` приоритетнее угадывания по screenshot, токены — через `figma-token-extractor`; живьём Figma не читать (View-seat ≈ 6 чтений/мес). На `track=code` (умолчание студии) Figma-гейты не применяются вовсе, а маршрут-условные секции отчёта не требуются — заполнять их как `not_applicable` не нужно, пропуск фиксируется строкой `skipped_by_track` в `stage-gate-ledger.md` (см. примечание к Output Contract ниже).
 
 ## Предназначение
 
@@ -31,7 +31,7 @@ disallowedTools: mcp__notion, mcp__github, mcp__gitlab, Task, Agent
 
 - `handoff-bundle.md` (сжатый через **State Truncation Gate**)
 - `prd.md`, `ia-brief.md`, `design-brief.md`, `screens.md`, `copy-deck.md`, `prototype-report.md`
-- `STYLE_GUIDE.md`, `design-loop-report.md` при наличии; `figma-handoff-bundle.md`, `figma-layout-ir.json`, `figma-visual-qa.json` — только для Figma-ветки
+- `STYLE_GUIDE.md`, `design-loop-report.md` при наличии; `figma-handoff-bundle.md`, `figma-layout-ir.json`, `figma-visual-qa.json` — только на маршруте `track=figma`
 - `CLAUDE.md` §6.1, `COMMANDS.md`, `apps/frontend/src/components/shadcn/`, `design/tokens/shadcn/README.md`
 - Существующий frontend код
 
@@ -43,7 +43,7 @@ disallowedTools: mcp__notion, mcp__github, mcp__gitlab, Task, Agent
 3a-3e. **Surface Output Contract Pass**, **Visual Evidence Grounding Pass**, **Source Pair Implementation Matrix**, **Figma Layout Contract Pass** (`figma-layout-ir.json`/`figma-visual-qa.json`; `ready_allowed=false` -> `partial/blocked`/waiver), **Primary App Flow Implementation Gate**, **Design System Mode Pass**, **Component Contract Pass**.
 4. **Surface Routing** (marketing/landing vs app/dashboard/console vs blended).
 5. При `reuse|extend` собирать экран композицией компонентов реестра (`yarn shadcn add <component>`) плюс продуктовый слой для gap-компонентов; skill `landing-builder` — при записанном `product_specific|bespoke` и для маркетинговой композиции. Пропуск навыка при reuse фиксировать как `skipped_with_reason=registry_reuse_default`.
-6. Синхронизация с Figma handoff — только для Figma-ветки (variables/components/Auto Layout -> Flex/Grid/constraints; layout IR приоритетнее угадывания по screenshot); иначе `not_applicable` с причиной.
+6. Синхронизация с Figma handoff — только при `track=figma` (variables/components/Auto Layout -> Flex/Grid/constraints; layout IR приоритетнее угадывания по screenshot). На `track=code` шаг не выполняется, и его секции в отчёте не требуются — пропуск фиксируется строкой `skipped_by_track` в ledger.
 7. **Component Architecture** (composition over configuration), state machine/симулятор со скелетонами.
 8. Адаптивность и A11y (aria-labels, семантика, keyboard focus, цвет не единственный индикатор), анонимная аналитика без PII.
 9. **Motion polish** (transitions <300ms, без `transition: all`, hover только `hover: hover and pointer: fine`, `prefers-reduced-motion`).
@@ -60,7 +60,7 @@ disallowedTools: mcp__notion, mcp__github, mcp__gitlab, Task, Agent
 - **Границы темы**: правка `--spacing` или шкалы радиусов без записанного `product_specific` — `process_deviation`, потолок `partial`.
 - **Машинная приёмка обязательна**: визуально значимое изменение не `success` без вердиктов `yarn vr:test` и `yarn test-storybook` (мобильная поверхность — плюс `yarn qa:mobile`) либо без записанной причины недоступности.
 - Безопасность секретов: не hardcode ключей/токенов; переменные окружения. Минимизация зависимостей (установка компонента реестра под это правило не подпадает — это копия кода, а не новая зависимость).
-- **Figma visual QA / Layout IR fidelity** (только для задач, прошедших через Figma-ветку): не `success`, если `figma-visual-qa.json` отсутствует/`ready_allowed=false`/unresolved blocked checks, либо не реализованы route/zones/copy-fit из `figma-layout-ir.json` без deviation. Для дефолтного маршрута эти гейты — `not_applicable` с причиной, их место занимает машинная приёмка.
+- **Figma visual QA / Layout IR fidelity** (только при `track=figma` в `run-state.json`): не `success`, если `figma-visual-qa.json` отсутствует/`ready_allowed=false`/unresolved blocked checks, либо не реализованы route/zones/copy-fit из `figma-layout-ir.json` без deviation. На `track=code` эти гейты не применяются вовсе, их место занимает машинная приёмка; маршрут определяется полем `track`, а не наличием `figma-layout-ir.json`.
 - **Evidence-first UI**: визуально значимые изменения требуют browser/Playwright desktop и mobile checks либо честный `blocked`/`partial`.
 - **Mobile Device Acceptance Gate** (норма — skill `design-engineering`): мобильная поверхность не `success` без приёмки в **профиле устройства** (`isMobile` + `hasTouch`, реальные тач-жесты) с пятью сценариями и строкой `engine_limitation` в `frontend-result.md`. Узкий desktop-вьюпорт (`setViewportSize`) приёмкой не считается — картинка похожа, touch/safe-area/`visualViewport` не воспроизводятся.
 - **Surface / Primary app flow coverage first**: не `success` без карты coverage/deviation и рабочего сценария от entry point до completion evidence.

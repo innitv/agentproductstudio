@@ -6,7 +6,19 @@ import { getCoreBundleArtifactsForProfile, getRoutePlanForProfile, type RoutePro
 import { agentInstructionFiles } from "./agents.registry";
 import { createAgentsSdkLayer } from "./agents.sdk";
 import { pathToFileURL } from "node:url";
-import { artifactFiles, getRequiredArtifactsForStage, workflowStages } from "./workflow-stages";
+import {
+  artifactFiles,
+  defaultWorkflowScale,
+  defaultWorkflowTrack,
+  getRequiredArtifactsForStage,
+  getSectionsSkippedByTrack,
+  getStagesSkippedByScale,
+  getWorkflowStagesForProfile,
+  intakeSurveyUnrecordedMarker,
+  workflowStages,
+  type WorkflowScale,
+  type WorkflowTrack,
+} from "./workflow-stages";
 
 // Local no-API-key runner for Claude Code agent pack mode.
 // It validates the workflow structure and creates an output scaffold without
@@ -28,7 +40,19 @@ export async function runLandingWorkflow(input: LandingWorkflowInput): Promise<s
   }
 
   const profile = input.profile ?? detectRouteProfile(input);
-  const routePlan = getRoutePlanForProfile(profile);
+  // Оси запуска приходят с intake. Дефолты те же, что у движка: масштаб консервативен
+  // (`full`), маршрут — умолчание студии (`code`).
+  const axes: RunAxes = {
+    profile,
+    scale: input.scale ?? defaultWorkflowScale,
+    track: input.track ?? defaultWorkflowTrack,
+    recorded: {
+      profile: Boolean(input.axes_recorded?.profile ?? input.profile),
+      scale: Boolean(input.axes_recorded?.scale ?? input.scale),
+      track: Boolean(input.axes_recorded?.track ?? input.track),
+    },
+  };
+  const routePlan = getRoutePlanForProfile(profile, axes.scale);
 
   if (!routePlan.length) {
     throw new Error("Landing workflow requires a non-empty route plan.");
@@ -66,11 +90,14 @@ export async function runLandingWorkflow(input: LandingWorkflowInput): Promise<s
     `- Specialists: ${Object.keys(agentsSdkLayer.specialists).length}`,
     `- Route tools: ${agentsSdkLayer.routeToolNames.join(", ")}`,
     "",
+    `Scale: ${axes.scale}`,
+    `Track: ${axes.track}`,
+    "",
     "Required artifacts:",
-    ...getCoreBundleArtifactsForProfile(profile).map((artifact) => `- ${artifact}`),
+    ...getCoreBundleArtifactsForProfile(profile, axes.scale).map((artifact) => `- ${artifact}`),
     "",
     "Stage gates:",
-    ...workflowStages.flatMap((stage) => [
+    ...getWorkflowStagesForProfile(profile, axes.scale).flatMap((stage) => [
       `- ${stage.id}: ${stage.title}`,
       `  owner: ${stage.owner}`,
       `  artifacts: ${getRequiredArtifactsForStage(stage, profile).map((artifact) => artifactFiles[artifact]).join(", ")}`,
@@ -85,9 +112,9 @@ export async function runLandingWorkflow(input: LandingWorkflowInput): Promise<s
   ].join("\n");
 
   await writeFile(join(outputDir, "workflow-scaffold.md"), scaffold, "utf8");
-  await writeFile(join(outputDir, "run-plan.md"), createRunPlan(input.goal, date, profile), "utf8");
-  await writeFile(join(outputDir, "handoff-bundle.md"), createHandoffBundle(input.goal, profile), "utf8");
-  await writeFile(join(outputDir, "stage-gate-ledger.md"), createStageGateLedger(slug, date, input.goal, profile), "utf8");
+  await writeFile(join(outputDir, "run-plan.md"), createRunPlan(input.goal, date, axes), "utf8");
+  await writeFile(join(outputDir, "handoff-bundle.md"), createHandoffBundle(input.goal, axes), "utf8");
+  await writeFile(join(outputDir, "stage-gate-ledger.md"), createStageGateLedger(slug, date, input.goal, axes), "utf8");
   await writeFile(join(outputDir, "recursive-brief.md"), createRecursiveBriefScaffold(input.goal), "utf8");
 
   console.log(`Workflow scaffold created: outputs/${slug}/${date}/workflow-scaffold.md`);
@@ -114,7 +141,32 @@ function createSlug(value: string): string {
     .slice(0, 80) || "landing-workflow";
 }
 
-function createRunPlan(goal: string, date: string, profile: RouteProfile): string {
+// Оси запуска и то, какие из них названы на старте явно.
+interface RunAxes {
+  profile: RouteProfile;
+  scale: WorkflowScale;
+  track: WorkflowTrack;
+  recorded: { profile: boolean; scale: boolean; track: boolean };
+}
+
+// Как ось попала в run: явным флагом на старте — или умолчанием, то есть никак.
+//
+// Ключевое решение по гейту опроса. Скаффолд НЕ пишет раздел заглушкой: заглушка закрывала
+// бы гейт сама за себя, и проверка «опрос записан» стала бы тавтологией. Он пишет ровно то,
+// что знает: ось, переданная флагом, — это и есть записанный ответ (оркестратор задал
+// вопрос до создания каталога и закодировал ответ во флаге); ось, взятая умолчанием,
+// помечается `intakeSurveyUnrecordedMarker`, и валидатор считает раздел незаписанным.
+// Итог: запуск, сделанный по процессу (`yarn workflow:start "<цель>" --track ... --profile
+// ... --scale ...`), валиден сразу; запуск молча, без ответов, называет ошибкой ровно то,
+// чего не хватает, — вместо прежнего «нет раздела», которое падало у любого нового run.
+function axisProvenance(recorded: boolean, flag: string, value: string): string {
+  return recorded ? `передано на старте: \`${flag} ${value}\`` : intakeSurveyUnrecordedMarker;
+}
+
+function createRunPlan(goal: string, date: string, axes: RunAxes): string {
+  const stagesInScale = getWorkflowStagesForProfile(axes.profile, axes.scale);
+  const stagesOutOfScale = getStagesSkippedByScale(axes.profile, axes.scale);
+
   return [
     "# Run Plan",
     "",
@@ -132,11 +184,41 @@ function createRunPlan(goal: string, date: string, profile: RouteProfile): strin
     "",
     "## Workflow Profile",
     "",
-    profile,
+    axes.profile,
+    "",
+    "## Ответы на вопросы intake",
+    "",
+    "| Вопрос | Ответ | Как получен | Ось |",
+    "|---|---|---|---|",
+    `| Нужен макет в Figma перед вёрсткой? | ${axes.track === "figma" ? "Да" : "Нет"} | ${axisProvenance(axes.recorded.track, "--track", axes.track)} | \`track\` = \`${axes.track}\` |`,
+    `| Есть конкретный образец, с которым сверять результат? | ${axes.profile === "reference" ? "Да" : "Нет"} | ${axisProvenance(axes.recorded.profile, "--profile", axes.profile)} | \`profile\` = \`${axes.profile}\` |`,
+    "",
+    // Пометку нельзя называть в пояснении дословно: валидатор ищет её по всему файлу, и
+    // упоминание в тексте само стало бы незакрытым ответом.
+    "Скаффолд заполняет только те оси, значение которых передано на старте. Ось, помеченная как незаписанная, гейт не закрывает: оркестратор обязан дописать ответ и то, как он получен, либо причину, по которой вопрос законно не задавался (ответ уже дан в запросе, запуск не продуктовый, режим `quick draft`).",
+    "",
+    "## Масштаб",
+    "",
+    `- \`scale\`: \`${axes.scale}\``,
+    `- Источник: ${axisProvenance(axes.recorded.scale, "--scale", axes.scale)}`,
+    axes.scale === "full"
+      ? "- Стадий вне масштаба нет: `full` включает весь pipeline."
+      : "- Стадии вне масштаба записаны в `stage-gate-ledger.md` как `skipped_by_scale`.",
+    "",
+    "## Маршрут",
+    "",
+    `- \`track\`: \`${axes.track}\``,
+    `- Источник: ответ на вопрос 1 (${axisProvenance(axes.recorded.track, "--track", axes.track)}).`,
+    axes.track === "figma"
+      ? "- Маршрут `figma` требует все условные секции: снятых маршрутом ожиданий нет."
+      : "- Секции вне маршрута записаны в `stage-gate-ledger.md` как `skipped_by_track`.",
     "",
     "## План этапов",
     "",
-    ...workflowStages.map((stage) => `- ${stage.id}: ${stage.title} -> ${getRequiredArtifactsForStage(stage, profile).map((artifact) => artifactFiles[artifact]).join(", ")}`),
+    ...stagesInScale.map((stage) => `- ${stage.id}: ${stage.title} -> ${getRequiredArtifactsForStage(stage, axes.profile).map((artifact) => artifactFiles[artifact]).join(", ")}`),
+    ...(stagesOutOfScale.length
+      ? ["", `Вне масштаба \`${axes.scale}\` (записаны в ledger как \`skipped_by_scale\`): ${stagesOutOfScale.map((stage) => stage.id).join(", ")}.`]
+      : []),
     "",
     "## Ограничения",
     "",
@@ -146,7 +228,7 @@ function createRunPlan(goal: string, date: string, profile: RouteProfile): strin
   ].join("\n");
 }
 
-function createHandoffBundle(goal: string, profile: RouteProfile): string {
+function createHandoffBundle(goal: string, axes: RunAxes): string {
   return [
     "# Handoff Bundle",
     "",
@@ -156,11 +238,19 @@ function createHandoffBundle(goal: string, profile: RouteProfile): string {
     "",
     "## Workflow Profile",
     "",
-    profile,
+    axes.profile,
+    "",
+    "## Workflow Scale",
+    "",
+    axes.scale,
+    "",
+    "## Workflow Track",
+    "",
+    axes.track,
     "",
     "## Visual Reference Required",
     "",
-    profile === "reference" ? "true" : "false",
+    axes.profile === "reference" ? "true" : "false",
     "",
     "## Inputs Used",
     "",
@@ -201,7 +291,13 @@ function createHandoffBundle(goal: string, profile: RouteProfile): string {
   ].join("\n");
 }
 
-function createStageGateLedger(slug: string, date: string, goal: string, profile: RouteProfile): string {
+function createStageGateLedger(slug: string, date: string, goal: string, axes: RunAxes): string {
+  const outOfScale = new Set(getStagesSkippedByScale(axes.profile, axes.scale).map((stage) => stage.id));
+  // Ожидания, которые снимает маршрут. Их надо закрыть положительной записью: незакрытое
+  // ожидание неотличимо от забытой секции, и валидатор требует строку, как только стадия
+  // отдаст артефакт. Скаффолд выводит их из манифеста, а не из памяти автора.
+  const skippedSections = getSectionsSkippedByTrack(axes.track);
+
   return [
     "# Stage Gate Ledger",
     "",
@@ -210,20 +306,44 @@ function createStageGateLedger(slug: string, date: string, goal: string, profile
     `- Project slug: ${slug}`,
     `- Date: ${date}`,
     `- Goal: ${goal}`,
-    `- Workflow profile: ${profile}`,
+    `- Workflow profile: ${axes.profile}`,
+    `- Workflow scale: ${axes.scale}`,
+    `- Workflow track: ${axes.track}`,
     "",
     "## Rule",
     "",
     "Каждый stage считается завершенным только когда обязательные артефакты записаны, `handoff-bundle.md` обновлен, risks/open questions перенесены дальше и validation не возвращает errors для complete bundle.",
     "",
+    "Оси зафиксированы на `00-intake` и не меняются задним числом: валидатор отклонит run, где стадия вне масштаба уже отработала или где маршрут-зависимая стадия отработала под другим маршрутом.",
+    "",
     "## Stage Status",
     "",
-    "| Stage | Owner | Required artifacts | Status | Gate notes |",
+    "| Stage | Title | Owner | Required artifacts | Status | Gate notes |",
+    "|---|---|---|---|---|---|",
+    ...workflowStages
+      .filter((stage) => !stage.profile || stage.profile === axes.profile)
+      .map((stage, index) => {
+        const artifacts = getRequiredArtifactsForStage(stage, axes.profile).map((artifact) => `\`${artifactFiles[artifact]}\``).join(", ");
+        if (outOfScale.has(stage.id)) {
+          return `| ${stage.id} | ${stage.title} | ${stage.owner} | ${artifacts} | \`skipped_by_scale\` | Вне масштаба \`${axes.scale}\`, зафиксировано на 00-intake |`;
+        }
+
+        const status = index === 0 ? "partial" : "pending";
+        return `| ${stage.id} | ${stage.title} | ${stage.owner} | ${artifacts} | ${status} | Scaffold initialized |`;
+      }),
+    "",
+    "## Секции вне маршрута (Sections Skipped By Track)",
+    "",
+    skippedSections.length
+      ? `Маршрут \`${axes.track}\` не требует секций ниже. Запись обязательна: без неё пропуск неотличим от забытой секции.`
+      : `Маршрут \`${axes.track}\` требует все условные секции — снятых ожиданий нет.`,
+    "",
+    "| Stage | Artifact | Section | Status | Reason |",
     "|---|---|---|---|---|",
-    ...workflowStages.map((stage, index) => {
-      const status = index === 0 ? "partial" : "pending";
-      return `| ${stage.id} ${stage.title} | ${stage.owner} | ${getRequiredArtifactsForStage(stage, profile).map((artifact) => `\`${artifactFiles[artifact]}\``).join(", ")} | ${status} | Scaffold initialized |`;
-    }),
+    ...skippedSections.map(
+      (expectation) =>
+        `| ${expectation.stage.id} | \`${artifactFiles[expectation.artifact]}\` | \`${expectation.section}\` | \`skipped_by_track\` | Маршрут \`${axes.track}\`, зафиксирован на 00-intake |`,
+    ),
     "",
     "## Validation Runs",
     "",

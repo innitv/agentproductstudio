@@ -10,7 +10,9 @@ Skill превращает `screens.md` и дизайн-контекст в `fig
 **Полная процедура, входы/выходы, gates и validation-команды — в [`agent-pack/skills/figma-screen-compiler/SKILL.md`](../../../agent-pack/skills/figma-screen-compiler/SKILL.md). Следуй ей.**
 
 ## Применимость
-**Только когда Figma реально в деле** (`CLAUDE.md` §6.1). IR нужен исключительно как guardrail перед Figma canvas write. Для кодовой поверхности контракт экрана — composition story плюс `yarn vr:test` / `yarn test-storybook`; отсутствие `figma-layout-ir.json` тогда записывается как `skipped_with_reason: Figma не участвует`, а не как пробел.
+**Только маршрут `track: figma`** из `run-state.json` (CLAUDE.md §0.3, §6.1). Определять маршрут по наличию `figma-layout-ir.json` запрещено. IR нужен исключительно как guardrail перед Figma canvas write. Для кодовой поверхности контракт экрана — composition story плюс `yarn vr:test` / `yarn test-storybook`.
+
+На маршруте `track: code` `figma-layout-ir.json` не создаётся и **записи в ledger не требует вовсе** — это штатный маршрут, а не пропуск. Писать `skipped_with_reason: Figma не участвует` **запрещено** (замена прежнего указания). Записи требуют только маршрут-условные **секции** `screens.md` (`## Layout Compiler Contract`, `## Figma Readiness`) — строкой `skipped_by_track` в таблице «Секции вне маршрута» `stage-gate-ledger.md`; `## Component Contract Matrix` и `## Frame / State Implementation Map` обязательны на обоих маршрутах. Каноническая формулировка — `agent-pack/workflows/claude-operating-rules.md` §5, раздел «Маршрут (`track`)».
 
 ## Когда использовать
 - Перед любым Figma canvas write для `figma_board`, `product_ui` или `prototype`.

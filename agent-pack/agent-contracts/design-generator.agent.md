@@ -44,8 +44,9 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - `prd.md`
 - `CLAUDE.md` §6.1 — правила shadcn/ui
 - `apps/frontend/src/components/shadcn/` — фактический состав компонентов; `apps/frontend/.storybook` — витрина
-- Только для Figma-ветки: `integrations/mcp/figma-canvas-write-guide.md`
-- `design/figma/registry.json` — только для Figma-ветки
+- `run-state.json` — оси запуска; поле `track` (`code`/`figma`) определяет, применяется ли Figma-часть контракта
+- Только на маршруте `track=figma`: `integrations/mcp/figma-canvas-write-guide.md`
+- `design/figma/registry.json` — только на маршруте `track=figma`
 - `design/figma/<selected_design_system_slug>/ds.config.json`, если выбран `reuse|extend`
 - `design/figma/<selected_design_system_slug>/foundation.md|token-map.md`, если выбран `reuse|extend`
 - `design/figma/<selected_design_system_slug>/components.md|component-map.md`, если выбран `reuse|extend`
@@ -54,7 +55,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 
 ## Internal Pipeline (Внутренний процесс)
 
-> **Приоритизация шагов.** Всегда обязательны: 0a Prerequisite Gate, Screen Scope & Traceability, Component Inventory/Contract, State Inventory, Screen Traceability, Readiness. Шаги, специфичные для Figma/product-UI/prototype (Layout Compiler Contract, `figma-layout-ir.json`, Figma Visual QA, Source Pair `*_to_figma`), применяются только для этих surface; для text-only/не-Figma задач помечаются `not_applicable` с причиной (см. fallback в Guardrails). Это снижает риск пропуска ядра под нагрузкой длинного pipeline.
+> **Приоритизация шагов.** Всегда обязательны: 0a Prerequisite Gate, Screen Scope & Traceability, Component Inventory/Contract, State Inventory, Screen Traceability, Readiness. Шаги, специфичные для Figma (`figma-layout-ir.json`, Figma Visual QA, Source Pair `*_to_figma`), применяются только на маршруте `track=figma` — маршрут берётся из `run-state.json`, а не из типа поверхности и не из наличия файлов. На `track=code` секции `## Layout Compiler Contract` и `## Figma Readiness` **не требуются вовсе** (валидатор их не спрашивает, пропуск фиксируется строкой `skipped_by_track` в `stage-gate-ledger.md`), а прочие Figma-гейты, не имеющие своей секции, помечаются `not_applicable` с причиной — полный разбор в Guardrails. Это снижает риск пропуска ядра под нагрузкой длинного pipeline.
 
 0a. **Design-Agent Prerequisite Gate**: для запросов `собери макеты`, `собери use cases`, `собери flow`, `мобильное приложение`, `интерфейс приложения`, `Figma макеты`, `mobile app screens` и любых app-like UI surfaces этот агент не является первым владельцем. Он стартует только после `04-design`, когда есть `design-brief.md` с LazyWeb/reference grounding, `design_system_mode`, reuse/extend strategy, визуальным направлением и списком DS gaps. Если такого design handoff нет, вернуть `blocked_missing_design_agent_handoff` вместо генерации технической спецификации или Figma-картинок.
 
@@ -68,13 +69,13 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 5a. **Showcase Contract**: витрина компонентов и состояний — Storybook (`apps/frontend/.storybook`), а не Figma-фрейм. Для каждого экрана в `screens.md` указать имя composition story и роут приложения — это один и тот же код; для каждого состояния из State Inventory указать имя story, по которому его будут принимать машинно (`yarn test-storybook`, `yarn vr:test`). Состояние без указанного носителя проверки не считается специфицированным.
 6. Если есть `STYLE_GUIDE.md` или визуальный риск, вызвать skill `design-loop` и сначала создать `design-generator-prompt.md` по шаблону `agent-pack/artifacts/design/design-generator-prompt.template.md`. Prompt ограничивает первичную генерацию 2-3 ключевыми экранами.
 7. **Screen Contract Generation**: Создать `screens.md`: список экранов, Surface Output Contract, Visual Evidence-To-Screen Map, Source Pair Plan, screen traceability, sections, component inventory, layout grid, responsive behavior, copy binding, state inventory, data requirements, accessibility notes, analytics/test hooks, asset requirements и acceptance notes.
-8. **Component & State Contract**: Для каждого интерактивного/повторяемого компонента указать stable id, **source** (`shadcn_registry:<component>` — дефолт; `product_layer:<component>` — для gap-компонентов своего слоя; `figma:<node>` — только для Figma-ветки), semantic variables, visual reference influence, variants, states, validation behavior, resizing, React target/prop mapping, story/test/locator и deviations. Это Component Contract Matrix. Для `source=product_layer` обязательна причина: компонента нет в реестре либо записан `product_specific|bespoke`. Поля Figma properties/values и Auto Layout заполняются только для Figma-ветки, иначе `not_applicable` с причиной.
+8. **Component & State Contract**: Для каждого интерактивного/повторяемого компонента указать stable id, **source** (`shadcn_registry:<component>` — дефолт; `product_layer:<component>` — для gap-компонентов своего слоя; `figma:<node>` — только на маршруте `track=figma`), semantic variables, visual reference influence, variants, states, validation behavior, resizing, React target/prop mapping, story/test/locator и deviations. Это Component Contract Matrix. Для `source=product_layer` обязательна причина: компонента нет в реестре либо записан `product_specific|bespoke`. **Сама секция `## Component Contract Matrix` обязательна на обоих маршрутах**; маршрут меняет только заполнение полей: Figma properties/values и Auto Layout заполняются при `track=figma`, а при `track=code` в них ставится `not_applicable` и адресатом мэппинга «состояние → реализация» выступает Storybook story, а не Figma-node.
 9. **Responsive & Accessibility Pass**: Проверить desktop/tablet/mobile behavior, touch targets, heading hierarchy, landmarks, labels/errors/focus order, contrast/readability risks и overflow constraints.
 10. **Reference/Figma Readiness Pass**: Для reference-driven/high-visual-risk задач проверить section-by-section соответствие `reference-analysis.md`/`STYLE_GUIDE.md`; для любых визуальных поверхностей проверить Visual Evidence Grounding; для Figma handoff проверить variables/styles/components/screens, canvas strategy, Source Pair Plan и screenshot evidence plan.
 11. Для reference-driven/high-visual-risk и `extend|product_specific` задач провести `visual_calibration` на 2-3 экранах: сравнить с `STYLE_GUIDE.md`, visual reference cards и real-world references; зафиксировать style drift, composition/density/rhythm/copy-fit issues и revision block в `design-loop-report.md`.
 12. Если `design-loop-report.md` содержит unresolved style drift, вернуть `partial` или `blocked`; не передавать frontend как `ready`.
-13. Если пользователь запросил Figma canvas write или Figma handoff, вызвать skill `figma-handoff` после `screens.md` и `design-loop-report.md`. Сформировать `figma-handoff-bundle.md` с foundation, variables/styles/components/screens и explicit target.
-13a. Для `figma_board`, `product_ui` и `prototype` surface вызвать skill `figma-screen-compiler` до любого Figma write. Создать `figma-layout-ir.json` с route, screen zones, copy-fit, component sources, resize constraints, DS honesty, `ui_fidelity_target` для каждого screen и verification contract. Если IR не создан или имеет `status=blocked`, Figma write запрещен.
+13. Если маршрут запуска `track=figma` (`run-state.json`; это ответ человека на `00-intake`, а не решение агента) и нужен Figma canvas write или Figma handoff, вызвать skill `figma-handoff` после `screens.md` и `design-loop-report.md`. Сформировать `figma-handoff-bundle.md` с foundation, variables/styles/components/screens и explicit target.
+13a. На маршруте `track=figma` для `figma_board`, `product_ui` и `prototype` surface вызвать skill `figma-screen-compiler` до любого Figma write. Создать `figma-layout-ir.json` с route, screen zones, copy-fit, component sources, resize constraints, DS honesty, `ui_fidelity_target` для каждого screen и verification contract. Если IR не создан или имеет `status=blocked`, Figma write запрещен.
 14. Перед Figma write проверить:
    - remote Figma MCP `use_figma` доступен;
    - пользователь дал Figma file URL или target node;
@@ -106,7 +107,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - `screens.md` не может быть `ready`, если отсутствует Visual Evidence Grounding для визуальной или интерактивной поверхности.
 - `screens.md` не может быть `ready` для app/prototype/Figma/frontend surface, если экраны являются набором страниц без Primary App Flow Gate, route/transition map, next states и acceptance walkthrough.
 - `screens.md` не может быть `ready` для Figma/frontend handoff, если отсутствует Source Pair Plan с required/evidence/owner по обязательным парам.
-- Figma-ready surface не может быть `ready`, если отсутствует `figma-layout-ir.json` с route, zones, layout constraints, component sources и verification contract.
+- Figma-ready surface (маршрут `track=figma`) не может быть `ready`, если отсутствует `figma-layout-ir.json` с route, zones, layout constraints, component sources и verification contract. Маршрут берётся из `run-state.json`: отсутствие IR на этом маршруте — дефект, а не признак того, что маршрут другой.
 - Figma-ready surface не может быть `ready`, если в `figma-layout-ir.json` у каждого screen нет `ui_fidelity_target`: real app pattern, forbidden patterns, evidence reference и screenshot acceptance.
 - Figma canvas result не может быть `ready_for_review|ready`, если отсутствует `figma-visual-qa.json` или gate запрещает readiness из-за clipped text, overlap, unsafe safe area, route incoherence, app-likeness failure, DS dishonesty или systemization regression.
 - Для Figma-ready задач обязательно описывать Auto Layout intent, variables/styles/components, component sets/variants и canvas strategy.
@@ -127,8 +128,8 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - `screens.md`
 - `design-generator-prompt.md` (опционально)
 - `design-loop-report.md` (опционально)
-- `figma-layout-ir.json` (обязательно для Figma/product UI/prototype surface перед Figma write)
-- `figma-visual-qa.json` (обязательно после Figma write перед `ready_for_review|ready`)
+- `figma-layout-ir.json` (только на маршруте `track=figma`; там обязателен перед Figma write)
+- `figma-visual-qa.json` (только на маршруте `track=figma`; там обязателен после Figma write перед `ready_for_review|ready`)
 
 ## Structured Output Contract (Структурированный контракт вывода)
 

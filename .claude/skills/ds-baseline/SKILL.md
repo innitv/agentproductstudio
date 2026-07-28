@@ -27,5 +27,6 @@ Skill защищает от главной ошибки: сборки foundation
 - Systemization (компоненты + стори состояний в витрине; Figma-слой — только как показ из уже принятых токенов) → Component Contract Matrix → regression check.
 
 ## Обязательные проверки
-- `yarn figma:audit --registry design/figma/<slug>/component-contracts.json`
 - `yarn validate:config`
+- **Маршрут `track: code` (дефолт, `run-state.json`):** `yarn tokens:check`, `yarn test-storybook`, `yarn vr:test` — Machine Acceptance Gate. Записи в Figma нет, реестра `design/figma/<slug>/` нет; approval `figma_write` и `figma:audit` **не запрашивать** — approval на запись, которой не будет, это `process_deviation`.
+- **Маршрут `track: figma`:** дополнительно approval `figma_write` с exact target до write, metadata + screenshot после, и `yarn figma:audit --registry design/figma/<slug>/component-contracts.json`.

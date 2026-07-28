@@ -59,7 +59,23 @@
   -> storybook-result.md (опциональный файл-обёртка; сама витрина и вердикты приёмки обязательны, см. ниже)
 ```
 
-**Ветвление маршрута (решение владельца продукта от 2026-07-27, CLAUDE.md §6.1).** Дефолтный маршрут продуктового UI **не проходит через Figma**: компоненты берутся из shadcn/ui в коде, токены живут в `design/tokens/`, витрина — Storybook, сверка — машинная. Шаги, помеченные `[только Figma-маршрут]`, обязательны, когда задача действительно идёт через Figma (пользователь дал Figma-файл, нужен canvas write, идёт извлечение токенов); их отсутствие в задаче без Figma — штатный маршрут, а не `skipped_with_reason`. Обоснование — `docs/architecture/storybook-figma-research-2026-07-27.md`.
+## Маршрут (track): через какой инструмент производится макет
+
+Третья ось запуска, независимая от `profile` и `scale` (CLAUDE.md §0.3). Значение живёт в `run-state.json` (`track`), фиксируется на `00-intake` ответом человека и дублируется в поле `Track` шапки `stage-gate-ledger.md`. Каноническая формулировка — `agent-pack/workflows/claude-operating-rules.md` §5, раздел «Маршрут (`track`) и как оформляется „Figma не участвует“».
+
+| Track | Что это | Что добавляется к последовательности |
+|---|---|---|
+| `code` (дефолт студии) | спецификация экранов + shadcn/ui + Storybook как витрина состояний | ничего сверх ядра |
+| `figma` | макет собирается на холсте Figma | шаги, помеченные ниже `[только Figma-маршрут]`, и Figma-специфичные секции `screens.md` / `frontend-result.md` |
+
+Правила оформления (обязательные):
+
+- **Маршрут-условные артефакты** (`figma-layout-ir.json`, `figma-handoff-bundle.md`, `figma-visual-qa.json`) на маршруте `code` не создаются и **записи в ledger не требуют вовсе**: это штатный маршрут, а не пропуск. `skipped_with_reason: Figma не участвует` писать запрещено.
+- **Маршрут-условные секции** (`## Layout Compiler Contract`, `## Figma Readiness` в `screens.md`; `## Design System Implementation`, `## Component Contract Implementation`, `## Frame / State Implementation Map`, `## Figma Visual QA Gate Summary`, `## Figma Roundtrip Deviations` в `frontend-result.md`) закрываются строкой `skipped_by_track` в таблице «Секции вне маршрута» `stage-gate-ledger.md` с указанием стадии и секции. Проверяется машинно в три стороны; незакрытая секция — ошибка валидатора.
+- **Маршрут читается из `run-state.json`, а не выводится по наличию файлов.** Детекция по `figma-layout-ir.json` запрещена. Задним числом маршрут не меняется: если `06-screens`/`08-frontend` отработали, валидатор отклонит смену.
+- Маршрут режет только состав Figma-специфичных секций. Стадии, approval gates, run ledger, Storybook Acceptance Gate и машинная приёмка одинаковы на обоих маршрутах.
+
+Проверка: `yarn workflow:validate <run-dir> --track <track>`; старт — `yarn workflow:start "<goal>" --track <track>`. Обоснование ветвления (решение владельца продукта от 2026-07-27, CLAUDE.md §6.1) — `docs/architecture/storybook-figma-research-2026-07-27.md`.
 
 ## Жесткий контроль этапов (Hard Stage Enforcement)
 
@@ -263,7 +279,7 @@ Storybook перестал быть опциональным слоем: для 
 - Токены для витрины и приложения общие: DTCG в `design/tokens/`, сборка `yarn tokens:build`.
 - Недоступность оси (нет Docker, не поднято превью) не понижает требование до визуального осмотра: пиши `skipped_with_reason` и downstream risk, статус surface — не выше `partial`.
 
-Этот gate заменяет ручную сверку макета с Figma. Если Figma в задаче не участвует, парная сверка с Figma не требуется; машинная приёмка требуется всегда.
+Этот gate заменяет ручную сверку макета с Figma. На маршруте `track: code` парная сверка с Figma не требуется и записи не требует; машинная приёмка обязательна на **обоих** маршрутах.
 
 ### Порядок Skills В Design Enhancement Layer
 
@@ -278,7 +294,7 @@ Design skills применяются в таком порядке:
 7. `design-engineering` на `08-frontend` и `11-qa`: проверяет motion, focus, hover, active, disabled/loading/error/empty states и reduced motion, включая мобильную приёмку в профиле устройства (`yarn qa:mobile`).
 8. `ds-to-storybook` на `08-frontend`: **обязателен для `product_ui|frontend` surface**, а не «только если нужен export». Skill ведёт покрытие вариантов/состояний историями и связывает Component Contract Matrix с историями и вердиктами приёмки (`yarn vr:test`, `yarn test-storybook`).
 
-Пункты 3-6 применяются только когда задача действительно идёт через Figma. На дефолтном маршруте (`reuse` shadcn/ui, витрина в Storybook) они не выполняются, и их отсутствие не фиксируется как пропуск.
+Пункты 3-6 применяются только на маршруте `track: figma`. На маршруте `track: code` (`reuse` shadcn/ui, витрина в Storybook) они не выполняются, их артефакты не создаются и их отсутствие не фиксируется как пропуск; записи требуют только маршрут-условные **секции** — строкой `skipped_by_track`.
 
 Figma canvas strategy выбирается по задаче: если пользователь дал anchor frame, он может использоваться как точка привязки, но полноценная дизайн-доска должна создаваться отдельными frames на canvas, если это улучшает читаемость handoff.
 

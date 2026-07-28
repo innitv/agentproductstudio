@@ -20,7 +20,7 @@ disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 - **Дизайн-система по умолчанию — shadcn/ui** (`CLAUDE.md` §6.1, решение от 2026-07-27). Дефолтный `design_system_mode` — `reuse`: примитивы берутся из официального реестра (`yarn shadcn search @shadcn` — список из 61 компонента, `yarn shadcn add <component>` — установка) и живут в коде `apps/frontend/src/components/shadcn/`. Состав читай прямо из этого каталога — отдельных индексов состава не заводить.
 - **Токены — в репозитории, не в Figma:** `design/tokens/` (DTCG, `yarn tokens:build`), тема shadcn — `design/tokens/shadcn/` (`yarn tokens:build`, baseline-гейт `yarn tokens:check`). В теме менять цвет, гарнитуру, кольцо фокуса; `--spacing` и шкалу радиусов не трогать.
 - **Витрина компонентов и состояний — Storybook** (`apps/frontend/.storybook`, `yarn storybook`), а не Figma-макет. Экран живёт как composition story и как роут приложения — это один и тот же код; приёмка машинная (`yarn test-storybook`, `yarn vr:test`).
-- **Figma не исключена, но опциональна:** дивергентная фаза (подобрать вид, показать человеку) и разовое извлечение решений в токены. Постоянной синхронизации Figma↔код нет. Индексы Figma-DS заархивированы, в `design/figma/registry.json` осталась одна проектная запись. Если Figma-ветка всё же нужна: эталон — локальный baseline в `design/figma/<slug>/`, живое чтение только разовым ingest (View-seat ≈ 6 чтений/мес), механика — в плагине `/figma-ds:build` и `/figma-ds:standard`.
+- **Маршрут макета читай из `run-state.json`** (поле `track`, `CLAUDE.md` §0.3): его выбрал человек на `00-intake` ответом «Нужен макет в Figma перед вёрсткой?». Твой выбор `design_system_mode` маршрут **не переключает** — своя дизайн-система (`product_specific|bespoke`) штатно проектируется в коде. Роль Figma сузилась до дивергентной фазы (подобрать вид, показать человеку) и разового извлечения решений в токены; постоянной синхронизации Figma↔код нет, индексы Figma-DS заархивированы, в `design/figma/registry.json` осталась одна проектная запись. Если маршрут `figma`: эталон — локальный baseline в `design/figma/<slug>/`, живое чтение только разовым ingest (View-seat ≈ 6 чтений/мес), механика — в плагине `/figma-ds:build` и `/figma-ds:standard`.
 
 ## Предназначение
 
@@ -31,14 +31,15 @@ disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 - `prd.md`, `research-summary.md`, `scenario-user-flows.md`, `ia-brief.md`
 - `copy-deck.md` (при наличии), `CLAUDE.md` §6.1
 - `apps/frontend/src/components/shadcn/` (фактический состав), `design/tokens/`, `design/tokens/shadcn/README.md`
-- Только для Figma-ветки: `integrations/mcp/figma-canvas-write-guide.md`, `design/figma/registry.json`, `ds.config.json`/`foundation.md`/`components.md` выбранной ДС
+- `run-state.json` — оси запуска; маршрут макета берётся из поля `track`
+- Только на маршруте `track=figma`: `integrations/mcp/figma-canvas-write-guide.md`, `design/figma/registry.json`, `ds.config.json`/`foundation.md`/`components.md` выбранной ДС
 
 ## Внутренний процесс
 
 0. **Product UI Routing Gate**: для `собери макеты/use cases/flow`, `мобильное приложение`, `экраны в Figma` и т.п. — Design Agent первый владелец; не отдавать в `design-generator`/`figma-*`/`use_figma` до фиксации visual direction, evidence, `design_system_mode`, reuse/extend strategy и DS gaps.
 1. Проверить product context (constraints, целевое действие, user journey, возражения, статусы/исключения, trust requirements).
 1a. **Design System Strategy Gate**: записать `design_system_mode=reuse|extend|product_specific|bespoke` с rationale и rejected alternatives. Стартовое значение — `reuse` на shadcn/ui; до выбора другого режима перечислить, какие нужные компоненты уже есть в реестре, а каких нет. `extend` = reuse shadcn + перечисленные gap-компоненты своего слоя; `product_specific`/`bespoke` — только с записанным обоснованием (сильный визуальный характер или нестандартный интерфейс: редактор, канвас, плотная таблица).
-1b. **Token Precedence**: (1) явная спецификация PRD/reference/STYLE_GUIDE → (2) токены репозитория `design/tokens/` → (3) Figma variables, если задача идёт через Figma-ветку → (4) дефолты. Конфликт источников не решать молча — эскалировать.
+1b. **Token Precedence**: (1) явная спецификация PRD/reference/STYLE_GUIDE → (2) токены репозитория `design/tokens/` → (3) Figma variables, только при `track=figma` → (4) дефолты. Конфликт источников не решать молча — эскалировать.
 1c. **Theme Customization Boundary**: цвет, гарнитура, кольцо фокуса — менять можно; `--spacing` и шкала радиусов — нет. Потребность в другом шаге сетки/радиусах = заявка на `product_specific`, а не правка темы.
 2. Для reference-driven задач убедиться, что технический scan референса выполнен и evidence сохранён.
 3. **Universal Visual Evidence Grounding**: собрать/явно отклонить same-domain, adjacent, interaction/state references и DS grounding; `visual_evidence_plan` + `visual_reference_cards`.
@@ -46,7 +47,7 @@ disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 5. Создать `reference-analysis.md` с section-by-section visual spec.
 6. Для reference-driven/high-visual-risk вызвать skill `style-decompose` и создать `STYLE_GUIDE.md` до финального `design-brief.md`.
 7. **Surface Output Contract Pass** + **Primary App Flow Gate** (primary user/job, trigger, entry point, P0 route/transition map, error/recovery, acceptance walkthrough); только набор страниц без сквозного сценария -> `partial`.
-8. Сформировать `design-brief.md`; для `extend|product_specific` зафиксировать двухпроходную сборку (`visual_calibration` на 2-3 экранах -> `systemization`): в Storybook для дефолтного маршрута, в Figma — если задача идёт через Figma-ветку. Записать, какой путь выбран.
+8. Сформировать `design-brief.md`; для `extend|product_specific` зафиксировать двухпроходную сборку (`visual_calibration` на 2-3 экранах -> `systemization`): в Storybook при `track=code`, в Figma при `track=figma`. Записать, какой путь выбран.
 8b. **Витрина — Storybook**: перечислить, какие компоненты и состояния должны существовать как stories и какие экраны — как composition story плюс роут приложения. Состояния, которые предстоит принимать, должны иметь именованные stories: приёмка машинная (`yarn test-storybook`, `yarn vr:test`).
 9. Если нужен Figma write — не писать на холст здесь: зафиксировать `figma_handoff_required=true`, `figma_layout_ir_required=true` и передать в `06-screens`.
 10. Обновить `handoff-bundle.md` (visual decisions, Surface Output Contract, assumptions, применённые/пропущенные skills через `skipped_with_reason`).

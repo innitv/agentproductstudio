@@ -37,7 +37,7 @@ Storybook — **основная витрина** product UI студии, а н
 2. **Компоненты по умолчанию берутся из shadcn/ui** (`apps/frontend/src/components/shadcn/`, ставятся `yarn shadcn add <component>`). Сторя пишется на тот компонент, который реально стоит в роуте. Собственный компонент в витрине допустим, когда он закрывает подтверждённый пробел реестра (`Chip`, `SegmentedControl`, `InputCard` со сбросом, уровень `warning` у `Alert`) или когда `design_system_mode = product_specific|bespoke` обоснован по Design System Strategy Gate.
 3. **Приёмка машинная, а не «посмотрел и похоже».** `yarn test-storybook` гоняет play-функции и a11y; `yarn vr:test` даёт пиксельный вердикт по всем историям в пиннутом Docker-образе. Вердикт читается из `reports/visual-regression/summary.json` (story-id, статус, число различающихся пикселей, пути к `-expected`/`-actual`/`-diff`), а не из текста ошибки.
 
-Figma в этом маршруте не участвует. Ветвление `Figma-driven handoff` (раздел ниже) применяется, только когда Figma реально была в деле — дивергентная фаза `04-design` или разовое извлечение решений в токены.
+**Маршрут.** Skill обязателен для `product_ui|frontend` surface на **обоих** маршрутах — витрина и машинная приёмка от маршрута не зависят. Маршрут читается из `run-state.json` (`track`, CLAUDE.md §0.3). На `track: code` Figma не участвует: маршрут-условные Figma-**артефакты** не создаются и записи в ledger **не требуют вовсе**, а маршрут-условные **секции** `frontend-result.md` (`## Design System Implementation`, `## Component Contract Implementation`, `## Frame / State Implementation Map`, `## Figma Visual QA Gate Summary`, `## Figma Roundtrip Deviations`) закрываются строкой `skipped_by_track` в таблице «Секции вне маршрута» `stage-gate-ledger.md`. Писать `skipped_with_reason: Figma не участвует` запрещено. Каноническая формулировка — `agent-pack/workflows/claude-operating-rules.md` §5, раздел «Маршрут (`track`)».
 
 ## Процедура
 
@@ -52,7 +52,7 @@ Figma в этом маршруте не участвует. Ветвление `
 
 ## Ветвление: Figma-driven handoff
 
-Применяется, только когда для задачи существует `figma-handoff-bundle.md` или пользователь явно передаёт макет как источник. Постоянной синхронизации кода и Figma в студии нет — Figma-кит не ведётся.
+Применяется, только когда `run-state.json` объявляет `track: figma`. **Определять маршрут по наличию `figma-handoff-bundle.md` или `figma-layout-ir.json` запрещено** — Figma-run, не создавший файл, выглядел бы как честный код-маршрут и обошёл бы гейт. Постоянной синхронизации кода и Figma в студии нет — Figma-кит не ведётся.
 
 - Сопоставь Figma component/property/value → frontend component/prop → Storybook story/state → test locator. Зафиксируй gaps и accepted deviations.
 - Канон типов property (variant/boolean/text/instance-swap/slot) и матрицы состояний — skill `/figma-ds:standard` (`plugins/figma-ds/skills/standard/SKILL.md`); сверяйся с ним, а не выводи ожидаемый набор из фактической структуры Figma-файла.

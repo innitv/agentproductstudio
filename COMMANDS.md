@@ -27,6 +27,15 @@
 | `/qa` | `11-qa`: аудит PRD fit, UX, a11y, responsive, secrets. |
 | `/release` | `12-release`: release notes, validation, deployment/rollback notes. |
 | `/notion-publish` | Публикация research pack в Notion после human approval. |
+| `/retro` | Разбор завершённого run по фактическим артефактам: пять метрик процесса, до пяти находок, разбор пишется в `docs/architecture/retro-<slug>-<date>.md`. |
+
+Плагинные команды (ставятся `yarn plugin:link`, живут в `plugins/`, а не в `.claude/commands/`):
+
+| Команда | Что делает |
+| --- | --- |
+| `/figma-ds:build` | Механика сборки токенизированной DS и макетов в Figma через Plugin API: страницы, тиеры Variables, консолидация компонентов, грабли, финальная самопроверка перед отчётом (пакетный гейт, НЕ после каждого write). |
+| `/figma-ds:standard` | Textbook-канон дизайн-систем со ссылками на первоисточники: тиеры токенов, DTCG, modes, выбор variant/boolean/slot, пороги WCAG 2.2, versioning, порядок документации. |
+| `/subsystem-audit:audit` | Повторяемый шаблон аудита подсистемы: верификация каждой находки первоисточником, сравнение с GitHub по реальным URL, эвристики против ложных находок, отчёт в файл + сжатый P0/P1/P2 в чат. |
 
 Skills (`.claude/skills/`, детально — `agent-pack/skills/`) slash-команд не имеют: Claude Code подключает их автоматически по описанию. Покрытие стадий: `yarn workflow:skills`.
 
@@ -687,24 +696,33 @@ yarn workflow:doctor --repair
 
 ## Типовые сценарии
 
-Стандартный сценарий без визуального референса:
+Продуктовый run живёт в `outputs/<project-slug>/<YYYY-MM-DD>/`, standalone research — в `research/projects/<research-slug>/<YYYY-MM-DD>/`. Это **разные каталоги**: валидировать продуктовый run по research-пути нельзя, такого каталога не существует.
+
+Стандартный продуктовый сценарий без визуального референса (маршрут `code`, дефолт):
 
 ```bash
-yarn landing:run "Лендинг для AI-сервиса записи в салон"
-yarn research:run research/projects/<research-slug>/<YYYY-MM-DD>
-yarn workflow:validate research/projects/<research-slug>/<YYYY-MM-DD> --through 01-research --profile standard
+yarn workflow:start "Лендинг для AI-сервиса записи в салон" --scale full --track code
+yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --through 01-research
+yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile standard
 ```
 
 Сценарий с визуальным референсом:
 
 ```bash
-yarn landing:run "Лендинг как https://example.com для сервиса X"
+yarn workflow:start "Лендинг как https://example.com для сервиса X" --scale full --track code
 yarn reference:scan https://example.com example-reference
 yarn reference:diff reports/visual-review/example-reference reports/visual-review/example-local reports/visual-review/example-reference
 yarn reference:section-diff https://example.com http://127.0.0.1:4173 reports/visual-review/example-reference
 yarn reference:review reports/visual-review/example-reference http://127.0.0.1:4173 --local-dir reports/visual-review/example-local
-yarn research:run research/projects/<research-slug>/<YYYY-MM-DD>
-yarn workflow:validate research/projects/<research-slug>/<YYYY-MM-DD> --through 01-research --profile reference
+yarn workflow:validate outputs/<project-slug>/<YYYY-MM-DD> --profile reference
+```
+
+Standalone research без frontend-доставки (отдельный каталог, отдельный реестр):
+
+```bash
+yarn research:run research/projects/<research-slug>/<YYYY-MM-DD> "research query"
+yarn research:lint research/projects/<research-slug>/<YYYY-MM-DD>
+yarn workflow:validate research/projects/<research-slug>/<YYYY-MM-DD> --through 01-research --profile standard
 ```
 
 ## Trigger Phrases / Триггер-фразы (Natural Language Intents)

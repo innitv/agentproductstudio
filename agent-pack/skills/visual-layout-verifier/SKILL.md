@@ -30,7 +30,7 @@ contract_schema: agent-pack/templates/skill.template.md
 
 ## 1. Назначение
 
-**Применимость: только когда Figma реально в деле.** Skill проверяет Figma-макет против `figma-layout-ir.json` и вне Figma-поверхности не запускается. По решению от 2026-07-27 (`CLAUDE.md` §6.1) Figma сузилась до дивергентной фазы на `04-design` и разового извлечения решений в токены; постоянной синхронизации кода и Figma нет.
+**Применимость: только маршрут `track: figma`.** Skill проверяет Figma-макет против `figma-layout-ir.json` и вне Figma-поверхности не запускается. Маршрут читается из `run-state.json` (CLAUDE.md §0.3); **определять его по наличию `figma-layout-ir.json` запрещено** — Figma-run, не создавший файл, выглядел бы как честный код-маршрут. По решению от 2026-07-27 (`CLAUDE.md` §6.1) Figma сузилась до дивергентной фазы на `04-design` и разового извлечения решений в токены; постоянной синхронизации кода и Figma нет.
 
 Для поверхности, которая живёт в коде, эквивалентная проверка — другая и не подменяется этим skill:
 
@@ -39,7 +39,7 @@ contract_schema: agent-pack/templates/skill.template.md
 | Figma-макет | этот skill: screenshots + object inventory против `figma-layout-ir.json` | `figma-visual-qa.json` |
 | UI в коде | `yarn vr:test` (пиксельная регрессия историй витрины), `yarn test-storybook` (интеракции + a11y), `yarn qa:mobile` (профиль устройства) | `reports/visual-regression/summary.json` + exit code |
 
-Если `figma-layout-ir.json` для задачи не создавался, это не пробел проверки, а признак того, что поверхность кодовая: веди приёмку по правой колонке и запиши `skipped_with_reason: поверхность не Figma`.
+**Как оформляется «Figma не участвует» (на маршруте `track: code`).** `figma-visual-qa.json` — маршрут-условный **артефакт**: он не создаётся и **записи в ledger не требует вовсе**, это штатный маршрут, а не пропуск проверки. Писать `skipped_with_reason: поверхность не Figma` **запрещено**: приёмка не пропущена, она идёт по правой колонке таблицы выше и обязательна. Записи требуют только маршрут-условные **секции** `frontend-result.md` (`## Figma Visual QA Gate Summary`, `## Figma Roundtrip Deviations` и др.) — строкой `skipped_by_track` в таблице «Секции вне маршрута» `stage-gate-ledger.md`. Каноническая формулировка — `agent-pack/workflows/claude-operating-rules.md` §5, раздел «Маршрут (`track`) и как оформляется „Figma не участвует“» (заменяет прежнее указание этого skill про `skipped_with_reason`).
 
 Внутри своей области skill защищает от результата, который структурно выглядит правильным в слоях, но визуально разваливается: обрезанный текст, наезды, слабая плотность, неверная иерархия, отсутствие app route.
 

@@ -36,7 +36,7 @@ color: orange
 6. **Alternate & Recovery Paths** (отмена, назад, повторная отправка, исправление ошибки, потеря соединения, отказ от CTA).
 7. **Microinteraction & Motion Spec**: trigger, target, duration/easing, reduced-motion fallback, focus retention, touch/keyboard equivalence (без motion ради украшения).
 8. **Instrumentation & Test Hooks** (event name, trigger, payload notes, PII risk, expected assertion).
-9. **Prototype Format Decision**: дефолт — исполняемая спецификация плюс носители в коде (Storybook stories на состояния из State Inventory и роут приложения на сценарий); каждое состояние получает имя story, по которому его примут машинно (`yarn test-storybook`, `yarn vr:test`). Figma interaction map — опциональный формат для задач с Figma-веткой; Figma write требует approval и `write_allowed=true`.
+9. **Prototype Format Decision**: дефолт — исполняемая спецификация плюс носители в коде (Storybook stories на состояния из State Inventory и роут приложения на сценарий); каждое состояние получает имя story, по которому его примут машинно (`yarn test-storybook`, `yarn vr:test`). Figma interaction map — опциональный формат только на маршруте `track=figma` (поле `track` в `run-state.json`, `CLAUDE.md` §0.3); Figma write требует approval и `write_allowed=true`.
 10. **Friction & Conversion Review**, **Manual Test Script** (happy/negative/keyboard/mobile path) и **Frontend Handoff Contract**.
 
 ## Обязательные результаты

@@ -26,6 +26,19 @@ export interface LandingWorkflowInput {
   source_policy?: unknown;
   notion_target?: string;
   profile?: "standard" | "reference";
+  // Оси запуска, зафиксированные на `00-intake`. Скаффолд обязан их знать: без них
+  // `run-plan.md` перечисляет все 13 стадий независимо от масштаба, а `stage-gate-ledger.md`
+  // не содержит ни строк `skipped_by_scale`, ни таблицы секций вне маршрута.
+  scale?: "full" | "increment" | "patch";
+  track?: "code" | "figma";
+  // Какие оси названы явно на старте, а какие взяты умолчанием. Нужно, чтобы скаффолд
+  // записал ответ там, где он есть, и пометил незаписанным там, где его не было: иначе
+  // скаффолд закрывал бы гейт опроса сам за себя.
+  axes_recorded?: {
+    profile?: boolean;
+    scale?: boolean;
+    track?: boolean;
+  };
 }
 
 export interface HandoffBundle {

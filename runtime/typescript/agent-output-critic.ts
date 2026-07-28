@@ -289,14 +289,15 @@ export async function verifyAgentOutput(options: VerifyAgentOutputOptions): Prom
     checkClaims.push({ id: "workflow:validate", claimed: "auto", source: "auto" });
   }
 
-  // Профиль run читается из его собственного состояния, а не угадывается по тексту.
+  // Профиль run читается из его собственного состояния — тем же чтением, что делает сам
+  // валидатор. Здесь он нужен не для флага, а для отчёта и для предупреждения ниже.
   const runProfile = runDir ? readRunProfile(runDir) : undefined;
   if (runDir && !runProfile && !options.dryRun && checkClaims.some((claim) => claim.id === "workflow:validate")) {
     findings.push({
       level: "warning",
       code: "run_profile_unknown",
       message:
-        "В `run-state.json`/`run-meta.json` нет поля профиля — `workflow:validate` запущен без `--profile` и определяет его эвристикой. Для reference-run это может дать неверный набор обязательных артефактов: сверься с прямым прогоном валидатора.",
+        "В `run-state.json`/`run-meta.json` нет поля профиля — валидатору нечего прочитать, и он определяет профиль эвристикой по тексту. Для reference-run это может дать неверный набор обязательных артефактов: запусти `yarn workflow:sync <run-dir>` или сверься с прямым прогоном валидатора с явным `--profile`.",
     });
   }
 
@@ -388,15 +389,12 @@ export async function verifyAgentOutput(options: VerifyAgentOutputOptions): Prom
         args.push("--through", claims.stage_id);
       }
 
-      // Профиль обязателен явно. Без него валидатор определяет профиль эвристикой по
-      // тексту run-plan/handoff, и на reference-run он ошибается: на реальном
-      // `contractor-payment-demo` эвристика дала `standard` (19 ошибок) при
-      // `profile: reference` в run-state (26 ошибок). Разные наборы обязательных
-      // артефактов = ложный вердикт и цифры, не совпадающие с прямым прогоном.
-      // `scale` не передаём намеренно: валидатор сам читает его из `run-state.json`.
-      if (runProfile) {
-        args.push("--profile", runProfile);
-      }
+      // Ни одна ось не передаётся флагом: валидатор читает `profile`, `scale` и `track`
+      // из `run-state.json` сам. Раньше здесь стоял костыль `--profile`, потому что
+      // валидатор угадывал профиль по тексту и на `contractor-payment-demo` отвечал
+      // `standard` (19 ошибок) при `profile: reference` в состоянии (26 ошибок). Корень
+      // починен в самом валидаторе, поэтому костыль снят: критик обязан запускать ту же
+      // команду, которую по `CLAUDE.md` §10 запускает человек, иначе их цифры расходятся.
     }
 
     const result = await runner({ id: definition.id, bin: yarnBinary(), args });

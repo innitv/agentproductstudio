@@ -18,7 +18,8 @@ Skill превращает `STYLE_GUIDE.md` и продуктовый конте
 ## Ключевые шаги
 - Проверь наличие `STYLE_GUIDE.md`, `design-brief.md`, `ia-brief.md`, `copy-deck.md`; пометь copy gaps, не придумывай финальный copy.
 - Собери `design-generator-prompt.md` по шаблону.
-- Ограничь первичную генерацию 2-3 экранами как `visual_calibration`. Поверхность запиши явно: **по умолчанию экран в коде** + composition story (критика на реальном тексте, результат не выбрасывается, проверка машинная — `yarn vr:test`, `yarn test-storybook`); Figma-черновик — только когда направление ещё расходится, и он выбрасывается после переноса решений в `design/tokens/` и код.
+- Ограничь первичную генерацию 2-3 экранами как `visual_calibration`. Поверхность следует маршруту `track` из `run-state.json` (CLAUDE.md §0.3) и записывается явно: `track: code` — **экран в коде** + composition story (критика на реальном тексте, результат не выбрасывается, проверка машинная — `yarn vr:test`, `yarn test-storybook`); `track: figma` — Figma-черновик, который выбрасывается после переноса решений в `design/tokens/` и код.
+- На `track: code` Figma-артефакты не создаются и записи в ledger не требуют вовсе; маршрут-условные секции `screens.md`/`frontend-result.md` закрываются строкой `skipped_by_track` в `stage-gate-ledger.md`. `skipped_with_reason: Figma не участвует` писать запрещено.
 - Сравни результат с `STYLE_GUIDE.md`: tokens, composition, hierarchy, typography, spacing, interaction states.
 - Проведи критику: что generic/default, где нарушена иерархия; зафиксируй в `design-loop-report.md`.
 - Regression после systemization: для кода — `yarn vr:test`, для Figma — screenshot до/после. Визуально более слабый результат блокирует `ready`.

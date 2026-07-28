@@ -12,7 +12,8 @@ Storybook — **основная витрина** product UI студии, а н
 ## Когда использовать
 - Реализован или изменён product UI: витрина обязательна, а не опциональна.
 - Нужен каталог состояний компонентов и экранов.
-- Figma-driven component handoff — отдельное ветвление, применяется только при наличии `figma-handoff-bundle.md`.
+- Figma-driven component handoff — отдельное ветвление, применяется только на маршруте `track: figma` из `run-state.json` (CLAUDE.md §0.3). Определять маршрут по наличию `figma-handoff-bundle.md` запрещено.
+- Сам skill обязателен для `product_ui|frontend` на **обоих** маршрутах. На `track: code` Figma-артефакты не создаются и записи в ledger не требуют; маршрут-условные секции `frontend-result.md` закрываются строкой `skipped_by_track` в `stage-gate-ledger.md`, а `skipped_with_reason: Figma не участвует` писать запрещено.
 
 ## Ключевые шаги
 - Собери inventory из frontend source (`apps/frontend/src/components/`, `apps/frontend/src/views/`), `design-brief.md`, `screens.md`; источник каждого компонента — реестр shadcn, свой слой или пробел.

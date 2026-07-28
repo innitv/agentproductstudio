@@ -2,7 +2,17 @@
 
 Дата обзора: 2026-06-02.
 
-Этот документ фиксирует практики, которые можно применять в `product-agent-studio` без переноса чужого runtime или шаблонного поведения. Внешние `outputs/*` и старые run artifacts не являются источником правил; этот документ относится только к нормативному слою `AGENTS.md`, `agent-pack/workflows`, `agent-pack/agent-contracts`, `agent-pack/templates`, `agent-pack/quality` и runtime-командам.
+Этот документ фиксирует практики, которые можно применять в `agent-product-studio` без переноса чужого runtime или шаблонного поведения. Внешние `outputs/*` и старые run artifacts не являются источником правил; этот документ относится только к нормативному слою `CLAUDE.md`, `agent-pack/workflows`, `agent-pack/agent-contracts`, `agent-pack/templates`, `agent-pack/quality` и runtime-командам.
+
+## Актуальность (читать до применения)
+
+Обзор снят **до** двух решений владельца продукта от 2026-07-27, поэтому его словарь местами устарел. Где он расходится с текущими правилами, прав **не** он:
+
+- **Дизайн-система по умолчанию — shadcn/ui в коде** (CLAUDE.md §6.1), витрина — Storybook, приёмка — машинная (`yarn vr:test`, `yarn test-storybook`, `yarn qa:mobile`). Наблюдения ниже, сформулированные как «Figma/design-system agent tooling», применяются только на маршруте `track: figma`.
+- **Маршрут производства макета — ось `track` в `run-state.json`** (CLAUDE.md §0.3), а не свойство типа задачи. Глубина — ось `scale` (§0.2). Ни одна из осей не была известна на дату обзора.
+- `AGENTS.md` перестал быть источником правил и является указателем на `CLAUDE.md`.
+
+Сами наблюдения об ops loop, ledger, delegation packet, approval gates, QA evidence и release records остаются в силе — они про устройство процесса, а не про инструмент макета.
 
 ## Адаптированные наблюдения
 
@@ -30,9 +40,9 @@
 | Agent deployment systems emphasize human approval before irreversible writes and one-step undo/revert paths for agent-made changes. | Release stage не делает git/deploy/Notion/Figma writes без approval и всегда фиксирует rollback readiness. |
 | Changelog/release tooling separates added/changed/fixed/internal/dependency updates and includes links to evidence or commits. | В нашем release artifact изменения разделяются на product artifacts, code, config, tests, docs, external records и unrelated dirty tree. |
 | Production release playbooks pair preflight checks with post-release smoke and monitoring windows. | Release notes должны включать Post-Release Smoke Checks и stop conditions, даже если фактический deploy не запрошен. |
-| Design generation agents produce better downstream results when screens are grounded in tokens, components, states, responsive constraints and traceability rather than visual vibes. | `screens.md` должен содержать Input Readiness, Design-System Grounding, Screen Traceability, Component Inventory, State Inventory и Figma Readiness. |
-| Figma/design-system agent tooling works best when variables, component variants, Auto Layout intent and screenshot verification are planned before writing to canvas. | Design generator обязан описать variables/styles/components, Auto Layout critical areas, canvas strategy и screenshot evidence plan до `use_figma`. |
-| Design-to-code systems avoid drift by mapping Figma/design components to code components and preserving copy/source bindings. | Screen specs должны связывать component source, copy source, frontend owner и prototype/test signals. |
+| Design generation agents produce better downstream results when screens are grounded in tokens, components, states, responsive constraints and traceability rather than visual vibes. | `screens.md` должен содержать Input Readiness, Design-System Grounding, Screen Traceability, Component Inventory, State Inventory, Component Contract Matrix и Frame / State Implementation Map. Секция `Figma Readiness` — маршрут-условная: обязательна на `track: figma`, на `track: code` закрывается строкой `skipped_by_track` в ledger. |
+| Figma/design-system agent tooling works best when variables, component variants, Auto Layout intent and screenshot verification are planned before writing to canvas. | **Только `track: figma`:** design generator обязан описать variables/styles/components, Auto Layout critical areas, canvas strategy и screenshot evidence plan до `use_figma`. На `track: code` эквивалент — истории Storybook с покрытием состояний и три машинных вердикта приёмки. |
+| Design-to-code systems avoid drift by mapping Figma/design components to code components and preserving copy/source bindings. | Screen specs должны связывать component source, copy source, frontend owner и prototype/test signals. На `track: code` источник компонента — реестр shadcn/ui или собственный слой проекта, а адресат мэппинга состояния — Storybook story, а не Figma-нода. |
 
 ## Принципы для нашего проекта
 

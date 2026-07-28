@@ -105,6 +105,8 @@ try {
   restoreEnv("RESEARCH_PROVIDER_ORDER", originalEnv.RESEARCH_PROVIDER_ORDER);
 }
 
+console.log("multi-source research tests passed");
+
 function restoreEnv(key: string, value: string | undefined): void {
   if (value === undefined) {
     delete process.env[key];

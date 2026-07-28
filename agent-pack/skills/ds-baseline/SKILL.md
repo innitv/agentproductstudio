@@ -49,7 +49,7 @@ Skill защищает от главной ошибки: **сборки foundati
 
 ## 1.2. Где живёт foundation
 
-**Источник правды для токенов — репозиторий, не Figma:** `design/tokens/` (DTCG, три тиера), сборка `yarn tokens:build`. Baseline-гейт отклоняет незаявленные изменения значений, поэтому правка значения делается в токенах, а не в компоненте и не в Figma-переменной.
+**Источник правды для токенов — репозиторий, не Figma:** `design/tokens/` (DTCG), сборка `yarn tokens:build`. Фактическая структура — **один плоский слой на тему** (`design/tokens/shadcn/<theme>.json`, группы `color`/`density`/`typography`), а не три тиера: канон трёх тиеров из `/figma-ds:standard` описывает Figma-переменные и здесь не реализован. Приводить файл к трём тиерам «ради канона» запрещено — это сломает гейт паритета `yarn tokens:check`. Baseline-гейт отклоняет незаявленные изменения значений, поэтому правка значения делается в токенах, а не в компоненте и не в Figma-переменной.
 
 Отсюда порядок для новой системы: извлечённый из экранов foundation записывается в `design/tokens/` и оттуда попадает в код. Figma-переменные — при необходимости зеркало, разовое и в одну сторону; обратной синхронизации нет и не планируется. Витрина результата — Storybook (`ds-to-storybook`), не Figma-страница.
 
@@ -105,5 +105,10 @@ Failure modes:
 - [ ] Foundation извлечён из утверждённых экранов, а не из отраслевого preset.
 - [ ] Component Contract Matrix заполнена; Code Connect status записан.
 - [ ] Regression check выполнен: systemization не ухудшила композицию.
-- [ ] Approval `figma_write` с exact target получен до write; после write — metadata + screenshot.
-- [ ] `yarn figma:audit --registry design/figma/<slug>/component-contracts.json` пройден без `needs_revision`/`blocked` (или зафиксирован deviation).
+
+Два последних пункта — **маршрут-условные**: они относятся только к `track: figma` из `run-state.json` (CLAUDE.md §0.3). На `track: code` витрина результата — Storybook, записи в Figma нет, реестра `design/figma/<slug>/` нет, и требовать их запрещено: пункты не выполняются, записи в ledger не требуют и на статус не влияют. Запрашивать approval `figma_write` на записи, которой не будет, — `process_deviation`.
+
+- [ ] **(только `track: figma`)** Approval `figma_write` с exact target получен до write; после write — metadata + screenshot.
+- [ ] **(только `track: figma`)** `yarn figma:audit --registry design/figma/<slug>/component-contracts.json` пройден без `needs_revision`/`blocked` (или зафиксирован deviation).
+
+Эквивалент этих двух проверок на `track: code`: `yarn tokens:check` (паритет темы со снимком реестра), `yarn test-storybook` и `yarn vr:test` — то есть Machine Acceptance Gate, обязательный на обоих маршрутах.
