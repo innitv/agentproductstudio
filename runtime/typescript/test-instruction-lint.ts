@@ -85,6 +85,31 @@ withFixture(
   (root) => assert.deepEqual(lintInstructionReferences(root), []),
 );
 
+// Мёртвое имя во второй половине записи «или так, или так» — тоже ссылка в никуда.
+// Форма `A|B` в одной паре backticks прятала имя от проверки: правило знало про суффикс
+// `-map.md`, но матчило только backtick-фрагмент целиком. Так `token-map.md` пережил
+// собственное удаление в шести местах правил и был вычищен руками 2026-07-29.
+withFixture(
+  {
+    "agent-pack/agent-contracts/design.agent.md":
+      "- `design/figma/<selected_design_system_slug>/foundation.md|token-map.md`, если выбран `reuse|extend`\n",
+  },
+  (root) => {
+    const findings = lintInstructionReferences(root);
+    assertFinding(findings, "artifact-file", /'token-map\.md'/);
+  },
+);
+
+// Та же форма без мёртвых имён остаётся законной: `reuse|extend` — это не имена файлов,
+// а `components.md` производится. Разделитель сам по себе не нарушение.
+withFixture(
+  {
+    "agent-pack/agent-contracts/design.agent.md":
+      "- `design/figma/<selected_design_system_slug>/components.md`, если выбран `reuse|extend`\n",
+  },
+  (root) => assert.deepEqual(lintInstructionReferences(root), []),
+);
+
 // ---------------------------------------------------------------------------
 // 2. Стадия, навык, абсолютный путь
 // ---------------------------------------------------------------------------

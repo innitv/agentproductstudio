@@ -17,8 +17,8 @@
 - `reference-analysis.md`, если применимо
 - `design/figma/registry.json`, если используется Figma DS
 - `design/figma/<selected_design_system_slug>/ds.config.json`, если выбран `reuse|extend`
-- `design/figma/<selected_design_system_slug>/foundation.md|token-map.md`, если применимо
-- `design/figma/<selected_design_system_slug>/components.md|component-map.md`, если применимо
+- `design/figma/<selected_design_system_slug>/foundation.md`, если применимо
+- `design/figma/<selected_design_system_slug>/components.md`, если применимо
 
 ## Input Readiness Pass
 

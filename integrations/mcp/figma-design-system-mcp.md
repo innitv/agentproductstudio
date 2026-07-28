@@ -80,14 +80,11 @@ claude mcp add --transport http figma https://mcp.figma.com/mcp
 - `design/figma/<design-system-slug>/components.md`.
 - `design/figma/<design-system-slug>/components/<category>.md`.
 - `design/figma/<design-system-slug>/design-system-audit.md`.
-- `design/figma/<design-system-slug>/token-map.md` и `component-map.md` допустимы как legacy/human-readable aliases.
 
 Рекомендуемые workflow-specific результаты:
 
 - `agent-pack/artifacts/design/design-brief.template.md` или `outputs/<slug>/<date>/design-brief.md`.
 - `outputs/<slug>/<date>/figma-design-system-audit.md`.
-- `outputs/<slug>/<date>/figma-token-map.md` только для task-specific Figma frames, не для общей библиотеки.
-- `outputs/<slug>/<date>/figma-component-map.md` только для task-specific Figma frames, не для общей библиотеки.
 
 Если Figma library является общей дизайн-системой, не дублируй её в каждом `outputs/` run. Сохраняй её в `design/figma/`, а workflow artifacts должны ссылаться на эти файлы в `Inputs Used`.
 

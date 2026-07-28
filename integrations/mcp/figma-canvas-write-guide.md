@@ -37,8 +37,8 @@
 
 - Если `selected_design_system_slug` есть и статус `indexed`, читай локальный индекс:
   - `design/figma/<slug>/ds.config.json`;
-  - `foundation.md|token-map.md`;
-  - `components.md|component-map.md`;
+  - `foundation.md`;
+  - `components.md`;
   - только нужные `components/<category>.md`.
 - Не читай весь Figma-файл повторно, если локальный индекс отвечает на вопрос.
 - В Figma обращайся только для missing nodes, refresh, screenshot/object verification или approved write.

@@ -121,15 +121,24 @@ export function lintInstructionReferences(root = process.cwd()): LintFinding[] {
       // законно называют то, чего уже нет, и именно так фиксируется урок.
       const isRetrospective = /прецедент|заархивирован|удал[её]н|раньше|ранее|протух|устарел|историческ/i.test(line);
 
-      for (const match of line.matchAll(/`([a-z][a-z0-9-]*(?:-result|-report|-bundle|-brief|-deck|-ir|-qa|-map|-plan)\.(?:md|json))`/g)) {
-        const fileName = match[1];
+      // Внутри одной пары backticks может стоять несколько имён через `|` — запись вида
+      // `foundation.md|token-map.md` («или так, или так»). Разбираем содержимое по разделителю:
+      // иначе мёртвое имя во второй половине прячется от проверки целиком, что и случилось
+      // с `token-map.md` — он пережил собственное удаление в шести местах правил.
+      const artifactName = /^[a-z][a-z0-9-]*(?:-result|-report|-bundle|-brief|-deck|-ir|-qa|-map|-plan)\.(?:md|json)$/;
+
+      for (const inline of line.matchAll(/`([^`]+)`/g)) {
         if (isRetrospective) continue;
-        if (!knownArtifactFiles.has(fileName) && !knownProducedNames.has(fileName)) {
-          report(
-            "artifact-file",
-            `'${fileName}' выглядит как артефакт запуска, но его не производит ни манифест ` +
-              "(artifactFiles), ни runtime, ни шаблоны. Либо артефакт удалён, либо имя разъехалось.",
-          );
+        for (const part of inline[1].split("|")) {
+          const fileName = part.trim();
+          if (!artifactName.test(fileName)) continue;
+          if (!knownArtifactFiles.has(fileName) && !knownProducedNames.has(fileName)) {
+            report(
+              "artifact-file",
+              `'${fileName}' выглядит как артефакт запуска, но его не производит ни манифест ` +
+                "(artifactFiles), ни runtime, ни шаблоны. Либо артефакт удалён, либо имя разъехалось.",
+            );
+          }
         }
       }
 
