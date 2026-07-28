@@ -22,10 +22,12 @@
 ```text
 request → recursive brief → research → PRD → IA → design → copy → screens → prototype
                                                                                  │
-                                                          🔴 человек утверждает макеты
+                                              🔴 только track=figma: человек утверждает макеты
                                                                                  │
                                                     frontend → test bench → QA → release
 ```
+
+На умолчании `track: code` гейта утверждения нет: макета, который можно утвердить до вёрстки, там не существует. Вместо него человек смотрит готовые экраны в витрине Storybook, а качество держит машинная приёмка.
 
 Оркестратор — это главная сессия Claude Code. Она владеет маршрутизацией, гейтами и финальным ответом, а специалистов вызывает как ограниченные capabilities: они получают входы, возвращают структурированный результат и не подменяют общий статус workflow.
 
@@ -107,6 +109,7 @@ Skills подключаются автоматически по описанию
 
 - **`figma-ds`** — `/figma-ds:build` (механика Figma Plugin API и финальная самопроверка перед отчётом — пакетный гейт, не после каждого write) и `/figma-ds:standard` (textbook-канон дизайн-систем). Граница простая: всё, что верно про Figma безотносительно нашего процесса, — в плагине; гейты, стадии и статусы — в `integrations/mcp/figma-canvas-write-guide.md`. Копий не заводить.
 - **`subsystem-audit`** — `/subsystem-audit:audit`: доказательный шаблон аудита подсистемы (верификация находок первоисточником, сравнение с GitHub по реальным URL, эвристики против ложных находок).
+- **`ui-craft`** — `/ui-craft:build` (ремесло вёрстки: композиция, переменные вместо чисел по месту, состояния, доступность, движение, проверка сборкой и скриншотами) и `/ui-craft:reference-check` (сверка с внешним образцом измерением, а не фразой «похоже»). Плагин переносим и намеренно **не** выбирает основу — «библиотека или своя вёрстка» решает проект в своём `CLAUDE.md`; у нас это §6.1, shadcn/ui. Проектные skills `landing-builder` и `visual-diff-verifier` остаются: они про наши стадии, гейты и команды.
 
 Полный справочник команд: [COMMANDS.md](COMMANDS.md).
 
@@ -128,6 +131,7 @@ Skills подключаются автоматически по описанию
 | `agent-pack/schemas/`, `agent-pack/artifacts/` | JSON Schema для structured outputs и шаблоны артефактов |
 | `plugins/figma-ds/` | Плагин: единый источник Figma-знания вне процесса студии — `/figma-ds:build` (механика Plugin API, грабли, чек-лист после write) и `/figma-ds:standard` (textbook-канон DS). Раздаётся на машину junction'ом из `~/.claude/skills/` |
 | `plugins/subsystem-audit/` | Плагин: `/subsystem-audit:audit` — повторяемый шаблон аудита подсистемы. Раздаётся junction'ом так же |
+| `plugins/ui-craft/` | Плагин: `/ui-craft:build` и `/ui-craft:reference-check` — переносимое ремесло интерфейса вне процесса студии, без привязки к выбору основы и к нашим командам. Раздаётся junction'ом так же |
 | `runtime/typescript/` | Исполняемый слой: workflow engine, валидаторы, approval CLI, research и reference tooling |
 | `apps/frontend/` | Studio frontend |
 | `design/figma/` | Design-system context, Figma maps, component contracts |
@@ -144,7 +148,9 @@ Skills подключаются автоматически по описанию
 - [agent-pack/workflows/artifact-driven-pipeline.md](agent-pack/workflows/artifact-driven-pipeline.md) — полный product workflow и run ledger.
 - [agent-pack/guardrails/approval-matrix.md](agent-pack/guardrails/approval-matrix.md) — что требует подтверждения человека и с какой точной целью.
 
-Коротко о главном: `quick draft` включается только по явной фразе пользователя; новое создаётся только для доказанного gap, а существующее переиспользуется; frontend не начинается, пока человек не утвердил макеты; нарушение уже существующего правила записывается как `process_deviation`, а не как «поправка пользователя».
+Коротко о главном: `quick draft` включается только по явной фразе пользователя; новое создаётся только для доказанного gap, а существующее переиспользуется; нарушение уже существующего правила записывается как `process_deviation`, а не как «поправка пользователя».
+
+**Гейт утверждения макетов — только на маршруте `figma`.** Там frontend заблокирован до явного «ок» человека (`agent-pack/workflows/claude-operating-rules.md`, порядок reference-scan и Figma write). На умолчании `track: code` этого гейта нет намеренно: макета, который можно утвердить до вёрстки, там не существует — вместо него человек смотрит готовые экраны в витрине Storybook и правит словами, а качество держит машинная приёмка (`vr:test`, `test-storybook`, `qa:mobile`). Прежняя формулировка обещала гейт безусловно и на кодовом маршруте была невыполнима.
 
 `AGENTS.md` — только указатель на `CLAUDE.md` для сторонних агентов (Codex, OpenCode), а не источник правил.
 

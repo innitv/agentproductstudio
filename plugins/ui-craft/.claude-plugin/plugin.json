@@ -1,0 +1,10 @@
+{
+  "name": "ui-craft",
+  "description": "Переносимое ремесло интерфейса: процедура качественной реализации UI, верная при любой основе (библиотека компонентов или вёрстка с нуля), и сверка результата с внешним образцом измерением вместо фразы «похоже».",
+  "author": {
+    "name": "ignatovivin"
+  },
+  "homepage": "https://github.com/innitv/agentproductstudio",
+  "repository": "https://github.com/innitv/agentproductstudio",
+  "license": "MIT"
+}
