@@ -1,6 +1,6 @@
 ---
 name: figma-screen-compiler
-description: Использовать, когда Figma/product UI/prototype surface нужно собрать или обновить из screens и design-контекста — компилирует спецификации экранов в figma-layout-ir.json, применяет route/component/layout constraints и блокирует готовность к Figma write, если отсутствуют IR, DS honesty, copy-fit или visual QA требования.
+description: Использовать, когда Figma/product UI/prototype surface нужно собрать или обновить из screens и design-контекста: компилирует спецификации экранов в figma-layout-ir.json, применяет route/component/layout constraints и блокирует готовность к Figma write, если отсутствуют IR, DS honesty, copy-fit или visual QA требования.
 ---
 
 # Figma Screen Compiler

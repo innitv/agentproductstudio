@@ -1,6 +1,6 @@
 ---
 name: ds-to-storybook
-description: Использовать для component library, Storybook/state catalog или Figma-driven frontend handoff. Skill создает storybook-result.md с variant/state coverage, Component Contract Matrix mapping и validation evidence.
+description: Использовать для component library, Storybook/state catalog или Figma-driven frontend handoff. Создает storybook-result.md с variant/state coverage, Component Contract Matrix mapping и validation evidence.
 ---
 
 # Design System To Storybook

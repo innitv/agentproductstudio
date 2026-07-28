@@ -1,6 +1,6 @@
 ---
 name: notion-sync
-description: Использовать, когда на этапе 01-research или 12-release нужна одобренная человеком публикация/экспорт research-only или PRD артефактов в Notion. Skill готовит читаемый notion_research_export_ru, запрашивает approval в чате, публикует только разрешенный контент и фиксирует blocked/partial состояния при отсутствии approval, token, parent page или permissions.
+description: Использовать, когда на этапе 01-research или 12-release нужна одобренная человеком публикация/экспорт research-only или PRD артефактов в Notion. Skill готовит читаемый notion_research_export_ru, запрашивает approval в чате, публикует только разрешённый контент и фиксирует blocked/partial состояния при отсутствии approval, token, parent page или permissions.
 ---
 
 # Notion Research & PRD Sync

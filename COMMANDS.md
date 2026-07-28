@@ -411,6 +411,21 @@ yarn qa:quick
 yarn workflow:test-agentic
 ```
 
+### Сторожа против расхождения инструкций и кода
+
+Четыре проверки, заведённые после аудита 2026-07-28 (`docs/architecture/studio-audit-2026-07-28.md`): все семь находок P0 того аудита прошли мимо зелёных проверок, потому что держались на договорённости, а не на тесте. Каждая доказана воспроизведением исторического дефекта — тесты содержат дословные формулировки, которые в репозитории уже были.
+
+| Проверка | Что ловит | Где живёт | Куда подключена |
+|---|---|---|---|
+| Дословное равенство описаний зеркал | `description` в `.claude/skills/<id>/SKILL.md` разошёлся с `agent-pack/skills/<id>/SKILL.md`. Роутер выбирает навык по этой строке, поэтому дрейф меняет поведение молча. Тело зеркала намеренно короче и не сверяется | `validateSkillWrappers` в `runtime/typescript/skill-metadata.ts` | `yarn validate:config` (→ `qa:quick`) и `yarn workflow:test-skill-metadata` |
+| Линтер инструкционных ссылок | Слаг дизайн-системы вне `design/figma/registry.json`, стадия вне манифеста, навык без каталога, артефакт без производителя, абсолютный путь домашней машины. Область — только нормативные инструкции; `docs/**` не сканируется (датированные снимки обязаны цитировать исчезнувшее) | `lintInstructionReferences` в `runtime/typescript/instruction-lint.ts` | `yarn validate:config` (→ `qa:quick`) и `yarn workflow:test-instruction-lint` |
+| Запрет детекции маршрута по наличию файла | Формулировки вида «применяется при наличии `figma-handoff-bundle.md`». Маршрут читается из `run-state.json` (`CLAUDE.md` §0.3). Требует трёх признаков в одном предложении, поэтому законное «есть файл — сверь его» не задевает | `lintRouteDetectionByFile` там же | те же две команды |
+| Связность графа стадий | Вход стадии, который не производит ни один шаг маршрута или производит позже неё самой (прообраз — `validate_context_no_future_tasks` у crewAI). Известные отклонения перечислены явно и печатаются предупреждением на каждом прогоне; протухшая запись — ошибка | `validateWorkflowGraph` в `runtime/typescript/workflow-graph.ts` | `yarn validate:config` (→ `qa:quick`) и `yarn workflow:test-workflow-graph` |
+
+Строка или файл выводится из-под линтера маркером `instruction-lint-ignore` в HTML-комментарии — по образцу `docs-audit-ignore` в аудите документации.
+
+Пятая проверка — предупреждение `yarn workflow:doctor` о глобальных копиях навыков в `~/.claude/skills/<id>`: реальный каталог перебивает проектный навык, и роутер видит его описание (симлинк конфликтом не считается). Это **никогда не ошибка**: домашний каталог принадлежит конкретному человеку, в CI и у другого разработчика его нет. Сам детектор покрыт `yarn workflow:test-skill-metadata` на подставном домашнем каталоге.
+
 Полный Playwright QA:
 
 ```bash
@@ -677,7 +692,7 @@ yarn workflow:doctor --repair
 | Команда | Что делает |
 | --- | --- |
 | `yarn typecheck` | `tsc --noEmit` по всему репозиторию. Входит в `qa:quick`. |
-| `yarn validate:config` | Валидация конфигов + семантическая проверка маршрутов и стадий. Входит в `qa:quick`. |
+| `yarn validate:config` | Валидация конфигов + семантическая проверка маршрутов и стадий; сюда же включены четыре сторожа против расхождения инструкций и кода (см. «Сторожа» в разделе QA). Входит в `qa:quick`. |
 | `yarn docs:audit` | Аудит документации: битые пути в backticks и markdown-ссылки в `docs/**`, `agent-pack/**`, `.claude/**`, `plugins/**`, корневых `*.md`, `outputs/README.md`, `research/README.md`; сверка упомянутых `yarn`-команд с `package.json` в обе стороны; сверка MCP-серверов из `.mcp.json` с `README.md`/`CLAUDE.md`. Входит в `qa:quick`. Правила исключений — в шапке `tooling/scripts/audit-docs.mjs`. |
 | `yarn qa:all` | `qa:quick` + полный Playwright. Запускается `pre-push` хуком. |
 | `yarn qa:playwright:install` | Установка Chromium для Playwright. |

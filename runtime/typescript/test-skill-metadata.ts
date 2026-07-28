@@ -1,8 +1,14 @@
 import assert from "node:assert/strict";
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { parseSkillInstructionDocument, validateSkillMetadata, validateSkillWrappers } from "./skill-metadata";
+import {
+  detectGlobalSkillConflicts,
+  extractFrontmatterDescription,
+  parseSkillInstructionDocument,
+  validateSkillMetadata,
+  validateSkillWrappers,
+} from "./skill-metadata";
 
 function withSkillFixture(assertion: (root: string) => void): void {
   const root = mkdtempSync(join(tmpdir(), "skill-metadata-"));
@@ -101,6 +107,92 @@ withWrapperFixture((root) => {
   const wrapper = join(root, ".claude/skills/landing-builder/SKILL.md");
   writeFileSync(wrapper, readFileSync(wrapper, "utf8").replace("name: landing-builder", "name: wrong-name"), "utf8");
   assertMetadataError(validateSkillWrappers(root), /landing-builder\/SKILL\.md: name 'wrong-name' must match skill id 'landing-builder'/);
+});
+
+// ---------------------------------------------------------------------------
+// Дословное равенство описаний зеркала и источника.
+//
+// Воспроизводится РЕАЛЬНЫЙ дефект: описание `landing-builder` в глобальной копии говорило
+// «bespoke-вёрстка с нуля», проектное — «по умолчанию из компонентов shadcn/ui»
+// (`docs/architecture/studio-audit-2026-07-28.md` P0-7). Роутер выбирает навык по этой
+// строке, поэтому расхождение меняет поведение молча.
+// ---------------------------------------------------------------------------
+
+const historicGlobalDescription =
+  "Использовать при bespoke-реализации UI лендинга, сайта или экрана — вёрстка с нуля на чистом " +
+  "кастомном CSS / Tailwind и независимых React/TypeScript компонентах.";
+
+withWrapperFixture((root) => {
+  const wrapper = join(root, ".claude/skills/landing-builder/SKILL.md");
+  writeFileSync(
+    wrapper,
+    readFileSync(wrapper, "utf8").replace(/^description:.*$/m, `description: ${historicGlobalDescription}`),
+    "utf8",
+  );
+  assertMetadataError(
+    validateSkillWrappers(root),
+    /landing-builder\/SKILL\.md: description must match agent-pack\/skills\/landing-builder\/SKILL\.md verbatim/,
+  );
+  assertMetadataError(validateSkillWrappers(root), /bespoke-реализации UI лендинга/);
+});
+
+// Мелкий дрейф (ё/е, знак препинания) ловится тем же правилом: именно так расхождение и
+// начинается, а «смысловое» сравнение двух строк машине недоступно.
+withWrapperFixture((root) => {
+  const wrapper = join(root, ".claude/skills/notion-sync/SKILL.md");
+  writeFileSync(wrapper, readFileSync(wrapper, "utf8").replace("разрешённый", "разрешенный"), "utf8");
+  assertMetadataError(validateSkillWrappers(root), /notion-sync\/SKILL\.md: description must match/);
+});
+
+// Кавычки и переносы строк расхождением НЕ считаются: сверяется текст, а не раскладка YAML.
+assert.equal(
+  extractFrontmatterDescription('description: "Текст с двоеточием: и продолжением"'),
+  "Текст с двоеточием: и продолжением",
+);
+assert.equal(
+  extractFrontmatterDescription("description: Первая строка\n  и перенос\nname: x"),
+  "Первая строка и перенос",
+);
+
+// ---------------------------------------------------------------------------
+// Конфликт с глобальными навыками `~/.claude/skills/<id>`: только предупреждение,
+// и только при наличии домашнего каталога (у другого разработчика его нет).
+// ---------------------------------------------------------------------------
+
+function withFakeHome(assertion: (root: string, home: string) => void): void {
+  const root = mkdtempSync(join(tmpdir(), "skill-conflict-"));
+  const home = mkdtempSync(join(tmpdir(), "skill-home-"));
+  try {
+    mkdirSync(join(root, "agent-pack"), { recursive: true });
+    cpSync("agent-pack/skills", join(root, "agent-pack/skills"), { recursive: true });
+    mkdirSync(join(home, ".claude/skills"), { recursive: true });
+    assertion(root, home);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+    rmSync(home, { recursive: true, force: true });
+  }
+}
+
+// Домашнего каталога нет вовсе — молчание, а не ошибка.
+assert.deepEqual(detectGlobalSkillConflicts(process.cwd(), join(tmpdir(), "no-such-home-dir-xyz")), []);
+
+withFakeHome((root, home) => {
+  assert.deepEqual(detectGlobalSkillConflicts(root, home), []);
+
+  // Реальный каталог перебивает проектный навык — это и случилось с landing-builder.
+  mkdirSync(join(home, ".claude/skills/landing-builder"), { recursive: true });
+  writeFileSync(join(home, ".claude/skills/landing-builder/SKILL.md"), "---\nname: landing-builder\n---\n", "utf8");
+  const conflicts = detectGlobalSkillConflicts(root, home);
+  assert.deepEqual(conflicts.map((conflict) => conflict.id), ["landing-builder"]);
+
+  // Имя, которого в проекте нет, конфликтом не является.
+  mkdirSync(join(home, ".claude/skills/some-personal-skill"), { recursive: true });
+  assert.deepEqual(detectGlobalSkillConflicts(root, home).map((conflict) => conflict.id), ["landing-builder"]);
+
+  // Симлинк на этот же репозиторий — не копия, а тот же файл: конфликта нет.
+  rmSync(join(home, ".claude/skills/landing-builder"), { recursive: true, force: true });
+  symlinkSync(join(root, "agent-pack/skills/landing-builder"), join(home, ".claude/skills/landing-builder"), "junction");
+  assert.deepEqual(detectGlobalSkillConflicts(root, home), []);
 });
 
 console.log("skill metadata regression tests passed");

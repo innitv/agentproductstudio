@@ -1,4 +1,5 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { homedir } from "node:os";
 import { join, relative } from "node:path";
 import YAML from "js-yaml";
 import { approvalActions } from "./approval-gate";
@@ -117,11 +118,50 @@ export function validateSkillMetadata(root = process.cwd()): string[] {
 }
 
 /**
+ * Извлекает `description` из frontmatter построчно, а не полным YAML-парсером: обёртки
+ * намеренно держат незакавыченные значения с `: ` внутри, на которых строгий парсер падает.
+ * Снимает окружающие кавычки и схлопывает переносы, чтобы сравнивать текст, а не раскладку.
+ */
+export function extractFrontmatterDescription(frontmatter: string): string | undefined {
+  // Без флага `m`: `$` обязан означать конец текста, иначе значение обрезается по первой
+  // строке и многострочное описание молча теряет хвост.
+  const raw = frontmatter.match(/(?:^|\n)description:\s*([\s\S]*?)(?=\n[A-Za-z_][A-Za-z0-9_]*:|\n---|$)/)?.[1];
+  if (raw === undefined) return undefined;
+
+  const collapsed = raw.trim().replace(/\s+/g, " ");
+  if (collapsed.length >= 2 && collapsed.startsWith('"') && collapsed.endsWith('"')) {
+    try {
+      return String(JSON.parse(collapsed)).trim();
+    } catch {
+      return collapsed.slice(1, -1).trim();
+    }
+  }
+
+  if (collapsed.length >= 2 && collapsed.startsWith("'") && collapsed.endsWith("'")) {
+    return collapsed.slice(1, -1).replaceAll("''", "'").trim();
+  }
+
+  return collapsed;
+}
+
+/**
  * Проверяет нативные обёртки `.claude/skills/<id>/SKILL.md`: для каждого детального
  * навыка (`agent-pack/skills`) обёртка должна существовать, иметь frontmatter с
- * `name === id` и непустой `description`. Не требует равенства description с детальной
- * версией — обёртка намеренно короче. Graceful skip, если `.claude/skills` отсутствует
- * (например во временных фикстурах, где копируется только `agent-pack/skills`).
+ * `name === id` и `description`, ДОСЛОВНО равный описанию источника.
+ *
+ * Почему дословно, а не «без смысловых противоречий». `description` — единственное поле,
+ * по которому роутер выбирает навык: тело он читает уже после выбора. Машинного способа
+ * сравнить два описания «по смыслу» не существует, а любой эвристический (общие слова,
+ * длина, ключевые термины) пропускает ровно тот случай, ради которого проверка заводится:
+ * переформулировку, меняющую условие применения. Исторически так разошёлся `landing-builder`
+ * — «bespoke-вёрстка с нуля» против «по умолчанию из компонентов shadcn/ui»
+ * (`docs/architecture/studio-audit-2026-07-28.md` P0-7).
+ *
+ * Требование НЕ распространяется на тело: зеркало намеренно короче источника. Сверяется
+ * только строка маршрутизации, поэтому проверка не воюет с назначением обёртки.
+ *
+ * Graceful skip, если `.claude/skills` отсутствует (например во временных фикстурах, где
+ * копируется только `agent-pack/skills`).
  */
 export function validateSkillWrappers(root = process.cwd()): string[] {
   const errors: string[] = [];
@@ -150,16 +190,68 @@ export function validateSkillWrappers(root = process.cwd()): string[] {
     // незакавыченные description с ": " внутри, на которых строгий парсер падает.
     const frontmatter = match[1];
     const name = frontmatter.match(/^name:\s*(.+?)\s*$/m)?.[1]?.replace(/^["']|["']$/g, "");
-    const description = frontmatter.match(/^description:\s*(.+?)\s*$/m)?.[1]?.trim();
+    const description = extractFrontmatterDescription(frontmatter);
     if (name !== id) {
       errors.push(`${relativeWrapper}: name '${String(name)}' must match skill id '${id}'.`);
     }
     if (!description || description.length === 0) {
       errors.push(`${relativeWrapper}: description must be a non-empty string.`);
+      continue;
+    }
+
+    const sourceFrontmatter = readFileSync(file, "utf8").match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    const sourceDescription = sourceFrontmatter ? extractFrontmatterDescription(sourceFrontmatter[1]) : undefined;
+    if (!sourceDescription) continue;
+
+    if (sourceDescription !== description) {
+      errors.push(
+        `${relativeWrapper}: description must match agent-pack/skills/${id}/SKILL.md verbatim ` +
+          "(the router picks a skill by this string, so any drift silently changes routing).\n" +
+          `    источник: ${sourceDescription}\n` +
+          `    зеркало:  ${description}`,
+      );
     }
   }
 
   return errors;
+}
+
+export interface GlobalSkillConflict {
+  id: string;
+  globalPath: string;
+}
+
+/**
+ * Предупреждение о конфликте имён с глобальными навыками `~/.claude/skills/<id>`.
+ *
+ * Глобальная копия выигрывает коллизию имён: в листинге сессии стоит ЕЁ описание, и
+ * проектная версия не доезжает никогда. Именно так проектный `landing-builder` («по
+ * умолчанию из компонентов shadcn/ui») оказался перекрыт глобальным («bespoke-вёрстка с
+ * нуля») — `docs/architecture/studio-audit-2026-07-28.md` P0-7.
+ *
+ * Строго предупреждение, никогда не ошибка, и никогда не обязательное условие прогона:
+ * домашний каталог принадлежит конкретному человеку, у другого разработчика и в CI его
+ * нет. Симлинк (как `figma-ds`, `subsystem-audit`) конфликтом НЕ считается — он указывает
+ * на этот же репозиторий, то есть копии не существует.
+ */
+export function detectGlobalSkillConflicts(root = process.cwd(), homeDir = homedir()): GlobalSkillConflict[] {
+  const globalSkillsDir = join(homeDir, ".claude", "skills");
+  if (!existsSync(globalSkillsDir)) return [];
+
+  const projectSkillIds = new Set(
+    listSkillFiles(root)
+      .map((file) => file.split(/[\\/]/).at(-2))
+      .filter((id): id is string => Boolean(id)),
+  );
+
+  const conflicts: GlobalSkillConflict[] = [];
+  for (const entry of readdirSync(globalSkillsDir, { withFileTypes: true })) {
+    if (!projectSkillIds.has(entry.name)) continue;
+    if (entry.isSymbolicLink() || !entry.isDirectory()) continue;
+    conflicts.push({ id: entry.name, globalPath: join(globalSkillsDir, entry.name) });
+  }
+
+  return conflicts;
 }
 
 export function loadSkillMetadataRecords(root = process.cwd()): SkillMetadataRecord[] {

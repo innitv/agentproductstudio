@@ -1,6 +1,6 @@
 ---
 name: research-pack
-description: Использовать на этапе 01-research и для standalone research/CJM, когда нужна source-backed исследовательская база: Tavily-first source policy, шесть обязательных артефактов, source quality pass, contradiction review и claims-to-validate. DeepSeek/Gemini — только non-blocking advisory, research pack не получает success без source-backed evidence и Research Content Lint.
+description: Использовать на этапе 01-research и для standalone research/CJM, когда нужна source-backed исследовательская база: Tavily-first source policy, шесть обязательных артефактов, source quality pass, contradiction review и claims-to-validate. Skill не заменяет agent-pack/workflows/deep-research.workflow.md, а делает его исполняемым: DeepSeek/Gemini остаются non-blocking advisory, а research pack не получает success без source-backed evidence и Research Content Lint.
 ---
 
 # Research Pack (Глубокое Исследование)

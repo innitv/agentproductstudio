@@ -1,6 +1,7 @@
 import { existsSync, readdirSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { detectGlobalSkillConflicts } from "./skill-metadata";
 
 interface DiagnosticResult {
   check: string;
@@ -103,6 +104,28 @@ async function runDiagnostics(): Promise<DiagnosticResult[]> {
       canRepair: true
     });
   }
+
+  // 3a. Конфликт имён с глобальными навыками `~/.claude/skills/<id>`
+  //
+  // Глобальная копия выигрывает коллизию имён, и роутер видит ЕЁ описание — проектная
+  // версия не доезжает никогда. Проверка живёт в doctor, а не в `qa:quick`: домашний
+  // каталог принадлежит конкретному человеку, в CI и у другого разработчика его нет.
+  // Поэтому только предупреждение, никогда не ошибка (сам детектор покрыт тестом
+  // `workflow:test-skill-metadata` на подставном домашнем каталоге).
+  const globalSkillConflicts = detectGlobalSkillConflicts();
+  results.push({
+    check: "Глобальные копии навыков (~/.claude/skills)",
+    passed: true,
+    level: globalSkillConflicts.length === 0 ? "pass" : "warning",
+    message:
+      globalSkillConflicts.length === 0
+        ? "Копий проектных навыков в домашнем каталоге нет (симлинки конфликтом не считаются)."
+        : `Глобальные каталоги перебивают проектные навыки: ${globalSkillConflicts
+            .map((conflict) => `${conflict.id} (${conflict.globalPath})`)
+            .join(", ")}. Роутер выбирает навык по описанию глобальной копии, проектная версия не применяется. ` +
+          "Удали каталог или замени его симлинком на этот репозиторий.",
+    canRepair: false,
+  });
 
   // 4. Проверка конфига MCP
   const mcpExamplePath = join(process.cwd(), "integrations/mcp/mcp-servers.example.json");

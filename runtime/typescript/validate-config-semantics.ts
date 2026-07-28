@@ -28,6 +28,8 @@ import {
 import { approvalActions } from "./approval-gate";
 import { validateAgentMetadata } from "./agent-metadata";
 import { validateSkillMetadata, validateSkillWrappers } from "./skill-metadata";
+import { validateInstructionTexts } from "./instruction-lint";
+import { describeKnownGraphDeviations, validateWorkflowGraph } from "./workflow-graph";
 
 export function validateConfigSemantics(root = process.cwd()): string[] {
   const errors: string[] = [];
@@ -104,6 +106,8 @@ export function validateConfigSemantics(root = process.cwd()): string[] {
   errors.push(...validateAgentMetadata(root));
   errors.push(...validateSkillMetadata(root));
   errors.push(...validateSkillWrappers(root));
+  errors.push(...validateWorkflowGraph());
+  errors.push(...validateInstructionTexts(root));
 
   return errors;
 }
@@ -318,6 +322,12 @@ function validateApprovalMatrix(root: string, errors: string[]): void {
 }
 
 async function main(): Promise<void> {
+  // Известные отклонения графа печатаются на каждом прогоне: молчаливое исключение
+  // неотличимо от починенного дефекта.
+  for (const warning of describeKnownGraphDeviations()) {
+    console.warn(`WARN: ${warning}`);
+  }
+
   const errors = validateConfigSemantics();
   if (errors.length) {
     console.error("Semantic config validation failed:");
