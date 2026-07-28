@@ -2,7 +2,6 @@
 // Keep schema names aligned with artifact names and agent output contracts.
 
 export type AgentStatus = "success" | "partial" | "blocked";
-export type QaVerdict = "pass" | "pass_with_notes" | "fail";
 
 export interface AgentOutput<TArtifactName extends string, TArtifact> {
   agent_name: string;

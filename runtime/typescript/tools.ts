@@ -16,31 +16,3 @@ export const toolNames = {
   runQaReview: "run_qa_review",
   createReleaseNotes: "create_release_notes",
 } as const;
-
-export const approvalRequiredTools = new Set<string>([
-  "deploy",
-  "delete_data",
-  "external_send",
-  "notion_write",
-  "change_secrets",
-  "connect_broad_mcp",
-  "github_write",
-  "gitlab_write",
-  "figma_write",
-  "browser_external_action",
-]);
-
-export const routeToolNames = [
-  toolNames.createRecursiveBrief,
-  toolNames.runResearch,
-  toolNames.createPrd,
-  toolNames.publishPrdToNotion,
-  toolNames.createIaBrief,
-  toolNames.createDesignBrief,
-  toolNames.createCopyDeck,
-  toolNames.generateScreens,
-  toolNames.implementFrontend,
-  toolNames.createVisualReferenceReview,
-  toolNames.runQaReview,
-  toolNames.createReleaseNotes,
-] as const;

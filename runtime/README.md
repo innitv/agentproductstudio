@@ -19,10 +19,10 @@
 - `orchestrator` владеет финальным ответом;
 - специалисты вызываются как agents-as-tools;
 - `orchestrator` строит dependency graph и сам выбирает порядок запуска субагентов;
-- IA, screens, prototype report и test bench result являются частью базового продуктового pipeline;
+- IA, screens и frontend result являются частью базового продуктового pipeline;
 - route tools описаны в `runtime/typescript/route.config.ts`;
 - adaptive research layer описан в `runtime/typescript/research.config.ts` и `integrations/mcp/research-providers.md`;
-- lifecycle hooks описаны в `runtime/typescript/hooks.ts`; Claude Code hooks — в `.claude/settings.json` и `.claude/hooks/` (legacy `.codex/hooks/` в `archive/legacy-codex/`);
+- Claude Code hooks — в `.claude/settings.json` и `.claude/hooks/` (legacy `.codex/hooks/` в `archive/legacy-codex/`); собственного слоя lifecycle hooks в runtime нет — модуль удалён 2026-07-28 как невостребованный;
 - command/action rules описаны в `.claude/settings.json` permissions (legacy `.codex/rules/` в `archive/legacy-codex/`);
 - handoff используется только по правилам `agent-pack/workflows/landing-agent-orchestration.workflow.md`;
 - outputs валидируются по схемам из `agent-pack/schemas/`;

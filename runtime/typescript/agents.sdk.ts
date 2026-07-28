@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
-import { Agent, run } from "@openai/agents";
+import { Agent } from "@openai/agents";
 import { agentInstructionFiles, agentNames } from "./agents.registry";
 import { parseAgentInstructionDocument } from "./agent-metadata";
 import { getRoutePlanForProfile, routeTools, type RouteProfile } from "./route.config";
@@ -12,10 +12,6 @@ export interface AgentsSdkLayer {
   orchestrator: Agent;
   specialists: Partial<Record<AgentRegistryKey, Agent>>;
   routeToolNames: string[];
-}
-
-export interface StandaloneRunResult {
-  finalOutput: unknown;
 }
 
 const specialistDescriptions: Partial<Record<AgentRegistryKey, string>> = {
@@ -112,17 +108,6 @@ export function createOrchestratorAgent(
   });
 }
 
-export async function runStandaloneAgentsSdkWorkflow(goal: string): Promise<StandaloneRunResult> {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error("Standalone Agents SDK mode requires OPENAI_API_KEY. Use Claude Code agent pack mode when no API key is available.");
-  }
-
-  const { orchestrator } = await createAgentsSdkLayer(detectRouteProfile(goal));
-  const result = await run(orchestrator, goal);
-
-  return { finalOutput: result.finalOutput };
-}
-
 function findAgentRegistryKey(agentName: string): AgentRegistryKey {
   const found = Object.entries(agentNames).find(([, value]) => value === agentName)?.[0];
 
@@ -145,12 +130,6 @@ async function inspectLayer(): Promise<void> {
   console.log(`Orchestrator: ${layer.orchestrator.name}`);
   console.log(`Specialists: ${Object.keys(layer.specialists).length}`);
   console.log(`Route tools: ${layer.routeToolNames.join(", ")}`);
-}
-
-function detectRouteProfile(goal: string): RouteProfile {
-  return /https?:\/\/|visual reference|reference url|как этот сайт|референс/i.test(goal)
-    ? "reference"
-    : "standard";
 }
 
 function parseInspectProfile(): RouteProfile {

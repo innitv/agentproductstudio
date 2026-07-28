@@ -166,47 +166,6 @@ export async function registerActiveResearchProject(
   };
 }
 
-/** Убирает слаг из `activeResearchProjects`. Идемпотентно. */
-export async function unregisterActiveResearchProject(
-  researchRoot: string,
-  slug: string,
-): Promise<ResearchRegistryChange> {
-  const guard = guardResearchRoot(researchRoot);
-  if (guard) {
-    return guard;
-  }
-
-  const registryPath = resolveResearchRegistryPath(researchRoot);
-  const registry = await readResearchRegistry(researchRoot);
-  if (!registry) {
-    return {
-      action: "skipped",
-      slug,
-      registry_path: registryPath,
-      active_research_projects: [],
-      reason: "registry.json не найден",
-    };
-  }
-
-  if (!registry.activeResearchProjects.includes(slug)) {
-    return {
-      action: "unchanged",
-      slug,
-      registry_path: registryPath,
-      active_research_projects: registry.activeResearchProjects,
-    };
-  }
-
-  registry.activeResearchProjects = registry.activeResearchProjects.filter((item) => item !== slug);
-  await writeResearchRegistry(researchRoot, registry);
-  return {
-    action: "removed",
-    slug,
-    registry_path: registryPath,
-    active_research_projects: registry.activeResearchProjects,
-  };
-}
-
 /**
  * Вызывается из `yarn research:run` — единственной runtime-точки, которая работает с
  * research-run. Run вне `research/projects/<slug>/<date>` (продуктовый `outputs/**`,
