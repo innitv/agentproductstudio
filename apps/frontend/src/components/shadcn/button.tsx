@@ -22,6 +22,13 @@ const buttonVariants = cva(
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
+        // Добавлено проектом (run outputs/a3-shadcn/2026-07-29, Component
+        // Contract Matrix → `a3-button`). Штатная лестница 32/36/40 не
+        // покрывает кнопку 48 из образца, а высота кнопки — свойство размера,
+        // а не инстанса: `className="h-12"` на каждой кнопке разъехался бы
+        // первым же новым экраном. Кегль 16 (`text-base`) — тот же, что у
+        // кнопки формы в образце.
+        xl: "h-12 rounded-md px-6 text-base has-[>svg]:px-4",
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
         sm: "h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5",
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",

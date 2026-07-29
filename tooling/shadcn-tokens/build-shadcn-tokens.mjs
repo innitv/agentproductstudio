@@ -74,7 +74,7 @@ const OUTPUT = path.join(ROOT, "apps/frontend/src/styles/shadcn/tokens.generated
  * задаёт эталонный СОСТАВ переменных для всех остальных тем. Поэтому `default`
  * обязана остаться первой, даже когда список вырастет.
  */
-const THEMES = ["default"];
+const THEMES = ["default", "a3"];
 
 /**
  * Группы, попадающие в `@theme inline`. Сейчас только `color`: остальные

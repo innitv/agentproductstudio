@@ -61,7 +61,7 @@
     "workflow:retro": "tsx runtime/typescript/run-run-retro.ts",
     "workflow:doctor": "tsx runtime/typescript/doctor.ts",
     "workflow:test-validator": "tsx runtime/typescript/test-workflow-validator.ts",
-    "workflow:test-agentic": "yarn workflow:test-agentic-rollout && yarn workflow:test-approval-gate && yarn workflow:test-agent-metadata && yarn workflow:test-agent-capabilities && yarn workflow:test-agent-output-skeletons && yarn workflow:test-agent-output-critic && yarn workflow:test-skill-metadata && yarn workflow:test-workflow-graph && yarn workflow:test-workflow-map && yarn workflow:test-artifact-templates && yarn workflow:test-instruction-lint && yarn workflow:test-skill-usage && yarn workflow:test-validator && yarn workflow:test-sync-run-state && yarn workflow:test-context-truncator && yarn workflow:test-intent-parser && yarn workflow:test-visual-reference-review && yarn workflow:test-multi-source-research && yarn workflow:test-figma-layout-contract && yarn workflow:test-figma-layout-verifier && yarn workflow:test-output-metadata && yarn workflow:test-output-lifecycle && yarn workflow:test-outputs-registry && yarn workflow:test-research-registry && yarn workflow:test-run-retro && yarn workflow:test-guard-bash-hook && yarn workflow:test-agentic-executor && yarn workflow:test-agentic-readiness && yarn workflow:test-agentic-engine",
+    "workflow:test-agentic": "yarn workflow:test-agentic-rollout && yarn workflow:test-approval-gate && yarn workflow:test-agent-metadata && yarn workflow:test-agent-capabilities && yarn workflow:test-agent-output-skeletons && yarn workflow:test-agent-output-critic && yarn workflow:test-skill-metadata && yarn workflow:test-workflow-graph && yarn workflow:test-workflow-map && yarn workflow:test-artifact-templates && yarn workflow:test-instruction-lint && yarn workflow:test-scaffold-no-fiction && yarn workflow:test-skill-usage && yarn workflow:test-validator && yarn workflow:test-sync-run-state && yarn workflow:test-context-truncator && yarn workflow:test-intent-parser && yarn workflow:test-visual-reference-review && yarn workflow:test-multi-source-research && yarn workflow:test-figma-layout-contract && yarn workflow:test-figma-layout-verifier && yarn workflow:test-output-metadata && yarn workflow:test-output-lifecycle && yarn workflow:test-outputs-registry && yarn workflow:test-research-registry && yarn workflow:test-run-retro && yarn workflow:test-guard-bash-hook && yarn workflow:test-agentic-executor && yarn workflow:test-agentic-readiness && yarn workflow:test-agentic-engine",
     "workflow:test-sync-run-state": "tsx runtime/typescript/test-sync-run-state.ts",
     "workflow:test-context-truncator": "tsx runtime/typescript/test-context-truncator.ts",
     "workflow:test-intent-parser": "tsx runtime/typescript/test-intent-parser.ts",
@@ -75,6 +75,7 @@
     "workflow:test-workflow-map": "tsx runtime/typescript/test-workflow-map.ts",
     "workflow:test-artifact-templates": "tsx runtime/typescript/test-artifact-templates.ts",
     "workflow:test-instruction-lint": "tsx runtime/typescript/test-instruction-lint.ts",
+    "workflow:test-scaffold-no-fiction": "tsx runtime/typescript/test-scaffold-no-fiction.ts",
     "workflow:test-skill-usage": "tsx runtime/typescript/test-skill-usage.ts",
     "workflow:test-figma-layout-contract": "yarn tsx runtime/typescript/test-figma-layout-contract.ts",
     "workflow:test-figma-layout-verifier": "yarn tsx runtime/typescript/test-figma-layout-verifier.ts",
@@ -123,6 +124,8 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/ibm-plex-sans": "^5.3.0",
     "@mendable/firecrawl-js": "4.25.0",
     "@notionhq/notion-mcp-server": "2.2.1",
     "@playwright/test": "1.60.0",

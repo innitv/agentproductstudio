@@ -55,6 +55,14 @@ const ROUTES: StudioRoute[] = [
     theme: "default",
     title: "Заявка на карту",
   },
+  {
+    description:
+      "Информационная страница ООО РНКО «А3 Финанс»: восемь блоков с якорной навигацией, " +
+      "реквизиты с копированием, форма обращения. Тема проекта `a3` поверх реестра.",
+    hash: "#a3-finance",
+    theme: "a3",
+    title: "А3 Финанс",
+  },
 ]
 
 export function StudioIndexView({ theme = "default" }: { theme?: ShadcnTheme }) {

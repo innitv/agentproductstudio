@@ -39,7 +39,15 @@ const indexPath = path.join(repoRoot, "dist/storybook/index.json");
  * молчаливое усечение охвата запрещено, «покрыто не всё» должно быть видно
  * в коде и в отчёте, а не выводиться из разницы чисел.
  */
-const excludedStories: Record<string, string> = {};
+const excludedStories: Record<string, string> = {
+  "pages-a3finance--full-page":
+    "Страница А3 целиком — 5714 px на desktop и 7572 px на mobile. В кадр 1280×2000 она не " +
+    "помещается, а fullPage даёт ЛОЖНЫЙ кадр: sticky-шапка и cookie-бар (position: fixed) " +
+    "рисуются на позиции скролла и ложатся поперёк середины снимка. Регрессия этих блоков " +
+    "ведётся семью секционными историями Pages/A3Finance/* с тегом vr-page (самая высокая, " +
+    "«Реквизиты», — 1476 px), а фиксированные слои снимаются отдельно: A3/SiteHeader/Scrolled " +
+    "и A3/CookieBar/Shown. История оставлена для ручного просмотра и сверки с роутом.",
+};
 
 /**
  * Тег истории-страницы (composition story).
@@ -63,6 +71,29 @@ const PAGE_STORY_TAG = "vr-page";
 
 /** Высота вьюпорта для историй-страниц. Ширина остаётся общей — 1280. */
 const PAGE_VIEWPORT = { height: 2000, width: 1280 } as const;
+
+/**
+ * Дополнительные ширины для историй-страниц.
+ *
+ * Зачем: до 2026-07-29 регрессия снимала ЕДИНСТВЕННУЮ ширину 1280. Обе точки,
+ * с которых сняты макеты студии (desktop 1440 и mobile 390), пиксельно не
+ * покрывались ничем — то есть зелёный `vr:test` не означал, что композиция на
+ * них цела. Перестроение мобильной раскладки при этом самое рискованное место
+ * страницы: там меняется и сетка, и порядок, и кегли.
+ *
+ * Покрываются только истории-страницы: компонент в 1280 помещается целиком и от
+ * ширины окна не зависит, а страница зависит от неё целиком. Имя снапшота
+ * получает суффикс ширины, поэтому существующие эталоны 1280 не переименованы и
+ * не потеряны.
+ *
+ * Мобильная ширина здесь проверяет КОМПОЗИЦИЮ, а не поведение: тач-жесты,
+ * safe-area и `visualViewport` не воспроизводятся вьюпортом и остаются за
+ * `yarn qa:mobile` (Mobile Device Acceptance Gate).
+ */
+const PAGE_EXTRA_VIEWPORTS = [
+  { height: 2000, label: "w1440", width: 1440 },
+  { height: 1400, label: "w390", width: 390 },
+] as const;
 
 function readStorybookIndex(): StorybookIndex {
   try {
@@ -100,7 +131,11 @@ const isPageStory = (story: StorybookIndexEntry) => story.tags?.includes(PAGE_ST
  * Съёмка одной истории. Имя снапшота задаётся story-id, а не именем теста,
  * поэтому разнесение историй по describe-блокам не переименовывает эталоны.
  */
-async function captureStory(page: Page, story: StorybookIndexEntry): Promise<void> {
+async function captureStory(
+  page: Page,
+  story: StorybookIndexEntry,
+  snapshotSuffix = "",
+): Promise<void> {
   await page.goto(`/iframe.html?id=${encodeURIComponent(story.id)}&viewMode=story`);
 
   // `sb-show-main` Storybook ставит в начале рендера, до коммита React,
@@ -130,7 +165,7 @@ async function captureStory(page: Page, story: StorybookIndexEntry): Promise<voi
 
   // toHaveScreenshot сам повторяет съёмку, пока два подряд кадра не совпадут:
   // это гасит анимации и догоняет play-функции без ручных таймаутов.
-  await expect(page).toHaveScreenshot(`${story.id}.png`, {
+  await expect(page).toHaveScreenshot(`${story.id}${snapshotSuffix}.png`, {
     animations: "disabled",
     caret: "hide",
     fullPage: isPageStory(story),
@@ -154,3 +189,15 @@ test.describe("Storybook visual regression: страницы", () => {
     });
   }
 });
+
+for (const viewport of PAGE_EXTRA_VIEWPORTS) {
+  test.describe(`Storybook visual regression: страницы ${viewport.width}`, () => {
+    test.use({ viewport: { height: viewport.height, width: viewport.width } });
+
+    for (const story of stories.filter(isPageStory)) {
+      test(`${story.title} / ${story.name} @${viewport.width} [${story.id}]`, async ({ page }) => {
+        await captureStory(page, story, `--${viewport.label}`);
+      });
+    }
+  });
+}

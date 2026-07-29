@@ -28,6 +28,7 @@ export interface ShadcnStoryShellProps {
  * подпись компилятор не даст, а безымянная тема в эталоне неотличима от соседней.
  */
 const themeTitle: Record<ShadcnTheme, string> = {
+  a3: "a3 — тема продукта «А3 Финанс»",
   default: "default — штатный shadcn",
 }
 
