@@ -68,7 +68,14 @@ export async function runLocalWorkflow(options: LocalWorkflowOptions): Promise<s
 async function buildContext(outputDir: string, goal: string) {
   const research = await readIfExists(join(outputDir, artifactFiles.research_summary));
   const isResearchPartial = /Status \| partial|status:\s*partial/i.test(research);
-  const status = isResearchPartial ? "partial" : "ready";
+  // Отсутствие research-артефакта — НЕ признак готовности. Прежнее
+  // `isResearchPartial ? "partial" : "ready"` давало `ready`, когда файла нет вовсе:
+  // на масштабах `increment`/`patch` стадия `01-research` вычеркнута, файла не
+  // существует, и генератор объявлял свежий артефакт готовым. Чем меньше масштаб,
+  // тем увереннее была фикция (run `a3-shadcn`, 2026-07-29; тест
+  // `test-scaffold-no-fiction`).
+  const hasResearch = research.trim().length > 0;
+  const status = !hasResearch ? "pending" : isResearchPartial ? "partial" : "ready";
   const productName = createProductName(goal);
   const profile = await inferProfileFromRunPlan(outputDir);
 
@@ -78,6 +85,9 @@ async function buildContext(outputDir: string, goal: string) {
     productName,
     profile,
     status,
+    /** Фильтр входов по факту существования файла в каталоге run. */
+    existingInputs: (candidates: string[]): string[] =>
+      candidates.filter((name) => existsSync(join(outputDir, name))),
     validationNote: isResearchPartial
       ? "Research coverage is partial; product claims must remain marked needs validation."
       : "Research coverage passed configured provider checks.",
@@ -338,7 +348,10 @@ function renderIa(context: Awaited<ReturnType<typeof buildContext>>): string {
 function renderDesign(context: Awaited<ReturnType<typeof buildContext>>): string {
   const payload = {
     status: context.status,
-    inputs_used: ["prd.md", "ia-brief.md", "research-summary.md", "scenario-user-flows.md"],
+    // Только те входы, которые реально существуют в каталоге run: на урезанных
+    // масштабах половины этих стадий нет, а ссылка на несуществующий артефакт
+    // выглядит как выполненная работа.
+    inputs_used: context.existingInputs(["prd.md", "ia-brief.md", "research-summary.md", "scenario-user-flows.md"]),
     visual_direction: "Сдержанный продуктовый лендинг: ясная иерархия, плотные секции, заметный CTA, без декоративного шума.",
     sections: [{ name: "Hero" }, { name: "Value" }, { name: "FAQ" }, { name: "Lead form" }],
     components: ["Header", "CTA button", "Value cards", "FAQ item", "Lead form", "Footer"],

@@ -302,6 +302,7 @@ function validateGateSemantics(options: {
 
   findings.push(...validateScaleSkipRecords(options.outputDir, options.profile, options.scale));
   findings.push(...validateExpectationClosure(options));
+  findings.push(...validateHumanReviewGates(options));
 
   if (runState) {
     const missingMetadata = [
@@ -537,6 +538,59 @@ function validateScaleSkipRecords(outputDir: string, profile: WorkflowProfile, s
 // зафиксировано осью `scale` в `run-state.json` на `00-intake`, и ось защищена от смены
 // задним числом. Набор ожиданий выводится из неё манифестом детерминированно, поэтому
 // копия на диске была бы вторым источником правды.
+/**
+ * Гейты человека: показ витрины и показ страницы (`CLAUDE.md` §5, пункты 8.5a/8.5b).
+ *
+ * Машина не проверит, что человек ПОСМОТРЕЛ, — но проверит, что ему ПОКАЗЫВАЛИ.
+ * Без этой записи гейт остаётся декларацией: на run `a3-shadcn` (2026-07-29) показ
+ * случился один раз и в самом конце, восемь дефектов прошли четыре зелёные машинные
+ * приёмки, и пять из них были видны в витрине до сборки страницы.
+ *
+ * Формат строки в `stage-gate-ledger.md` — свободный, обязательны маркер и точка:
+ *
+ *     human_review: 8.5a | Storybook показан 2026-07-29, замечания: тени на кнопках
+ *     human_review: 8.5b | dev-сервер показан 2026-07-29, замечаний нет
+ *
+ * Проверка включается, когда стадия `08-frontend` уже отработала: до неё показывать
+ * нечего. Отсутствие записи — error: закрыть `08`, `09` или `11` как success нельзя.
+ */
+function validateHumanReviewGates(options: {
+  outputDir: string;
+  stages: ReturnType<typeof getWorkflowStagesForProfile>;
+  stageLimit: number;
+  throughStageId?: string;
+}): Finding[] {
+  const frontendDone = options.stages
+    .slice(0, options.stageLimit + 1)
+    .some((stage) => stage.id === "08-frontend");
+  if (!frontendDone) return [];
+
+  const ledgerPath = join(options.outputDir, artifactFiles.stage_gate_ledger);
+  if (!existsSync(ledgerPath)) return [];
+
+  const ledger = readFileSync(ledgerPath, "utf8");
+  const findings: Finding[] = [];
+
+  for (const point of ["8.5a", "8.5b"] as const) {
+    // Внутри template literal escape-последовательности регулярки надо удваивать:
+    // `\s` схлопнулось бы в букву `s`, а `\b` — в символ backspace.
+    const seen = new RegExp(`human_review:\\s*${point.replace(".", "\\.")}(?![0-9])`).test(ledger);
+    if (seen) continue;
+
+    const what = point === "8.5a" ? "витрины (Storybook)" : "собранной страницы (dev-сервер)";
+    findings.push({
+      level: "error",
+      message:
+        `${artifactFiles.stage_gate_ledger}: нет записи \`human_review: ${point}\` — показ ${what} ` +
+        "человеку не зафиксирован. Гейт человека нельзя закрыть фразой «делай дальше» " +
+        "(CLAUDE.md §5, claude-operating-rules.md §6.1): запиши строку с датой и полученными " +
+        "замечаниями либо зафиксируй process_deviation с причиной.",
+    });
+  }
+
+  return findings;
+}
+
 //
 // Секционная половина этой проверки (ось `track`) удалена 2026-07-28 вместе с самой осью.
 function validateExpectationClosure(options: {

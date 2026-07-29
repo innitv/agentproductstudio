@@ -744,3 +744,63 @@ withRun((runDir) => {
 });
 
 console.log("workflow validator regression tests passed");
+
+// ---------------------------------------------------------------------------
+// Гейты человека 8.5a/8.5b: показ витрины и показ страницы.
+//
+// Машина не проверяет, что человек посмотрел, — она проверяет, что ему показывали.
+// Дефект, ради которого проверка заведена (run `a3-shadcn`, 2026-07-29): показ случился
+// один раз и в самом конце, восемь расхождений с образцом прошли `vr:test` 95/0,
+// `test-storybook` 64/0, `qa:mobile` 5/0/0 и axe 0 нарушений, и пять из них были видны
+// в витрине ещё до сборки страницы. Гейт существовал только текстом и не сработал.
+// ---------------------------------------------------------------------------
+
+withRun((runDir) => {
+  // Ledger без записей о показе: обе точки обязаны дать error после `08-frontend`.
+  const ledgerFile = join(runDir, artifactFiles.stage_gate_ledger);
+  mkdirSync(runDir, { recursive: true });
+  writeFileSync(ledgerFile, "# Stage Gate Ledger\n\n## Run\n\n- ничего про показ здесь нет\n", "utf8");
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard");
+  const humanReview = findings.filter((f) => /human_review/.test(f.message));
+
+  assert.equal(humanReview.length, 2, "ожидались две ошибки: 8.5a и 8.5b");
+  assert.ok(humanReview.some((f) => /8\.5a/.test(f.message)), "нет ошибки про показ витрины");
+  assert.ok(humanReview.some((f) => /8\.5b/.test(f.message)), "нет ошибки про показ страницы");
+  assert.ok(humanReview.every((f) => f.level === "error"), "гейт человека — error, а не warning");
+});
+
+withRun((runDir) => {
+  // Обе записи на месте — проверка молчит. Без этой половины тест доказывал бы только
+  // то, что ошибка умеет появляться, но не то, что она умеет исчезать.
+  const ledgerFile = join(runDir, artifactFiles.stage_gate_ledger);
+  mkdirSync(runDir, { recursive: true });
+  writeFileSync(
+    ledgerFile,
+    "# Stage Gate Ledger\n\n## Run\n\n" +
+      "- human_review: 8.5a | Storybook показан 2026-07-29, замечания: тени на кнопках, серые поля\n" +
+      "- human_review: 8.5b | dev-сервер показан 2026-07-29, замечания: зазор кнопок 32 вместо 12\n",
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard");
+  assert.equal(
+    findings.filter((f) => /human_review/.test(f.message)).length,
+    0,
+    "записи о показе есть — ошибок про гейт человека быть не должно",
+  );
+});
+
+// До `08-frontend` показывать нечего: проверка не должна срабатывать раньше времени.
+withRun((runDir) => {
+  const ledgerFile = join(runDir, artifactFiles.stage_gate_ledger);
+  mkdirSync(runDir, { recursive: true });
+  writeFileSync(ledgerFile, "# Stage Gate Ledger\n\n## Run\n\n- пусто\n", "utf8");
+
+  const findings = validateWorkflowRun(runDir, "04-design", "standard");
+  assert.equal(
+    findings.filter((f) => /human_review/.test(f.message)).length,
+    0,
+    "до 08-frontend гейт показа не применяется",
+  );
+});
