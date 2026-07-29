@@ -49,7 +49,8 @@ disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 7. **Surface Output Contract Pass** + **Primary App Flow Gate** (primary user/job, trigger, entry point, P0 route/transition map, error/recovery, acceptance walkthrough); только набор страниц без сквозного сценария -> `partial`.
 8. Сформировать `design-brief.md`; для `extend|product_specific` зафиксировать двухпроходную сборку (`visual_calibration` на 2-3 экранах -> `systemization`): в Storybook по умолчанию, в Figma — если работа идёт по переданному Figma-файлу. Записать, какой путь выбран.
 8b. **Витрина — Storybook**: перечислить, какие компоненты и состояния должны существовать как stories и какие экраны — как composition story плюс роут приложения. Состояния, которые предстоит принимать, должны иметь именованные stories: приёмка машинная (`yarn test-storybook`, `yarn vr:test`).
-9. Если нужен Figma write — не писать на холст здесь: зафиксировать `figma_handoff_required=true`, `figma_layout_ir_required=true` и передать в `06-screens`.
+9. 🔴 **Носитель экранов (Figma или сразу код) выбирает человек на `00-intake`** — читай ответ в `run-plan.md`, не решай сам. `figma_handoff_required=false` по собственному доводу запрещён; ответа нет — `partial` и запрос оркестратору.
+9a. Если нужен Figma write — не писать на холст здесь: зафиксировать `figma_handoff_required=true`, `figma_layout_ir_required=true` и передать в `06-screens`.
 10. Обновить `handoff-bundle.md` (visual decisions, Surface Output Contract, assumptions, применённые/пропущенные skills через `skipped_with_reason`).
 
 ## Обязательные результаты
