@@ -17,6 +17,7 @@ skills:
   - run-ledger
   - approval-gate
   - outputs-cleanup
+  - rule-placement
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 
