@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { join, relative, resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import { formatModelProviderApprovalTarget } from "./agentic-approval-targets";
@@ -13,7 +13,7 @@ import {
   type ApprovalAction,
 } from "./approval-gate";
 import { loadLocalEnv } from "./env";
-import { parseUserIntent } from "./intent-parser";
+import { parseUserIntent, type ParsedIntent } from "./intent-parser";
 import { archiveWorkflowRun, cleanupTempOutputs, formatArchiveWorkflowRunResult, formatCleanupTempResult } from "./output-lifecycle";
 import { formatWorkflowOutputsGuide, formatWorkflowRunInspection, formatWorkflowRunList, inspectWorkflowRun, listWorkflowRuns } from "./output-metadata";
 import { formatOutputsRegistrySync, syncOutputsRegistry } from "./outputs-registry";
@@ -27,6 +27,7 @@ const explicitWorkflowCommands = new Set([
   "start",
   "resume",
   "status",
+  "intent",
   "list",
   "inspect",
   "outputs",
@@ -46,13 +47,35 @@ const explicitWorkflowCommands = new Set([
   "agentic-preflight",
 ]);
 
-export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<void> {
+/**
+ * Операции движка, которые CLI вызывает как побочный эффект. Вынесены в отдельный слой,
+ * чтобы регрессионный тест маршрутизации мог проверить, ЧТО именно вызвала команда, не
+ * запуская реальный прогон и не трогая `outputs/`.
+ */
+export interface WorkflowCliEngine {
+  startWorkflowEngine: typeof startWorkflowEngine;
+  resumeWorkflowEngine: typeof resumeWorkflowEngine;
+  rerunWorkflowStage: typeof rerunWorkflowStage;
+  getWorkflowEngineStatus: typeof getWorkflowEngineStatus;
+}
+
+const defaultWorkflowCliEngine: WorkflowCliEngine = {
+  startWorkflowEngine,
+  resumeWorkflowEngine,
+  rerunWorkflowStage,
+  getWorkflowEngineStatus,
+};
+
+export async function runWorkflowCli(
+  rawArgs = process.argv.slice(2),
+  engine: WorkflowCliEngine = defaultWorkflowCliEngine,
+): Promise<void> {
   loadLocalEnv();
 
   const command = rawArgs[0];
   const rest = rawArgs.slice(1);
 
-  if (await tryRunIntentCommand(command, rest, rawArgs)) {
+  if (await tryRunIntentCommand(rawArgs, engine)) {
     return;
   }
 
@@ -65,8 +88,8 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
       );
     }
 
-    const state = await startWorkflowEngine({ goal, executionMode: mode, profile, scale });
-    console.log(await getWorkflowEngineStatus(state.output_dir));
+    const state = await engine.startWorkflowEngine({ goal, executionMode: mode, profile, scale });
+    console.log(await engine.getWorkflowEngineStatus(state.output_dir));
     return;
   }
 
@@ -76,8 +99,8 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
       throw new Error("Usage: yarn workflow:resume outputs/<project-slug>/<YYYY-MM-DD>");
     }
 
-    const state = await resumeWorkflowEngine(resolve(process.cwd(), outputDir));
-    console.log(await getWorkflowEngineStatus(state.output_dir));
+    const state = await engine.resumeWorkflowEngine(resolve(process.cwd(), outputDir));
+    console.log(await engine.getWorkflowEngineStatus(state.output_dir));
     return;
   }
 
@@ -87,7 +110,7 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
       throw new Error("Usage: yarn workflow:status outputs/<project-slug>/<YYYY-MM-DD>");
     }
 
-    console.log(await getWorkflowEngineStatus(resolve(process.cwd(), outputDir)));
+    console.log(await engine.getWorkflowEngineStatus(resolve(process.cwd(), outputDir)));
     return;
   }
 
@@ -169,8 +192,8 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
       throw new Error("Usage: yarn workflow:run-stage outputs/<project-slug>/<YYYY-MM-DD> <stage-id> --force");
     }
 
-    const state = await rerunWorkflowStage(resolve(process.cwd(), outputDir), stageId, { force });
-    console.log(await getWorkflowEngineStatus(state.output_dir));
+    const state = await engine.rerunWorkflowStage(resolve(process.cwd(), outputDir), stageId, { force });
+    console.log(await engine.getWorkflowEngineStatus(state.output_dir));
     return;
   }
 
@@ -324,51 +347,170 @@ export async function runWorkflowCli(rawArgs = process.argv.slice(2)): Promise<v
     return;
   }
 
-  throw new Error("Usage: workflow engine command must be one of: start, resume, status, list, inspect, outputs, skills, map, cleanup-temp, archive, registry-sync, run-stage, approve, deny, approval-request, approvals, agentic-stages, agentic-readiness, agentic-approval-commands, agentic-preflight\nOr use a natural trigger phrase!");
+  throw new Error("Usage: workflow engine command must be one of: start, resume, status, intent, list, inspect, outputs, skills, map, cleanup-temp, archive, registry-sync, run-stage, approve, deny, approval-request, approvals, agentic-stages, agentic-readiness, agentic-approval-commands, agentic-preflight\nOr use a natural trigger phrase via: yarn workflow:intent \"<фраза>\"");
 }
 
-async function tryRunIntentCommand(command: string | undefined, rest: string[], rawArgs: string[]): Promise<boolean> {
-  if (command && explicitWorkflowCommands.has(command) && !["start", "resume", "status", "run-stage"].includes(command)) {
-    return false;
+/**
+ * Решение о маршруте CLI: явная команда или распознанное намерение.
+ *
+ * Правило: **явная команда имеет безусловный приоритет над эвристикой.** Написал `start` —
+ * исполняется start, а текст после команды — это ЦЕЛЬ нового прогона, а не фраза для
+ * распознавания. Триггер-фразы живут в отдельной команде `intent` (и в вызове без команды).
+ *
+ * Прецедент 2026-07-30, из-за которого правило появилось: `yarn workflow:start "Редизайн
+ * мобильных экранов A3Pay в стиле Ozon Банка" --scale increment` содержал слово «дизайн»,
+ * эвристика превратила его в `run-stage 04-design`, и стадия отработала в самом свежем
+ * ЧУЖОМ run-каталоге, перезаписав там `design-brief.md` и весь run ledger. Каталог
+ * `outputs/` в `.gitignore` — восстановить было нечем.
+ */
+export type CliRoutePlan =
+  | { kind: "explicit"; command: string }
+  | { kind: "intent"; intent: ParsedIntent; phrase: string; runDir?: string; fromIntentCommand: boolean }
+  | { kind: "unrecognized"; phrase: string; fromIntentCommand: boolean };
+
+export function planCliRoute(rawArgs: string[]): CliRoutePlan {
+  const command = rawArgs[0];
+  const fromIntentCommand = command === "intent";
+
+  if (command && explicitWorkflowCommands.has(command) && !fromIntentCommand) {
+    return { kind: "explicit", command };
   }
 
-  const fullInput = rawArgs.join(" ").trim();
-  let intent = null;
-  if (command && ["start", "resume", "status", "run-stage"].includes(command)) {
-    const restText = rest.join(" ").trim();
-    if (restText) {
-      intent = parseUserIntent(restText);
-    }
-  } else if (fullInput) {
-    intent = parseUserIntent(fullInput);
+  const source = fromIntentCommand ? rawArgs.slice(1) : rawArgs;
+  const runDir = readFlagValue(source, "--run-dir");
+  const phrase = withoutFlagValue(source, "--run-dir").join(" ").trim();
+  if (!phrase) {
+    return { kind: "unrecognized", phrase, fromIntentCommand };
   }
 
+  const intent = parseUserIntent(phrase);
   if (!intent || intent.confidence === "low") {
+    return { kind: "unrecognized", phrase, fromIntentCommand };
+  }
+
+  return { kind: "intent", intent, phrase, runDir, fromIntentCommand };
+}
+
+async function tryRunIntentCommand(rawArgs: string[], engine: WorkflowCliEngine): Promise<boolean> {
+  const plan = planCliRoute(rawArgs);
+  if (plan.kind === "explicit") {
     return false;
   }
 
-  const recentDir = findMostRecentRunDir();
-  if (intent.command === "resume" && recentDir) {
-    console.log(`[Intent Parser] Распознано намерение: Продолжить последний проект (${recentDir})`);
-    const state = await resumeWorkflowEngine(recentDir);
-    console.log(await getWorkflowEngineStatus(state.output_dir));
+  if (plan.kind === "unrecognized") {
+    if (!plan.fromIntentCommand) {
+      return false;
+    }
+
+    throw new Error(
+      plan.phrase
+        ? `Не удалось распознать намерение в фразе: "${plan.phrase}". Используй явную команду: yarn workflow:start "<цель>", yarn workflow:resume <run-dir>, yarn workflow:run-stage <run-dir> <stage-id> --force.`
+        : 'Usage: yarn workflow:intent "<фраза-триггер>" [--run-dir outputs/<project-slug>/<YYYY-MM-DD>]',
+    );
+  }
+
+  const { intent, phrase } = plan;
+
+  if (intent.command === "start") {
+    // Цель прогона из фразы не выводится, а придумывать её за человека нельзя: слаг
+    // каталога и `run-plan.md` строятся именно из цели.
+    throw new Error(
+      `Фраза "${phrase}" распознана как старт нового прогона, но цель прогона в ней не названа. Запусти явно: yarn workflow:start "<цель прогона>" [--scale full|increment|patch].`,
+    );
+  }
+
+  // Каталог либо назван человеком (--run-dir), либо выведен эвристикой «самый свежий
+  // run-state.json». Второй случай обязан быть видимым и подтверждённым: молча писать в
+  // каталог, которого человек не называл, — это и есть механизм инцидента 2026-07-30.
+  const explicitRunDir = plan.runDir ? resolve(process.cwd(), plan.runDir) : undefined;
+  const runDir = explicitRunDir ?? findMostRecentRunDir();
+  if (!runDir) {
+    throw new Error('Не найден ни один прогон в outputs/. Начни новый: yarn workflow:start "<цель прогона>".');
+  }
+
+  const runDirLabel = formatRunDirLabel(runDir);
+  const heuristicRunDir = !explicitRunDir;
+
+  if (intent.command === "status") {
+    // Чтение статуса ничего не перезаписывает, поэтому подтверждение не требуется —
+    // но каталог всё равно печатается, чтобы человек видел, о каком прогоне речь.
+    console.log(`[Intent Parser] Распознано намерение: Показать статус прогона (${runDirLabel})${heuristicRunDir ? " — каталог выведен эвристикой" : ""}`);
+    console.log(await engine.getWorkflowEngineStatus(runDir));
     return true;
   }
 
-  if (intent.command === "status" && recentDir) {
-    console.log(`[Intent Parser] Распознано намерение: Показать статус последнего проекта (${recentDir})`);
-    console.log(await getWorkflowEngineStatus(recentDir));
+  if (intent.command === "resume") {
+    console.log(`[Intent Parser] Распознано намерение: Продолжить прогон (${runDirLabel})`);
+    if (heuristicRunDir && !(await confirmHeuristicRunDir(runDirLabel, "resume: продолжить прогон"))) {
+      console.log("Отменено: прогон не запускался, каталог не изменён.");
+      return true;
+    }
+
+    const state = await engine.resumeWorkflowEngine(runDir);
+    console.log(await engine.getWorkflowEngineStatus(state.output_dir));
     return true;
   }
 
-  if (intent.command === "run-stage" && intent.stageId && recentDir) {
-    console.log(`[Intent Parser] Распознано намерение: Запустить этап "${intent.stageId}" для проекта (${recentDir})`);
-    const state = await rerunWorkflowStage(recentDir, intent.stageId, { force: true });
-    console.log(await getWorkflowEngineStatus(state.output_dir));
+  if (intent.command === "run-stage" && intent.stageId) {
+    console.log(`[Intent Parser] Распознано намерение: Запустить этап "${intent.stageId}" (${runDirLabel})`);
+    if (heuristicRunDir && !(await confirmHeuristicRunDir(runDirLabel, `run-stage ${intent.stageId}`))) {
+      console.log("Отменено: этап не запускался, каталог не изменён.");
+      return true;
+    }
+
+    const state = await engine.rerunWorkflowStage(runDir, intent.stageId, { force: true });
+    console.log(await engine.getWorkflowEngineStatus(state.output_dir));
     return true;
   }
 
   return false;
+}
+
+function formatRunDirLabel(runDir: string): string {
+  const relativePath = relative(process.cwd(), runDir);
+  return relativePath && !relativePath.startsWith("..") ? relativePath : runDir;
+}
+
+/**
+ * Подтверждение записи в каталог, который вывела эвристика. Без TTY подтверждение получить
+ * негде, поэтому действие не выполняется вовсе: пусть человек назовёт каталог явно, чем
+ * стадия перезапишет артефакты постороннего прогона.
+ */
+async function confirmHeuristicRunDir(runDirLabel: string, action: string): Promise<boolean> {
+  const explicitHint = [
+    `Каталог прогона не назван человеком — он выведен эвристикой (самый свежий run-state.json в outputs/): ${runDirLabel}.`,
+    `Действие '${action}' перезаписывает артефакты этого каталога.`,
+    'Укажи каталог явно: yarn workflow:intent "<фраза>" --run-dir outputs/<project-slug>/<YYYY-MM-DD>',
+    "или используй yarn workflow:run-stage / yarn workflow:resume с явным путём.",
+  ].join(" ");
+
+  if (!input.isTTY) {
+    throw new Error(`Подтверждение целевого каталога невозможно: нет TTY. ${explicitHint}`);
+  }
+
+  console.log("");
+  console.log("=== Подтверждение целевого каталога ===");
+  console.log(`Действие: ${action}`);
+  console.log(`Каталог: ${runDirLabel}`);
+  console.log("Каталог выведен эвристикой (самый свежий run-state.json в outputs/), а не назван тобой.");
+  console.log("Стадия перезапишет артефакты именно в нём.");
+  console.log("");
+
+  const rl = createInterface({ input, output });
+  try {
+    while (true) {
+      const answer = (await rl.question("Выполнить в этом каталоге? [y/n]: ")).trim().toLowerCase();
+      if (["y", "yes", "да", "д"].includes(answer)) {
+        return true;
+      }
+      if (["n", "no", "нет", "н"].includes(answer)) {
+        return false;
+      }
+      console.log("Введите y или n.");
+    }
+  } finally {
+    rl.close();
+  }
 }
 
 function findMostRecentRunDir(baseDir: string = resolve(process.cwd(), "outputs")): string | null {
@@ -763,4 +905,15 @@ function readFlagValue(args: string[], flag: string): string | undefined {
 
   const value = args[index + 1];
   return value && !value.startsWith("--") ? value : undefined;
+}
+
+/** Убирает флаг и его значение из списка аргументов: остаток — это текст фразы. */
+function withoutFlagValue(args: string[], flag: string): string[] {
+  const index = args.indexOf(flag);
+  if (index < 0) {
+    return args;
+  }
+
+  const hasValue = Boolean(args[index + 1] && !args[index + 1].startsWith("--"));
+  return args.filter((_, position) => position !== index && !(hasValue && position === index + 1));
 }

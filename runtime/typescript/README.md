@@ -14,7 +14,7 @@
 - `workflow-stage-executors.ts` — тонкий dispatcher между research, local и approval-gated agentic executor.
 - `executors/` — реализации stage execution: `research-executor.ts`, `local-executor.ts`, `agentic-executor.ts`, Notion export helper и общие executor utilities.
 - `agent-output/` — parser/normalizer structured specialist output, JSON Schema validation по `agent-pack/schemas/agent-output.schema.json` и Markdown artifact fallback.
-- `workflow-cli.ts` — command dispatch, intent parsing, approval commands и agentic preflight/readiness formatting.
+- `workflow-cli.ts` — command dispatch, intent parsing, approval commands и agentic preflight/readiness formatting. Явная команда всегда важнее эвристики: текст после `start` — это цель нового прогона, триггер-фразы распознаёт только команда `intent` (`yarn workflow:intent`), а каталог, выведенный эвристикой «самый свежий `run-state.json`», требует подтверждения или `--run-dir` перед любой записью. Регрессия — `yarn workflow:test-cli-routing`.
 - `run-workflow-engine.ts` — тонкий CLI entrypoint и compatibility exports для тестов/скриптов.
 - `agentic-rollout.ts`, `agentic-approval-targets.ts` — staged rollout agentic stages и стабильные approval targets для model provider calls.
 - `run-local-workflow.ts` — deterministic local artifact generator.
