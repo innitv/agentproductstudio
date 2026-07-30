@@ -88,7 +88,20 @@ const yarnPassthroughBinaries = new Set([
   "workspace",
 ]);
 
-const skippedDirectories = new Set(["node_modules", ".git", "dist", "test-results"]);
+/*
+ * `worktrees` — временные git worktree агентов (`.claude/worktrees/<ветка>/`).
+ * Это КОПИЯ репозитория внутри репозитория: аудит проверял бы одни и те же
+ * документы дважды, причём во второй раз относительные пути из копии не
+ * разрешаются, и падал на файле, которого в рабочем дереве никто не менял.
+ * Живой worktree параллельной сессии удалять нельзя, поэтому исключение.
+ */
+const skippedDirectories = new Set([
+  "node_modules",
+  ".git",
+  "dist",
+  "test-results",
+  "worktrees",
+]);
 const snapshotFilePattern = /-\d{4}-\d{2}-\d{2}\.md$/;
 const ignoreMarker = "docs-audit-ignore";
 
