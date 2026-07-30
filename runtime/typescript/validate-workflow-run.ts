@@ -47,6 +47,8 @@ interface RunStateLike {
 
 interface RunMetaLike {
   workflow_profile?: WorkflowProfile;
+  workflow_scale?: WorkflowScale;
+  status?: StageStateStatus;
 }
 
 interface StageResultLike {
@@ -84,6 +86,8 @@ export function validateWorkflowRun(
   const scale = scaleInput ?? persistedScale ?? defaultWorkflowScale;
   const stages = getWorkflowStagesForProfile(profile, scale);
   const predatesIntakeSurvey = runPredatesIntakeSurvey(persistedState?.created_at);
+
+  findings.push(...checkRunAxisConsistency(persistedState, persistedMeta));
 
   const stageLimit = throughStageId
     ? stages.findIndex((stage) => stage.id === throughStageId)
@@ -710,6 +714,46 @@ function resolveCandidatePath(outputDir: string, candidate: string): string {
 // Записанный профиль run. Читается из обоих файлов состояния — так же, как его читает
 // Agent Output Critic. Значение вне перечня трактуется как отсутствующее: битая запись не
 // должна молча сузить набор обязательных артефактов.
+/**
+ * Оси прогона (профиль, масштаб, статус) записаны дважды: в `run-state.json` и в
+ * `run-meta.json`. Пока копии совпадают, разница незаметна — но инструменты читают их в
+ * РАЗНОМ порядке: валидатор берёт сначала `run-state`, а `yarn workflow:retro` — сначала
+ * `run-meta`. Разошедшиеся копии дают двум инструментам разные ответы об одном прогоне.
+ *
+ * Прецедент 2026-07-30 (`a3pay-x-ozon-bank-mobile-flow`): оркестратор поправил
+ * `run-state.json` руками — профиль `reference`, статус `partial`. `run-meta.json` остался
+ * с `standard`/`failed`, потому что ручная правка одного файла второй не обновляет.
+ * Валидатор работал по `reference` и был прав; ретро напечатало «Профиль `standard`,
+ * статус `failed`» и было неправо — то есть разбор прогона стартовал с недостоверных осей.
+ *
+ * Чинится одной командой `yarn workflow:sync <run-dir>`, поэтому проверка даёт error с
+ * прямой подсказкой, а не молча выбирает победителя.
+ */
+function checkRunAxisConsistency(
+  state: RunStateLike | undefined,
+  meta: RunMetaLike | undefined,
+): Finding[] {
+  if (!state || !meta) {
+    return [];
+  }
+
+  const axes: Array<{ axis: string; stateValue?: string; metaValue?: string }> = [
+    { axis: "profile", stateValue: state.profile, metaValue: meta.workflow_profile },
+    { axis: "scale", stateValue: state.scale, metaValue: meta.workflow_scale },
+    { axis: "status", stateValue: state.status, metaValue: meta.status },
+  ];
+
+  return axes
+    .filter((entry) => entry.stateValue && entry.metaValue && entry.stateValue !== entry.metaValue)
+    .map((entry) => ({
+      level: "error" as const,
+      message:
+        `${runStateFileName} and ${runMetaFileName} disagree on '${entry.axis}': ` +
+        `'${entry.stateValue}' vs '${entry.metaValue}'. Инструменты читают эти файлы в разном порядке, ` +
+        `поэтому расхождение даёт разные ответы об одном прогоне. Синхронизируй: yarn workflow:sync <run-dir>.`,
+    }));
+}
+
 function readPersistedProfile(
   state: RunStateLike | undefined,
   meta: RunMetaLike | undefined,

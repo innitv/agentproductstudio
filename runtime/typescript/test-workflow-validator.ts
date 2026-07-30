@@ -804,3 +804,67 @@ withRun((runDir) => {
     "до 08-frontend гейт показа не применяется",
   );
 });
+
+// Оси прогона записаны дважды — в `run-state.json` и в `run-meta.json`, а валидатор и
+// `yarn workflow:retro` читают их в РАЗНОМ порядке. Прецедент 2026-07-30
+// (`a3pay-x-ozon-bank-mobile-flow`): оркестратор поправил профиль и статус руками в
+// `run-state.json`, `run-meta.json` остался прежним, и ретро напечатало недостоверные оси
+// прогона, с которых начинался его разбор. Расхождение обязано быть видимым.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "00-intake", "standard");
+  writeFileSync(
+    join(runDir, "run-meta.json"),
+    JSON.stringify({ workflow_profile: "standard", workflow_scale: "increment", status: "failed" }),
+    "utf8",
+  );
+  writeFileSync(
+    join(runDir, "run-state.json"),
+    JSON.stringify({
+      profile: "reference",
+      scale: "increment",
+      status: "partial",
+      created_at: "",
+      updated_at: "",
+      stages: {},
+    }),
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "00-intake", "reference");
+  assertError(findings, /disagree on 'profile': 'reference' vs 'standard'/);
+  assertError(findings, /disagree on 'status': 'partial' vs 'failed'/);
+  assert.equal(
+    findings.filter((finding) => /disagree on 'scale'/.test(finding.message)).length,
+    0,
+    "совпадающая ось расхождением не считается",
+  );
+});
+
+// Согласованные копии молчат: проверка ловит расхождение, а не сам факт двух файлов.
+withRun((runDir) => {
+  writeArtifactsThrough(runDir, "00-intake", "standard");
+  writeFileSync(
+    join(runDir, "run-meta.json"),
+    JSON.stringify({ workflow_profile: "reference", workflow_scale: "increment", status: "partial" }),
+    "utf8",
+  );
+  writeFileSync(
+    join(runDir, "run-state.json"),
+    JSON.stringify({
+      profile: "reference",
+      scale: "increment",
+      status: "partial",
+      created_at: "",
+      updated_at: "",
+      stages: {},
+    }),
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "00-intake", "reference");
+  assert.equal(
+    findings.filter((finding) => /disagree on/.test(finding.message)).length,
+    0,
+    "совпадающие run-state и run-meta ошибок давать не должны",
+  );
+});
