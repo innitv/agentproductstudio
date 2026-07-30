@@ -32,6 +32,7 @@ skills:
   - visual-layout-verifier
   - design-engineering
   - figma-ds-ingest
+  - shadcn-library
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 

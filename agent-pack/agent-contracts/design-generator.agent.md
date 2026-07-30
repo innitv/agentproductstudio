@@ -23,6 +23,7 @@ skills:
   - visual-layout-verifier
   - figma-roundtrip
   - figma-handoff
+  - shadcn-library
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 
@@ -42,7 +43,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - `design-brief.md`
 - `copy-deck.md`
 - `prd.md`
-- `CLAUDE.md` §6.1 — правила shadcn/ui
+- `CLAUDE.md` §6.1 — решение про shadcn/ui; механика библиотеки — навык `shadcn-library`
 - `apps/frontend/src/components/shadcn/` — фактический состав компонентов; `apps/frontend/.storybook` — витрина
 - `run-state.json` — оси запуска
 - При работе по переданному Figma-файлу: `integrations/mcp/figma-canvas-write-guide.md`, `design/figma/registry.json`

@@ -2,7 +2,7 @@
 name: frontend
 description: "Lead Frontend разработчик (stage 08-frontend). Оркестратор делегирует сюда после готовности PRD, IA, design, copy, screens и prototype, чтобы реализовать UI и state machine: примитивы из реестра shadcn/ui (`yarn shadcn add`), продуктовый слой и композиция — на Tailwind и React/TypeScript, витрина состояний — Storybook. Производит `frontend-result.md` (+ опц. `storybook-result.md`) с browser/mobile evidence. Триггер-фразы: `напиши код`, `сверстай лендинг`, `реализуй фронтенд`, `собери интерфейс`, `implement frontend`, `create ui code`, `build frontend`, `обнови верстку`, `поправь стили`, `исправь фронтенд`, `update ui`."
 model: opus
-skills: [landing-builder, figma-token-extractor, figma-roundtrip, visual-layout-verifier, design-engineering, ds-to-storybook, figma-ds-ingest]
+skills: [landing-builder, figma-token-extractor, figma-roundtrip, visual-layout-verifier, design-engineering, ds-to-storybook, figma-ds-ingest, shadcn-library]
 color: green
 disallowedTools: mcp__notion, mcp__github, mcp__gitlab, Task, Agent
 ---
@@ -33,7 +33,7 @@ disallowedTools: mcp__notion, mcp__github, mcp__gitlab, Task, Agent
 - `handoff-bundle.md` (сжатый через **State Truncation Gate**)
 - `prd.md`, `ia-brief.md`, `design-brief.md`, `screens.md`, `copy-deck.md`
 - `STYLE_GUIDE.md`, `design-loop-report.md` при наличии; `figma-handoff-bundle.md`, `figma-layout-ir.json`, `figma-visual-qa.json` — если работа шла по Figma-файлу
-- `CLAUDE.md` §6.1, `COMMANDS.md`, `apps/frontend/src/components/shadcn/`, `design/tokens/shadcn/README.md`
+- `CLAUDE.md` §6.1, навык `shadcn-library`, `COMMANDS.md`, `apps/frontend/src/components/shadcn/`, `design/tokens/shadcn/README.md`
 - Существующий frontend код
 
 ## Внутренний процесс

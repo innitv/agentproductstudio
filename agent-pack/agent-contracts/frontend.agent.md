@@ -22,6 +22,7 @@ skills:
   - design-engineering
   - ds-to-storybook
   - figma-ds-ingest
+  - shadcn-library
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 
@@ -89,7 +90,7 @@ Lazyweb для frontend используется как benchmark/critique layer
 - `STYLE_GUIDE.md`, `design-loop-report.md`, `figma-handoff-bundle.md` при наличии
 - `run-state.json` — оси запуска
 - `figma-layout-ir.json` и `figma-visual-qa.json` — если работа шла по переданному Figma-файлу
-- `CLAUDE.md` §6.1 (правила shadcn/ui) и `COMMANDS.md` (разделы про `yarn shadcn add`, `yarn tokens:build`, `yarn test-storybook`, `yarn vr:test`, `yarn qa:mobile`)
+- `CLAUDE.md` §6.1 (решение про shadcn/ui), навык `shadcn-library` (механика и грабли библиотеки) и `COMMANDS.md` (разделы про `yarn shadcn add`, `yarn tokens:build`, `yarn test-storybook`, `yarn vr:test`, `yarn qa:mobile`)
 - `apps/frontend/src/components/shadcn/` — фактический состав установленных компонентов; `design/tokens/shadcn/README.md` — темы
 - Существующие файлы исходного кода фронтенда
 
@@ -215,6 +216,8 @@ reference_deviation: в образце «Документы» → сделано
 
 ### Тёмной темы нет — не завязывайся на системную
 
-В Tailwind 4 вариант `dark:` по умолчанию слушает `prefers-color-scheme`, а компоненты реестра несут тёмные варианты прямо в классах (`dark:bg-input/30` у `Input` и у `Button variant=outline`). Тёмных токенов в проекте не объявлено, класса `.dark` нет — поэтому вариант привязан к классу в `apps/frontend/src/styles.css` (`@custom-variant dark`). Не снимай эту привязку и не добавляй тёмные варианты «на будущее»: понадобится тёмная тема — она заводится как тема со своими токенами и своим классом (`CLAUDE.md` §6.1).
+В Tailwind 4 вариант `dark:` по умолчанию слушает `prefers-color-scheme`, а компоненты реестра несут тёмные варианты прямо в классах (`dark:bg-input/30` у `Input` и у `Button variant=outline`). Тёмных токенов в проекте не объявлено, класса `.dark` нет — поэтому вариант привязан к классу в `apps/frontend/src/styles.css` (`@custom-variant dark`). Не снимай эту привязку и не добавляй тёмные варианты «на будущее»: понадобится тёмная тема — она заводится как тема со своими токенами и своим классом.
 
-Цена ошибки измерена: на машине с тёмной системной темой поля ввода и вторичные кнопки получали серую подложку с альфой 0.3 вместо белой, и **ни одна машинная приёмка этого увидеть не могла** — контейнер Playwright и CI стартуют со светлой системной темой. Нашёл человек глазами (`a3-shadcn`, 2026-07-29).
+Цена ошибки измерена: на машине с тёмной системной темой поля ввода и вторичные кнопки получали серую подложку с альфой 0.3 вместо белой, и **ни одна машинная приёмка этого увидеть не могла** — контейнер Playwright и CI стартуют со светлой системной темой. Нашёл человек глазами (`a3-shadcn`, 2026-07-29). С 2026-07-30 наличие привязки проверяется машинно: `yarn workflow:test-studio-hygiene`.
+
+Остальная механика библиотеки — навык `shadcn-library` (он в твоём `skills:`): `shadow-xs` во всех интерактивных примитивах и правило снимать тени группой, порталы вне контейнера темы, чего в реестре нет, границы правки токенов.

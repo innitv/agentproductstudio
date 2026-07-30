@@ -2,6 +2,7 @@ import { existsSync, readdirSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { detectGlobalSkillConflicts } from "./skill-metadata";
+import { detectAbandonedWorktrees } from "./studio-hygiene";
 
 interface DiagnosticResult {
   check: string;
@@ -124,6 +125,27 @@ async function runDiagnostics(): Promise<DiagnosticResult[]> {
             .map((conflict) => `${conflict.id} (${conflict.globalPath})`)
             .join(", ")}. Роутер выбирает навык по описанию глобальной копии, проектная версия не применяется. ` +
           "Удали каталог или замени его симлинком на этот репозиторий.",
+    canRepair: false,
+  });
+
+  // 3b. Брошенные worktree агентов в `.claude/worktrees/`
+  //
+  // Каждая копия удваивает выдачу любого грепа и `Glob` по репозиторию — система начинает
+  // проверять себя по удвоенной реальности. Как и проверка выше, только предупреждение:
+  // worktree живой параллельной сессии удалять нельзя, а брошенной считается лишь та, где
+  // нечего терять (чистое дерево, HEAD влит в main).
+  const abandonedWorktrees = detectAbandonedWorktrees();
+  results.push({
+    check: "Брошенные worktree агентов (.claude/worktrees)",
+    passed: true,
+    level: abandonedWorktrees.length === 0 ? "pass" : "warning",
+    message:
+      abandonedWorktrees.length === 0
+        ? "Брошенных worktree нет (живые worktree параллельных сессий не считаются)."
+        : `Найдены worktree без незавершённой работы: ${abandonedWorktrees
+            .map((worktree) => `${worktree.path} (HEAD ${worktree.head.slice(0, 7)}, влит в main)`)
+            .join(", ")}. Каждая копия удваивает выдачу грепа и Glob по репозиторию. ` +
+          "Удалить: git worktree remove <путь> && git worktree prune.",
     canRepair: false,
   });
 

@@ -24,6 +24,7 @@ skills:
   - figma-screen-compiler
   - figma-roundtrip
   - figma-handoff
+  - shadcn-library
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 
@@ -90,7 +91,7 @@ UI Kit и дизайн-система используются только ка
 - `copy-deck.md` (при наличии)
 - `integrations/mcp/figma-canvas-write-guide.md`
 - `agent-pack/workflows/ds-baseline.workflow.md`
-- `CLAUDE.md` §6.1 — правила shadcn/ui (что менять безопасно, что не трогать, чего в библиотеке нет)
+- `CLAUDE.md` §6.1 — решение про shadcn/ui и три решения уровня проекта; механика библиотеки (что менять безопасно, что не трогать, чего в библиотеке нет, грабли) — навык `shadcn-library`
 - `apps/frontend/src/components/shadcn/` — фактический состав установленных компонентов (читать код напрямую, отдельных индексов состава не заводить)
 - `design/tokens/` и `design/tokens/shadcn/README.md` — токены и темы
 - `run-state.json` — оси запуска

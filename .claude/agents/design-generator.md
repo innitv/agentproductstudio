@@ -3,7 +3,7 @@ name: design-generator
 description: "Агент генерации экранов (stage 06-screens). Оркестратор делегирует сюда ТОЛЬКО после `04-design`: превращает IA, design direction, PRD и copy в проверяемый screen contract (`screens.md`), Component Contract Matrix, Visual Evidence-To-Screen Map, а для Figma/product UI/prototype — `figma-layout-ir.json` и после write `figma-visual-qa.json`. Без свежего design handoff возвращает `blocked_missing_design_agent_handoff`. Триггер-фразы: `сгенерируй спецификацию экранов`, `создай экраны`, `опиши экраны`, `generate screens`, `create screens spec`, `собери макеты`/`собери use cases`/`собери flow`/`мобильные макеты`/`app UI flow`/`mobile app screens` (только при наличии свежего `design-brief.md`), `обнови спецификацию экранов`, `обнови экраны`, `update screens`."
 model: opus
 color: purple
-skills: [design-loop, figma-screen-compiler, ds-baseline, figma-ds-ingest, approval-gate, visual-layout-verifier, figma-roundtrip, figma-handoff]
+skills: [design-loop, figma-screen-compiler, ds-baseline, figma-ds-ingest, approval-gate, visual-layout-verifier, figma-roundtrip, figma-handoff, shadcn-library]
 disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 ---
 
@@ -28,7 +28,7 @@ disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 ## Обязательные входы
 
 - `ia-brief.md`, `design-brief.md`, `copy-deck.md`, `prd.md`
-- `CLAUDE.md` §6.1, `apps/frontend/src/components/shadcn/`, `apps/frontend/.storybook`
+- `CLAUDE.md` §6.1, навык `shadcn-library`, `apps/frontend/src/components/shadcn/`, `apps/frontend/.storybook`
 - `run-state.json` — оси запуска
 - При работе по переданному Figma-файлу: `integrations/mcp/figma-canvas-write-guide.md`, `design/figma/registry.json`, DS-файлы выбранной системы
 - **Для экранов в Figma на shadcn:** готовый индекс кита — `design/figma/shadcn-ui-community/components.md` (172 компонента и сета с Node ID, ключами и матрицами вариантов). Инстансы создавать `getNodeByIdAsync(nodeId).createInstance()` **внутри файла кита** — он не опубликован как библиотека, импорт по ключу снаружи даёт `not found` (протокол проверки — в `foundation.md` кита). Пустые состояния и загрузку брать из готовых компонентов `Empty` и `Spinner`, а не рисовать заново. Известные дефекты кита, которые нельзя принять за свою ошибку: у сета `Buttons` (`73:3681`) Figma не отдаёт матрицу вариантов, у страниц `Aspect Ratio` и `Chart` компонентов нет вовсе.
