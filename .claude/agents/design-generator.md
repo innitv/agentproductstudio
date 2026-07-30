@@ -18,6 +18,8 @@ disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 - **Куда писать:** `screens.md`, `design-loop-report.md` → в текущий run-каталог `outputs/<project-slug>/<YYYY-MM-DD>/` (путь даёт оркестратор).
 - **Источник компонентов — реестр shadcn/ui** (`CLAUDE.md` §6.1), дефолтный `design_system_mode=reuse`. В Component Contract Matrix поле `source`: `shadcn_registry:<component>` — дефолт, `product_layer:<component>` — для gap-компонентов (в библиотеке нет `Chip`, `SegmentedControl`, `InputCard` со сбросом, уровня `warning` у `Alert`), `figma:<node>` — если работа идёт по переданному пользователем Figma-файлу. Состав читай из `apps/frontend/src/components/shadcn/`, параллельный индекс не заводи.
 - **Витрина — Storybook, не Figma-фрейм:** для каждого экрана укажи имя composition story и роут приложения (это один код), для каждого состояния — имя story, по которому его примут машинно (`yarn test-storybook`, `yarn vr:test`). Состояние без носителя проверки не специфицировано.
+- **Механика сборки в Figma — плагин `/figma-ds:build`** (в `skills:` не значится, вызывается по имени): организация по страницам, токены Variables в три тиера, консолидация и документирование компонентов, грабли Plugin API (слетевший оверрайд, INSTANCE_SWAP с чужим цветом, `get_metadata` не видит страницы, компонент не импортируется по ключу из чужого файла). Там же **обязательная финальная самопроверка перед отчётом** — пакетная, на всю пачку изменений, а не после каждого write.
+- **Что правильно по канону — `/figma-ds:standard`**; при сверке экрана с внешним образцом — `/ui-craft:reference-check` (обход образца целиком ДО выбора основы, измерение вместо оценки на глаз).
 
 ## Предназначение
 

@@ -20,6 +20,8 @@ disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 - **Дизайн-система по умолчанию — shadcn/ui** (`CLAUDE.md` §6.1, решение от 2026-07-27). Дефолтный `design_system_mode` — `reuse`: примитивы берутся из официального реестра (`yarn shadcn search @shadcn` — список из 61 компонента, `yarn shadcn add <component>` — установка) и живут в коде `apps/frontend/src/components/shadcn/`. Состав читай прямо из этого каталога — отдельных индексов состава не заводить.
 - **Токены — в репозитории, не в Figma:** `design/tokens/` (DTCG, `yarn tokens:build`), тема shadcn — `design/tokens/shadcn/` (`yarn tokens:build`, baseline-гейт `yarn tokens:check`). В теме менять цвет, гарнитуру, кольцо фокуса; `--spacing` и шкалу радиусов не трогать.
 - **Витрина компонентов и состояний — Storybook** (`apps/frontend/.storybook`, `yarn storybook`), а не Figma-макет. Экран живёт как composition story и как роут приложения — это один и тот же код; приёмка машинная (`yarn test-storybook`, `yarn vr:test`).
+- **Канон дизайн-систем — плагин `/figma-ds:standard`** (в `skills:` не значится, вызывается по имени): три тиера токенов и role-based naming, modes на semantic, выбор property (variant / boolean / text / instance-swap / slot), точные пороги доступности, versioning и статусы. Вызывай при вопросах «как правильно по канону» и перед тем, как объявить DS готовой; отклонения от канона фиксируй как `deviation` с причиной, а не молча.
+- **Переносимое ремесло интерфейса — плагин `/ui-craft:build`**: композиция, состояния, адаптивность, доступность, движение. Основу (библиотека против вёрстки с нуля) он не выбирает — это решение проекта, оно выше.
 
 ## Предназначение
 
