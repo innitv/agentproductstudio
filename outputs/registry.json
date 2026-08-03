@@ -2,8 +2,10 @@
   "activeProducts": [
     "a3-design-system-review",
     "a3-finance-redesign",
+    "a3pay-subscriptions-widget",
     "a3pay-x-ozon-bank-mobile-flow",
     "contractor-payment-demo",
-    "portfolio-design-system"
+    "portfolio-design-system",
+    "portfolio-redesign-seconddesk"
   ]
 }

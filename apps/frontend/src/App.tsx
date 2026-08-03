@@ -1,19 +1,26 @@
 import * as React from "react";
-import { A3FinanceRoute } from "./views/A3FinanceRoute";
 import { CardRequestShadcnRoute } from "./views/CardRequestShadcnRoute";
 import { StudioIndexView } from "./views/StudioIndexView";
 
 /** Экраны, доступные по хешу. Разметка каждого живёт в своём файле в views/. */
-type HashView = "a3Finance" | "cardRequestShadcn" | "index";
+type HashView = "cardRequestShadcn" | "index";
 
-/** Хеши маршрутов. Всё остальное — якоря ВНУТРИ уже открытого экрана. */
+/**
+ * Хеши маршрутов.
+ *
+ * Верстак студии держит ОДИН пилотный экран на штатной теме реестра. Продуктовые
+ * экраны здесь не живут: собранный продукт уезжает в свой репозиторий вместе с
+ * темой и приёмкой, иначе появляются две расходящиеся копии одного кода.
+ *
+ * Что уехало и когда:
+ *   • три тематических хеша (`-branded`, `-calm`, `-calm-typed`) — 2026-07-28,
+ *     вместе с темами эксперимента;
+ *   • `#portfolio*` (три экрана сайта-портфолио) — 2026-08-03, в
+ *     `C:/Project/siteportfolio`, где маршруты стали настоящими путями;
+ *   • `#a3-finance` — 2026-08-03, решением владельца.
+ */
 const ROUTE_BY_HASH: Record<string, HashView> = {
-  // Пилотный экран на штатной теме реестра. Три тематических хеша
-  // (`-branded`, `-calm`, `-calm-typed`) удалены 2026-07-28 вместе с темами
-  // эксперимента: верстак студии не держит постоянных тем, тема заводится под
-  // конкретный проект и уезжает в его репозиторий.
   "#card-request-shadcn": "cardRequestShadcn",
-  "#a3-finance": "a3Finance",
   "": "index",
   "#": "index",
 };
@@ -21,9 +28,8 @@ const ROUTE_BY_HASH: Record<string, HashView> = {
 /**
  * Разрешение маршрута по хешу.
  *
- * Ключевая деталь: страница А3 держит собственные якоря секций (`#requisites`,
- * `#contacts`, `#disclosure`), и они тоже пишутся в `location.hash`. Поэтому
- * НЕизвестный хеш не сбрасывает экран на указатель, а оставляет текущий —
+ * НЕизвестный хеш не сбрасывает экран на указатель, а оставляет текущий: экраны
+ * держат собственные якоря секций, и они тоже пишутся в `location.hash` —
  * иначе первый же переход по якорю выкидывал бы пользователя со страницы.
  */
 function resolveView(previous: HashView): HashView {
@@ -41,10 +47,6 @@ export function App() {
 
   if (view === "cardRequestShadcn") {
     return <CardRequestShadcnRoute />;
-  }
-
-  if (view === "a3Finance") {
-    return <A3FinanceRoute />;
   }
 
   return <StudioIndexView />;

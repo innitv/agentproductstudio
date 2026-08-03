@@ -1,6 +1,6 @@
 /*
  * СГЕНЕРИРОВАНО tooling/shadcn-tokens/build-shadcn-tokens.mjs — руками не править.
- * Источник: design/tokens/shadcn/{default,a3}.json
+ * Источник: design/tokens/shadcn/{default}.json
  *
  * Тема переключается атрибутом data-shadcn-theme на контейнере; копий
  * компонентов под тему не существует.
@@ -112,71 +112,6 @@ html[data-shadcn-theme] {
   /* typography */
   --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  --text-xs: 0.75rem;
-  --text-xs--line-height: calc(1 / 0.75);
-  --text-sm: 0.875rem;
-  --text-sm--line-height: calc(1.25 / 0.875);
-  --text-base: 1rem;
-  --text-base--line-height: calc(1.5 / 1);
-  --text-lg: 1.125rem;
-  --text-lg--line-height: calc(1.75 / 1.125);
-  --text-xl: 1.25rem;
-  --text-xl--line-height: calc(1.75 / 1.25);
-  --text-2xl: 1.5rem;
-  --text-2xl--line-height: calc(2 / 1.5);
-  --tracking-tight: -0.025em;
-}
-
-[data-shadcn-theme="a3"] {
-  /* color */
-  --background: #ffffff;
-  --foreground: #0b1b34;
-  --card: #ffffff;
-  --card-foreground: #0b1b34;
-  --popover: #ffffff;
-  --popover-foreground: #0b1b34;
-  --primary: #003399;
-  --primary-foreground: #ffffff;
-  --secondary: #f7f8fa;
-  --secondary-foreground: #0b1b34;
-  --muted: #f7f8fa;
-  --muted-foreground: #667085;
-  --accent: #edf1fb;
-  --accent-foreground: #003399;
-  --destructive: #d92d20;
-  --border: #dcdfe5;
-  --input: #cbd1d9;
-  --ring: #0040c0;
-  --chart-1: #003399;
-  --chart-2: #0036a3;
-  --chart-3: #0040c0;
-  --chart-4: #3d63cc;
-  --chart-5: #7d9ae3;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #0b1b34;
-  --sidebar-primary: #003399;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #edf1fb;
-  --sidebar-accent-foreground: #003399;
-  --sidebar-border: #dcdfe5;
-  --sidebar-ring: #0040c0;
-
-  /* shape */
-  --radius: 0.625rem;
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
-
-  /* density */
-  --spacing: 0.25rem;
-
-  /* typography */
-  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --text-xs: 0.75rem;
   --text-xs--line-height: calc(1 / 0.75);
   --text-sm: 0.875rem;
