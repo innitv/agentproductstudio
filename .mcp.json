@@ -2,7 +2,10 @@
   "mcpServers": {
     "playwright": {
       "command": "yarn",
-      "args": ["dlx", "@playwright/mcp@latest"]
+      "args": [
+        "dlx",
+        "@playwright/mcp@latest"
+      ]
     },
     "github": {
       "command": "docker",
@@ -38,7 +41,9 @@
     },
     "notion": {
       "command": "yarn",
-      "args": ["notion:mcp"],
+      "args": [
+        "notion:mcp"
+      ],
       "env": {
         "NOTION_TOKEN": "${NOTION_TOKEN}"
       }
@@ -50,6 +55,14 @@
     "figmaDesktop": {
       "type": "http",
       "url": "http://127.0.0.1:3845/mcp"
+    },
+    "shadcn": {
+      "command": "yarn",
+      "args": [
+        "dlx",
+        "shadcn@latest",
+        "mcp"
+      ]
     }
   }
 }

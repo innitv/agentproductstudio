@@ -784,10 +784,92 @@ withRun((runDir) => {
   );
 
   const findings = validateWorkflowRun(runDir, "08-frontend", "standard");
+  // Фильтр по уровню, а не по слову `human_review`: рядом живёт предупреждение о
+  // неразмеченном канале находки, и оно тоже упоминает гейт — но говорит о другом.
   assert.equal(
-    findings.filter((f) => /human_review/.test(f.message)).length,
+    findings.filter((f) => f.level === "error" && /human_review/.test(f.message)).length,
     0,
     "записи о показе есть — ошибок про гейт человека быть не должно",
+  );
+});
+
+/**
+ * Показ человеку был, а канал находки не размечен — предупреждение.
+ *
+ * Норма живёт в skill `run-ledger` §4.1 с 2026-07-29 и три run подряд не исполнялась,
+ * из-за чего `yarn workflow:retro` печатал «0 дорогих находок» при девяти, пяти и
+ * тринадцати фактических правках от человека.
+ */
+withRun((runDir) => {
+  const ledgerFile = join(runDir, artifactFiles.stage_gate_ledger);
+  mkdirSync(runDir, { recursive: true });
+  writeFileSync(
+    ledgerFile,
+    "# Stage Gate Ledger\n\n## Run\n\n" +
+      "- human_review: 8.5a | витрина показана 2026-08-03, замечания: тени\n" +
+      "- human_review: 8.5b | страница показана 2026-08-03, замечания: подвал\n",
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard");
+  const markup = findings.filter((f) => /не размечен маркером/.test(f.message));
+
+  assert.equal(markup.length, 1, "показ был, маркера нет — ожидалось предупреждение");
+  assert.equal(markup[0].level, "warning", "разметка — свидетельство о прошлом, блокировать нельзя");
+});
+
+// Маркер стоит — предупреждение исчезает.
+withRun((runDir) => {
+  const ledgerFile = join(runDir, artifactFiles.stage_gate_ledger);
+  mkdirSync(runDir, { recursive: true });
+  writeFileSync(
+    ledgerFile,
+    "# Stage Gate Ledger\n\n## Run\n\n" +
+      "- human_review: 8.5a | витрина показана 2026-08-03, замечания: тени\n" +
+      "- human_review: 8.5b | страница показана 2026-08-03, замечания: подвал\n\n" +
+      "## Правки по замечаниям (2026-08-03)\n<!-- retro: pass=1 found_by=user_review -->\n",
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard");
+  assert.equal(
+    findings.filter((f) => /не размечен маркером/.test(f.message)).length,
+    0,
+    "маркер стоит — предупреждения быть не должно",
+  );
+});
+
+// Показа не было вовсе — проверка не срабатывает: размечать нечего.
+withRun((runDir) => {
+  const ledgerFile = join(runDir, artifactFiles.stage_gate_ledger);
+  mkdirSync(runDir, { recursive: true });
+  writeFileSync(ledgerFile, "# Stage Gate Ledger\n\n## Run\n\n- показа не было\n", "utf8");
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard");
+  assert.equal(
+    findings.filter((f) => /не размечен маркером/.test(f.message)).length,
+    0,
+    "без показа человеку проверка канала не применяется",
+  );
+});
+
+// «Замечаний нет» — законный выход: показ прошёл вхолостую, заходов не было.
+withRun((runDir) => {
+  const ledgerFile = join(runDir, artifactFiles.stage_gate_ledger);
+  mkdirSync(runDir, { recursive: true });
+  writeFileSync(
+    ledgerFile,
+    "# Stage Gate Ledger\n\n## Run\n\n" +
+      "- human_review: 8.5a | витрина показана 2026-08-03, замечаний нет\n" +
+      "- human_review: 8.5b | страница показана 2026-08-03, замечаний нет\n",
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard");
+  assert.equal(
+    findings.filter((f) => /не размечен маркером/.test(f.message)).length,
+    0,
+    "«замечаний нет» объясняет отсутствие заходов",
   );
 });
 

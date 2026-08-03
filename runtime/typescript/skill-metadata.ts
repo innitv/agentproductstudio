@@ -207,6 +207,24 @@ export function loadSkillMetadataRecords(root = process.cwd()): SkillMetadataRec
   });
 }
 
+/**
+ * Навыки, поставленные вендором, а не написанные в студии.
+ *
+ * Их `SKILL.md` приходит в чужом формате — без нашего frontmatter (`id`,
+ * `owner_stage_ids`, `validation_commands` и прочего), потому что у автора
+ * пакета своя схема. Требовать от них наши поля бессмысленно вдвойне: файл
+ * перезапишется при следующем обновлении пакета, а дописанные поля исчезнут.
+ *
+ * Правило владения: вендорские навыки обновляются командой установки и НЕ
+ * правятся руками; проектные правила про ту же библиотеку живут в своём навыке
+ * (для shadcn/ui это `shadcn-library`). Поэтому здесь именно список изъятий, а
+ * не «пропускать всё без frontmatter»: навык студии без метаданных обязан
+ * оставаться ошибкой.
+ *
+ * Заведено 2026-08-03, когда `skills add shadcn/ui` принёс два таких пакета.
+ */
+const vendorSkillDirectories = new Set(["migrate-radix-to-base", "shadcn"]);
+
 function listSkillFiles(root: string): string[] {
   const skillsDir = join(root, ".claude", "skills");
   if (!existsSync(skillsDir)) {
@@ -215,6 +233,7 @@ function listSkillFiles(root: string): string[] {
 
   return readdirSync(skillsDir, { withFileTypes: true })
     .filter((item) => item.isDirectory())
+    .filter((item) => !vendorSkillDirectories.has(item.name))
     .map((item) => join(skillsDir, item.name, "SKILL.md"))
     .filter((file) => existsSync(file))
     .map((file) => file.replaceAll("\\", "/"));

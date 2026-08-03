@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import YAML from "js-yaml";
@@ -592,7 +592,74 @@ function validateHumanReviewGates(options: {
     });
   }
 
+  findings.push(...validateFindingChannelMarkup({ ledger, outputDir: options.outputDir }));
+
   return findings;
+}
+
+/**
+ * Показ человеку состоялся — значит канал находки обязан быть размечен.
+ *
+ * ─── ЗАЧЕМ МАШИННАЯ ПРОВЕРКА У НОРМЫ, КОТОРАЯ УЖЕ ЗАПИСАНА ──────────────────
+ * Норма живёт в skill `run-ledger` §4.1 с 2026-07-29 и требует размечать заход
+ * маркером `<!-- retro: pass=N found_by=… -->`. За три run подряд её не исполнил никто:
+ *
+ *   • `a3-shadcn` (2026-07-29) — ретро показало 0 возвратов и 0 дорогих находок при
+ *     девяти фактических возвратах и восьми дефектах, найденных человеком глазами;
+ *   • `a3pay-x-ozon-bank-mobile-flow` (2026-07-30) — снова 0 при пяти правках от человека;
+ *   • `portfolio-redesign-seconddesk` (2026-08-03) — снова 0 при тринадцати.
+ *
+ * Три повтора подряд означают, что дефицит не в знании нормы. Поэтому здесь проверка, а
+ * не четвёртое напоминание.
+ *
+ * ─── ЧТО ИМЕННО ПРОВЕРЯЕТСЯ ────────────────────────────────────────────────
+ * Связка «был показ человеку → был хотя бы один размеченный заход». Она верна не всегда:
+ * показ мог пройти без замечаний. Поэтому у правила есть законный выход — сказать это
+ * прямо в строке `human_review` («замечаний нет»). Молчание выходом не является: оно
+ * неотличимо от забытой разметки, а цифра «0 дорогих находок» в ретро выглядит как
+ * отличный результат, тогда как означает обратное.
+ *
+ * Уровень `warning`, а не `error`: разметка — свидетельство о прошлом, и блокировать ею
+ * закрытие стадии значило бы поощрять проставление задним числом, то есть ровно ту
+ * недостоверность, против которой правило и заведено.
+ */
+function validateFindingChannelMarkup(options: { ledger: string; outputDir: string }): Finding[] {
+  const shown = /human_review:\s*8\.5[ab]/.test(options.ledger);
+  if (!shown) return [];
+
+  // «Замечаний нет» — законный ответ на вопрос «где заходы»: показ прошёл вхолостую.
+  if (/замечани\p{L}*\s+(нет|не\s+бы)/iu.test(options.ledger)) return [];
+
+  const marked = readRunArtifacts(options.outputDir).some((text) =>
+    /<!--\s*retro:[^>]*found_by=/.test(text),
+  );
+  if (marked) return [];
+
+  return [
+    {
+      level: "warning",
+      message:
+        `${artifactFiles.stage_gate_ledger}: показ человеку зафиксирован, но ни один заход не ` +
+        "размечен маркером `<!-- retro: pass=N found_by=user_review -->`. Канал находки машинно " +
+        "не выводится: `yarn workflow:retro` напечатает «0 дорогих находок», хотя правки пришли " +
+        "от человека — так уже вышло на трёх run подряд (skill `run-ledger` §4.1). Размечай заход " +
+        "в момент правки либо укажи в строке `human_review`, что замечаний не было.",
+    },
+  ];
+}
+
+/** Тексты markdown-артефактов run — там живут заходы стадий. */
+function readRunArtifacts(outputDir: string): string[] {
+  if (!existsSync(outputDir)) return [];
+  return readdirSync(outputDir)
+    .filter((name) => name.endsWith(".md"))
+    .map((name) => {
+      try {
+        return readFileSync(join(outputDir, name), "utf8");
+      } catch {
+        return "";
+      }
+    });
 }
 
 //
