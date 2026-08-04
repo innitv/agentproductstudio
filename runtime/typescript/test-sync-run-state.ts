@@ -124,4 +124,61 @@ await withRun(async (runDir) => {
   );
 });
 
+// ---------------------------------------------------------------------------
+// attempts подтягивается под фактические заходы в артефактах
+// ---------------------------------------------------------------------------
+
+// Правки, сделанные агентом прямо в артефакте, движок не видит: на run
+// `a3pay-subscriptions-widget` было 9 датированных заходов против `attempts: 0`.
+// Пока счётчик не подтягивается под факт, метрика повторов недостоверна по всем run.
+await withRun(async (runDir) => {
+  writeArtifact(runDir, "screens.md", [
+    "## Inputs Used",
+    "## Первый заход (2026-08-03)\n<!-- retro: pass=1 found_by=user_review -->",
+    "## Второй заход (2026-08-03)\n<!-- retro: pass=2 found_by=user_review -->",
+    "## Третий заход (2026-08-04)\n<!-- retro: pass=3 found_by=user_review -->",
+  ]);
+
+  const result = await syncWorkflowRunState({ outputDir: runDir, profile: "standard", preview: false });
+  assert.equal(
+    result.nextState.stages["06-screens"]?.attempts,
+    3,
+    "три датированных захода в артефакте обязаны дать attempts = 3, иначе статистика повторов врёт",
+  );
+});
+
+// Счётчик движка выше числа заходов — он и остаётся: стадия могла перезапускаться
+// без записи захода в артефакт, и занижать факт нельзя.
+await withRun(async (runDir) => {
+  writeFileSync(
+    join(runDir, "run-state.json"),
+    JSON.stringify({
+      run_id: "engine-run",
+      goal: "Goal",
+      profile: "standard",
+      execution_mode: "local",
+      status: "partial",
+      output_dir: runDir,
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-01-01T00:00:00.000Z",
+      stages: {
+        "06-screens": { id: "06-screens", title: "Screens", status: "completed", attempts: 5, artifacts: [] },
+      },
+    }),
+    "utf8",
+  );
+  writeArtifact(runDir, "screens.md", [
+    "## Inputs Used",
+    "## Единственный заход (2026-08-04)\n<!-- retro: pass=1 found_by=user_review -->",
+  ]);
+
+  const result = await syncWorkflowRunState({ outputDir: runDir, profile: "standard", preview: false });
+  assert.equal(
+    result.nextState.stages["06-screens"]?.attempts,
+    5,
+    "sync берёт максимум из счётчика движка и числа заходов, а не затирает больший",
+  );
+});
+
 console.log("sync-run-state tests passed");
+

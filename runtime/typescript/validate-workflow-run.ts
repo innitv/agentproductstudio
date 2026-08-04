@@ -22,6 +22,7 @@ import {
   type WorkflowScale,
 } from "./workflow-stages";
 import { canReleaseFromQaStatus, isIncompleteArtifactStatus, isStageIncomplete } from "./status-resolver";
+import { collectRunPasses } from "./run-retro";
 
 interface Finding {
   level: "error" | "warning";
@@ -307,6 +308,7 @@ function validateGateSemantics(options: {
   findings.push(...validateScaleSkipRecords(options.outputDir, options.profile, options.scale));
   findings.push(...validateExpectationClosure(options));
   findings.push(...validateHumanReviewGates(options));
+  findings.push(...validateRetroPassMarkers(options));
 
   if (runState) {
     const missingMetadata = [
@@ -558,6 +560,75 @@ function validateScaleSkipRecords(outputDir: string, profile: WorkflowProfile, s
  * Проверка включается, когда стадия `08-frontend` уже отработала: до неё показывать
  * нечего. Отсутствие записи — error: закрыть `08`, `09` или `11` как success нельзя.
  */
+/**
+ * Повторный заход обязан нести маркер канала находки.
+ *
+ * Заход — датированный `##`-заголовок в артефакте стадии; маркер
+ * `<!-- retro: pass=N found_by=... -->` ставится строкой под ним. Кто нашёл дефект,
+ * машинно из файла не выводится: это знает только тот, кто в момент правки держит
+ * контекст. Без маркера `yarn workflow:retro` подставляет эвристику по тексту
+ * заголовка и печатает `unknown`.
+ *
+ * Почему это проверка, а не норма. Норма записана трижды и трижды не сработала:
+ * `a3-shadcn` (2026-07-29) — маркеров не ставили вовсе; `a3pay-x-ozon-bank-mobile-flow`
+ * (2026-07-30) — оркестратор писал разделами ledger вместо заходов;
+ * `a3pay-subscriptions-widget` (2026-08-03) — восемь маркеров проставлены строками
+ * списка, а не под заголовками, и разбор не увидел ни одного. Каждый раз причина
+ * новая, результат один: ретро печатает «0 дорогих находок» при восьми фактических,
+ * то есть **врёт в благополучную сторону** — по метрике выходит, что автоматика
+ * поймала всё сама. Четвёртая формулировка нормы не меняет того, что исполнение
+ * держится на дисциплине в момент, когда человек занят другим.
+ */
+function validateRetroPassMarkers(options: { outputDir: string }): Finding[] {
+  const passes = collectRunPasses(options.outputDir);
+  if (passes.length === 0) return [];
+
+  const findings: Finding[] = [];
+  const unmarkedByArtifact = new Map<string, number[]>();
+  for (const pass of passes) {
+    if (pass.channel_source === "marker") continue;
+    const lines = unmarkedByArtifact.get(pass.artifact) ?? [];
+    lines.push(pass.line);
+    unmarkedByArtifact.set(pass.artifact, lines);
+  }
+
+  for (const [artifact, lines] of unmarkedByArtifact) {
+    findings.push({
+      level: "error",
+      message:
+        `${artifact}: ${lines.length} из ${passes.filter((p) => p.artifact === artifact).length} ` +
+        `датированных заходов без маркера канала (строки ${lines.join(", ")}). ` +
+        "Под заголовком захода нужна строка `<!-- retro: pass=N found_by=... -->`, " +
+        "где `found_by` — один из `validator|agent_self|qa|orchestrator|user_review|user_device`. " +
+        "Маркер, поставленный не строкой под заголовком (в списке, таблице, абзаце), " +
+        "к заходу не привязывается и в разбор не попадает — проверь `yarn workflow:retro`.",
+    });
+  }
+
+  // Расхождение между фактическими заходами и счётчиком движка: правки шли мимо
+  // `workflow:run-stage`, поэтому статистика повторов недостоверна.
+  const runState = readJsonIfExists<RunStateLike>(join(options.outputDir, runStateFileName));
+  const engineStages = (runState?.stages ?? {}) as Record<string, { attempts?: number }>;
+  const passesByStage = new Map<string, number>();
+  for (const pass of passes) {
+    passesByStage.set(pass.stage_id, (passesByStage.get(pass.stage_id) ?? 0) + 1);
+  }
+  for (const [stageId, count] of passesByStage) {
+    const attempts = engineStages[stageId]?.attempts ?? 0;
+    if (attempts < count) {
+      findings.push({
+        level: "warning",
+        message:
+          `${runStateFileName}: стадия ${stageId} — ${count} заходов в артефактах против ` +
+          `attempts: ${attempts}. Правки шли мимо движка, статистика повторов недостоверна. ` +
+          "Почини командой `yarn workflow:sync <run-dir>` — она подтянет attempts под факт.",
+      });
+    }
+  }
+
+  return findings;
+}
+
 function validateHumanReviewGates(options: {
   outputDir: string;
   stages: ReturnType<typeof getWorkflowStagesForProfile>;

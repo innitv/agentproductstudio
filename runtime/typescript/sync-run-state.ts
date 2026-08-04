@@ -14,6 +14,7 @@ import {
   type WorkflowScale,
 } from "./workflow-stages";
 import { artifactStatusToStageStatus, readMarkdownStatus, summarizeRunStatus } from "./status-resolver";
+import { collectRunPasses } from "./run-retro";
 import {
   runStateFileName,
   stageResultsDirName,
@@ -66,6 +67,16 @@ export async function syncWorkflowRunState(options: SyncOptions): Promise<SyncRe
   const stageStates: Record<string, WorkflowStageState> = {};
   const stageResults: WorkflowStageResult[] = [];
 
+  // Фактические заходы из артефактов: датированные `##`-заголовки. Правки, сделанные
+  // агентом напрямую в артефакте, движок не видит, и `attempts` остаётся равным 1 (или 0)
+  // при любом числе возвратов — на run `a3pay-subscriptions-widget` было 9 заходов против
+  // `attempts: 0`. Пока счётчик не подтягивается под факт, метрика повторов недостоверна
+  // по всем run сразу, а не только по этому.
+  const passesByStage = new Map<string, number>();
+  for (const pass of collectRunPasses(outputDir)) {
+    passesByStage.set(pass.stage_id, (passesByStage.get(pass.stage_id) ?? 0) + 1);
+  }
+
   for (const stage of stages) {
     const requiredArtifacts = getRequiredArtifactsForStage(stage, profile);
     const inspected = await Promise.all(
@@ -80,7 +91,10 @@ export async function syncWorkflowRunState(options: SyncOptions): Promise<SyncRe
       id: stage.id,
       title: stage.title,
       status,
-      attempts: createdArtifacts.length > 0 ? Math.max(previousStage?.attempts ?? 0, 1) : previousStage?.attempts ?? 0,
+      attempts: Math.max(
+        createdArtifacts.length > 0 ? Math.max(previousStage?.attempts ?? 0, 1) : previousStage?.attempts ?? 0,
+        passesByStage.get(stage.id) ?? 0,
+      ),
       artifacts: createdArtifacts,
       updated_at: updatedAt,
       error: previousStage?.error,

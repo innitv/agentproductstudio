@@ -167,6 +167,29 @@ function buildArtifactToStage(): Map<string, string> {
   return map;
 }
 
+/**
+ * Собрать заходы по всем markdown-артефактам стадий в каталоге run.
+ *
+ * Вынесено в экспорт, потому что тот же счёт нужен трём потребителям, и разойтись
+ * они не должны: `workflow:retro` печатает метрику, `workflow:validate` требует
+ * маркер канала у каждого захода, `workflow:sync` подтягивает `attempts` под
+ * фактическое число заходов. Прецедент расхождения — run `a3pay-subscriptions-widget`:
+ * 9 заходов в артефакте против `attempts: 0` в состоянии run.
+ */
+export function collectRunPasses(dir: string): RetroPass[] {
+  if (!existsSync(dir)) return [];
+  const artifactToStage = buildArtifactToStage();
+  const passes: RetroPass[] = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (!entry.isFile() || !entry.name.endsWith(".md")) continue;
+    const stageId = artifactToStage.get(entry.name);
+    if (!stageId) continue;
+    const content = readFileSync(join(dir, entry.name), "utf8");
+    passes.push(...extractPasses(entry.name, stageId, content));
+  }
+  return passes;
+}
+
 function readJson(file: string): Record<string, unknown> | undefined {
   if (!existsSync(file)) return undefined;
   try {
@@ -239,7 +262,7 @@ function parseMarker(line: string | undefined): Record<string, string> | undefin
  *
  * Границы: содержимое fenced-блоков не читается (внутри примеров бывают `##`).
  */
-function extractPasses(artifactFile: string, stageId: string, content: string): RetroPass[] {
+export function extractPasses(artifactFile: string, stageId: string, content: string): RetroPass[] {
   const lines = content.split(/\r?\n/);
   const passes: RetroPass[] = [];
   let inFence = false;
@@ -365,17 +388,8 @@ export function collectRunRetro(runDir: string): RetroReport {
   const ledgerPath = join(dir, "stage-gate-ledger.md");
   const ledger = existsSync(ledgerPath) ? readFileSync(ledgerPath, "utf8") : "";
 
-  const artifactToStage = buildArtifactToStage();
-
   // Заходы: сканируем все markdown-артефакты run, стадию берём из манифеста.
-  const passes: RetroPass[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (!entry.isFile() || !entry.name.endsWith(".md")) continue;
-    const stageId = artifactToStage.get(entry.name);
-    if (!stageId) continue; // ledger, run-plan и прочее не являются артефактами стадий
-    const content = readFileSync(join(dir, entry.name), "utf8");
-    passes.push(...extractPasses(entry.name, stageId, content));
-  }
+  const passes: RetroPass[] = collectRunPasses(dir);
 
   // Стадии: движок + фактические заходы + inputs_used.
   const engineStages = (runState.stages ?? {}) as Record<string, Record<string, unknown>>;

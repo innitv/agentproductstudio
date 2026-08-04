@@ -950,3 +950,108 @@ withRun((runDir) => {
     "совпадающие run-state и run-meta ошибок давать не должны",
   );
 });
+
+// ---------------------------------------------------------------------------
+// Маркер канала находки у повторного захода
+// ---------------------------------------------------------------------------
+
+// Заход без маркера — error. Норма записана трижды и трижды не исполнена
+// (`a3-shadcn` 2026-07-29, `a3pay-x-ozon-bank-mobile-flow` 2026-07-30,
+// `a3pay-subscriptions-widget` 2026-08-03), поэтому её держит проверка, а не дисциплина.
+withRun((runDir) => {
+  mkdirSync(runDir, { recursive: true });
+  writeFileSync(
+    join(runDir, artifactFiles.screens),
+    "# Screens\n\n## Inputs Used\n\n- бриф\n\n" +
+      "## Правки после показа (2026-08-03)\n\nПеределали список.\n",
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "06-screens", "standard");
+  const marker = findings.filter((f) => /без маркера канала/.test(f.message));
+  assert.equal(marker.length, 1, "заход без маркера обязан давать ошибку");
+  assert.equal(marker[0].level, "error", "уровень находки — error, а не предупреждение");
+});
+
+// Маркер под заголовком — ошибки нет.
+withRun((runDir) => {
+  mkdirSync(runDir, { recursive: true });
+  writeFileSync(
+    join(runDir, artifactFiles.screens),
+    "# Screens\n\n## Inputs Used\n\n- бриф\n\n" +
+      "## Правки после показа (2026-08-03)\n<!-- retro: pass=2 found_by=user_review -->\n\nПеределали список.\n",
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "06-screens", "standard");
+  assert.equal(
+    findings.filter((f) => /без маркера канала/.test(f.message)).length,
+    0,
+    "размеченный заход ошибок давать не должен",
+  );
+});
+
+// 🔴 Тот самый случай, который проверка и заводилась ловить: маркер есть в файле,
+// но стоит строкой списка, а не под заголовком захода. Для ретро он невидим.
+withRun((runDir) => {
+  mkdirSync(runDir, { recursive: true });
+  writeFileSync(
+    join(runDir, artifactFiles.screens),
+    "# Screens\n\n## Inputs Used\n\n- бриф\n\n" +
+      "## Правки после показа (2026-08-03)\n\n" +
+      "- human_review: 7.5 | заход 2 <!-- retro: pass=2 found_by=user_review -->\n",
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "06-screens", "standard");
+  assert.equal(
+    findings.filter((f) => /без маркера канала/.test(f.message)).length,
+    1,
+    "маркер вне строки под заголовком к заходу не привязывается и должен считаться отсутствующим",
+  );
+});
+
+// Артефакт без датированных заголовков — проверка не применяется: заходов не было.
+withRun((runDir) => {
+  mkdirSync(runDir, { recursive: true });
+  writeFileSync(
+    join(runDir, artifactFiles.screens),
+    "# Screens\n\n## Inputs Used\n\n- бриф\n\n## Экраны\n\nОдин проход, возвратов не было.\n",
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "06-screens", "standard");
+  assert.equal(
+    findings.filter((f) => /без маркера канала/.test(f.message)).length,
+    0,
+    "run без повторных заходов проверке не подлежит",
+  );
+});
+
+// Расхождение `attempts` с числом заходов — предупреждение с командой починки.
+withRun((runDir) => {
+  mkdirSync(runDir, { recursive: true });
+  writeFileSync(
+    join(runDir, artifactFiles.screens),
+    "# Screens\n\n## Inputs Used\n\n- бриф\n\n" +
+      "## Заход первый (2026-08-03)\n<!-- retro: pass=1 found_by=user_review -->\n\nТекст.\n\n" +
+      "## Заход второй (2026-08-04)\n<!-- retro: pass=2 found_by=user_review -->\n\nТекст.\n",
+    "utf8",
+  );
+  writeFileSync(
+    join(runDir, "run-state.json"),
+    JSON.stringify({
+      profile: "standard",
+      status: "partial",
+      created_at: "",
+      updated_at: "",
+      stages: { "06-screens": { id: "06-screens", status: "completed", attempts: 0 } },
+    }),
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "06-screens", "standard");
+  const drift = findings.filter((f) => /заходов в артефактах против/.test(f.message));
+  assert.equal(drift.length, 1, "расхождение attempts с числом заходов обязано быть названо");
+  assert.match(drift[0].message, /workflow:sync/, "предупреждение обязано называть команду починки");
+});
