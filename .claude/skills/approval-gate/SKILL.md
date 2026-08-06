@@ -80,6 +80,7 @@ Evidence: approval record с action, exact target, `approved_by`, timestamp; з�
 - **`blocked`/`partial`** — approval запрошен и получен denial, либо отсутствуют credentials/target/права. Причина пишется в `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, `release-notes.md`.
 - **`process_deviation`** — агент выполнил внешнее действие, записал approval, пропустил provider/gate или изменил статус **без** требуемого интерактивного вопроса. Фиксируется немедленно в `stage-gate-ledger.md`, `handoff-bundle.md` и `release-notes.md` с полями: action, exact target, что фактически сделано, какой интерактивный шаг пропущен, remediation. Скрывать deviation или переписывать историю так, будто gate пройден корректно, запрещено.
 - **Запрещённый обход:** заменять требуемый provider/API/MCP локальным аналогом, чтобы обойти approval.
+- 🔴 **`figma_write`: exact target включает предмет работы, а не только файл и страницу.** Совпадение `file:` и `page:` не покрывает работу над другим продуктом, другой декой или знаком бренда в том же файле. При смене предмета — новый запрос до начала работы; «тот же файл» аргументом не является. Прецедент и разбор: `agent-pack/guardrails/approval-matrix.md` (раздел про предмет работы), `docs/architecture/retro-a3-brand-presentation-template-2026-08-06.md`. Расхождение в том run заметил субагент, а не оркестратор — значит проверять это обязан и тот, кто исполняет.
 
 ## 5. Validation gates
 

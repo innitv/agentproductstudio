@@ -5,7 +5,7 @@
 | Notion research child page publish/update | `notion_research_publish` | required with exact parent page target |
 | Notion PRD export | `notion_prd_export` | required with exact page/database target |
 | Notion Agile Board export | `notion_agile_export` | required with exact parent page/database target |
-| Figma canvas write/update | `figma_write` | required with exact file/node target |
+| Figma canvas write/update | `figma_write` | required with exact file/node target **и предметом работы** (см. ниже) |
 | External research API call with project/product context | `external_research_provider_call` | required with exact provider/run target unless user already approved this provider for the run; not required for explicitly enabled non-blocking DeepSeek/Gemini advisory checks on `01-research` |
 | Agentic specialist model-provider call | `model_provider_call` | required with exact `openai_agents_sdk:<owner>:<stage-id>` target |
 | Deploy | `deploy` | required with exact environment/target when available |
@@ -31,3 +31,11 @@ Target matching is strict: a targetless approval never satisfies a targeted requ
 - общий запрос пользователя «сделай/опубликуй/продолжай» не заменяет интерактивный approval, если action требует exact target или отдельный waiver;
 - для `model_provider_call` и `external_research_provider_call` вопрос должен явно называть provider, stage/run target и какие данные покинут локальную песочницу; исключение — явно включенные non-blocking DeepSeek/Gemini advisory checks на `01-research`, которые логируются без approval-вопроса;
 - если интерактивный вопрос был пропущен, запиши process deviation record в `stage-gate-ledger.md`, `handoff-bundle.md` и `release-notes.md` вместо того, чтобы помечать gate как корректно пройденный.
+
+## 🔴 `figma_write`: target — это файл, страница И предмет работы
+
+Одного совпадения файла и страницы недостаточно. Запись approval содержит **предмет**: какой продукт, какая дека, какие экраны. При смене предмета внутри того же файла approval обновляется **до начала работы** — новым запросом, а не расширительным толкованием старого.
+
+Прецедент `a3-brand-presentation-template` (2026-08-05…06): в `approval-state.json` лежала запись `figma_write` с целью «сборка макетов 14 типов слайдов». В том же файле и на той же странице за сессию выполнены правка двух банковских дек, семь раундов проб слайдов и две серии проб **знака бренда** — работа другого предмета и другого уровня риска (знак бренда правится на нормативной странице «Бренд», хотя пробы собирались отдельно). Формально target совпадал, содержательно — нет. Расхождение заметил субагент в конце сборки, оркестратор — нет.
+
+Практически: «тот же файл» — не аргумент. Аргумент — «тот же предмет». Отсутствие обновлённой записи фиксируется как process deviation record с причиной (см. раздел Interactive Approval Protocol выше), а не считается покрытым старым approval. Разбор: `docs/architecture/retro-a3-brand-presentation-template-2026-08-06.md`.
