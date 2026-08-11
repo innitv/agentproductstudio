@@ -61,12 +61,23 @@ $env:ANTHROPIC_DEFAULT_SONNET_MODEL = $mainModel
 $env:ANTHROPIC_DEFAULT_HAIKU_MODEL  = 'deepseek-v4-flash'
 $env:CLAUDE_CODE_SUBAGENT_MODEL     = 'deepseek-v4-flash'
 
-# Ключ Anthropic не должен уехать во внешнего провайдера
-$env:ANTHROPIC_API_KEY = $null
+# 🔴 Изоляция конфигурации обязательна, без неё режим не работает.
+# Claude Code с активной подпиской игнорирует ANTHROPIC_AUTH_TOKEN и отправляет
+# в DeepSeek сохранённые креды подписки; DeepSeek отвечает 401, а до этого
+# несколько минут висят ретраи (замерено 2026-08-06). Отдельный CLAUDE_CONFIG_DIR
+# лишает клиента сохранённых кредов, и он берёт ключ из переменной.
+# Каталог постоянный: иначе onboarding повторяется на каждом запуске.
+$env:CLAUDE_CONFIG_DIR = Join-Path $HOME '.claude-deepseek'
+New-Item -ItemType Directory -Force -Path $env:CLAUDE_CONFIG_DIR | Out-Null
+
+# Присваивание $null переменную не гасит надёжно — удаляем явно,
+# чтобы ключ Anthropic не уехал во внешнего провайдера
+Remove-Item Env:\ANTHROPIC_API_KEY -ErrorAction SilentlyContinue
 
 Write-Host ''
 Write-Host '  Claude Code -> DeepSeek' -ForegroundColor Cyan
 Write-Host "  основная модель: $mainModel, субагенты: deepseek-v4-flash"
+Write-Host "  конфиг: $env:CLAUDE_CONFIG_DIR (отдельный от основного)"
 Write-Host ''
 Write-Host '  НЕ делать в этой сессии:' -ForegroundColor Yellow
 Write-Host '    - визуальное (нет vision): гейты 8.5a/8.5b, visual-diff, Figma write'
