@@ -91,6 +91,26 @@ try {
     ["# QA Report", "", "## Summary", "Заходов нет.", ""].join("\n"),
   );
 
+  // Хроника, которую ведут в run ledger, а не в артефакте стадии: так выглядит прогон,
+  // целиком прошедший в Figma. До 2026-08-11 такие заходы метрика не видела вовсе.
+  writeFileSync(
+    join(runDir, "HANDOFF.md"),
+    [
+      "# Handoff",
+      "",
+      "## Состояние после сессии 2026-07-03 (первый показ)",
+      "Собрано и показано.",
+      "",
+      "## Состояние после сессии 2026-07-04 (переделка после показа)",
+      "<!-- retro: found_by=user_review -->",
+      "Владелец отклонил манеру целиком.",
+      "",
+      "## Состав пакета",
+      "Заголовок без даты заходом не является.",
+      "",
+    ].join("\n"),
+  );
+
   writeFileSync(
     join(runDir, "stage-gate-ledger.md"),
     [
@@ -147,7 +167,8 @@ try {
     !report.passes.some((pass) => pass.heading.includes("Changed Files")),
     "заголовок без даты не должен считаться заходом",
   );
-  assert.equal(report.metrics.rework_passes, 2, "заходов сверх первого на стадию должно быть 2");
+  // 2 сверх первого во `08-frontend` + 1 сверх первого в ledger-хронике `HANDOFF.md`.
+  assert.equal(report.metrics.rework_passes, 3, "заходы ledger обязаны считаться наравне со стадийными");
   assert.equal(report.metrics.rework_by_stage["08-frontend"], 3);
 
   // --- Метрика 2: каналы -----------------------------------------------------
@@ -168,7 +189,8 @@ try {
   assert.equal(garbage.channel_source, "heuristic", "мусорное значение маркера не должно приниматься");
   assert.equal(garbage.channel, "unknown");
 
-  assert.equal(report.metrics.channel_marker_coverage, Math.round((1 / 3) * 100) / 100);
+  // 2 маркера (один в артефакте стадии, один в ledger-хронике) на 5 заходов.
+  assert.equal(report.metrics.channel_marker_coverage, Math.round((2 / 5) * 100) / 100);
 
   // --- Метрики 3 и 4: ledger -------------------------------------------------
   assert.equal(report.metrics.deviations, 2, "отклонения читаются из таблицы ledger");
@@ -220,8 +242,32 @@ try {
   // ни один заход не будет отнесён к стадии и тест выше упадёт на нулях — но
   // проверим явно, что стадия у заходов реальная, а не подставлена по имени файла.
   assert.ok(
-    report.passes.every((pass) => /^\d{2}-/.test(pass.stage_id)),
-    "стадия захода обязана приходить из манифеста",
+    report.passes.every((pass) => /^\d{2}-/.test(pass.stage_id) || pass.stage_id === "ledger"),
+    "стадия захода обязана приходить из манифеста (или быть хроникой ledger)",
+  );
+
+  // --- Заходы, ведомые в run ledger, а не в артефакте стадии -------------------
+  // 🔴 Регресс, который это ловит: прогон, целиком прошедший в Figma с хроникой в
+  // `HANDOFF.md`, печатал «0 заходов, 0 дорогих находок» — метрика врала в
+  // благополучную сторону ровно там, где разбор нужнее всего (run
+  // `a3-brand-presentation-template`, 2026-08-11).
+  const ledgerPasses = report.passes.filter((pass) => pass.stage_id === "ledger");
+  assert.equal(ledgerPasses.length, 2, "оба датированных захода HANDOFF.md обязаны быть найдены");
+  assert.ok(
+    ledgerPasses.some((pass) => pass.channel === "user_review" && pass.channel_source === "marker"),
+    "маркер канала в ledger-хронике обязан читаться так же, как в артефакте стадии",
+  );
+  assert.equal(
+    report.metrics.rework_by_stage.ledger,
+    2,
+    "заходы ledger обязаны попадать в разбивку по стадиям",
+  );
+
+  // Негативный контроль механизма: без ledger-хроники счёт обязан падать.
+  const withoutLedger = report.metrics.rework_passes - Math.max(0, ledgerPasses.length - 1);
+  assert.ok(
+    withoutLedger < report.metrics.rework_passes,
+    "метрика обязана расти за счёт ledger-заходов, иначе механизм ничего не добавил",
   );
 
   // --- Проверка маршрута -----------------------------------------------------

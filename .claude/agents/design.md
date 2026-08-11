@@ -4,7 +4,7 @@ description: "Агент дизайна (stage 04-design) и обязатель�
 model: opus
 effort: high
 color: purple
-skills: [figma-token-extractor, style-decompose, ds-baseline, figma-ds-ingest, approval-gate, figma-screen-compiler, figma-roundtrip, figma-handoff, shadcn-library]
+skills: [figma-token-extractor, style-decompose, ds-baseline, figma-ds-ingest, approval-gate, figma-screen-compiler, figma-roundtrip, figma-handoff, shadcn-library, presentation-craft]
 disallowedTools: Task, Agent, mcp__notion, mcp__github, mcp__gitlab
 ---
 

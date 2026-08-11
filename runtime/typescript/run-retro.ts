@@ -168,7 +168,21 @@ function buildArtifactToStage(): Map<string, string> {
 }
 
 /**
- * Собрать заходы по всем markdown-артефактам стадий в каталоге run.
+ * Файлы run ledger, которые тоже несут хронику заходов.
+ *
+ * 🔴 Повод: run `a3-brand-presentation-template`. Работа шла в Figma, её хроника
+ * велась разделами `HANDOFF.md` («Состояние после сессии …»), а канонические артефакты
+ * стадий после `05-copy` не трогались вовсе. Метрика печатала «6 заходов, 0 дорогих
+ * находок» на прогоне, где отклонений от владельца было больше десяти — то есть врала
+ * в благополучную сторону ровно там, где разбор нужнее всего. Стадия у таких заходов
+ * не выводится (работа не привязана к стадии pipeline), поэтому она помечается `ledger`
+ * и в таблицу стадий не попадает — только в общий счёт и в таблицу заходов.
+ */
+const ledgerChronicleFiles = new Set(["HANDOFF.md", "handoff-bundle.md", "stage-gate-ledger.md"]);
+const ledgerStageId = "ledger";
+
+/**
+ * Собрать заходы по markdown-артефактам стадий и по файлам run ledger.
  *
  * Вынесено в экспорт, потому что тот же счёт нужен трём потребителям, и разойтись
  * они не должны: `workflow:retro` печатает метрику, `workflow:validate` требует
@@ -182,7 +196,7 @@ export function collectRunPasses(dir: string): RetroPass[] {
   const passes: RetroPass[] = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     if (!entry.isFile() || !entry.name.endsWith(".md")) continue;
-    const stageId = artifactToStage.get(entry.name);
+    const stageId = artifactToStage.get(entry.name) ?? (ledgerChronicleFiles.has(entry.name) ? ledgerStageId : undefined);
     if (!stageId) continue;
     const content = readFileSync(join(dir, entry.name), "utf8");
     passes.push(...extractPasses(entry.name, stageId, content));
@@ -440,11 +454,22 @@ export function collectRunRetro(runDir: string): RetroReport {
 
   const lastValidation = [...validationRuns].reverse().find((run) => run.errors !== undefined);
 
+  // Заходы вне стадий pipeline: работа, чья хроника ведётся в run ledger (`HANDOFF.md`).
+  // Стадии для них нет, поэтому в таблицу стадий они не попадают — но в метрику обязаны:
+  // без этого прогон, целиком прошедший в Figma, печатает «0 заходов» (run
+  // `a3-brand-presentation-template`, где отклонений от владельца было больше десяти).
+  const ledgerPasses = passes.filter((pass) => pass.stage_id === ledgerStageId).length;
+
   const metrics: RetroMetrics = {
     // Первый заход в артефакт — это работа, а не rework: считаем сверх первого на стадию.
-    rework_passes: stages.reduce((sum, row) => sum + Math.max(0, row.rework_passes - 1), 0),
+    rework_passes:
+      stages.reduce((sum, row) => sum + Math.max(0, row.rework_passes - 1), 0) +
+      Math.max(0, ledgerPasses - 1),
     rework_by_stage: Object.fromEntries(
-      stages.filter((row) => row.rework_passes > 0).map((row) => [row.stage_id, row.rework_passes]),
+      [
+        ...stages.filter((row) => row.rework_passes > 0).map((row) => [row.stage_id, row.rework_passes]),
+        ...(ledgerPasses > 0 ? [[ledgerStageId, ledgerPasses]] : []),
+      ] as [string, number][],
     ),
     defect_channel: channelCounts,
     channel_marker_coverage: passes.length === 0 ? 0 : Math.round((withMarker / passes.length) * 100) / 100,

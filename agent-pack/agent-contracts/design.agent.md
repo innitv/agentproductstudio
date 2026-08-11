@@ -25,6 +25,7 @@ skills:
   - figma-roundtrip
   - figma-handoff
   - shadcn-library
+  - presentation-craft
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 
