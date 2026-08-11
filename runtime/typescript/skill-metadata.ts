@@ -114,7 +114,49 @@ export function validateSkillMetadata(root = process.cwd()): string[] {
     }
   }
 
+  errors.push(...findOrphanSkills(root));
+
   return errors;
+}
+
+/**
+ * Навык-сирота: лежит на диске, но не подключён ни к одному агенту и не назван в индексе.
+ *
+ * 🔴 Повод: навык `presentation-craft` (2026-08-11) был создан и прошёл все проверки, будучи
+ * подключённым **ни к кому** — ни один тест этого не заметил. Такой навык существует только
+ * для того, кто его написал: субагент получает тела навыков из своего списка `skills:`, и
+ * если навыка там нет, исполнитель о нём не узнает. Класс ошибки тот же, что ловит skill
+ * `rule-placement`: правило записано в один файл и потому не действует.
+ *
+ * Два законных адреса подключения, и хотя бы один обязан быть:
+ *  - `skills:` в обёртке `.claude/agents/<agent>.md` — стадийный навык;
+ *  - упоминание в `CLAUDE.md` — кросс-стадийный, который вызывает оркестратор.
+ */
+export function findOrphanSkills(root = process.cwd()): string[] {
+  const agentsDir = join(root, ".claude", "agents");
+  const indexFile = join(root, "CLAUDE.md");
+  if (!existsSync(agentsDir)) return [];
+
+  const wrappers = readdirSync(agentsDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
+    .map((entry) => readFileSync(join(agentsDir, entry.name), "utf8"))
+    .join("\n");
+  const index = existsSync(indexFile) ? readFileSync(indexFile, "utf8") : "";
+
+  const orphans: string[] = [];
+  for (const file of listSkillFiles(root)) {
+    const id = file.split(/[\\/]/).at(-2);
+    if (!id) continue;
+    const inWrapper = new RegExp(`(^|[\\s,\\[\`])${id}([\\s,\\]\`]|$)`, "m").test(wrappers);
+    const inIndex = index.includes(`\`${id}\``);
+    if (!inWrapper && !inIndex) {
+      orphans.push(
+        `.claude/skills/${id}/SKILL.md: навык не подключён ни к одному агенту (skills: в обёртке) ` +
+          `и не назван в CLAUDE.md — исполнитель о нём не узнает.`,
+      );
+    }
+  }
+  return orphans;
 }
 
 /**
