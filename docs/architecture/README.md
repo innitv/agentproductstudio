@@ -29,6 +29,7 @@
 
 | Документ | Прогон |
 |---|---|
+| [retro-fasttest-contractor-demo-2026-08-11.md](retro-fasttest-contractor-demo-2026-08-11.md) | Две темы подрядчиков и два новых архетипа. Источник проверки «каждая поставляемая ссылка открывается своим экраном» и нормы «образец за состоянием снимают из браузера с живой сессией» |
 | [retro-a3pay-x-ozon-bank-mobile-flow-2026-07-30.md](retro-a3pay-x-ozon-bank-mobile-flow-2026-07-30.md) | Мобильный флоу A3Pay под Ozon Банк |
 | [retro-fasttest-contractor-demo-2026-07-30.md](retro-fasttest-contractor-demo-2026-07-30.md) | Демо оплаты для подрядчиков (вынесено в отдельный репозиторий) |
 | [retro-a3-shadcn-2026-07-29.md](retro-a3-shadcn-2026-07-29.md) | A3 на shadcn. Источник нормы «знание про библиотеку → навык `shadcn-library`» и разбора восьми дефектов, прошедших машинную приёмку |
