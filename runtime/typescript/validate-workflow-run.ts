@@ -649,17 +649,47 @@ function validateHumanReviewGates(options: {
   for (const point of ["8.5a", "8.5b"] as const) {
     // Внутри template literal escape-последовательности регулярки надо удваивать:
     // `\s` схлопнулось бы в букву `s`, а `\b` — в символ backspace.
-    const seen = new RegExp(`human_review:\\s*${point.replace(".", "\\.")}(?![0-9])`).test(ledger);
+    const escaped = point.replace(".", "\\.");
+    const seen = new RegExp(`human_review:\\s*${escaped}(?![0-9])`).test(ledger);
     if (seen) continue;
 
+    /*
+     * 🔴 Отклонение с причиной — законный выход, и он обязан РАСПОЗНАВАТЬСЯ.
+     *
+     * До 2026-08-17 сообщение ниже предлагало «зафиксируй process_deviation с
+     * причиной», а сама проверка искала только `human_review` — записанное
+     * отклонение оставалось ошибкой. То есть валидатор советовал ход, который
+     * сам же не принимал: поймано аудитом при попытке закрыть реальный прогон,
+     * где витрину не показывали, потому что человек правил по собранной странице.
+     *
+     * Уровень `warning`: отклонение — не то же самое, что показ. Оно снимает
+     * блокировку, но остаётся видимым в выдаче, иначе «не показывали» станет
+     * дешёвым способом закрыть гейт.
+     */
+    const deviation = new RegExp(
+      `process_deviation[^\\n]*human_review\\s*${escaped}(?![0-9])`,
+    ).test(ledger);
     const what = point === "8.5a" ? "витрины (Storybook)" : "собранной страницы (dev-сервер)";
+
+    if (deviation) {
+      findings.push({
+        level: "warning",
+        message:
+          `${artifactFiles.stage_gate_ledger}: показ ${what} не проводился, зафиксировано ` +
+          `\`process_deviation: human_review ${point}\` с причиной. Гейт не закрыт показом — ` +
+          "отклонение принято, но остаётся в выдаче.",
+      });
+      continue;
+    }
+
     findings.push({
       level: "error",
       message:
         `${artifactFiles.stage_gate_ledger}: нет записи \`human_review: ${point}\` — показ ${what} ` +
         "человеку не зафиксирован. Гейт человека нельзя закрыть фразой «делай дальше» " +
-        "(CLAUDE.md §5, claude-operating-rules.md §6.1): запиши строку с датой и полученными " +
-        "замечаниями либо зафиксируй process_deviation с причиной.",
+        "(CLAUDE.md §5, claude-operating-rules.md §6.1): запиши строку командой " +
+        `\`yarn workflow:human-review <run-dir> ${point} --notes "…"\` либо зафиксируй строку ` +
+        `\`process_deviation: human_review ${point}\` с причиной.`,
     });
   }
 

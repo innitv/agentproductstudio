@@ -408,8 +408,31 @@ function parseCliArgs(argv) {
   return { json, targets };
 }
 
+/**
+ * Путь обязателен.
+ *
+ * Прецедент 2026-08-17: без аргумента `resolveMarkdownTargets` брал `.`, то есть линтовал
+ * КОРЕНЬ репозитория как research pack — 4 fail, включая `generic_claim_detector` на строках
+ * самого `CLAUDE.md`. С путём run-каталога та же команда проходит. Это ошибка вызова, а не
+ * провал линта, поэтому код выхода отдельный: `2` (провал линта — `1`, успех — `0`), иначе
+ * «lint упал» и «lint позвали без аргумента» неотличимы по коду.
+ */
+const usage = [
+  "Usage: yarn research:lint <путь> [<путь>…] [--json]",
+  "  <путь> — каталог run (research pack) или отдельный .md:",
+  "    yarn research:lint research/projects/<research-slug>/<YYYY-MM-DD>",
+  "    yarn research:lint outputs/<project-slug>/<YYYY-MM-DD>",
+  "    yarn research:lint <research-export-md>",
+  "Без пути команда линтовала бы корень репозитория как research pack — это не проверка, а шум.",
+].join("\n");
+
 async function main() {
   const { json, targets } = parseCliArgs(process.argv.slice(2));
+  if (!targets.length) {
+    console.error(usage);
+    process.exit(2);
+  }
+
   try {
     const report = lintResearchTargets(targets);
     if (json) {

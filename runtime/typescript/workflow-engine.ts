@@ -26,6 +26,8 @@ import { summarizeRunStatus as resolveRunStatus } from "./status-resolver";
 
 export interface StartWorkflowOptions {
   goal: string;
+  /** Явный слаг каталога прогона; без него слаг выводится из цели (см. `resolveRunSlug`). */
+  slug?: string;
   profile?: WorkflowProfile;
   scale?: WorkflowScale;
   executionMode?: WorkflowExecutionMode;
@@ -48,6 +50,7 @@ export async function startWorkflowEngine(options: StartWorkflowOptions): Promis
   // перечисляет весь pipeline независимо от масштаба, а гейт опроса нечем закрыть.
   const outputDir = await runLandingWorkflow({
     goal: options.goal,
+    slug: options.slug,
     profile,
     scale,
     axes_recorded: {

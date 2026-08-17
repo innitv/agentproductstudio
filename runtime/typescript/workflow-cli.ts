@@ -13,6 +13,12 @@ import {
   type ApprovalAction,
 } from "./approval-gate";
 import { loadLocalEnv } from "./env";
+import {
+  assertHumanReviewGate,
+  humanReviewGateTitles,
+  humanReviewGates,
+  recordHumanReview,
+} from "./human-review-gate";
 import { parseUserIntent, type ParsedIntent } from "./intent-parser";
 import { archiveWorkflowRun, cleanupTempOutputs, formatArchiveWorkflowRunResult, formatCleanupTempResult } from "./output-lifecycle";
 import { formatWorkflowOutputsGuide, formatWorkflowRunInspection, formatWorkflowRunList, inspectWorkflowRun, listWorkflowRuns } from "./output-metadata";
@@ -39,6 +45,7 @@ const explicitWorkflowCommands = new Set([
   "run-stage",
   "approve",
   "deny",
+  "human-review",
   "approval-request",
   "approvals",
   "agentic-stages",
@@ -46,6 +53,63 @@ const explicitWorkflowCommands = new Set([
   "agentic-approval-commands",
   "agentic-preflight",
 ]);
+
+/**
+ * Аргументы каждой команды одной строкой. Это те же `Usage:`, что печатаются при неполном
+ * вызове, собранные в один перечень — иначе справки для человека не существует вовсе:
+ * `--help` не обрабатывался, и строки жили только внутри отдельных `throw`.
+ *
+ * Связность с `explicitWorkflowCommands` проверяется машинно
+ * (`runtime/typescript/test-workflow-start-guards.ts`): новая команда без строки справки —
+ * это команда, о которой человек не узнает.
+ */
+export const commandUsage: Record<string, string> = {
+  start: 'yarn workflow:start "<landing workflow goal>" [--slug <project-slug>] [--mode local|agentic] [--profile standard|reference] [--scale full|increment|patch]',
+  resume: "yarn workflow:resume outputs/<project-slug>/<YYYY-MM-DD>",
+  status: "yarn workflow:status outputs/<project-slug>/<YYYY-MM-DD>",
+  intent: 'yarn workflow:intent "<фраза-триггер>" [--run-dir outputs/<project-slug>/<YYYY-MM-DD>]',
+  list: "yarn workflow:list [--base outputs]",
+  inspect: "yarn workflow:inspect outputs/<project-slug>/<YYYY-MM-DD>",
+  outputs: "yarn workflow:outputs outputs/<project-slug>/<YYYY-MM-DD>",
+  skills: "yarn workflow:skills",
+  map: "yarn workflow:map",
+  "cleanup-temp": "yarn workflow:cleanup-temp [--base outputs/temp] [--force]",
+  archive: "yarn workflow:archive outputs/<project-slug>/<YYYY-MM-DD> [--force] [--quarantine] [--target-root outputs/archive]",
+  "registry-sync": "yarn workflow:registry-sync [--base outputs] [--force|--fix]",
+  "run-stage": "yarn workflow:run-stage outputs/<project-slug>/<YYYY-MM-DD> <stage-id> --force",
+  approve: "yarn workflow:approve outputs/<project-slug>/<YYYY-MM-DD> <approval-action> [--target value] [--by name] [--notes text]",
+  deny: "yarn workflow:deny outputs/<project-slug>/<YYYY-MM-DD> <approval-action> [--target value] [--by name] [--notes text]",
+  "human-review": 'yarn workflow:human-review outputs/<project-slug>/<YYYY-MM-DD> <gate> --notes "что сказал человек" [--shown "ссылка/узел/роут"] [--by name]',
+  "approval-request": "yarn workflow:approval-request outputs/<project-slug>/<YYYY-MM-DD> <approval-action> --target <value> [--by name] [--notes text] [--reason text]",
+  approvals: "yarn workflow:approvals outputs/<project-slug>/<YYYY-MM-DD>",
+  "agentic-stages": "yarn workflow:agentic-stages",
+  "agentic-readiness": "yarn workflow:agentic-readiness [outputs/<project-slug>/<YYYY-MM-DD>] [--strict]",
+  "agentic-approval-commands": "yarn workflow:agentic-approval-commands outputs/<project-slug>/<YYYY-MM-DD> [--by name] [--missing-only]",
+  "agentic-preflight": "yarn workflow:agentic-preflight outputs/<project-slug>/<YYYY-MM-DD> [--by name] [--strict]",
+};
+
+/** Флаги справки. Распознаются в любой позиции, до разбора команды. */
+const helpFlags = new Set(["--help", "-h"]);
+
+/**
+ * Справка по командам движка.
+ *
+ * Прецедент 2026-08-17: флаг `--help` не обрабатывался, поэтому `yarn workflow:start --help`
+ * принимал `--help` за ЦЕЛЬ прогона: заводил каталог `outputs/help/<дата>`, вносил слаг
+ * `help` в `outputs/registry.json` и прогонял по нему стадии. На диске нашли два таких
+ * прогона — с полностью сгенерированными research-артефактами.
+ */
+export function formatWorkflowCliHelp(): string {
+  const width = Math.max(...Object.keys(commandUsage).map((command) => command.length));
+  return [
+    "Движок workflow: команды и их аргументы.",
+    "",
+    ...Object.entries(commandUsage).map(([command, usage]) => `  ${command.padEnd(width)}  ${usage}`),
+    "",
+    'Вместо команды можно дать триггер-фразу: yarn workflow:intent "<фраза>" [--run-dir outputs/<project-slug>/<YYYY-MM-DD>]',
+    "Флаг --help (-h) в любой позиции печатает эту справку и НЕ создаёт ни каталога прогона, ни записи в реестре.",
+  ].join("\n");
+}
 
 /**
  * Операции движка, которые CLI вызывает как побочный эффект. Вынесены в отдельный слой,
@@ -75,20 +139,25 @@ export async function runWorkflowCli(
   const command = rawArgs[0];
   const rest = rawArgs.slice(1);
 
+  // Справка проверяется ДО разбора команды и до эвристики намерений: `--help` в любой
+  // позиции — это запрос справки, а не цель прогона и не фраза-триггер.
+  if (rawArgs.some((arg) => helpFlags.has(arg))) {
+    console.log(formatWorkflowCliHelp());
+    return;
+  }
+
   if (await tryRunIntentCommand(rawArgs, engine)) {
     return;
   }
 
   if (command === "start") {
-    const { mode, profile, scale, args } = parseStartOptions(rest);
+    const { mode, profile, scale, slug, args } = parseStartOptions(rest);
     const goal = args.join(" ").trim();
     if (!goal) {
-      throw new Error(
-        'Usage: yarn workflow:start "<landing workflow goal>" [--mode local|agentic] [--profile standard|reference] [--scale full|increment|patch]',
-      );
+      throw new Error(`Usage: ${commandUsage.start}`);
     }
 
-    const state = await engine.startWorkflowEngine({ goal, executionMode: mode, profile, scale });
+    const state = await engine.startWorkflowEngine({ goal, slug, executionMode: mode, profile, scale });
     console.log(await engine.getWorkflowEngineStatus(state.output_dir));
     return;
   }
@@ -214,6 +283,35 @@ export async function runWorkflowCli(
       notes: parsed.notes,
     });
     console.log(`Approval recorded: ${action}${parsed.target ? ` -> ${parsed.target}` : ""}`);
+    return;
+  }
+
+  /*
+   * ─── ЗАПИСЬ ПОКАЗА ЧЕЛОВЕКУ ───────────────────────────────────────────────
+   * Заведено 2026-08-17 по аудиту студии: строки `human_review` не оказалось ни в
+   * одном из десяти активных прогонов, хотя валидатор её требует. Проверка была,
+   * механизма записи — нет; теперь запись делается командой, а не памятью.
+   */
+  if (command === "human-review") {
+    const outputDir = rest[0];
+    const gate = rest[1];
+    if (!outputDir || !gate) {
+      throw new Error(
+        `Usage: yarn workflow:human-review outputs/<project-slug>/<YYYY-MM-DD> <${humanReviewGates.join("|")}> --notes "что сказал человек" [--shown "ссылка/узел/роут"] [--by name]\n` +
+          humanReviewGates.map((point) => `  ${point} — ${humanReviewGateTitles[point]}`).join("\n"),
+      );
+    }
+
+    assertHumanReviewGate(gate);
+    const parsed = parseApprovalArgs(rest.slice(2));
+    const shownIndex = rest.indexOf("--shown");
+    const line = recordHumanReview(resolve(process.cwd(), outputDir), {
+      by: parsed.by,
+      gate,
+      notes: parsed.notes ?? "",
+      shown: shownIndex >= 0 ? rest[shownIndex + 1] : undefined,
+    });
+    console.log(`Показ записан в ledger:\n${line}`);
     return;
   }
 
@@ -347,7 +445,13 @@ export async function runWorkflowCli(
     return;
   }
 
-  throw new Error("Usage: workflow engine command must be one of: start, resume, status, intent, list, inspect, outputs, skills, map, cleanup-temp, archive, registry-sync, run-stage, approve, deny, approval-request, approvals, agentic-stages, agentic-readiness, agentic-approval-commands, agentic-preflight\nOr use a natural trigger phrase via: yarn workflow:intent \"<фраза>\"");
+  // Перечень команд берётся из `commandUsage`, а не из второй рукописной копии: список в этом
+  // сообщении уже отставал от маршрутизации (в нём не было `human-review`).
+  throw new Error(
+    `Usage: workflow engine command must be one of: ${Object.keys(commandUsage).join(", ")}\n` +
+      'Or use a natural trigger phrase via: yarn workflow:intent "<фраза>"\n' +
+      "Справка по аргументам каждой команды: yarn workflow:start --help",
+  );
 }
 
 /**
@@ -555,6 +659,7 @@ function parseStartOptions(args: string[]): {
   mode: WorkflowExecutionMode;
   profile?: "standard" | "reference";
   scale?: WorkflowScale;
+  slug?: string;
   args: string[];
 } {
   let parsedArgs = args;
@@ -591,7 +696,22 @@ function parseStartOptions(args: string[]): {
     parsedArgs = parsedArgs.filter((_, index) => index !== scaleIndex && index !== scaleIndex + 1);
   }
 
-  return { mode, profile, scale, args: parsedArgs };
+  // Явный слаг каталога прогона. Нужен там, где из цели его вывести нельзя: транслитерации
+  // нет, и на русской цели от строки остаются одни цифры (прогон 2026-08-17 получил слаг `3`
+  // из «Веб-флоу кабинета А3: создание счёта…»). Формат проверяет `resolveRunSlug` — один
+  // предохранитель на оба входа, CLI и `landing:run`.
+  const slugIndex = parsedArgs.indexOf("--slug");
+  let slug: string | undefined;
+  if (slugIndex >= 0) {
+    const rawSlug = parsedArgs[slugIndex + 1];
+    if (!rawSlug || rawSlug.startsWith("--")) {
+      throw new Error(`Флаг --slug требует значение. Usage: ${commandUsage.start}`);
+    }
+    slug = rawSlug;
+    parsedArgs = parsedArgs.filter((_, index) => index !== slugIndex && index !== slugIndex + 1);
+  }
+
+  return { mode, profile, scale, slug, args: parsedArgs };
 }
 
 function parseApprovalArgs(args: string[]): { target?: string; by?: string; notes?: string } {

@@ -17,6 +17,9 @@ export interface AgentOutput<TArtifactName extends string, TArtifact> {
 
 export interface LandingWorkflowInput {
   goal: string;
+  // Слаг каталога прогона, названный человеком. Нужен там, где из цели он не выводится:
+  // на русской цели латиницы почти нет, и слаг вырождается в отдельные цифры.
+  slug?: string;
   context?: string;
   constraints?: string[];
   sources?: string[];

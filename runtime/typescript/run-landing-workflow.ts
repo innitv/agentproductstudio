@@ -62,7 +62,7 @@ export async function runLandingWorkflow(input: LandingWorkflowInput): Promise<s
     throw new Error(`Landing workflow structure is incomplete. Missing: ${missingFiles.join(", ")}`);
   }
 
-  const slug = createSlug(input.goal);
+  const slug = resolveRunSlug(input.goal, input.slug);
   const date = new Date().toISOString().slice(0, 10);
   const outputDir = join(process.cwd(), "outputs", slug, date);
   await mkdir(outputDir, { recursive: true });
@@ -132,7 +132,53 @@ function createSlug(value: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
-    .slice(0, 80) || "landing-workflow";
+    .slice(0, 80);
+}
+
+/** Формат слага каталога прогона: `outputs/<slug>/<YYYY-MM-DD>`. */
+export const runSlugPattern = /^[a-z0-9][a-z0-9-]{2,}$/;
+
+/**
+ * Предохранитель на входе: слаг каталога прогона либо назван человеком, либо выводится из
+ * цели — и во втором случае обязан быть осмысленным.
+ *
+ * Прецедент 2026-08-17: `yarn workflow:start "Веб-флоу кабинета А3: создание счёта…"` дал
+ * слаг **`3`**. Транслитерации здесь нет и не заводится намеренно: латиница из строки
+ * выцеплена, всё остальное стало дефисами, и от русской цели осталась одна цифра. Прогон
+ * пришлось заводить заново с латинской целью, а каталог `outputs/3/` — удалять.
+ *
+ * Поэтому проверяется не «получилось ли что-нибудь», а годится ли результат как имя каталога:
+ * пусто, короче трёх символов или только цифры — это отказ с показом получившегося слага, а не
+ * молчаливое создание каталога, который потом никто не опознает.
+ */
+export function resolveRunSlug(goal: string, explicitSlug?: string): string {
+  if (explicitSlug !== undefined) {
+    const normalized = explicitSlug.trim().toLowerCase();
+    if (!runSlugPattern.test(normalized)) {
+      throw new Error(
+        `Слаг '${explicitSlug}' не годится для каталога прогона. Нужен шаблон ${runSlugPattern.source}: ` +
+          "строчные латинские буквы, цифры и дефис, минимум 3 символа, первый символ — буква или цифра.",
+      );
+    }
+
+    return normalized;
+  }
+
+  const derived = createSlug(goal);
+  // Цифры-только проверяются отдельно: сам шаблон `333` пропускает, и для НАЗВАННОГО человеком
+  // слага это осознанный выбор, а для выведенного из цели — ровно тот дефект, что был.
+  if (!runSlugPattern.test(derived) || /^[0-9-]+$/.test(derived)) {
+    throw new Error(
+      [
+        `Из цели "${goal}" выведен слаг '${derived}' — он не годится для каталога прогона:`,
+        "нужно минимум 3 символа и не одни цифры.",
+        "Так получается на целях без латиницы: транслитерации нет, и от строки остаются отдельные цифры.",
+        `Передай слаг явно: yarn workflow:start "<цель>" --slug <project-slug> (шаблон ${runSlugPattern.source}).`,
+      ].join(" "),
+    );
+  }
+
+  return derived;
 }
 
 // Оси запуска и то, какие из них названы на старте явно.

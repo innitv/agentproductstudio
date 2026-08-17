@@ -195,6 +195,14 @@ yarn workflow:approve outputs/<project-slug>/<YYYY-MM-DD> notion_research_publis
 
 Approval matching строгий по `target`: если runtime запрашивает `--target`, approval должен быть записан с тем же `target`. Targetless approval не покрывает targeted request, а targeted approval не покрывает targetless request.
 
+Записать показ результата человеку (гейты 7.5 макеты, 8.5a витрина, 8.5b собранная страница):
+
+```bash
+yarn workflow:human-review outputs/<project-slug>/<YYYY-MM-DD> 8.5b --notes "ритм секций сбит, зазор 32 вместо 12" --shown "http://localhost:5173/a3 на 1440 и 390" --by "Иван Игнатов"
+```
+
+Команда дописывает в `stage-gate-ledger.md` строку `human_review: <точка>`, которую требует `yarn workflow:validate` после отработавшей `08-frontend`. Пустые замечания отклоняются — молчание человека выходом не является; повторный показ добавляет строку, а не заменяет прежнюю. Заведена 2026-08-17: аудит студии нашёл, что вручную эту строку не записали **ни в одном из десяти активных прогонов**.
+
 Посмотреть все approval records для run:
 
 ```bash
@@ -259,6 +267,8 @@ yarn research:lint <research-export-md>
 ```
 
 Lint проверяет: не тезисная выжимка, глубина CJM/user-flow, связь roadmap с CJM и валидацией, claims с механизмом, неуниверсальные формулировки, неповторяющиеся строки таблиц. **Если lint падает, Notion/Figma/external write запрещён** до исправления источников или export.
+
+Путь обязателен: без него команда выходит с кодом **2** и печатает usage. Раньше отсутствие аргумента означало «линтовать корень репозитория как research pack» — 4 fail на файлах студии, к research отношения не имеющих. Коды выхода различают причины: `0` — pass, `1` — провал линта, `2` — ошибка вызова.
 
 Сверить навигационный индекс `research/registry.json` с фактическими каталогами `research/projects/*`:
 
@@ -414,7 +424,7 @@ yarn workflow:test-agentic
 
 ### Сторожа против расхождения инструкций и кода
 
-Девять проверок: три заведены после аудита 2026-07-28, две — после прогона `a3-shadcn` 2026-07-29 (разбор — `docs/architecture/retro-a3-shadcn-2026-07-29.md`), четыре — после аудита 2026-07-30 (`docs/architecture/studio-optimization-audit-2026-07-30.md`). Первые три (`docs/architecture/studio-audit-2026-07-28.md`): все семь находок P0 того аудита прошли мимо зелёных проверок, потому что держались на договорённости, а не на тесте. Каждая доказана воспроизведением исторического дефекта — тесты содержат дословные формулировки, которые в репозитории уже были.
+Одиннадцать проверок: три заведены после аудита 2026-07-28, две — после прогона `a3-shadcn` 2026-07-29 (разбор — `docs/architecture/retro-a3-shadcn-2026-07-29.md`), четыре — после аудита 2026-07-30 (`docs/architecture/studio-optimization-audit-2026-07-30.md`), две — после аудита 2026-08-17 (`docs/architecture/studio-hygiene-audit-2026-08-17.md`). Первые три (`docs/architecture/studio-audit-2026-07-28.md`): все семь находок P0 того аудита прошли мимо зелёных проверок, потому что держались на договорённости, а не на тесте. Каждая доказана воспроизведением исторического дефекта — тесты содержат дословные формулировки, которые в репозитории уже были.
 
 | Проверка | Что ловит | Где живёт | Куда подключена |
 |---|---|---|---|
@@ -426,6 +436,8 @@ yarn workflow:test-agentic
 | Пропажа указателя на плагин | Обёртка агента перестала упоминать нужный ей плагин (`figma-ds`, `ui-craft` — у четырёх специалистов, `subsystem-audit` — у оркестратора). Субагент видит только свою обёртку и свои навыки: плагин, которого в обёртке нет, для него не существует. Класс дефекта уже случался — коммит `2a49ed8` | `checkPluginPointers` в `runtime/typescript/studio-hygiene.ts` | `yarn workflow:test-studio-hygiene` (→ `workflow:test-agentic`) |
 | Снятая привязка тёмного варианта | Пропажу `@custom-variant dark (...)` из `apps/frontend/src/styles.css`. Без неё `dark:` слушает системную тему, а компоненты реестра несут тёмные варианты в классах: поля и вторичные кнопки уходят в серое на машине с тёмной ОС. Дефект прошёл `vr:test`, `test-storybook`, `qa:mobile` и axe — контейнеры стартуют со светлой темой | `checkFrontendThemeInvariants` в `runtime/typescript/studio-hygiene.ts` | `yarn workflow:test-studio-hygiene` (→ `workflow:test-agentic`) |
 | Тест, который никто не запускает | Файл `runtime/typescript/test-*.ts` без скрипта в `package.json` либо скрипт, не попавший в цепочку `workflow:test-agentic`. Аудит 07-28 нашёл пять таких — состояние починили, механизм нет. Проверка покрывает и саму себя | `checkTestAggregatorCoverage` в `runtime/typescript/studio-hygiene.ts` | `yarn workflow:test-studio-hygiene` (→ `workflow:test-agentic`) |
+| Прогон, заведённый по ошибке вызова | `--help` в аргументах `workflow:start` (флаг уезжал в цель прогона: на диске были два прогона со слагом `help` и research-артефактами внутри) и мусорный слаг из цели без латиницы (русская цель дала слаг `3`). Плюс связность: команда в маршрутизации без строки справки | `helpFlags`/`commandUsage` в `runtime/typescript/workflow-cli.ts`, `resolveRunSlug` в `runtime/typescript/run-landing-workflow.ts` | `yarn workflow:test-start-guards` (→ `workflow:test-agentic`) |
+| Команда, позванная без обязательного аргумента | `research:lint` без пути (линтовал корень репозитория как research pack) и `figma:audit`, не знающий, какую систему аудировать (`default_system` в `design/figma/registry.json`). Обе команды не входили ни в один агрегатор, поэтому их поломка была не видна сводной проверке | `tooling/scripts/lint-research-content.mjs`, `tooling/scripts/audit-figma-component-contracts.mjs` | `yarn workflow:test-cli-arg-contracts` (→ `workflow:test-agentic`) |
 
 Строка или файл выводится из-под линтера маркером `instruction-lint-ignore` в HTML-комментарии — по образцу `docs-audit-ignore` в аудите документации.
 
@@ -737,7 +749,7 @@ yarn workflow:doctor --repair
 | `yarn workflow:approval-request <run-dir> <action>` | Интерактивный запрос approval с точным `target` (Interactive Question Gate). |
 | `yarn plugin:link` | Ставит плагины из `plugins/` junction'ом в `~/.claude/skills/`. |
 | `yarn figma:check` | Проверка локального Figma token. |
-| `yarn figma:audit` | Аудит Figma component contracts против live-файла. Систему указывать явно: `--registry design/figma/<slug>/component-contracts.json --out design/figma/<slug>/live-audit.latest.md`. |
+| `yarn figma:audit` | Аудит Figma component contracts против live-файла. Без флагов берёт систему из `default_system` в `design/figma/registry.json`; другую систему указывать явно: `--registry design/figma/<slug>/component-contracts.json --out design/figma/<slug>/live-audit.latest.md`. Флаг `--dry-run` разрешает реестр и контракты и останавливается до обращения к Figma API — работает без токена и сети. |
 | `yarn figma:verify-layout` | Проверка `figma-layout-ir.json` против собранных экранов. |
 | `yarn notion:publish-research-hub`, `yarn notion:publish-stories`, `yarn notion:test-export` | Notion publish/export скрипты; требуют approval `notion_research_publish`. |
 | `yarn workflow:test-*` | Отдельные runtime-тесты. Обычно запускаются пачкой через `yarn workflow:test-agentic`; поштучный запуск нужен при отладке конкретной подсистемы. |

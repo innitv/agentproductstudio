@@ -2,7 +2,7 @@ import { existsSync, readdirSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { detectGlobalSkillConflicts } from "./skill-metadata";
-import { detectAbandonedWorktrees } from "./studio-hygiene";
+import { collectStudioHygieneFindings, detectAbandonedWorktrees } from "./studio-hygiene";
 
 interface DiagnosticResult {
   check: string;
@@ -146,6 +146,29 @@ async function runDiagnostics(): Promise<DiagnosticResult[]> {
             .map((worktree) => `${worktree.path} (HEAD ${worktree.head.slice(0, 7)}, влит в main)`)
             .join(", ")}. Каждая копия удваивает выдачу грепа и Glob по репозиторию. ` +
           "Удалить: git worktree remove <путь> && git worktree prune.",
+    canRepair: false,
+  });
+
+  // 3c. Гигиена студии: размер индекса, указатели плагинов, инварианты темы, покрытие тестов
+  //
+  // 🔴 Заведено 2026-08-17 по аудиту. До этого `doctor` брал из `studio-hygiene` ровно одну
+  // функцию — `detectAbandonedWorktrees`, — а остальные четыре проверки вызывались ТОЛЬКО из
+  // `test-studio-hygiene.ts`. Тот, кто следовал §3 «перед запуском workflow запускай doctor»,
+  // не узнавал, что `CLAUDE.md` в двухсот символах от провала порога: аудит застал его с
+  // запасом 231 символ из 35 000.
+  //
+  // Уровень `warning`, а не `error`: doctor проверяет готовность СРЕДЫ к прогону, и превышение
+  // порога индекса прогон не ломает. Ошибкой это делает агрегатор тестов, где оно и должно
+  // валить сборку.
+  const hygieneFindings = collectStudioHygieneFindings();
+  results.push({
+    check: "Гигиена студии (индекс, указатели плагинов, тема, покрытие тестов)",
+    passed: true,
+    level: hygieneFindings.length === 0 ? "pass" : "warning",
+    message:
+      hygieneFindings.length === 0
+        ? "Порог размера CLAUDE.md, указатели плагинов в обёртках, инварианты темы и покрытие агрегатора тестов — в норме."
+        : `${hygieneFindings.length} замечание(й): ${hygieneFindings.join(" | ")}`,
     canRepair: false,
   });
 

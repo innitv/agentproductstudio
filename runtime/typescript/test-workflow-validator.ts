@@ -793,6 +793,40 @@ withRun((runDir) => {
   );
 });
 
+withRun((runDir) => {
+  /*
+   * 🔴 Записанное отклонение снимает ошибку и остаётся предупреждением.
+   *
+   * До 2026-08-17 текст ошибки предлагал «зафиксируй process_deviation с причиной», а
+   * проверка искала только `human_review` — то есть валидатор советовал ход, который сам
+   * не принимал. Поймано аудитом на реальном прогоне портфолио: витрину не показывали,
+   * потому что человек правил по собранной странице, отклонение записали — ошибка осталась.
+   */
+  const ledgerFile = join(runDir, artifactFiles.stage_gate_ledger);
+  mkdirSync(runDir, { recursive: true });
+  writeFileSync(
+    ledgerFile,
+    "# Stage Gate Ledger\n\n## Run\n\n" +
+      "- human_review: 8.5b | dev-сервер показан 2026-08-17, замечания: ритм секций\n" +
+      "- `process_deviation: human_review 8.5a не проводился` | витрину отдельно не показывали: " +
+      "человек правил по собранной странице\n",
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard");
+  const gateErrors = findings.filter((f) => f.level === "error" && /human_review/.test(f.message));
+  assert.equal(gateErrors.length, 0, "отклонение записано — ошибки про 8.5a быть не должно");
+
+  const deviationWarning = findings.filter(
+    (f) => f.level === "warning" && /process_deviation/.test(f.message),
+  );
+  assert.equal(
+    deviationWarning.length,
+    1,
+    "отклонение обязано остаться видимым предупреждением, иначе «не показывали» станет дешёвым выходом",
+  );
+});
+
 /**
  * Показ человеку был, а канал находки не размечен — предупреждение.
  *

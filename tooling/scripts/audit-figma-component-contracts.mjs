@@ -4,6 +4,10 @@ import { dirname, join, resolve } from "node:path";
 const root = process.cwd();
 const registryArg = process.argv.indexOf("--registry");
 const outputArg = process.argv.indexOf("--out");
+// Разрешение реестра и контрактов без обращения к Figma API: проверяет ровно то, на чём
+// команда падала (скрипт не знал, какую систему аудировать), и работает без токена и сети —
+// поэтому пригодно для агрегатора проверок.
+const dryRun = process.argv.includes("--dry-run");
 
 function readDesignSystemRegistry() {
   const registryPath = join(root, "design/figma/registry.json");
@@ -19,7 +23,13 @@ function resolveDefaultRegistryPath() {
     || (systems.length === 1 ? systems[0] : undefined);
   const path = selected?.paths?.component_contracts;
   if (!path) {
-    throw new Error("Укажите --registry <path>. В design/figma/registry.json нет однозначного default_system/component_contracts.");
+    // Сообщение называет и то, чего не хватает, и то, что в реестре есть: раньше на две
+    // системы без `default_system` команда падала, не подсказав ни одного пригодного слага.
+    throw new Error(
+      "Укажите --registry <path>. В design/figma/registry.json нет однозначного default_system/component_contracts. " +
+        `Системы в реестре: ${systems.map((system) => system.slug).join(", ") || "нет ни одной"}. ` +
+        'Либо добавьте в реестр поле "default_system": "<slug>", либо передайте путь к контрактам флагом --registry.',
+    );
   }
   return path;
 }
@@ -90,6 +100,18 @@ function compareContract(contract, nodeRecord) {
 }
 
 const registry = JSON.parse(readFileSync(registryPath, "utf8"));
+
+if (dryRun) {
+  const components = Array.isArray(registry.components) ? registry.components : undefined;
+  if (!components?.length) {
+    throw new Error(`В контрактах ${registryPath} нет непустого массива components.`);
+  }
+
+  console.log(`Figma audit dry-run: registry=${registryPath}; components=${components.length}; fileKey=${registry.fileKey ?? "не задан"}`);
+  console.log("Сеть и токен не проверялись: dry-run разрешает только реестр и контракты.");
+  process.exit(0);
+}
+
 const outputPath = resolve(
   root,
   outputArg >= 0

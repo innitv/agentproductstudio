@@ -1,6 +1,7 @@
 {
   "$schema": "./registry.schema.json",
   "version": 1,
+  "default_system": "shadcn-ui-community",
   "systems": [
     {
       "slug": "shadcn-ui-community",
