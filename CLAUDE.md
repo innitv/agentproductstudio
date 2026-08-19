@@ -211,6 +211,7 @@ Sensitive data: не сохраняй secrets в коде, outputs, traces ил�
 - `selective-commit` — частичный коммит; broad staging запрещён.
 - `outputs-cleanup` — `cleanup/sorting`, архивация run.
 - `rule-placement` — **при любом изменении правила, нормы или гейта студии**. Механическая часть — грепнуть маркер: **выдача в один файл значит, что правило знает только автор**.
+- `context7-docs` — документация внешней библиотеки вместо памяти модели: незнакомый или версионный API, поведение, похожее на баг библиотеки. Норма — `claude-operating-rules.md` §6.2.
 - `run-retrospective` — разбор завершённого run (`/retro`). Расхождения устройства системы — это `/subsystem-audit:audit`.
 - `/subsystem-audit:audit` — аудит подсистемы, сверка с best practice. Junction-плагин.
 - `/ui-craft:build`, `/ui-craft:reference-check` — переносимое ремесло интерфейса. Junction-плагин; основу интерфейса выбирает §6.1.

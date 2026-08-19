@@ -33,6 +33,7 @@ skills:
   - design-engineering
   - figma-ds-ingest
   - shadcn-library
+  - context7-docs
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
 
