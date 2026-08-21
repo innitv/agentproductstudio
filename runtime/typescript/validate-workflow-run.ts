@@ -635,10 +635,30 @@ function validateHumanReviewGates(options: {
   stageLimit: number;
   throughStageId?: string;
 }): Finding[] {
-  const frontendDone = options.stages
-    .slice(0, options.stageLimit + 1)
-    .some((stage) => stage.id === "08-frontend");
-  if (!frontendDone) return [];
+  const reached = (stageId: string) =>
+    options.stages.slice(0, options.stageLimit + 1).some((stage) => stage.id === stageId);
+  const frontendDone = reached("08-frontend");
+
+  /*
+   * 🔴 Точка 7.5 требуется, только когда носитель экранов — Figma, и признак
+   * берётся ПО ФАКТУ, а не по декларации: ось `track` (code/figma) удалена
+   * 2026-07-28, поля «носитель» в `run-state.json` нет, и спрашивать его
+   * неоткуда. Зато `figma-layout-ir.json` появляется в run ровно тогда, когда
+   * экраны собирались в Figma, — если он есть, макеты человеку показывать
+   * было обязано.
+   *
+   * Почему это понадобилось: до 2026-08-21 валидатор проверял только 8.5a и
+   * 8.5b, а объявленная нерушимой 7.5 не проверялась НИЧЕМ — строки "7.5" в
+   * файле не было вовсе. Ровно класс «правило есть, машинной проверки нет» из
+   * урока 07-17: что не проверяется машиной — дрейфует обязательно.
+   */
+  const figmaCarrier =
+    reached("06-screens") &&
+    [artifactFiles.figma_layout_ir, artifactFiles.figma_visual_qa].some((fileName) =>
+      existsSync(join(options.outputDir, fileName)),
+    );
+
+  if (!frontendDone && !figmaCarrier) return [];
 
   const ledgerPath = join(options.outputDir, artifactFiles.stage_gate_ledger);
   if (!existsSync(ledgerPath)) return [];
@@ -646,7 +666,12 @@ function validateHumanReviewGates(options: {
   const ledger = readFileSync(ledgerPath, "utf8");
   const findings: Finding[] = [];
 
-  for (const point of ["8.5a", "8.5b"] as const) {
+  const points = [
+    ...(figmaCarrier ? (["7.5"] as const) : []),
+    ...(frontendDone ? (["8.5a", "8.5b"] as const) : []),
+  ];
+
+  for (const point of points) {
     // Внутри template literal escape-последовательности регулярки надо удваивать:
     // `\s` схлопнулось бы в букву `s`, а `\b` — в символ backspace.
     const escaped = point.replace(".", "\\.");
@@ -669,7 +694,12 @@ function validateHumanReviewGates(options: {
     const deviation = new RegExp(
       `process_deviation[^\\n]*human_review\\s*${escaped}(?![0-9])`,
     ).test(ledger);
-    const what = point === "8.5a" ? "витрины (Storybook)" : "собранной страницы (dev-сервер)";
+    const what =
+      point === "7.5"
+        ? "макетов в Figma (ссылка и скриншоты)"
+        : point === "8.5a"
+          ? "витрины (Storybook)"
+          : "собранной страницы (dev-сервер)";
 
     if (deviation) {
       findings.push({

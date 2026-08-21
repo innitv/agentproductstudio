@@ -793,6 +793,66 @@ withRun((runDir) => {
   );
 });
 
+// ---------------------------------------------------------------------------
+// Гейт 7.5: показ макетов, когда носитель экранов — Figma.
+//
+// До 2026-08-21 эта точка не проверялась НИЧЕМ: в валидаторе не было даже строки
+// "7.5", хотя `CLAUDE.md` §5 объявляет её нерушимой, а команда записи существует
+// с 08-17. Носитель определяется по факту — по наличию `figma-layout-ir.json`
+// (ось `track` удалена 07-28, поля «носитель» в `run-state.json` нет).
+// ---------------------------------------------------------------------------
+
+const ledgerWithFrontendGates =
+  "# Stage Gate Ledger\n\n## Run\n\n" +
+  "- human_review: 8.5a | Storybook показан, замечания: нет\n" +
+  "- human_review: 8.5b | страница показана, замечания: нет\n";
+
+withRun((runDir) => {
+  // Figma-артефакт есть, записи о показе макетов нет — обязана быть ошибка.
+  mkdirSync(runDir, { recursive: true });
+  writeFileSync(join(runDir, artifactFiles.figma_layout_ir), "{}\n", "utf8");
+  writeFileSync(join(runDir, artifactFiles.stage_gate_ledger), ledgerWithFrontendGates, "utf8");
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard");
+  const gate = findings.filter((f) => f.level === "error" && /human_review: 7\.5/.test(f.message));
+  assert.equal(gate.length, 1, "носитель Figma без записи 7.5 обязан давать ошибку");
+});
+
+withRun((runDir) => {
+  // Тот же ledger без Figma-артефакта: 7.5 не применяется, иначе code-прогон получил
+  // бы ошибку за гейт, которого у него нет по устройству.
+  mkdirSync(runDir, { recursive: true });
+  writeFileSync(join(runDir, artifactFiles.stage_gate_ledger), ledgerWithFrontendGates, "utf8");
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard");
+  assert.equal(
+    findings.filter((f) => /human_review: 7\.5/.test(f.message)).length,
+    0,
+    "без Figma-артефакта гейт макетов не применяется",
+  );
+});
+
+withRun((runDir) => {
+  // Запись на месте — молчит. Половина «ошибка умеет исчезать».
+  mkdirSync(runDir, { recursive: true });
+  writeFileSync(join(runDir, artifactFiles.figma_layout_ir), "{}\n", "utf8");
+  writeFileSync(
+    join(runDir, artifactFiles.stage_gate_ledger),
+    "# Stage Gate Ledger\n\n## Run\n\n" +
+      "- human_review: 7.5 | 2026-08-17 | владелец | показано: страница 916:3; замечания: принято\n" +
+      "- human_review: 8.5a | Storybook показан, замечания: нет\n" +
+      "- human_review: 8.5b | страница показана, замечания: нет\n",
+    "utf8",
+  );
+
+  const findings = validateWorkflowRun(runDir, "08-frontend", "standard");
+  assert.equal(
+    findings.filter((f) => f.level === "error" && /human_review/.test(f.message)).length,
+    0,
+    "запись 7.5 есть — ошибок про гейты человека быть не должно",
+  );
+});
+
 withRun((runDir) => {
   /*
    * 🔴 Записанное отклонение снимает ошибку и остаётся предупреждением.
