@@ -28,17 +28,6 @@
       ],
       "port": 5173,
       "autoPort": false
-    },
-    {
-      "name": "fasttest",
-      "runtimeExecutable": "yarn",
-      "runtimeArgs": [
-        "--cwd",
-        "C:/Project/fasttest",
-        "dev"
-      ],
-      "port": 5173,
-      "autoPort": false
     }
   ]
 }
