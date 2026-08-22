@@ -59,7 +59,12 @@ contract_schema: agent-pack/templates/skill.template.md
 4a. Для Figma/product UI/prototype surface создай `figma-layout-ir.json` через `figma-screen-compiler` до write: route, zones, layout constraints, copy-fit, component sources, DS honesty и verification contract.
 5. После visual verdict выполни `systemization`: variables/styles, component sets/properties, instances, Auto Layout/resizing и prototype links. Systemization не имеет права ухудшать screenshot или превращать UI в техническую схему.
 6. Создай Component Contract Matrix для повторяемых и интерактивных компонентов.
-7. Используй Code Connect, если доступен; иначе запиши полный fallback mapping и причину недоступности.
+7. **Code Connect нам недоступен — не трать на него шаги.** По состоянию на
+   2026-07-27 официальная дока требует план Organization/Enterprise и полный
+   Design/Dev Mode seat; проверять это заново на каждой задаче не нужно. Сразу
+   фиксируй fallback: та же связь «компонент → React API» обязана жить в
+   `figma-handoff-bundle.md`, `screens.md` и `frontend-result.md`, плюс
+   `code_connect_status=unavailable|not_configured|skipped_with_reason`.
 8. Для Figma write проверь exact target/approval, загрузи обязательный skill текущего `use_figma` tool и пиши небольшими idempotent patches: сначала настоящие product screens, затем только недостающие component gaps.
 8a. После write запусти `visual-layout-verifier` и создай `figma-visual-qa.json`; readiness запрещен без passed/passed_with_notes gate. Passed structural QA не дает readiness, если human-visible screenshot выглядит как technical board, wireframe или audit artifact.
 8b. Соблюдай textbook-канон — skill `/figma-ds:standard` (`plugins/figma-ds/skills/standard/SKILL.md`): три тиера токенов (primitive→semantic→component), role-based naming, modes на semantic, покрытие типов; component API (variant/boolean/text/instance-swap/slot); a11y (контраст AA≥4.5:1/non-text≥3:1, видимый focus, target ≥24px); versioning/статусы. Реализация в Plugin API и чек-лист после write — `/figma-ds:build`.
@@ -67,6 +72,16 @@ contract_schema: agent-pack/templates/skill.template.md
 9. Для Figma → frontend передай exact nodes/screenshots, state inventory, contracts и frame/state mapping.
 10. Для frontend → Figma классифицируй patch как `token_change|component_api_change|screen_composition_change`; DOM/screenshot import считай только draft/evidence.
 11. Проверь structural, visual и behavioral evidence. Visual regression после systemization блокирует `ready`.
+
+### Reuse-First Component Rule (режимы `reuse`/`extend`)
+
+Перед созданием компонента проверь выбранную DS, локальный индекс, React-компоненты и уже существующие Figma component sets. Подходящий есть — используй его instance/API, параллельную версию не создавай. Нет нужного variant/state — создай ТОЛЬКО точечное расширение под записанный gap. Собирать полный набор компонентов или новую библиотеку из-за одного недостающего элемента запрещено.
+
+Каждый Figma screen обязан использовать реальные instances выбранной DS там, где DS содержит подходящий компонент. Локальный wrapper допустим для product-specific gap или композиции вокруг DS instances, но не как замена существующего компонента. `local_components_with_deviation` — не waiver и `ready` не даёт: `visual-layout-verifier` обязан показать `ds_instance_summary` с источниками выбранной DS, числом видимых instances, числом локальных wrapper и списком недостающих источников.
+
+**Аудит контрактов на Figma-маршруте.** Если источником DS является Figma-библиотека, зафиксируй `selected_design_system_slug` из `design/figma/registry.json`, работай сначала по локальному индексу `design/figma/<slug>/`, а после изменения component sets или React API прогони `yarn figma:audit --registry design/figma/<slug>/component-contracts.json`. Live-аудит со статусом `needs_revision|blocked` запрещает закрывать roundtrip как `success` без deviation/waiver.
+
+🔴 **По умолчанию (`reuse` shadcn/ui в коде) реестр не используется:** выбранная система — `apps/frontend/src/components/shadcn/`, её аудит — `yarn tokens:check`, `yarn test-storybook`, `yarn vr:test`. Запись `shadcn-ui-community` в реестре этого не меняет: Figma-кит нужен, когда задача требует макетов, и источником правды о составе и поведении компонентов не является — им остаётся код. Требовать `selected_design_system_slug` или `figma:audit` без Figma-работы запрещено: там нечего аудировать.
 
 ## Минимальный output
 

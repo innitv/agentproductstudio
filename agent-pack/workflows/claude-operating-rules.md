@@ -155,14 +155,11 @@ Notion research publication выполняется **по явной прось�
 
 ### Two-Pass Figma Build Gate
 
-Применяется при работе по переданному Figma-файлу — когда задача **действительно идёт через Figma** (дивергентный черновик на `04-design`, разовое извлечение токенов, показ человеку, работа с переданной пользователем Figma-библиотекой). Без такой задачи Figma-сборка не требуется, и её отсутствие пропуском не считается.
+Применяется, когда задача **действительно идёт через Figma** (дивергентный черновик на `04-design`, разовое извлечение токенов, показ человеку, переданная пользователем библиотека). Без такой задачи Figma-сборка не требуется, и её отсутствие пропуском не считается.
 
-Для `product_specific`, `extend` и визуально рискованных задач Figma собирается в два прохода:
+**Норма:** для `product_specific`, `extend` и визуально рискованных задач сборка идёт в два прохода — сначала `visual_calibration` на 2-3 экранах, затем `systemization`. Систематизировать ценой ухудшения композиции запрещено; если systemization меняет утверждённую композицию, нужны screenshot comparison и deviation record. Для `ready` обязательны оба вида evidence — визуальный и структурный; число components, variables и Auto Layout frames качеством не является.
 
-1. `visual_calibration`: 2-3 ключевых экрана, реальные visual references, сценарная иерархия, плотность, rhythm, copy fit и responsive direction. На этом проходе запрещено систематизировать макет ценой ухудшения композиции.
-2. `systemization`: только после visual review создаются/уточняются variables, styles, component sets, properties, nested instances, Auto Layout, resizing и prototype links. Если systemization меняет утвержденную композицию, нужен screenshot comparison и deviation record.
-
-Figma-макет не считается качественным только по числу components/variables/Auto Layout frames. Для `ready` одновременно нужны visual calibration evidence и structural evidence.
+Процедура обоих проходов — skill `figma-roundtrip`, шаги 4-5.
 
 ### Figma Make-like Product UI Gate
 
@@ -170,13 +167,7 @@ Figma-макет не считается качественным только �
 
 Перед любым Figma/screen/write действием оркестратор обязан сначала направить задачу через `design` agent (`04-design`), если в текущем run нет свежего `design-brief.md`/`reference-analysis.md`, созданного под этот же запрос и эти же use cases. `design-generator`, `figma-screen-compiler`, `figma-handoff`, `figma-roundtrip`, `visual-layout-verifier` и прямой `use_figma` не имеют права быть первым владельцем задачи про макеты/use cases/flow. Они запускаются только downstream после решения design agent: визуальная гипотеза, LazyWeb evidence, design-system mode, reuse/extend/gap-компоненты и критерии app-like UI.
 
-Обязательный порядок:
-
-1. Собери visual evidence через Lazyweb/референсы по текущей тематике и платформе. Для мобильного приложения ищи именно mobile app screens/flows: dashboard/home, detail, payment/review, status, request/support, settings/access и другие релевантные состояния.
-2. Прочитай use cases/scenario-user-flows и выбери главный app flow. Use cases должны стать пользовательскими экранами и переходами внутри приложения, а не плитками, таблицами, evidence map или техническим board.
-3. В текущем Figma-файле проверь существующую дизайн-систему: components, variants, variables, text/effect styles, existing screens. Если компонент есть — используй его instance/API. Если не хватает одного компонента/variant/state — создай только этот gap и продолжай использовать все остальное существующее.
-4. Сначала собери 1-3 полноценных product screens в реальном viewport с нормальной плотностью, иерархией, навигацией, CTA, состояниями и русским UI-copy. Только после визуального review расширяй flow.
-5. Технические artifacts (`figma-layout-ir.json`, object inventory, node IDs, visual QA JSON, component matrix) являются внутренним контролем и не могут быть основным видимым deliverable. Их нельзя выносить на canvas как пользовательский результат без явного запроса.
+Порядок работы — skill `figma-roundtrip` (режим Figma Make-like) и `figma-screen-compiler`. Норма, которую они не отменяют: сначала visual evidence по теме и платформе, затем главный app flow из use cases, затем проверка существующей DS в файле (есть компонент — брать instance, нет одного — создавать только этот gap), и лишь потом 1-3 полноценных экрана в реальном вьюпорте с русским UI-copy. Технические артефакты (`figma-layout-ir.json`, inventory, node IDs, visual QA JSON, component matrix) — внутренний контроль, а не видимый результат: выносить их на холст как результат для человека без явного запроса запрещено.
 
 Запрещено для такого запроса:
 
@@ -204,52 +195,31 @@ Figma-макет не считается качественным только �
 
 ### Component Contract и Roundtrip Gate
 
-Для каждого повторяемого или интерактивного компонента создай Component Contract Matrix:
+**Норма:** каждый повторяемый или интерактивный компонент имеет Component Contract Matrix — цепочку `источник → allowed values → semantic variables → React component/prop → required states → story/test/locator → deviation`. Источник зависит от маршрута: по умолчанию (`reuse` shadcn/ui) это элемент реестра или собственный компонент своего слоя, а доказательством служат история Storybook с покрытием состояний и её снапшот визуальной регрессии — не Figma-нода. `figma-handoff-bundle.md` в этом маршруте не создаётся, и его отсутствие не является пропуском.
 
-`источник компонента -> allowed values -> semantic variables -> React component/prop -> required states -> story/test/locator -> deviation`.
+**Что запрещает статус `success`:**
 
-Источник компонента зависит от маршрута:
+- frontend, собранный по Figma, без mapping «frame/state → route/story/component», парных скриншотов и behavior evidence для обязательных состояний;
+- выдача импорта DOM или скриншота в Figma за обратную синхронизацию: это только draft/evidence, финальная версия обязана использовать variables, components и instances;
+- перерисовка всего холста там, где достаточно patch существующих instances (изменения классифицируются как `token_change|component_api_change|screen_composition_change`).
 
-- **По умолчанию (`reuse` shadcn/ui):** источник — элемент официального реестра или собственный компонент из своего слоя; доказательством контракта служат история Storybook с покрытием состояний и её снапшот визуальной регрессии, а не Figma-нода. Отдельный `figma-handoff-bundle.md` в этом маршруте не создаётся, и его отсутствие не является пропуском и не требует записи в ledger.
-- **При работе по Figma-библиотеке:** источник — `Figma component/property` (file/node/component key), и матрица дополнительно живёт в `figma-handoff-bundle.md`.
+На Figma-маршруте (источником DS является Figma-библиотека) в артефактах фиксируется `selected_design_system_slug` из `design/figma/registry.json`, и работа идёт с выбранной системой; по умолчанию (`reuse` shadcn/ui в коде) реестр не используется, и требовать слаг без Figma-работы запрещено.
 
-- Если Code Connect доступен по тарифу и доступам, используй его как основной production mapping. По состоянию на 2026-07-27 он нам **недоступен**: официальная дока требует план Organization/Enterprise и full Design/Dev Mode seat — не трать шаги на попытку его настроить, сразу фиксируй fallback.
-- Если Code Connect недоступен, та же связь обязательна в `figma-handoff-bundle.md`, `screens.md` и `frontend-result.md`; зафиксируй `code_connect_status=unavailable|not_configured|skipped_with_reason`.
-- Для `reuse|extend` **на Figma-маршруте** (источником DS является Figma-библиотека) зафиксируй `selected_design_system_slug` из `design/figma/registry.json` и работай с выбранной системой: сначала локальный индекс `design/figma/<design-system-slug>/`, затем `yarn figma:audit --registry design/figma/<design-system-slug>/component-contracts.json` после изменения component sets или React API. Live-аудит со статусом `needs_revision|blocked` запрещает закрывать Figma roundtrip как `success` без deviation/waiver. **По умолчанию (`reuse` shadcn/ui в коде) реестр не используется:** выбранная система — `apps/frontend/src/components/shadcn/`, её аудит — `yarn tokens:check`, `yarn test-storybook` и `yarn vr:test`. Наличие в реестре записи `shadcn-ui-community` (Figma-кит той же библиотеки) этого не меняет: кит нужен, когда задача требует **макетов в Figma**, и не является источником правды о составе и поведении компонентов — им остаётся код. Требовать `selected_design_system_slug` или `figma:audit` без Figma-работы запрещено — там нечего аудировать.
-- Для `reuse|extend` действует **Reuse-First Component Rule**: перед созданием компонента проверь выбранную DS, локальный индекс, React components и уже существующие Figma component sets. Если подходящий компонент есть, используй его instance/API и не создавай параллельную версию. Если компонента или нужного variant/state нет, создай только точечное расширение для зафиксированного gap/reason; запрещено собирать полный набор компонентов или новую библиотеку только потому, что не хватает одного элемента.
-- Для `reuse|extend` каждый Figma screen обязан использовать реальные instances выбранной DS там, где DS содержит подходящий компонент. Локальный component/wrapper допустим только для product-specific gap или composition вокруг DS instances; он не может заменять существующий DS component. `local_components_with_deviation` не является waiver и не дает `ready`: `visual-layout-verifier` должен показать `ds_instance_summary` с selected-DS sources, visible selected-DS instances, local wrapper count и missing required DS sources.
-- Нельзя выдавать импорт DOM/screenshot в Figma за полноценную обратную синхронизацию. Такой импорт является только draft/evidence; финальная версия должна использовать variables, components и instances.
-- Code -> Figma изменения разделяй на `token_change`, `component_api_change` и `screen_composition_change`. Не перерисовывай весь canvas, если достаточно patch существующих instances.
-- Frontend, собранный по Figma, не может иметь статус `success` без frame/state -> route/story/component mapping, paired Figma/browser screenshots и behavior evidence для обязательных состояний.
-
-Единый исполняемый SOP: `integrations/mcp/figma-canvas-write-guide.md`. Skill `figma-roundtrip` обязателен для Figma design system, Figma canvas write, Figma -> frontend и frontend -> Figma задач.
+Механика — skill `figma-roundtrip`: Reuse-First Component Rule, `ds_instance_summary`, статус Code Connect и его недоступность по тарифу, аудит `yarn figma:audit` на Figma-маршруте. Единый исполняемый SOP записи — `integrations/mcp/figma-canvas-write-guide.md`; skill обязателен для Figma design system, canvas write, Figma → frontend и frontend → Figma задач.
 
 ### Обязательный порядок reference-scan и Figma write
 
-1. **Обязательный технический скан референса:** Перед созданием `reference-analysis.md` Claude ОБЯЗАН запустить команду сканирования референса (`yarn reference:scan <url> [slug]`).
-   - Запрещено пропускать этот шаг или симулировать его прохождение фейковыми/старыми отчетами.
-   - Если API-ключ `FIRECRAWL_API_KEY` не задан в `.env`, сканирование должно быть выполнено через локальный Playwright-сценарий (он работает без внешних API). Полученные скриншоты десктопа и мобильной версии референса должны быть физически сохранены в `reports/visual-review/` и детально проанализированы.
-   - Игнорирование этого правила или использование старых/несвязанных скриншотов из папки отчетов считается критической ошибкой качества (Critical Quality Failure).
-2. **Lazyweb Evidence Gate:** Для задач с UI-риском, конкурентными паттернами или запросом на визуализацию/дизайн сначала используй Lazyweb MCP/skills как evidence layer: `lazyweb-design` для optimize/improve/create product screen, `lazyweb-quick-search` для быстрых экранов и benchmark references, `lazyweb_search_ab_tests` только при явном запросе на monetization/A/B evidence. Старые имена `lazyweb-design-research`, `lazyweb-quick-references`, `lazyweb-design-improve`, `lazyweb-design-brainstorm`, `lazyweb-ab-test-research` являются retired aliases и не вызываются напрямую; их intent маршрутизируется в актуальные skills/tools. Если Lazyweb tools недоступны в текущей сессии, зафиксируй `skipped_with_reason=lazyweb_unavailable_reload_required` и продолжай через обычный reference scan/web research.
-3. Создать `reference-analysis.md` на основе данных сканирования и Lazyweb evidence при наличии с section-by-section visual spec: hero/nav, фон, цвета, typography scale, spacing, layout grid, section order, cards, CTA, forms/controls, media, footer, mobile behavior, allowed/disallowed patterns.
-4. Подготовить `design-brief.md` и `screens.md`, которые явно читают эту спецификацию и проходят Primary App Flow Gate для всех app/prototype/frontend/Figma surfaces.
-5. Если требуется Figma canvas write, получить human approval и `write_allowed=true`; только после этого создавать/обновлять холст Figma по `integrations/mcp/figma-canvas-write-guide.md`.
-   - Перед записью и перед финальным screenshot обязательно пройти Russian Publication Gate для видимого текста Figma: frame names, headers, labels, cards, chips и descriptions на русском; старые draft-фреймы должны быть обновлены, скрыты или явно помечены `superseded`.
-6. После Figma write выполнить **Figma Surface Verification**: `get_metadata`/object inventory, `get_screenshot`, список созданных frame/node IDs, component/library grounding, Auto Layout/variables deviations и Russian Publication Gate result. Эта проверка является safety layer после визуальной сборки, а не заменой дизайна. Figma write без metadata + screenshot evidence считается `partial`/`blocked`, даже если canvas фактически создан; Figma write с хорошей metadata, но плохим UI screenshot считается `rejected_needs_redesign`.
-7. До утверждения макетов пользователем frontend заблокирован.
-8. Перед frontend handoff определить **Universal Source Pair Matrix** для текущей задачи:
-   - `reference_to_figma`: обязателен, если есть внешний visual reference и Figma canvas write;
-   - `figma_to_frontend`: обязателен, если frontend строится по Figma handoff или screen frames;
-   - `reference_to_frontend`: обязателен для reference-driven frontend;
-   - `spec_to_frontend_behavior`: обязателен, если есть prototype states, формы, навигация, ошибки или другие интерактивные сценарии.
-   Для каждой пары фиксируй required yes/no, evidence, status и notes. Pixel diff — только один сигнал; он не заменяет structure/metadata/state/behavior checks.
-9. После реализации выполнить **двустороннюю поблочную съёмку** — обязательно захватывать поблочные скриншоты ОДНОВРЕМЕННО с **референсного сайта** И **локальной реализации** с одинаковыми именами секций:
-   - `reference-desktop-section-<name>.png` / `reference-mobile-section-<name>.png` — секции оригинального референса.
-   - `local-desktop-section-<name>.png` / `local-mobile-section-<name>.png` — соответствующие секции локального сайта.
-   - Запрещено ограничиваться только full-page скриншотами или скриншотами лишь одной стороны: без пары «референс → реализация» сверка невозможна.
-   - Скрипт `tooling/scripts/capture-local-screenshots.mjs` ОБЯЗАН захватывать обе стороны в одном запуске.
-10. После захвата парных скриншотов запустить `yarn reference:diff <reference-report-dir> <local-report-dir> [output-dir]` и сохранить `visual-diff-result.json`. Для URL-to-URL section review можно дополнительно запустить `yarn reference:section-diff <reference-url> <local-url> [output-dir] [--sections sections.json]`.
-11. Зафиксировать результат в `visual-reference-review.md` с `Source Pair Matrix` и поблочным сравнением reference → Figma при наличии → frontend → status → corrections, ссылаясь на реальные пары скриншотов, Lazyweb evidence при наличии, Figma screenshot/node evidence при наличии и `visual-diff-result.json`.
+**Норма — четыре условия, каждое блокирует статус:**
+
+1. **`reference-analysis.md` не создаётся без технического скана.** Сначала `yarn reference:scan <url> [slug]`; без ключа `FIRECRAWL_API_KEY` — локальный Playwright, он работает без внешних API. Симулировать прохождение, брать старые или несвязанные скриншоты — Critical Quality Failure.
+2. **Lazyweb Evidence Gate: для задач с UI-риском сначала evidence, потом дизайн.** Lazyweb как evidence layer (`lazyweb-design` для optimize/improve/create, `lazyweb-quick-search` для быстрых референсов, `lazyweb_search_ab_tests` только по явному запросу про монетизацию). Недоступен — `skipped_with_reason=lazyweb_unavailable_reload_required` и обычный reference scan.
+3. **`reference-analysis.md` — это section-by-section visual spec, а не впечатление.** Обязательные разделы: hero/nav, фон, цвета, typography scale, spacing, layout grid, порядок секций, карточки, CTA, формы и контролы, медиа, подвал, поведение на мобильном, разрешённые и запрещённые паттерны. `design-brief.md` и `screens.md` обязаны явно читать эту спецификацию.
+4. **Сверка невозможна без ОБЕИХ сторон.** Поблочные скриншоты снимаются одновременно с референса и с реализации, с одинаковыми именами секций; захват только своей стороны — Critical Quality Failure. Результат — `visual-diff-result.json` и `visual-reference-review.md` с Source Pair Matrix.
+5. **Figma write требует approval и `write_allowed=true`**, а после записи — verification (`get_metadata`/inventory + `get_screenshot` + node IDs + Russian Publication Gate). Write без metadata и скриншота — `partial`/`blocked`, даже если холст создан; write с хорошей metadata и плохим UI — `rejected_needs_redesign`. **До утверждения макетов человеком frontend заблокирован.**
+
+Пары источников, которые обязана покрыть матрица: `reference_to_figma` (есть внешний референс и запись в Figma), `figma_to_frontend` (frontend строится по Figma), `reference_to_frontend` (reference-driven frontend), `spec_to_frontend_behavior` (состояния, формы, навигация, ошибки). Pixel diff — один сигнал из нескольких, он не заменяет проверку структуры, состояний и поведения.
+
+Процедура целиком — skill `visual-diff-verifier`: команды сканирования и диффа, порядок съёмки, снижение ложных срабатываний (отключение анимаций, маскирование динамики, per-section tolerance против различий шрифтового рендера), формат `visual-reference-review.md`. SOP записи в Figma — `integrations/mcp/figma-canvas-write-guide.md`.
 
 Запрещено:
 
@@ -284,9 +254,21 @@ Approval records ведутся через runtime gate. Матрица дейс
 
 Approval matching строгий по `target`: targetless approval не покрывает targeted request, а targeted approval не покрывает targetless request. Для agentic model-provider calls target имеет формат `openai_agents_sdk:<owner>:<stage-id>`.
 
-**КРИТИЧЕСКИ ВАЖНО:** Агент НЕ имеет права молча пропускать отправку запросов на одобрение. Если требуется внешнее действие (например, выгрузка в Notion на этапе 01-research), агент обязан сначала использовать интерактивный approval request (`workflow:approval-request`) с exact target. Если TTY/интерактивный выбор недоступен, агент обязан явно задать отдельный заметный вопрос пользователю в чате: «Разрешить публикацию пакета исследований/Agile-задач в Notion?» и после ответа записать `workflow:approve` или `workflow:deny`. Запрещается тихо переводить этап в статус blocked/partial, не попытавшись сначала интерактивно запросить разрешение у человека в текущей сессии диалога.
+**Interactive Question Gate — главное правило раздела.** Агент **не имеет права молча пропускать approval-запрос**, и тихий перевод этапа в `blocked`/`partial` без попытки спросить человека сам по себе является нарушением.
 
-**Interactive Question Gate:** Все approval-вопросы, provider opt-in, waiver, публикационные вопросы, Figma/Notion/deploy/git write confirmations и gate-вопросы, влияющие на статус workflow, должны быть интерактивными: сначала `workflow:approval-request`/runtime prompt с exact target, а если TTY недоступен — отдельный заметный вопрос в чате (используй `AskUserQuestion` tool) до выполнения действия. Нельзя трактовать общую фразу пользователя вроде «опубликуй», «давай», «продолжай», «сделай» как замену интерактивного approval, если workflow требует отдельный approval record или waiver. Исключение: явно включенные DeepSeek/Gemini advisory checks на `01-research` не являются отдельным provider opt-in вопросом и не блокируют readiness при сбое. После ответа пользователя агент обязан записать `workflow:approve`/`workflow:deny` либо явно зафиксировать waiver/denial в run ledger.
+Порядок один для всех approval-вопросов, provider opt-in, waiver, публикационных вопросов, подтверждений Figma/Notion/deploy/git write и любых gate-вопросов, влияющих на статус workflow:
+
+1. интерактивный `workflow:approval-request` (или runtime prompt) с **exact target**;
+2. если TTY недоступен — отдельный заметный вопрос в чате через `AskUserQuestion`, до выполнения действия («Разрешить публикацию пакета исследований в Notion?»);
+3. после ответа — запись `workflow:approve`/`workflow:deny` либо явная фиксация waiver/denial в run ledger.
+
+Два запрета и одно исключение:
+
+- **Общая фраза не заменяет approval.** «Опубликуй», «давай», «продолжай», «сделай» не являются разрешением, если workflow требует отдельный approval record или waiver.
+- **Молчаливый `blocked` запрещён.** Не спросив, статус не понижают.
+- **Исключение:** явно включённые DeepSeek/Gemini advisory checks на `01-research` не являются отдельным provider opt-in и не блокируют readiness при сбое.
+
+Процедура исполнения — skill `approval-gate` (он же ведёт запись); матрица действий — `agent-pack/guardrails/approval-matrix.md`.
 
 🔴 **Гейт человека нельзя закрыть фразой «делай дальше».** Правило выше запрещает подменять approval общей фразой; ровно то же относится к гейтам, где нужно **содержательное решение человека** — утверждение макетов перед вёрсткой, выбор между соответствием образцу и нормой доступности, отступление от образца. Такие гейты закрываются просмотром результата и явным решением по конкретному вопросу, а не разрешением не останавливаться.
 
