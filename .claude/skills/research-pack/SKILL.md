@@ -36,7 +36,7 @@ contract_schema: agent-pack/templates/skill.template.md
 
 ## 1. Назначение
 
-Skill применяется, когда нужно собрать исследовательскую базу для решений по PRD, IA, дизайну, copy, прототипу и test bench — на этапе `01-research` продуктового workflow или в standalone research/CJM run (`research/projects/<research-slug>/<YYYY-MM-DD>/`).
+Skill применяется, когда нужно собрать исследовательскую базу для решений по PRD, IA, дизайну, copy и экранам — на этапе `01-research` продуктового workflow или в standalone research/CJM run (`research/projects/<research-slug>/<YYYY-MM-DD>/`).
 
 Skill защищает три gates, которые чаще всего нарушаются: source-backed evidence вместо правдоподобной генерации, non-blocking роль advisory-провайдеров и Anti-AI-Slop качество выводов. Он **не дублирует** нормативный процесс: полный pipeline из 17 шагов и критерии COMPLETE живут в [`agent-pack/workflows/deep-research.workflow.md`](../../../agent-pack/workflows/deep-research.workflow.md), правила Notion-публикации и advisory rule — в [`agent-pack/workflows/claude-operating-rules.md`](../../../agent-pack/workflows/claude-operating-rules.md) разделы 3-4. Skill задаёт порядок, evidence contract и failure modes.
 

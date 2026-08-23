@@ -9,6 +9,7 @@ import {
   checkClaudeMdSize,
   checkFrontendThemeInvariants,
   checkPluginPointers,
+  checkRetiredRoleReferences,
   checkTestAggregatorCoverage,
   detectAbandonedWorktrees,
   validateStudioHygiene,
@@ -213,6 +214,60 @@ assert.deepEqual(detectAbandonedWorktrees(mkdtempSync(join(tmpdir(), "not-a-git-
     );
   } finally {
     rmSync(repo, { recursive: true, force: true });
+  }
+}
+
+// --- 5. Роли, выведенные из эксплуатации, в нормативной прозе -----------------------
+
+withFixture((root) => {
+  assert.deepEqual(
+    checkRetiredRoleReferences(root),
+    [],
+    "чистый репозиторий не должен давать находок — иначе негативный контроль ниже ничего не докажет",
+  );
+
+  // Ровно тот дефект, который прожил полтора месяца: обёртка называет исполнителя,
+  // которого больше нет ни в манифесте, ни в .claude/agents.
+  const wrapper = join(root, ".claude/agents/orchestrator.md");
+  writeFileSync(
+    wrapper,
+    readFileSync(wrapper, "utf8") +
+      "\n`subagent_type` = имя агента: `research`, `prototype`, `frontend`.\n",
+    "utf8",
+  );
+  assertFinding(
+    checkRetiredRoleReferences(root),
+    "retired-role-reference",
+    /names 'prototype' as a subagent_type/,
+  );
+});
+
+withFixture((root) => {
+  // Выведенная роль в прозе — второй канал того же дефекта.
+  const wrapper = join(root, ".claude/agents/research.md");
+  writeFileSync(wrapper, readFileSync(wrapper, "utf8") + "\nОтдаёт результат в test bench.\n", "utf8");
+  assertFinding(checkRetiredRoleReferences(root), "retired-role-reference", /still names 'test bench'/);
+});
+
+withFixture((root) => {
+  // Законные формы ловиться не должны: 'prototype' как тип поверхности и живой агент.
+  const wrapper = join(root, ".claude/agents/design.md");
+  writeFileSync(
+    wrapper,
+    readFileSync(wrapper, "utf8") +
+      "\nПоверхность: `figma_board | product_ui | prototype`. Делегируй с `subagent_type: design-generator`.\n",
+    "utf8",
+  );
+  assert.deepEqual(checkRetiredRoleReferences(root), []);
+});
+
+{
+  // Пустой набор файлов успехом не считается: проверке нечего читать.
+  const empty = mkdtempSync(join(tmpdir(), "studio-hygiene-empty-"));
+  try {
+    assertFinding(checkRetiredRoleReferences(empty), "retired-role-reference", /No normative markdown found/);
+  } finally {
+    rmSync(empty, { recursive: true, force: true });
   }
 }
 

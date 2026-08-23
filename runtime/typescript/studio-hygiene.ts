@@ -184,6 +184,119 @@ export function checkTestAggregatorCoverage(root = process.cwd()): HygieneFindin
   return findings;
 }
 
+/**
+ * Роли и артефакты, выведенные из эксплуатации, продолжали жить в прозе нормативных файлов.
+ * Инвентаризация 2026-08-23 нашла агентов `prototype` и `test-bench` в списке
+ * `subagent_type` обёртки оркестратора и стадию `prototype` в списке предпосылок frontend —
+ * через полтора месяца после того, как обе роли исчезли из манифеста. Индекс (`CLAUDE.md`
+ * §11) при этом перечислял актуальные десять: разъехались именно слои.
+ *
+ * Почему это не ловилось: `test-agent-metadata` сверяет структурные поля (stage id,
+ * artifacts, skills), а `instruction-lint` — существование упомянутых навыков. Прозу,
+ * которая называет несуществующего исполнителя, не читал никто, а читает её субагент.
+ *
+ * Граница проверки: ловим только те имена, у которых не осталось ни одного законного
+ * смысла. Слово `prototype` само по себе законно — это тип поверхности
+ * (`figma_board | product_ui | prototype`), и запрещать его нельзя.
+ */
+export const retiredRoleMarkers: Readonly<Record<string, string>> = {
+  "test-bench": "агент и стадия test-bench выведены из манифеста",
+  "test bench": "агент и стадия test-bench выведены из манифеста",
+  "prototype-report": "артефакт prototype-report.md больше не производится ни одной стадией",
+  "07-prototype": "стадии 07-prototype в манифесте нет: состояния описываются в screens.md",
+  "10-test-bench": "стадии 10-test-bench в манифесте нет",
+};
+
+const normativeGlobs: readonly string[] = [
+  "CLAUDE.md",
+  ".claude/agents",
+  ".claude/commands",
+  ".claude/skills",
+  "agent-pack/agent-contracts",
+  "agent-pack/workflows",
+  "agent-pack/templates",
+];
+
+function collectNormativeFiles(root: string): string[] {
+  const files: string[] = [];
+
+  const walk = (path: string): void => {
+    if (!existsSync(path)) return;
+    if (statSync(path).isDirectory()) {
+      for (const entry of readdirSync(path)) walk(join(path, entry));
+      return;
+    }
+    if (path.endsWith(".md")) files.push(path);
+  };
+
+  for (const target of normativeGlobs) walk(join(root, target));
+  return files;
+}
+
+/**
+ * Имена ролей в нормативной прозе сверяются с фактическим набором обёрток, а список
+ * выведенных ролей — с текстом целиком. Пустой набор файлов успехом не считается: проверка,
+ * которой нечего читать, молча зеленеет.
+ */
+export function checkRetiredRoleReferences(root = process.cwd()): HygieneFinding[] {
+  const findings: HygieneFinding[] = [];
+  const files = collectNormativeFiles(root);
+
+  if (files.length === 0) {
+    return [{
+      check: "retired-role-reference",
+      message:
+        "No normative markdown found (CLAUDE.md, .claude/agents, agent-pack/...). " +
+        "A check with nothing to read passes without proving anything.",
+    }];
+  }
+
+  const agentsDir = join(root, ".claude/agents");
+  const knownAgents = existsSync(agentsDir)
+    ? readdirSync(agentsDir).filter((name) => name.endsWith(".md")).map((name) => name.slice(0, -3))
+    : [];
+
+  for (const file of files) {
+    const relative = file.slice(root.length + 1).replaceAll("\\", "/");
+    const content = readFileSync(file, "utf8");
+
+    for (const [marker, reason] of Object.entries(retiredRoleMarkers)) {
+      if (!content.includes(marker)) continue;
+      findings.push({
+        check: "retired-role-reference",
+        message:
+          `${relative} still names '${marker}': ${reason}. ` +
+          "A subagent reads this prose as its instruction and cannot know the role is gone.",
+      });
+    }
+
+    for (const line of content.split(/\r?\n/)) {
+      if (!line.includes("subagent_type") || !knownAgents.length) continue;
+
+      // Две законные формы записи: значение (`subagent_type: design`) и перечисление в
+      // обёртке оркестратора (``subagent_type` = имя агента: `research`, `prd`, …`).
+      const names: string[] = [...line.matchAll(/subagent_type[`"']?\s*[:=]\s*[`"']?([a-z][a-z-]*)/g)]
+        .map((match) => match[1]);
+      const enumeration = /subagent_type`?\s*=\s*имя агента:(.*)$/.exec(line);
+      if (enumeration) {
+        names.push(...[...enumeration[1].matchAll(/`([a-z][a-z-]+)`/g)].map((match) => match[1]));
+      }
+
+      for (const name of names) {
+        if (knownAgents.includes(name)) continue;
+        findings.push({
+          check: "retired-role-reference",
+          message:
+            `${relative} names '${name}' as a subagent_type, but .claude/agents/${name}.md does not exist. ` +
+            `Known agents: ${knownAgents.join(", ")}.`,
+        });
+      }
+    }
+  }
+
+  return findings;
+}
+
 export interface AbandonedWorktree {
   path: string;
   head: string;
@@ -276,6 +389,7 @@ export function collectStudioHygieneFindings(root = process.cwd()): HygieneFindi
     ...checkPluginPointers(root),
     ...checkFrontendThemeInvariants(root),
     ...checkTestAggregatorCoverage(root),
+    ...checkRetiredRoleReferences(root),
   ];
 }
 

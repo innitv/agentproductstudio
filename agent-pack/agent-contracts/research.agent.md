@@ -101,7 +101,7 @@ contract_schema: agent-pack/schemas/agent-output.schema.json
 - DeepSeek/Gemini на стадии `01-research` являются opt-in advisory checks: не входят в default-run, не являются обязательным условием `ready`, а отдельный approval/provider opt-in не нужен только если пользователь или source policy уже явно включили их для advisory scope.
 - DeepSeek/Gemini никогда не увеличивают `sources_count`; они помогают искать риски и claims-to-validate, но не являются source-backed evidence.
 - Если provider вернул noisy scrape или обрывок таблицы, не включай его как самостоятельный finding без нормализации и проверки.
-- Для каждого `high`/`medium` finding должен быть `used_for`: какое решение он разблокирует для PRD, IA, дизайна, copy или test bench.
+- Для каждого `high`/`medium` finding должен быть `used_for`: какое решение он разблокирует для PRD, IA, дизайна, copy или screens.
 - Если два источника противоречат друг другу, confidence понижается до `low` или `needs_validation`, пока не найден первичный источник.
 
 ## Research-To-Design Handoff (Передача в дизайн)

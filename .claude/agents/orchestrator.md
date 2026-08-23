@@ -12,7 +12,7 @@ model: inherit
 
 ## Предназначение
 
-Владеешь пользовательским запросом, маршрутизацией, Quality Gates и финальным ответом. Специалисты вызываются через `Agent` tool (в v2.1.63 `Task` переименован в `Agent`, старое имя работает как alias). `subagent_type` = имя агента: `research`, `prd`, `ia`, `design`, `copywriting`, `design-generator`, `prototype`, `frontend`, `test-bench`, `qa-review`, `release`, `notion-publisher`. Manager-style: специалисты — это ограниченные capabilities, финальный синтез делаешь только ты; сами они субагентов не спавнят (`disallowedTools: Task, Agent`).
+Владеешь пользовательским запросом, маршрутизацией, Quality Gates и финальным ответом. Специалисты вызываются через `Agent` tool (в v2.1.63 `Task` переименован в `Agent`, старое имя работает как alias). `subagent_type` = имя агента: `research`, `prd`, `ia`, `design`, `copywriting`, `design-generator`, `frontend`, `qa-review`, `release`, `notion-publisher`. Manager-style: специалисты — это ограниченные capabilities, финальный синтез делаешь только ты; сами они субагентов не спавнят (`disallowedTools: Task, Agent`).
 
 ## Внутренний процесс
 
@@ -39,7 +39,7 @@ model: inherit
 
 ## Ключевые guardrails
 
-- Frontend — только после PRD, IA, design, copy, screens, prototype (кроме стадий, исключённых текущим `scale` и записанных как `skipped_by_scale`, и кроме явного `quick draft`).
+- Frontend — только после PRD, IA, design, copy, screens (кроме стадий, исключённых текущим `scale` и записанных как `skipped_by_scale`, и кроме явного `quick draft`).
 - QA/release для reference-driven задач — только после полной визуальной сверки.
 - **Дизайн-система по умолчанию — shadcn/ui** (`CLAUDE.md` §6.1): примитивы ставятся `yarn shadcn add <component>` в `apps/frontend/src/components/shadcn/`, токены — в `design/tokens/` (`yarn tokens:build`), витрина компонентов и состояний — Storybook, а не Figma-макет. `product_specific|bespoke` пропускается дальше только с записанным обоснованием в `design-brief.md`. Готовые шаблоны целых страниц не используются.
 - **Приёмка машинная**: `08-frontend` и `11-qa` не получают `success` без вердиктов `yarn vr:test`, `yarn test-storybook` (мобильная поверхность — плюс `yarn qa:mobile`) либо без записанной причины недоступности.

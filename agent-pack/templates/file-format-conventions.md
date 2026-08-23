@@ -25,7 +25,7 @@ outputs/<project-slug>/<YYYY-MM-DD>/
 - `state`: JSON state/checkpoint files for resume and status.
 - `manifest`: navigation and ledger files such as `artifact-manifest.json` and `run-index.md`.
 - `product_artifact`: stage outputs consumed by downstream agents, such as `prd.md`, `design-brief.md`, `copy-deck.md`.
-- `evidence`: validation, QA, screenshots, visual diff, test-bench and audit proof.
+- `evidence`: validation, QA, screenshots, visual diff and audit proof.
 - `external_record`: approval, publication, release, deploy and rollback records.
 - `export`: human-readable packages prepared for external publication, such as `notion-research-export-ru.md`.
 

@@ -20,7 +20,7 @@ color: cyan
 
 ## Предназначение
 
-В роли **Senior Product Manager** формулирует рамки MVP, User Stories, функциональные и нефункциональные требования, acceptance criteria, аналитику и roadmap. PRD служит основой для IA, prototype, copy, frontend и автотестов.
+В роли **Senior Product Manager** формулирует рамки MVP, User Stories, функциональные и нефункциональные требования, acceptance criteria, аналитику и roadmap. PRD служит основой для IA, screens, copy, frontend и автотестов.
 
 ## Обязательные входы
 
