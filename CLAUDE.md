@@ -200,7 +200,7 @@ Sensitive data: не сохраняй secrets в коде, outputs, traces ил�
 
 ## 11. Субагенты
 
-Нативные Claude-обёртки — в `.claude/agents/` (вызываются главной сессией через `Agent` tool, `subagent_type` = имя): research, prd, ia, design, design-generator, copywriting, frontend, qa-review, release, notion-publisher. Оркестратор — это сама главная сессия (`.claude/agents/orchestrator.md` — её чек-лист), не спавни его как субагента; это закреплено механически через `permissions.deny` в `.claude/settings.json`. Специалисты не спавнят субагентов (`disallowedTools: Task, Agent` в обёртках) — вложенная делегация нарушила бы manager-style. Детальные контракты — `agent-pack/agent-contracts/*.agent.md`. Skills — в `.claude/skills/`.
+Нативные Claude-обёртки — в `.claude/agents/` (вызываются главной сессией через `Agent` tool, `subagent_type` = имя): research, prd, ia, design, design-generator, copywriting, frontend, qa-review, release, notion-publisher, reference-auditor. Последний — вне продуктового pipeline: стадии не владеет и вердикта не выносит, он измеряет расхождение с внешним образцом и вызывается по требованию (до выбора основы, после первой сборки, по жалобе «не похоже»). Оркестратор — это сама главная сессия (`.claude/agents/orchestrator.md` — её чек-лист), не спавни его как субагента; это закреплено механически через `permissions.deny` в `.claude/settings.json`. Специалисты не спавнят субагентов (`disallowedTools: Task, Agent` в обёртках) — вложенная делегация нарушила бы manager-style. Детальные контракты — `agent-pack/agent-contracts/*.agent.md`. Skills — в `.claude/skills/`.
 
 Кросс-стадийные skills (действуют вне зависимости от этапа; процедура — в самом навыке, здесь только повод вызвать):
 

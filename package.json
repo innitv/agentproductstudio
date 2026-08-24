@@ -100,6 +100,7 @@
     "workflow:test-agentic-engine": "tsx runtime/typescript/test-agentic-engine.ts",
     "reference:scan": "tsx runtime/typescript/reference-scan.ts",
     "reference:diff": "tsx runtime/typescript/visual-diff.ts",
+    "reference:metrics": "tsx runtime/typescript/reference-metrics.ts",
     "reference:section-diff": "tsx runtime/typescript/visual-section-diff.ts",
     "reference:review": "tsx runtime/typescript/visual-reference-review.ts",
     "research:run": "tsx runtime/typescript/research-stage-runner.ts",

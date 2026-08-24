@@ -39,6 +39,8 @@ export const agentCapabilityDescriptions: Record<AgentRegistryKey, string> = {
   frontend: "Реализует frontend на компонентах реестра shadcn/ui, ведет Storybook как витрину состояний и закрывает машинную приёмку (vr:test, test-storybook, qa:mobile).",
   qaReview: "Проверяет product fit, component contracts, вердикты машинной приёмки, visual/behavior evidence, accessibility и readiness; Figma roundtrip — только на Figma-маршруте.",
   release: "Формирует release notes: scope, changed files, validation, decision matrix и rollback notes.",
+  referenceAuditor:
+    "Измеряет расхождение реализации и внешнего образца по признакам (типографика с раздельной кириллицей и латиницей, плотность, палитра, профиль высот) и классифицирует каждое как defect/intentional/unknown; вердикта не выносит и стадии не владеет.",
 };
 
 export function loadAgentCapabilityRegistry(root = process.cwd()): AgentCapabilityRecord[] {

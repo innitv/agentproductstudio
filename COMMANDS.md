@@ -325,6 +325,33 @@ yarn reference:diff reports/visual-review/example-reference reports/visual-revie
 
 После этого `reference:review` автоматически добавит diff summary в `visual-reference-review.md`.
 
+Снять ИЗМЕРИМЫЕ признаки образца и реализации и положить их рядом:
+
+```bash
+yarn reference:metrics --reference=https://example.com --local=http://127.0.0.1:4173 --width=390
+```
+
+Отвечает на другой вопрос, чем `reference:diff`. Тот сравнивает КАДРЫ и говорит
+«похоже ли»; когда реализация переносит образец на свой контент (свои тексты,
+свой состав блоков), кадры расходятся полностью и процент различий не значит
+ничего. `reference:metrics` сравнивает признаки: профиль высот накопленной
+координатой низа, кегли и веса, фактическую гарнитуру ОТДЕЛЬНО по кириллице и
+латинице, загруженные начертания, палитру, медианы радиуса и внутренних полей.
+Обход включает `shadowRoot`.
+
+Образец за логином (корзина, кабинет, оформленный заказ) Playwright не откроет.
+Тогда зонд `runtime/browser/reference-probe.js` вставляется в консоль браузера
+человека, а его вывод подаётся файлом:
+
+```bash
+yarn reference:metrics --reference=probe-dump.json --local=http://127.0.0.1:4173
+```
+
+Команда пишет `reports/visual-review/reference-metrics.json` и всегда возвращает
+0: она измеряет, а не судит. Часть расхождений — намеренные решения продукта,
+и классификация `defect`/`intentional`/`unknown` остаётся за агентом
+`reference-auditor` или человеком; вердикт `pass`/`fail` — за `qa-review`.
+
 Посчитать section-aware diff по reference/local URL:
 
 ```bash
