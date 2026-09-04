@@ -26,88 +26,63 @@ contract_schema: agent-pack/templates/skill.template.md
 
 # Skill: Figma DS Ingest
 
-## Назначение
+## Что делает
 
-Превращает большую Figma дизайн-систему в локальный индекс `design/figma/<design_system_slug>/`. Индекс нужен, чтобы агент держал в контексте компактную карту с Node ID, Variables, variant matrices и component profiles, а не перечитывал Figma целиком при каждой задаче.
+Превращает большую Figma дизайн-систему в локальный индекс
+`design/figma/<design_system_slug>/`: компактная карта с Node ID, переменными, матрицами
+вариантов и профилями компонентов. Нужен, чтобы не перечитывать Figma целиком
+при каждой задаче.
 
-## Применимость
+## Когда включается
 
-**Только когда источником DS выбрана именно Figma-библиотека.** По `CLAUDE.md` §6.1 дизайн-система по умолчанию — shadcn/ui в коде (`apps/frontend/src/components/shadcn/`), и её состав читается прямо из кода: индексы её компонентов **не заводить**, второй источник правды неизбежно разъедется (прецедент — `token-map.md`, описывавший 28% реальности). Ingest нужен там, где кода нет и Figma — единственный носитель системы: чужой UI kit, корпоративная библиотека, community copy.
+Только когда источником DS выбрана именно Figma-библиотека, и её ещё нет в
+`design/figma/registry.json`: чужой UI kit, корпоративная библиотека, community
+copy. Плюс обновление индекса после смены `version_id`/`lastModified` — по
+факту изменения, а не «на всякий случай».
 
-🔴 **Кит shadcn/ui в Figma уже заингестен — не ингестить повторно.** `design/figma/shadcn-ui-community/` (file key `pCDj1p7ItjKJcXPJZDqXi6`, 2026-07-28): 172 компонента и сета с Node ID, ключами и матрицами вариантов, 47 семантических переменных в light/dark, 14 125 иконок счётчиками. Для макетов на shadcn в Figma читать этот индекс.
+🔴 **Для shadcn/ui индексы не заводить.** По `CLAUDE.md` §6.1 дизайн-система по
+умолчанию — shadcn/ui в коде, и её состав читается прямо из кода. Второй
+источник правды неизбежно разъедется: прецедент — `token-map.md`, описывавший
+28 % реальности.
 
-Индекс этой библиотеки существует ровно один. Прежний (по community-оригиналу `NUoNEuTJ3OZOGH2c780Z55`) удалён 2026-07-28 как источник путаницы: имена страниц совпадали с действующим китом, а Node ID компонентов — нет.
+🔴 **Кит shadcn/ui в Figma уже внесён — не вносить повторно.**
+`design/figma/shadcn-ui-community/` (file key `pCDj1p7ItjKJcXPJZDqXi6`,
+2026-07-28): 172 компонента и сета с Node ID, ключами и матрицами вариантов, 47
+семантических переменных в light/dark, 14 125 иконок счётчиками. Индекс этой
+библиотеки существует ровно один: прежний, по community-оригиналу
+`NUoNEuTJ3OZOGH2c780Z55`, удалён как источник путаницы — имена страниц
+совпадали с действующим китом, а Node ID компонентов нет.
 
-## Когда использовать
+## Read-only
 
-- Пользователь дает новую Figma DS, UI kit, корпоративную библиотеку или community copy — **которой ещё нет в `design/figma/registry.json`**.
-- Нужно выбрать `reuse|extend` для системы, которая еще не зарегистрирована в `design/figma/registry.json`.
-- Нужно собрать экраны по реальным Figma components/instances, но текущего локального индекса нет.
-- Нужно обновить индекс после изменения библиотеки — по смене `version_id`/`lastModified` или ручному re-baseline, а не «на всякий случай».
+Skill не пишет в Figma. Любая запись — отдельный approval `figma_write` и путь
+через `figma-handoff` / `figma-roundtrip`.
 
-## Read-Only Gate
+## Порядок: сначала перепись, потом чтение
 
-Этот skill не пишет в Figma. Любой canvas write, создание Variables/components или изменение файла требует отдельного `figma_write` approval и выполняется через `figma-handoff` / `figma-roundtrip`.
+Шесть шагов, порядок обязателен:
 
-## Рабочий Порядок
+1. **Preflight** — slug, URL, тип источника, режим при повторном заходе.
+2. **Census First** — только страницы, типы верхнего уровня, счётчики
+   компонентов и коллекции переменных. Полный `get_design_context` на большом
+   выделении не используется, в детей инстансов заходить не нужно.
+3. **Chunk Manifest** — чтение режется на части, у каждой статус
+   `pending|done|blocked`; при перезапуске готовые пропускаются.
+4. **Foundation** — переменные по коллекциям и режимам. Нет семантического слоя
+   или коллекция плоская — записывается риск, а не тихая нормализация.
+5. **Components** и **Deep Profiles** — матрицы вариантов для сетов; глубокие
+   профили только для категорий, нужных под сборку экранов.
+6. **Contract** — `component-contracts.json`, `ds.config.json`, запись в
+   реестр.
 
-1. **Preflight**
-   - Зафиксируй `design_system_slug`, Figma URL, source type и scope.
-   - Проверь `design/figma/registry.json`.
-   - Если slug уже есть, определи режим: `refresh|extend_index|inspect_only`.
-   - Запиши `source.md`.
+## Чем заканчивается
 
-2. **Census First**
-   - Сначала снимай только страницы, top-level types, ComponentSet/Component counts и Variable collections.
-   - Не используй полный `get_design_context` на больших выделениях.
-   - Не заходи в instance children.
-   - Выход: `_scan/census.md`.
+Индекс становится первым источником после ingest; Figma читается точечно.
+Закрывать `reuse` как готовый нельзя без `foundation.md`, `components.md` и
+записи в реестре; закрывать roundtrip как успех — без
+`component-contracts.json` или явно записанного отклонения.
 
-3. **Chunk Manifest**
-   - Нарежь чтение на page/section/frame/window chunks.
-   - Выход: `_scan/manifest.md` со статусами `pending|done|blocked`.
-   - При перезапуске пропускай `done`.
+## Детали
 
-4. **Foundation**
-   - Читай Variables по коллекциям и modes.
-   - Пиши `foundation.md`: primitive, semantic aliases, component tokens, notes.
-   - Если semantic layer отсутствует или collection плоская, запиши risk вместо silent normalization.
-
-5. **Components**
-   - Для каждой pending-порции читай `id`, `name`, `description`, `componentPropertyDefinitions`.
-   - Для `COMPONENT_SET` фиксируй compact matrix.
-   - Для standalone `COMPONENT` фильтруй variant children по `parent.type !== "COMPONENT_SET"`.
-   - Выход: `components.md`.
-
-6. **Deep Profiles**
-   - Создавай только для категорий, которые нужны для screen build/frontend mapping.
-   - Пиши `components/<category>.md`: Node ID, variants, props, slots, anatomy depth <= 3, representative dimensions.
-
-7. **Contract**
-   - Создай/обнови `component-contracts.json`.
-   - Запиши Code Connect status или fallback mapping.
-   - Создай `ds.config.json`.
-   - Обнови `design/figma/registry.json`.
-
-## Инварианты
-
-- Локальный индекс является первым источником после ingest.
-- Figma читается точечно: missing nodes, refresh, screenshot verification, approved write.
-- Node ID обязателен для каждого компонента, пригодного к сборке.
-- ComponentSet Node ID нельзя путать с page/frame Node ID.
-- Не сохраняй raw private dumps.
-- Не закрывай `reuse` как ready без `foundation.md`, `components.md` и registry entry.
-- Не закрывай frontend/Figma roundtrip как success без `component-contracts.json` или explicit deviation.
-
-## Формат Итогового Отчета
-
-В финальном ответе укажи:
-
-- slug;
-- source URL/scope;
-- созданные/обновленные файлы;
-- ingest status;
-- component/variable counts;
-- gaps/risks;
-- можно ли использовать систему для `reuse|extend`;
-- какие проверки выполнены.
+Полный порядок из семи шагов, инварианты и формат отчёта —
+`references/ingest-procedure.md`.

@@ -27,59 +27,48 @@ contract_schema: agent-pack/templates/skill.template.md
 
 # Skill: Figma Design Token Extractor
 
-## 1. Назначение
+## Когда включается
 
-Применяй skill, когда workflow содержит Figma URL/file/node id и нужно извлечь visual tokens как evidence для `design-brief.md` или frontend implementation. Canvas write/update является отдельным действием и требует `figma_write` approval.
+В задаче есть Figma URL, file или node id, и оттуда нужно снять visual tokens
+как evidence для `design-brief.md` или для реализации. Запись в canvas — другое
+действие, требует approval `figma_write`.
 
-**Извлечение разовое и однонаправленное.** По решению от 2026-07-27 (`CLAUDE.md` §6.1) источник правды для токенов — репозиторий: `design/tokens/` (DTCG, сборка `yarn tokens:build`; для shadcn-тем — `design/tokens/shadcn/`). Фактическая структура — **один плоский слой на тему** (группы `color`/`density`/`typography`), а не три тиера: канон трёх тиеров из `/figma-ds:standard` относится к Figma-переменным. Извлечённое значение кладётся в существующую группу, а файл к трём тиерам не переписывается — это сломает гейт паритета `yarn tokens:check`. Figma в этом маршруте — донор решения, а не хранилище: значение из макета переносится в токены один раз, обратной синхронизации нет и Figma-кит не ведётся.
+## Главное правило
 
-Отсюда два следствия для процедуры ниже:
+🔴 **Извлечение разовое и однонаправленное.** По решению от 2026-07-27
+(`CLAUDE.md` §6.1) источник правды для токенов — репозиторий: `design/tokens/`
+(DTCG, сборка `yarn tokens:build`; для тем shadcn — `design/tokens/shadcn/`).
+Figma здесь донор решения, а не хранилище: значение переносится один раз,
+обратной синхронизации нет, Figma-кит не ведётся.
 
-- Извлечённое значение считается принятым, только когда оно записано в `design/tokens/` и прошло `yarn tokens:build` с baseline-гейтом. Токен, оставшийся только в таблице `design-brief.md`, — это evidence, а не решение.
-- Расхождение Figma-переменной и токена в репозитории после переноса — не дефект и не повод перечитывать Figma. Правда — в репозитории.
+Два следствия:
 
-## 2. Обязательные inputs
+- Значение считается принятым, только когда записано в `design/tokens/` и
+  прошло `yarn tokens:build` с baseline-гейтом. Токен, оставшийся в таблице
+  `design-brief.md`, — это evidence, а не решение.
+- Расхождение Figma-переменной и токена в репозитории после переноса — не
+  дефект и не повод перечитывать Figma. Правда в репозитории.
 
-- Figma URL, file id или node id из `recursive-brief.md`, `run-plan.md` или `design-brief.md`.
-- Цель извлечения: design documentation или frontend implementation.
-- Проверка прав и того, какие данные покидают локальный проект.
+🔴 **Структура токенов — один плоский слой на тему** (группы
+`color`/`density`/`typography`), а не три тиера: канон трёх тиеров из
+`/figma-ds:standard` относится к Figma-переменным. Извлечённое значение
+кладётся в существующую группу; переписывать файл под три тиера запрещено —
+сломает гейт паритета `yarn tokens:check`.
 
-## 3. Процедура read-only extraction
+🔴 **Расхождение с `shadcn-ui-community` — не дефект.** Имена токенов там
+совпадают с `design/tokens/shadcn/default.json`, а значения цвета нет: кит на
+базе `neutral`, наша тема `default` — на `slate` (радиусы совпадают численно).
+Совпадение имени при разном значении — ожидаемое состояние, фиксировать фактом,
+а не конфликтом для эскалации.
 
-1. Проверь наличие Figma credentials/MCP и зафиксируй источник токенов.
-2. Считай styles, variables или выбранные nodes.
-3. Извлеки tokens с исходными evidence fields:
-   - token name;
-   - value;
-   - type: color, typography, spacing, radius, shadow, effect, asset;
-   - Figma style/node id;
-   - usage context.
-4. Сверь с выбранной системой из `design/figma/registry.json`: `design/figma/<selected_design_system_slug>/foundation.md`. Если реестр не содержит выбранной системы, сверять не с чем — извлечённые значения остаются гипотезой и помечаются `needs_validation`. Заархивированные индексы из `archive/design-systems/` источником сверки не являются.
-   - 🔴 **Расхождение с `shadcn-ui-community` — не дефект и не повод «исправлять» токен.** Имена токенов там совпадают с `design/tokens/shadcn/default.json`, а значения цвета нет: кит на базе `neutral`, наша тема `default` — на `slate` (радиусы при этом совпадают численно). Источник правды для токенов — репозиторий, а не Figma. Совпадение имени при разном значении — ожидаемое состояние, фиксировать как факт, а не как конфликт для эскалации.
-5. Запиши результат в `design-brief.md` в секцию `## Visual Direction` или `## Design Tokens`.
+## Чем заканчивается
 
-## 4. Frontend mapping
+`partial` — Figma недоступна, но дизайн можно продолжить с явно помеченными
+допущениями. `blocked` — человек требует реализации точно по Figma, а доступа к
+файлу или узлу нет.
 
-На `08-frontend` перенос идёт в `design/tokens/shadcn/` — правку значений делай там и пересобирай `yarn tokens:build`. Сгенерированный файл `apps/frontend/src/styles/shadcn/tokens.generated.css` руками не редактируется: сборка его перезапишет, а baseline-гейт отклонит незаявленное изменение значений. Не меняй `apps/frontend/src/styles.css` на design stage только ради extraction.
+## Детали
 
-Пример формата в `design-brief.md`:
-
-| Token | Value | Type | Source | Usage |
-| --- | --- | --- | --- | --- |
-| `--color-primary` | `#005FFC` | color | Figma style/node id | Primary CTA |
-
-## 5. Canvas write gate
-
-Если задача требует создать или обновить Figma canvas, остановись до human approval и `write_allowed=true`. После approval следуй `integrations/mcp/figma-canvas-write-guide.md`.
-
-## 6. Evidence и failure modes
-
-Ставь `partial`, если Figma недоступна, но дизайн можно продолжить с явно помеченными assumptions. Ставь `blocked`, если пользователь требует точного Figma-based implementation, а credentials/node access отсутствуют.
-
-## 7. Validation gates
-
-- [ ] Все ключевые tokens имеют source id или помечены как assumption.
-- [ ] `design-brief.md` обновлен таблицей tokens.
-- [ ] Принятые значения записаны в `design/tokens/` и проходят `yarn tokens:build` с baseline-гейтом; сгенерированные CSS-файлы вручную не правились.
-- [ ] Figma write не выполнялся без approval.
-- [ ] `yarn validate:config` проходит.
+Входы, процедура извлечения из пяти шагов, формат таблицы в `design-brief.md`,
+правила переноса в `design/tokens/shadcn/` и чек-лист приёмки —
+`references/extraction.md`.
