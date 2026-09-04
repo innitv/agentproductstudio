@@ -13,7 +13,6 @@ export const agentNames = {
   frontend: "frontend",
   qaReview: "qa-review",
   release: "release",
-  referenceAuditor: "reference-auditor",
 } as const;
 
 export const agentInstructionFiles = {
@@ -28,5 +27,4 @@ export const agentInstructionFiles = {
   frontend: "agent-pack/agent-contracts/frontend.agent.md",
   qaReview: "agent-pack/agent-contracts/qa-review.agent.md",
   release: "agent-pack/agent-contracts/release.agent.md",
-  referenceAuditor: "agent-pack/agent-contracts/reference-auditor.agent.md",
 } as const;

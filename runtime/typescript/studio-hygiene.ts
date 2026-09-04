@@ -185,6 +185,89 @@ export function checkTestAggregatorCoverage(root = process.cwd()): HygieneFindin
 }
 
 /**
+ * Состав агентов обязан совпадать между `.claude/agents/*.md` и реестром
+ * `agents.registry.ts`. Реестр — вход всей проверочной машины: `test-agent-metadata`,
+ * `instruction-lint` и capability registry обходят агентов ПО НЕМУ.
+ *
+ * Почему это заведено: агент, отсутствующий в реестре, невидим для проверок целиком,
+ * и его исчезновение проходит бесшумно. Замерено 2026-08-24 мутацией — запись
+ * `referenceAuditor` закомментирована, и все четыре теста (`test-agent-capabilities`,
+ * `test-agent-metadata`, `test-instruction-lint`, `test-studio-hygiene`) остались
+ * зелёными. `test-agent-capability-registry` сверял длину набора с длиной того же
+ * набора — тавтология, которая не может упасть.
+ *
+ * Обратная сторона так же важна: имя в реестре без файла обёртки даёт агента,
+ * которого главная сессия не увидит в списке `subagent_type`.
+ */
+export function checkAgentRegistryCoverage(root = process.cwd()): HygieneFinding[] {
+  const findings: HygieneFinding[] = [];
+  const agentsDir = join(root, ".claude/agents");
+  const registryFile = join(root, "runtime/typescript/agents.registry.ts");
+  if (!existsSync(agentsDir) || !existsSync(registryFile)) return findings;
+
+  const registrySource = readFileSync(registryFile, "utf8");
+  const block = (name: string): Map<string, string> => {
+    const body = new RegExp(`${name}\\s*=\\s*\\{([\\s\\S]*?)\\}\\s*as const`).exec(registrySource)?.[1] ?? "";
+    return new Map([...body.matchAll(/^\s*(\w+):\s*"([^"]+)"/gm)].map((m) => [m[1], m[2]]));
+  };
+  const names = block("agentNames");
+  const instructionFiles = block("agentInstructionFiles");
+
+  const wrappers = readdirSync(agentsDir)
+    .filter((name) => name.endsWith(".md"))
+    .map((name) => name.slice(0, -3));
+
+  // Пустой набор успехом не считается: если читать нечего, проверка не проверила ничего.
+  if (wrappers.length === 0 || names.size === 0) {
+    findings.push({
+      check: "agent-registry-coverage",
+      message:
+        `agent inventory is empty (${wrappers.length} wrappers, ${names.size} registry entries) — ` +
+        "the check read nothing and cannot report success.",
+    });
+    return findings;
+  }
+
+  const registered = new Set(names.values());
+  for (const wrapper of wrappers) {
+    if (!registered.has(wrapper)) {
+      findings.push({
+        check: "agent-registry-coverage",
+        message:
+          `.claude/agents/${wrapper}.md has no entry in agents.registry.ts — ` +
+          "the agent is invisible to every metadata, lint and capability check.",
+      });
+    }
+  }
+
+  for (const [key, agentName] of names) {
+    if (!wrappers.includes(agentName)) {
+      findings.push({
+        check: "agent-registry-coverage",
+        message: `agents.registry.ts lists '${agentName}' but .claude/agents/${agentName}.md is missing.`,
+      });
+    }
+    if (!instructionFiles.has(key)) {
+      findings.push({
+        check: "agent-registry-coverage",
+        message: `agents.registry.ts key '${key}' has a name but no contract file in agentInstructionFiles.`,
+      });
+    }
+  }
+
+  for (const key of instructionFiles.keys()) {
+    if (!names.has(key)) {
+      findings.push({
+        check: "agent-registry-coverage",
+        message: `agents.registry.ts key '${key}' has a contract file but no agent name.`,
+      });
+    }
+  }
+
+  return findings;
+}
+
+/**
  * Роли и артефакты, выведенные из эксплуатации, продолжали жить в прозе нормативных файлов.
  * Инвентаризация 2026-08-23 нашла агентов `prototype` и `test-bench` в списке
  * `subagent_type` обёртки оркестратора и стадию `prototype` в списке предпосылок frontend —
@@ -389,6 +472,7 @@ export function collectStudioHygieneFindings(root = process.cwd()): HygieneFindi
     ...checkPluginPointers(root),
     ...checkFrontendThemeInvariants(root),
     ...checkTestAggregatorCoverage(root),
+    ...checkAgentRegistryCoverage(root),
     ...checkRetiredRoleReferences(root),
   ];
 }

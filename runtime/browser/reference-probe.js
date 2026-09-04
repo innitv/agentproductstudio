@@ -65,6 +65,21 @@
     return Number.isFinite(parsed) ? Math.round(parsed) : null;
   }
 
+  /**
+   * Частые значения признака как `{ value, count }`, по убыванию частоты.
+   *
+   * Значение и частота лежат РАЗДЕЛЬНО, а не склеены в строку «Arial×4», по
+   * причине, которая стоила инструменту его основного сценария. Когда
+   * реализация переносит образец на свой контент, число узлов не совпадает
+   * никогда: тексты другой длины, абзацев больше. Склеенная строка делает из
+   * этого расхождение признака — `Arial×4` против `Arial×7` читается как
+   * «другая гарнитура», хотя гарнитура одна. Замерено на двух страницах с
+   * побайтово одинаковым CSS: 4 ложных расхождения из 8, включая кириллическую
+   * гарнитуру — ровно ту ось, ради которой зонд написан.
+   *
+   * Сравнивается множество значений (см. `reference-metrics.ts`), частота
+   * остаётся справочной: она показывает, что на странице доминирует.
+   */
   function top(values, limit) {
     const counts = new Map();
     for (const value of values) {
@@ -72,9 +87,9 @@
       counts.set(key, (counts.get(key) || 0) + 1);
     }
     return Array.from(counts.entries())
-      .sort((a, b) => b[1] - a[1])
+      .sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))
       .slice(0, limit)
-      .map((entry) => entry[0] + "×" + entry[1]);
+      .map((entry) => ({ value: entry[0], count: entry[1] }));
   }
 
   /** Медиана устойчивее среднего: один огромный блок её не сдвигает. */
@@ -172,7 +187,11 @@
       loadedFaces: Array.from(new Set(loaded)).sort(),
       textColors: top(withText.map((row) => row.color).filter(Boolean), 4),
       backgrounds: top(rows.map((row) => row.background).filter(Boolean), 4),
-      medianRadius: median(rows.map((row) => row.radius).filter((v) => v !== null && v < 100)),
+      // Только скруглённые узлы: на любой странице большинство блоков имеет
+      // радиус 0, и медиана по всем узлам вырождается в 0 у обеих сторон —
+      // ось есть в отчёте, а измеряет пустоту (проверено на странице, где обе
+      // карточки скруглены на 12px, а медиана показала 0 = 0).
+      medianRadius: median(rows.map((row) => row.radius).filter((v) => v !== null && v > 0 && v < 100)),
       medianPaddingLeft: median(rows.map((row) => row.paddingLeft).filter((v) => v !== null && v > 0)),
       outline: outline,
     };

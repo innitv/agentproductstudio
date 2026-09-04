@@ -6,6 +6,7 @@ import { join } from "node:path";
 import {
   CLAUDE_MD_CHAR_LIMIT,
   WORKTREE_IDLE_MINUTES,
+  checkAgentRegistryCoverage,
   checkClaudeMdSize,
   checkFrontendThemeInvariants,
   checkPluginPointers,
@@ -247,6 +248,46 @@ withFixture((root) => {
   const wrapper = join(root, ".claude/agents/research.md");
   writeFileSync(wrapper, readFileSync(wrapper, "utf8") + "\nОтдаёт результат в test bench.\n", "utf8");
   assertFinding(checkRetiredRoleReferences(root), "retired-role-reference", /still names 'test bench'/);
+});
+
+// --- 5.1. Состав агентов: обёртки против реестра ------------------------------------
+
+withFixture((root) => {
+  assert.deepEqual(
+    checkAgentRegistryCoverage(root),
+    [],
+    "чистый репозиторий не должен давать находок — иначе негативный контроль ниже ничего не докажет",
+  );
+
+  // Ровно та мутация, которая 2026-08-24 прошла все четыре теста студии незамеченной.
+  const registry = join(root, "runtime/typescript/agents.registry.ts");
+  writeFileSync(
+    registry,
+    readFileSync(registry, "utf8").replace('  release: "release",', '  // release: "release",'),
+    "utf8",
+  );
+  assertFinding(
+    checkAgentRegistryCoverage(root),
+    "agent-registry-coverage",
+    /release\.md has no entry in agents\.registry\.ts/,
+  );
+});
+
+withFixture((root) => {
+  // Обратная сторона: имя в реестре без обёртки — агент, которого главная сессия не увидит.
+  rmSync(join(root, ".claude/agents/release.md"));
+  assertFinding(
+    checkAgentRegistryCoverage(root),
+    "agent-registry-coverage",
+    /lists 'release' but \.claude\/agents\/release\.md is missing/,
+  );
+});
+
+withFixture((root) => {
+  // Пустой набор успехом не считается: проверке нечего читать.
+  rmSync(join(root, ".claude/agents"), { recursive: true, force: true });
+  mkdirSync(join(root, ".claude/agents"), { recursive: true });
+  assertFinding(checkAgentRegistryCoverage(root), "agent-registry-coverage", /agent inventory is empty/);
 });
 
 withFixture((root) => {

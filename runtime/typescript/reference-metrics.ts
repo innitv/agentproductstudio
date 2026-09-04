@@ -61,19 +61,25 @@ export interface OutlineRow {
   text?: string;
 }
 
+/** Значение признака и его частота на странице — раздельно, не склеенной строкой. */
+export interface TopValue {
+  value: string;
+  count: number;
+}
+
 export interface PageMetrics {
   source: string;
   viewport: string;
   pageHeight: number;
   nodes: number;
   shadowHosts: number;
-  fontSizes: string[];
-  fontWeights: string[];
-  familiesCyrillic: string[];
-  familiesLatin: string[];
+  fontSizes: TopValue[];
+  fontWeights: TopValue[];
+  familiesCyrillic: TopValue[];
+  familiesLatin: TopValue[];
   loadedFaces: string[];
-  textColors: string[];
-  backgrounds: string[];
+  textColors: TopValue[];
+  backgrounds: TopValue[];
   medianRadius: number | null;
   medianPaddingLeft: number | null;
   outline: OutlineRow[];
@@ -89,8 +95,16 @@ export interface MetricsComparison {
   reference: PageMetrics;
   local: PageMetrics;
   differences: string[];
-  outlineDrift: Array<{ index: number; referenceBottom: number; localBottom: number; drift: number }>;
+  outlineDrift: Array<{ index: number; referenceBottom: number; localBottom: number | null; drift: number | null }>;
 }
+
+/**
+ * Сколько строк профиля попадает в сверку. Предел молчаливым быть не должен:
+ * главная ось инструмента — накопленная координата К НИЗУ страницы, и обрезание
+ * отсекает ровно тот участок, где расхождение вырастает. Поэтому вывод печатает,
+ * сколько блоков осталось за пределом.
+ */
+const PROFILE_ROWS = 14;
 
 /**
  * Исходник зонда. Он живёт отдельным JS-файлом, а не функцией в этом модуле:
@@ -130,6 +144,57 @@ async function measure(browser: Browser, url: string, width: number, height: num
   return metrics;
 }
 
+/**
+ * Сверка двух снятых наборов признаков. Вынесена из `compareReference`, чтобы
+ * правило сравнения проверялось тестом без браузера: именно здесь жил дефект,
+ * из-за которого идентичная типографика читалась как расхождение.
+ */
+export function compareMetrics(reference: PageMetrics, local: PageMetrics): MetricsComparison {
+  {
+    const differences: string[] = [];
+
+    /**
+     * Признак расходится, когда расходится МНОЖЕСТВО его значений. Частоты в
+     * сравнение не входят: при переносе образца на свой контент число узлов не
+     * совпадает никогда, и сравнение вместе с частотами помечало расхождением
+     * идентичную типографику (замер: две страницы с побайтово одинаковым CSS —
+     * 4 ложных расхождения из 8). Частота остаётся в отчёте справочно.
+     */
+    const compareValues = (label: string, a: TopValue[], b: TopValue[]): void => {
+      const set = (rows: TopValue[]): string => rows.map((row) => row.value).sort().join("|");
+      if (set(a) !== set(b)) differences.push(label);
+    };
+    /** Медианы — целые пиксели: расхождение в 1 px это округление, а не решение. */
+    const compareMedian = (label: string, a: number | null, b: number | null): void => {
+      if (a === null || b === null) {
+        if (a !== b) differences.push(label);
+        return;
+      }
+      if (Math.abs(a - b) > 1) differences.push(label);
+    };
+
+    compareValues("кегли", reference.fontSizes, local.fontSizes);
+    compareValues("веса", reference.fontWeights, local.fontWeights);
+    compareValues("гарнитура (кириллица)", reference.familiesCyrillic, local.familiesCyrillic);
+    compareValues("гарнитура (латиница)", reference.familiesLatin, local.familiesLatin);
+    compareValues("цвета текста", reference.textColors, local.textColors);
+    compareValues("фоны", reference.backgrounds, local.backgrounds);
+    compareMedian("медиана радиуса", reference.medianRadius, local.medianRadius);
+    compareMedian("медиана поля слева", reference.medianPaddingLeft, local.medianPaddingLeft);
+
+    // Блока нет — дельты нет. Иначе отсутствие блока считалось как `0 - низ
+    // образца` и читалось в таблице как «наш блок на 700 px выше».
+    const outlineDrift = reference.outline.slice(0, PROFILE_ROWS).map((row, index) => ({
+      index,
+      referenceBottom: row.bottom,
+      localBottom: local.outline[index]?.bottom ?? null,
+      drift: local.outline[index] ? local.outline[index].bottom - row.bottom : null,
+    }));
+
+    return { reference, local, differences, outlineDrift };
+  }
+}
+
 export async function compareReference(options: {
   reference: string;
   local: string;
@@ -145,28 +210,7 @@ export async function compareReference(options: {
       ? (JSON.parse(await readFile(options.reference, "utf8")) as PageMetrics)
       : await measure(browser, options.reference, width, height);
     const local = await measure(browser, options.local, width, height);
-
-    const differences: string[] = [];
-    const compare = (label: string, a: unknown, b: unknown): void => {
-      if (JSON.stringify(a) !== JSON.stringify(b)) differences.push(label);
-    };
-    compare("кегли", reference.fontSizes, local.fontSizes);
-    compare("веса", reference.fontWeights, local.fontWeights);
-    compare("гарнитура (кириллица)", reference.familiesCyrillic, local.familiesCyrillic);
-    compare("гарнитура (латиница)", reference.familiesLatin, local.familiesLatin);
-    compare("цвета текста", reference.textColors, local.textColors);
-    compare("фоны", reference.backgrounds, local.backgrounds);
-    compare("медиана радиуса", reference.medianRadius, local.medianRadius);
-    compare("медиана поля слева", reference.medianPaddingLeft, local.medianPaddingLeft);
-
-    const outlineDrift = reference.outline.slice(0, 14).map((row, index) => ({
-      index,
-      referenceBottom: row.bottom,
-      localBottom: local.outline[index]?.bottom ?? -1,
-      drift: (local.outline[index]?.bottom ?? 0) - row.bottom,
-    }));
-
-    return { reference, local, differences, outlineDrift };
+    return compareMetrics(reference, local);
   } finally {
     await browser.close();
   }
@@ -199,9 +243,20 @@ async function main(): Promise<void> {
   await mkdir(dirname(out), { recursive: true });
   await writeFile(out, JSON.stringify(result, null, 2), "utf8");
 
+  const isTopValues = (value: unknown): value is TopValue[] =>
+    Array.isArray(value) && value.every((row) => typeof row === "object" && row !== null && "value" in row);
+
   const line = (label: string, a: unknown, b: unknown): void => {
-    const same = JSON.stringify(a) === JSON.stringify(b);
-    const fmt = (value: unknown): string => (Array.isArray(value) ? value.join(", ") : String(value));
+    // Метка «≠» ставится по тому же правилу, что и `differences`: по множеству
+    // значений, без частот. Иначе таблица и итоговый список противоречат друг другу.
+    const fmt = (value: unknown): string => {
+      if (isTopValues(value)) return value.map((row) => row.value + "×" + row.count).join(", ");
+      return Array.isArray(value) ? value.join(", ") : String(value);
+    };
+    const key = (value: unknown): string =>
+      isTopValues(value) ? value.map((row) => row.value).sort().join("|") : JSON.stringify(value);
+    const same =
+      typeof a === "number" && typeof b === "number" ? Math.abs(a - b) <= 1 : key(a) === key(b);
     console.log((same ? "  =" : "  ≠") + " " + label);
     console.log("      образец: " + fmt(a));
     console.log("      наш:     " + fmt(b));
@@ -227,7 +282,15 @@ async function main(): Promise<void> {
     const loc = result.local.outline[row.index];
     const cell = (node?: OutlineRow): string =>
       (node ? String(node.bottom).padStart(5) + " h" + String(node.h).padStart(4) + " " + node.tag : "—").padEnd(22);
-    console.log("  " + cell(ref) + " | " + cell(loc) + " | дельта низа " + (row.drift > 0 ? "+" : "") + row.drift);
+    const drift = row.drift === null ? "блока нет" : (row.drift > 0 ? "+" : "") + row.drift;
+    console.log("  " + cell(ref) + " | " + cell(loc) + " | дельта низа " + drift);
+  }
+  const hidden = Math.max(result.reference.outline.length, result.local.outline.length) - PROFILE_ROWS;
+  if (hidden > 0) {
+    console.log(
+      "  … ещё " + hidden + " блок(ов) за пределом сверки: профиль обрезан на " + PROFILE_ROWS +
+        " строках, полный список — в отчёте.",
+    );
   }
 
   const diffs = result.differences;
