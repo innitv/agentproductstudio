@@ -28,6 +28,20 @@
       ],
       "port": 5173,
       "autoPort": false
+    },
+    {
+      "name": "a3brand",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": [
+        "--cwd",
+        "C:/Project/a3brand",
+        "dev",
+        "--port",
+        "5175",
+        "--strictPort"
+      ],
+      "port": 5175,
+      "autoPort": false
     }
   ]
 }
