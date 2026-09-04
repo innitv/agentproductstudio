@@ -48,7 +48,7 @@
 
 Проверка: `yarn workflow:validate <run-dir> --scale <scale>`; старт — `yarn workflow:start "<goal>" --scale <scale>`; run без поля `scale` читается как `full`.
 
-Для selective commit/push используй `agent-pack/templates/selective-commit-sop.md`: сначала выписать include/exclude scope, staged делать только явными путями, затем выполнить `yarn git:check-staged`. Agentic handoff исполняется через runtime-контракты (Delegation Packet + Agent Output Critic). Agent Capability Registry — `runtime/typescript/agent-capability-registry.ts`; при изменении агента/маршрута/skill/approval проверяй `yarn workflow:test-agent-capabilities`. Перед началом полного workflow запусти `yarn workflow:doctor`; для поздних handoff от `08-frontend` используй сжатый `handoff-bundle.md`.
+Частичный коммит — skill `selective-commit` и `agent-pack/templates/selective-commit-sop.md`. Agentic handoff исполняется через runtime-контракты (Delegation Packet + Agent Output Critic). Agent Capability Registry — `runtime/typescript/agent-capability-registry.ts`; при изменении агента/маршрута/skill/approval проверяй `yarn workflow:test-agent-capabilities`. Перед началом полного workflow запусти `yarn workflow:doctor`; для поздних handoff от `08-frontend` используй сжатый `handoff-bundle.md`.
 
 ## 1. Роль и язык
 
@@ -212,6 +212,7 @@ Sensitive data: не сохраняй secrets в коде, outputs, traces ил�
 - `outputs-cleanup` — `cleanup/sorting`, архивация run.
 - `rule-placement` — **при любом изменении правила, нормы или гейта студии**. Механическая часть — грепнуть маркер: **выдача в один файл значит, что правило знает только автор**.
 - `context7-docs` — документация внешней библиотеки вместо памяти модели: незнакомый или версионный API, поведение, похожее на баг библиотеки. Норма — `claude-operating-rules.md` §6.2.
+- `presentation-craft` — слайды и листы фирменного стиля. Продуктовому UI не нужен, вызывается по требованию.
 - `run-retrospective` — разбор завершённого run (`/retro`). Расхождения устройства системы — это `/subsystem-audit:audit`.
 - `/subsystem-audit:audit` — аудит подсистемы, сверка с best practice. Junction-плагин.
 - `/ui-craft:build`, `/ui-craft:reference-check` — переносимое ремесло интерфейса. Junction-плагин; основу интерфейса выбирает §6.1.
