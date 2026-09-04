@@ -28,112 +28,55 @@ contract_schema: agent-pack/templates/skill.template.md
 
 # Skill: Bespoke UI Landing Builder
 
-## 1. Назначение
+## Когда включается
 
-Применяй skill только для `08-frontend`, когда уже есть `prd.md`, `ia-brief.md`, `design-brief.md`, `screens.md`, `copy-deck.md`. Frontend в полном workflow нельзя начинать раньше этих артефактов, кроме явно отмеченного `quick draft`.
+Стадия `08-frontend`, когда уже есть `prd.md`, `ia-brief.md`, `design-brief.md`,
+`screens.md`, `copy-deck.md`. Раньше этих артефактов фронтенд в полном workflow
+начинать нельзя — исключение только явный `quick draft`.
 
-Стек по умолчанию: React + Vite + Tailwind CSS. Верстка целевого лендинга и калькуляторов живет в `apps/frontend/src/views/` — один экран, один файл. Заводи новый `<ProductName>View.tsx`, а не переписывай чужой экран под свою задачу. `App.tsx` держи тонким роутером; маршрут добавляй и в список корневого указателя `StudioIndexView.tsx`, иначе он не будет виден никому, кроме исходников роутера.
+Стек по умолчанию: React + Vite + Tailwind. Экраны живут в
+`apps/frontend/src/views/`, один экран — один файл. Заводится новый
+`<ProductName>View.tsx`, а не переписывается чужой; `App.tsx` остаётся тонким
+роутером, и маршрут добавляется в `StudioIndexView.tsx` — иначе экран не увидит
+никто, кроме исходников роутера.
 
-## 1.1. Выбор основы: shadcn по умолчанию, bespoke по характеру
+## Выбор основы: shadcn по умолчанию
 
-Решение владельца продукта от 2026-07-27 (`CLAUDE.md` §6.1): **для product UI дефолт — компоненты shadcn/ui**, а не вёрстка примитивов с нуля. Они ставятся `yarn shadcn add <component>` в `apps/frontend/src/components/shadcn/` и после установки являются кодом проекта — править их можно и нужно.
+🔴 Решение владельца от 2026-07-27 (`CLAUDE.md` §6.1): для product UI дефолт —
+компоненты shadcn/ui, а не вёрстка примитивов с нуля. Выбор делается до первой
+строки разметки и записывается в `frontend-result.md`.
 
-Выбор основы делается до первой строки разметки и записывается в `frontend-result.md`:
+| Поверхность | Основа |
+|---|---|
+| app, консоль, формы, таблицы, оверлеи | shadcn/ui; свой код только на подтверждённый пробел |
+| marketing/landing с сильным визуальным характером | bespoke композиция, но поля, кнопки и диалоги всё равно из shadcn |
+| редактор, канвас, плотная таблица | bespoke с обоснованием в `design-brief.md` |
 
-| Поверхность | Основа | Что именно |
-|---|---|---|
-| `app/dashboard/console`, формы, таблицы, оверлеи | **shadcn/ui** | Примитивы из реестра; свой код — только на подтверждённый пробел (`Chip`, `SegmentedControl`, `InputCard` со сбросом, уровень `warning` у `Alert`) |
-| `marketing/landing` с сильным визуальным характером | bespoke | Композиция, hero, ритм секций пишутся под задачу; служебные контролы (поля, кнопки, диалоги) всё равно берутся из shadcn, если нет причины иначе |
-| Нестандартный интерфейс: редактор, канвас, плотная таблица | bespoke | Обоснование — в `design-brief.md` через Design System Strategy Gate |
+Bespoke без обоснования — не «характер», а лишняя работа и второй
+непроверенный слой примитивов.
 
-Bespoke без такого обоснования — не «характер», а лишняя работа и второй непроверенный слой примитивов.
+🔴 **Границы правки shadcn** (метод и числа — `design/tokens/shadcn/README.md`):
+цвет, гарнитуру и кольцо фокуса менять смело, но через `design/tokens/shadcn/`
+и `yarn tokens:build`, а не правкой значений в компоненте. `--spacing` и шкалу
+радиусов не трогать: в Tailwind 4 от `--spacing` считаются все отступы и
+высоты, сжатие даёт дробные пиксели и ломает ритм. Порталы (`SelectContent`,
+`DropdownMenuContent`, `TooltipContent`, `sonner`) рендерятся вне контейнера
+темы; тени Tailwind впечатаны константой и токеном не управляются.
 
-Границы правки shadcn (измерены экспериментом с разделением факторов, метод и числа — `design/tokens/shadcn/README.md`):
+Механика библиотеки, известные пробелы реестра и грабли — навык
+`shadcn-library`.
 
-- **Меняй смело:** цветовые токены, гарнитуру, кольцо фокуса — через `design/tokens/shadcn/` и `yarn tokens:build`, не правкой значений в компоненте.
-- **Не трогай `--spacing` и шкалу радиусов.** В Tailwind 4 от `--spacing` считаются все отступы и высоты; сжатие даёт дробные пиксели и ломает ритм.
-- **Порталы** (`SelectContent`, `DropdownMenuContent`, `TooltipContent`, `sonner`) рендерятся вне контейнера темы — атрибут темы зеркалится на корень документа. Тени Tailwind впечатаны константой и токеном не управляются.
+## Чего не делать
 
-## 2. Обязательные inputs
+Узнаваемый признак интерфейса, собранного без решения: фиолетово-синие
+градиенты, одинаковые карточки, избыточный `rounded-2xl`, декоративные тени,
+«hero card» без связи с продуктом. Дальше по списку: подставной текст, который
+прячет реальные переносы; мозаика равных карточек вместо иерархии; сырые hex и
+пиксели при наличии токенов; цвет как единственный индикатор статуса;
+hover без клавиатурного эквивалента; дашборд, где все панели равны и не видно
+главного действия.
 
-Перед изменением кода прочитай:
-- `prd.md`: цели, acceptance criteria, analytics.
-- `ia-brief.md`: sitemap, primary flow, главный экран и действие.
-- `design-brief.md`: визуальные токены, компоненты, responsive, accessibility.
-- `screens.md`: порядок экранов/секций и состояния.
-- `copy-deck.md`: финальные тексты, CTA, SEO, claims.
-- `reference-analysis.md`, если задача reference-driven.
+## Детали
 
-## 3. Процедура
-
-1. Извлеки implementation checklist из входных артефактов: секции, состояния, CTA, формы, analytics hooks, responsive breakpoints, accessibility notes.
-2. Перед кодом зафиксируй короткий frontend thesis:
-   - `visual thesis`: настроение, материал, плотность, энергия;
-   - `content plan`: hero/primary workspace, support/detail, conversion or task completion;
-   - `interaction thesis`: 2-3 осмысленных motion/feedback решения;
-   - `defaults to reject`: 3 типовых AI/default решения, которых нельзя допустить.
-3. Определи тип поверхности:
-   - `marketing/landing`: первый viewport работает как brand/product signal, composition-first, минимум chrome;
-   - `app/dashboard/console`: primary workspace, navigation, inspector/context, плотная повторяемая работа;
-   - blended projects разделяй на разные views/sections, не смешивай marketing hero с операционным dashboard.
-4. Выбери основу по таблице §1.1 и зафиксируй выбор с причиной. Для shadcn-основы собери экран из компонентов реестра и вкладывай характер в тему (цвет, гарнитура, фокус) и композицию, а не в переписывание примитивов. Для bespoke-основы собирай UI на CSS Grid/Flexbox, где Tailwind — только запись значений из design/reference artifacts: не используй готовые шаблоны, дефолтные сетки и стандартный "component library look".
-5. В reference-driven задаче layout, gaps, column counts, aspect ratios и section order бери только из `reference-analysis.md`; не подставляй Bootstrap-like/12-column defaults.
-6. В обычной задаче стиль выводи из `design-brief.md`, `STYLE_GUIDE.md` и `figma-handoff-bundle.md` при наличии. Не навязывай glassmorphism, gradients, blur или темную тему, если они не заданы дизайном.
-7. Синхронизируй tokens/components. Источник правды для значений — `design/tokens/` (DTCG, сборка `yarn tokens:build`; для shadcn-темы `design/tokens/shadcn/` и `yarn tokens:build`), а не Figma-файл: правка значения делается в токенах, иначе baseline-гейт отклонит незаявленное изменение. Если решение пришло из Figma-черновика `04-design`, оно переносится в токены один раз; обратной синхронизации нет.
-   - design tokens -> CSS custom properties или Tailwind theme values;
-   - Figma Auto Layout intent -> Flex/Grid, gap, padding, min/max, fixed/fill/hug equivalents;
-   - component states/variants -> React props, data attributes или local state.
-8. Реализуй component architecture: компоненты сфокусированы на одной задаче, без over-configured props, без prop drilling глубже 3 уровней. Состояние выбирай минимально достаточное: local state, lifted state, URL state, context или store только по необходимости.
-9. Реализуй состояния: loading/empty/error/success для форм и ключевых интерактивных элементов, selected/active для навигации и списков, hover/focus/disabled для controls.
-10. Подключи analytics hooks из PRD без отправки PII в event payload.
-11. Проведи frontend QA inventory до финального ответа: пользовательские claims, важные controls, state changes, viewport requirements, визуально критичные зоны.
-12. Обнови `frontend-result.md` в run directory: changed files, inputs read, implemented screens/sections, tokens/components mapping, analytics hooks, accessibility/responsive notes, validation commands и known deviations.
-
-## 4. Component Architecture
-
-- Держи view-level композицию отдельно от переиспользуемых компонентов.
-- Компонент должен иметь одну ответственность; если файл компонента разрастается и смешивает layout, data mapping и behavior, выдели подкомпоненты или hook.
-- Избегай "config-object UI", где компонент пытается принять все варианты через огромный набор props. Предпочитай composition: `Card`, `CardHeader`, `CardBody`, `ActionRow`.
-- Для repeated UI опиши стабильные размеры и responsive constraints, чтобы длинный текст, hover/focus state или loading label не меняли layout.
-- Не добавляй новую UI-библиотеку ради одного компонента. Используй существующий стек проекта: shadcn/ui уже в нём, добавление ещё одного набора примитивов рядом с ним — регресс, а не ускорение.
-- Не переписывай примитив shadcn целиком, чтобы поменять внешний вид: сначала проверь, закрывается ли задача темой в `design/tokens/shadcn/`.
-
-## 5. Anti-Patterns
-
-- Generic AI aesthetic: фиолетово-синие градиенты, одинаковые карточки, чрезмерный `rounded-2xl`, декоративные shadows, "hero card" без связи с продуктом.
-- Placeholder copy, который прячет реальные переносы текста.
-- Uniform card mosaics вместо purpose-driven hierarchy.
-- Сырые hex/pixel values, если есть tokens.
-- Цвет как единственный индикатор статуса.
-- Hover-only UX без keyboard/focus equivalent.
-- Full-bleed hero, который теряет brand/product signal в первом viewport.
-- Dashboard, где все панели равны и пользователь не видит primary workspace/action.
-
-## 6. Evidence и failure modes
-
-`frontend-result.md` обязан содержать:
-- список измененных файлов;
-- какие inputs прочитаны;
-- какие acceptance criteria закрыты;
-- какие tokens/components из design/Figma handoff использованы;
-- какие команды проверки запущены и их результат;
-- какие screenshots/viewport checks выполнены или почему они skipped;
-- известные ограничения, deviations или blockers.
-
-Блокируй stage как `blocked`/`partial`, если нет обязательных upstream artifacts, задача reference-driven без `reference-analysis.md`, frontend просит Figma write/deploy без approval, build/typecheck не проходит или визуально критичный viewport невозможно проверить.
-
-## 7. Validation gates
-
-- [ ] `yarn typecheck` проходит.
-- [ ] `yarn build` проходит.
-- [ ] Первый viewport не ломается на desktop/mobile.
-- [ ] Нет horizontal overflow, перекрытия текста, битых изображений.
-- [ ] Keyboard focus видим на интерактивных элементах.
-- [ ] Loading/empty/error/success states проверены.
-- [ ] Длинный текст не ломает кнопки, cards, table rows и nav.
-- [ ] Motion не использует `transition: all`, поддерживает reduced motion и hover gated для fine pointer.
-- [ ] Значения взяты из `design/tokens/`; сырых hex/px без токена нет, `yarn tokens:build` проходит baseline-гейт.
-- [ ] Выбор основы (shadcn или bespoke) записан с причиной; bespoke для product UI имеет обоснование по Design System Strategy Gate.
-- [ ] Analytics hooks соответствуют PRD и не содержат PII.
-- [ ] Для визуально значимой UI-задачи есть Playwright/browser screenshot evidence на desktop и mobile или явный blocker.
-- [ ] Экран имеет composition story в витрине (`ds-to-storybook`), и она рендерит тот же компонент, что и роут.
+Входы, процедура реализации, архитектура компонентов, состав evidence и
+чек-лист приёмки — `references/implementation.md`.
