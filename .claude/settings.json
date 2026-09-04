@@ -65,14 +65,20 @@
     "SessionStart": [
       {
         "hooks": [
-          { "type": "command", "command": "node .claude/hooks/session-start.mjs" }
+          {
+            "type": "command",
+            "command": "node .claude/hooks/session-start.mjs"
+          }
         ]
       }
     ],
     "UserPromptSubmit": [
       {
         "hooks": [
-          { "type": "command", "command": "node .claude/hooks/orchestrator-reminder.mjs" }
+          {
+            "type": "command",
+            "command": "node .claude/hooks/orchestrator-reminder.mjs"
+          }
         ]
       }
     ],
@@ -80,19 +86,37 @@
       {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
-          { "type": "command", "command": "node .claude/hooks/guard-write.mjs" }
+          {
+            "type": "command",
+            "command": "node .claude/hooks/guard-write.mjs"
+          }
         ]
       },
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "node .claude/hooks/guard-bash.mjs" }
+          {
+            "type": "command",
+            "command": "node .claude/hooks/guard-bash.mjs"
+          }
         ]
       },
       {
         "matcher": "use_figma|generate_figma_design",
         "hooks": [
-          { "type": "command", "command": "node .claude/hooks/delegation-guard.mjs" }
+          {
+            "type": "command",
+            "command": "node .claude/hooks/delegation-guard.mjs"
+          }
+        ]
+      },
+      {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/guard-agent-background.mjs"
+          }
         ]
       }
     ],
@@ -100,13 +124,19 @@
       {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
-          { "type": "command", "command": "node .claude/hooks/post-edit-sync.mjs" }
+          {
+            "type": "command",
+            "command": "node .claude/hooks/post-edit-sync.mjs"
+          }
         ]
       },
       {
         "matcher": "use_figma|generate_figma_design",
         "hooks": [
-          { "type": "command", "command": "node .claude/hooks/figma-selfcheck.mjs" }
+          {
+            "type": "command",
+            "command": "node .claude/hooks/figma-selfcheck.mjs"
+          }
         ]
       }
     ]

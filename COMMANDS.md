@@ -349,8 +349,9 @@ yarn reference:metrics --reference=probe-dump.json --local=http://127.0.0.1:4173
 
 Команда пишет `reports/visual-review/reference-metrics.json` и всегда возвращает
 0: она измеряет, а не судит. Часть расхождений — намеренные решения продукта,
-и классификация `defect`/`intentional`/`unknown` остаётся за агентом
-`reference-auditor` или человеком; вердикт `pass`/`fail` — за `qa-review`.
+и классификация `defect`/`intentional`/`unknown` делается по процедуре skill
+`visual-diff-verifier` §3.3.1 тем, кто знает решения продукта (оркестратор или
+человек); вердикт `pass`/`fail` — за `qa-review` на `09-visual-reference`.
 
 Посчитать section-aware diff по reference/local URL:
 
@@ -451,7 +452,7 @@ yarn workflow:test-agentic
 
 ### Сторожа против расхождения инструкций и кода
 
-Одиннадцать проверок: три заведены после аудита 2026-07-28, две — после прогона `a3-shadcn` 2026-07-29 (разбор — `docs/architecture/retro-a3-shadcn-2026-07-29.md`), четыре — после аудита 2026-07-30 (`docs/architecture/studio-optimization-audit-2026-07-30.md`), две — после аудита 2026-08-17 (`docs/architecture/studio-hygiene-audit-2026-08-17.md`). Первые три (`docs/architecture/studio-audit-2026-07-28.md`): все семь находок P0 того аудита прошли мимо зелёных проверок, потому что держались на договорённости, а не на тесте. Каждая доказана воспроизведением исторического дефекта — тесты содержат дословные формулировки, которые в репозитории уже были.
+Двенадцать проверок: три заведены после аудита 2026-07-28, две — после прогона `a3-shadcn` 2026-07-29 (разбор — `docs/architecture/retro-a3-shadcn-2026-07-29.md`), четыре — после аудита 2026-07-30 (`docs/architecture/studio-optimization-audit-2026-07-30.md`), две — после аудита 2026-08-17 (`docs/architecture/studio-hygiene-audit-2026-08-17.md`), одна — после потери трёх фоновых прогонов 2026-08-30/31 (`docs/architecture/delegation-lessons.md` §5). Первые три (`docs/architecture/studio-audit-2026-07-28.md`): все семь находок P0 того аудита прошли мимо зелёных проверок, потому что держались на договорённости, а не на тесте. Каждая доказана воспроизведением исторического дефекта — тесты содержат дословные формулировки, которые в репозитории уже были.
 
 | Проверка | Что ловит | Где живёт | Куда подключена |
 |---|---|---|---|
@@ -464,6 +465,7 @@ yarn workflow:test-agentic
 | Снятая привязка тёмного варианта | Пропажу `@custom-variant dark (...)` из `apps/frontend/src/styles.css`. Без неё `dark:` слушает системную тему, а компоненты реестра несут тёмные варианты в классах: поля и вторичные кнопки уходят в серое на машине с тёмной ОС. Дефект прошёл `vr:test`, `test-storybook`, `qa:mobile` и axe — контейнеры стартуют со светлой темой | `checkFrontendThemeInvariants` в `runtime/typescript/studio-hygiene.ts` | `yarn workflow:test-studio-hygiene` (→ `workflow:test-agentic`) |
 | Тест, который никто не запускает | Файл `runtime/typescript/test-*.ts` без скрипта в `package.json` либо скрипт, не попавший в цепочку `workflow:test-agentic`. Аудит 07-28 нашёл пять таких — состояние починили, механизм нет. Проверка покрывает и саму себя | `checkTestAggregatorCoverage` в `runtime/typescript/studio-hygiene.ts` | `yarn workflow:test-studio-hygiene` (→ `workflow:test-agentic`) |
 | Прогон, заведённый по ошибке вызова | `--help` в аргументах `workflow:start` (флаг уезжал в цель прогона: на диске были два прогона со слагом `help` и research-артефактами внутри) и мусорный слаг из цели без латиницы (русская цель дала слаг `3`). Плюс связность: команда в маршрутизации без строки справки | `helpFlags`/`commandUsage` в `runtime/typescript/workflow-cli.ts`, `resolveRunSlug` в `runtime/typescript/run-landing-workflow.ts` | `yarn workflow:test-start-guards` (→ `workflow:test-agentic`) |
+| Фоновое делегирование субагента | Вызов `Agent`/`Task` без `run_in_background: false`. Процесс живёт один ход: фоновый агент погибает, когда оркестратор отвечает человеку. Замер 2026-08-30/31 — три research-агента погибли дважды подряд, потеряв ~40 минут работы каждый; синхронный агент той же задачи отработал 27 минут и вернул результат. Отсутствие поля блокируется наравне с `true`: по умолчанию вызов уходит в фон. Осознанный обход — env `CLAUDE_ALLOW_BACKGROUND_AGENT=1` | `.claude/hooks/guard-agent-background.mjs`, matcher `Agent|Task` в `.claude/settings.json` | `yarn workflow:test-guard-agent-background` (→ `workflow:test-agentic`) |
 | Команда, позванная без обязательного аргумента | `research:lint` без пути (линтовал корень репозитория как research pack) и `figma:audit`, не знающий, какую систему аудировать (`default_system` в `design/figma/registry.json`). Обе команды не входили ни в один агрегатор, поэтому их поломка была не видна сводной проверке | `tooling/scripts/lint-research-content.mjs`, `tooling/scripts/audit-figma-component-contracts.mjs` | `yarn workflow:test-cli-arg-contracts` (→ `workflow:test-agentic`) |
 
 Строка или файл выводится из-под линтера маркером `instruction-lint-ignore` в HTML-комментарии — по образцу `docs-audit-ignore` в аудите документации.

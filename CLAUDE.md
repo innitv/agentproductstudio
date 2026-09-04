@@ -200,7 +200,7 @@ Sensitive data: не сохраняй secrets в коде, outputs, traces ил�
 
 ## 11. Субагенты
 
-Нативные Claude-обёртки — в `.claude/agents/` (вызываются главной сессией через `Agent` tool, `subagent_type` = имя): research, prd, ia, design, design-generator, copywriting, frontend, qa-review, release, notion-publisher, reference-auditor. Последний — вне продуктового pipeline: стадии не владеет и вердикта не выносит, он измеряет расхождение с внешним образцом и вызывается по требованию (до выбора основы, после первой сборки, по жалобе «не похоже»). Оркестратор — это сама главная сессия (`.claude/agents/orchestrator.md` — её чек-лист), не спавни его как субагента; это закреплено механически через `permissions.deny` в `.claude/settings.json`. Специалисты не спавнят субагентов (`disallowedTools: Task, Agent` в обёртках) — вложенная делегация нарушила бы manager-style. Детальные контракты — `agent-pack/agent-contracts/*.agent.md`. Skills — в `.claude/skills/`.
+Нативные Claude-обёртки — в `.claude/agents/` (вызываются главной сессией через `Agent` tool, `subagent_type` = имя): research, prd, ia, design, design-generator, copywriting, frontend, qa-review, release, notion-publisher. Оркестратор — это сама главная сессия (`.claude/agents/orchestrator.md` — её чек-лист), не спавни его как субагента; это закреплено механически через `permissions.deny` в `.claude/settings.json`. Специалисты не спавнят субагентов (`disallowedTools: Task, Agent` в обёртках) — вложенная делегация нарушила бы manager-style. Детальные контракты — `agent-pack/agent-contracts/*.agent.md`. Skills — в `.claude/skills/`.
 
 Кросс-стадийные skills (действуют вне зависимости от этапа; процедура — в самом навыке, здесь только повод вызвать):
 
@@ -224,7 +224,9 @@ Sensitive data: не сохраняй secrets в коде, outputs, traces ил�
 
 🔴 **Правил `CLAUDE.md`, изменённых в этой сессии, субагент не увидит** — его `claudeMd` снят на старте сессии (замерено 2026-07-30). Поменял правило и делегируешь сейчас — дублируй в packet.
 
-**Полный текст с замерами и прецедентами — `docs/architecture/delegation-lessons.md` §1-4; обязанности оркестратора по packet — `agent-pack/agent-contracts/orchestrator.agent.md`.** Читать перед первым делегированием в сессии.
+🔴 **Делегируй синхронно (`run_in_background: false`).** Процесс живёт один ход: фоновый агент умирает, когда оркестратор отвечает человеку — трижды подряд потеряны прогоны 2026-08-30/31. Дроби задачу под один ход и требуй в packet записи на диск по мере работы.
+
+**Полный текст с замерами и прецедентами — `docs/architecture/delegation-lessons.md` §1-5; обязанности оркестратора по packet — `agent-pack/agent-contracts/orchestrator.agent.md`.** Читать перед первым делегированием в сессии.
 
 ## 12. Триггер-фразы и slash-команды
 
