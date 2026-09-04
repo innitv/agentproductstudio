@@ -15,6 +15,7 @@ required_outputs:
   - prd
 approval_actions: []
 skills:
+  - prd-requirements
   - anti-ai-slop
 contract_schema: agent-pack/schemas/agent-output.schema.json
 ---
