@@ -25,8 +25,9 @@
 //
 // Удаления frozen-путей (статус D) НЕ блокируются — опасность selective-commit это
 // случайное ДОБАВЛЕНИЕ ledger/evidence, а не чистка.
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { execSync } from "node:child_process";
+import { join } from "node:path";
 
 let raw = "";
 try { raw = readFileSync(0, "utf8"); } catch {}
@@ -47,7 +48,7 @@ const block = (msg) => { process.stderr.write(`[guard-bash] ${msg}`); process.ex
  * исполняется, и прятать в нём `git add outputs/...` нельзя.
  */
 const stripCommitHeredocBodies = (text) => {
-  const lines = text.split(/\r?\n/);
+  const lines = text.split(String.fromCharCode(10));
   const kept = [];
   for (let i = 0; i < lines.length; i += 1) {
     const line = lines[i];
@@ -91,6 +92,36 @@ if (/\bgit\s+push\b/.test(scanned) && /(--force\b|--force-with-lease\b|(^|\s)-f(
     && process.env.CLAUDE_ALLOW_FORCE_PUSH !== "1") {
   block("git push --force заблокирован. Force-push перезаписывает удалённую историю. " +
         "Для осознанного действия повтори с env CLAUDE_ALLOW_FORCE_PUSH=1.");
+}
+
+// 2. Подпись коммита должна совпадать с ожидаемой для этого репозитория.
+//
+// 🔴 Повод (2026-09-04). Пуш ушёл под аккаунтом владельца, а коммиты были подписаны почтой
+// второго аккаунта: GitHub сопоставляет коммит с профилем по e-mail автора, и в списке
+// коммитов стоял не тот пользователь. Расхождение заметил человек — при том что оба факта
+// доступны машине. Проверка сверяет `git config user.email` с ожидаемым значением из файла
+// `.claude/git-identity` (одна строка, комментарии `#` игнорируются).
+//
+// Fail-open по устройству: нет файла — нет ожидания, проверка молчит. Это осознанно, чтобы
+// хук не мешал в репозиториях, где подпись не зафиксирована.
+if (/\bgit\s+(push|commit)\b/.test(scanned) && process.env.CLAUDE_ALLOW_IDENTITY_MISMATCH !== "1") {
+  const identityFile = join(cwd, ".claude", "git-identity");
+  if (existsSync(identityFile)) {
+    const expected = readFileSync(identityFile, "utf8")
+      .split(String.fromCharCode(10))
+      .map((line) => line.trim())
+      .find((line) => line && !line.startsWith("#"));
+    let actual = null;
+    try {
+      actual = execSync("git config user.email", { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    } catch { actual = null; } // git недоступен — не мешаем работе
+    if (expected && actual && expected !== actual) {
+      block(`Подпись коммита не та: git config user.email = '${actual}', ожидается '${expected}' ` +
+            "(.claude/git-identity). GitHub сопоставляет коммит с аккаунтом по e-mail автора, " +
+            "поэтому чужая почта приведёт коммит к другому профилю. Поправь подпись или, если " +
+            "расхождение осознанное, повтори с env CLAUDE_ALLOW_IDENTITY_MISMATCH=1.");
+    }
+  }
 }
 
 const gitLines = (args) => {
