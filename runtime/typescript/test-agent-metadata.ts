@@ -102,8 +102,11 @@ withAgentDocFixture((root) => {
 
 // Обёртка объявляет skill, которого нет в контракте — дрейф в обратную сторону.
 withAgentDocFixture((root) => {
+  // Мутация не зависит от состава skills у агента: раньше здесь стояла точная
+  // строка "skills: [anti-ai-slop]", и добавление навыка к prd молча ломало
+  // проверку — она переставала вносить мутацию и потому ничего не ловила.
   overwriteWrapper(root, "prd.md", (content) =>
-    content.replace("skills: [anti-ai-slop]", "skills: [anti-ai-slop, run-ledger]"));
+    content.replace(/skills: \[([^\]]*)\]/, "skills: [$1, run-ledger]"));
   assertMetadataError(
     validateAgentMetadata(root),
     /\.claude\/agents\/prd\.md: skills contains 'run-ledger' which the contract .* does not declare/,
