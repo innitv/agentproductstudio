@@ -89,12 +89,28 @@ function makeRoot(required: string[], prose: string): string {
   rmSync(root, { recursive: true, force: true });
 }
 
-// 6. Пустой набор документов и отсутствие схемы успехом не считаются
+// 6. Соседняя строка не должна влиять: заголовок «Обязательные результаты» через
+// строку от упоминания читался как требование к полю — так проверка давала шесть
+// ложных находок на живом репозитории, пока окно было отрезком символов.
+{
+  const root = makeRoot(
+    ["skills_used"],
+    ["- `skills_used` заполняется по ходу работы.", "", "## Обязательные результаты", "", "- артефакт стадии"].join(NL),
+  );
+  assert.deepEqual(
+    findContractConflicts(root),
+    [],
+    "модальность из соседней строки не относится к полю: окно — строка, а не отрезок символов",
+  );
+  rmSync(root, { recursive: true, force: true });
+}
+
+// 7. Пустой набор документов и отсутствие схемы успехом не считаются
 {
   const root = mkdtempSync(join(tmpdir(), "contract-consistency-empty-"));
   const found = findContractConflicts(root);
-  assert.equal(found.length, 1, "без схемы проверка обязана сообщить, что ей нечего читать");
-  assert.match(found[0].message, /схема вывода агента не найдена/);
+  assert.equal(found.length, 1, "без схем проверка обязана сообщить, что ей нечего читать");
+  assert.match(found[0].message, /схем не найдено/);
   rmSync(root, { recursive: true, force: true });
 }
 
