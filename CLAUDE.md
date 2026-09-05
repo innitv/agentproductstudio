@@ -107,7 +107,7 @@ Source of truth:
 - `outputs/registry.json` и `research/registry.json` — навигационные индексы; прошлые run artifacts не являются нормативным источником для изменения правил. `outputs/registry.json` ведёт runtime: `workflow:start` вносит слаг, `workflow:archive` убирает его, когда у слага не осталось каталогов, `workflow:registry-sync [--force]` чинит расхождения. Руками не править; `research/registry.json` пока ведётся вручную.
 - Standalone research/CJM без frontend delivery — тоже `research/projects/<research-slug>/<YYYY-MM-DD>/`.
 
-Run ledger (обязательные файлы до первых стадий): `run-plan.md`, `handoff-bundle.md`, `stage-gate-ledger.md`, `run-state.json`, `run-meta.json`, `artifact-manifest.json`, `run-index.md`. После каждого этапа обновляй `handoff-bundle.md` (completed artifacts, decisions, risks, next artifact) и `stage-gate-ledger.md` (stage status, gate notes, validation). Каждый этап читает предыдущие артефакты и фиксирует `inputs_used`. После ручной правки — `yarn workflow:sync <run-dir>`; обзор — `yarn workflow:list`/`yarn workflow:inspect <run-dir>`/`yarn workflow:outputs <run-dir>`.
+Run ledger ведётся по skill `run-ledger`: состав обязательных файлов, что обновляется после каждого этапа, фиксация `inputs_used`/`skills_used` и синхронизация после ручных правок — там. Ledger обязателен до первых стадий; этап, не записавший результат, считается незакрытым.
 
 ## 5. Обязательный продуктовый процесс
 
