@@ -21,9 +21,19 @@ function withSkillFixture(assertion: (root: string) => void): void {
   }
 }
 
+function applyMutation(path: string, transform: (content: string) => string): void {
+  const before = readFileSync(path, "utf8");
+  const after = transform(before);
+  // 🔴 Мутация, не изменившая файл, превращает тест в no-op: проверка сверяет
+  // неизменённое состояние и остаётся зелёной. Так 2026-09-04 `test-agent-metadata`
+  // перестал ловить дрейф skills — шаблон подстановки разошёлся с конфигом после
+  // добавления навыка к `prd`, и это всплыло случайно. Норма — skill `rule-placement`.
+  assert.notEqual(after, before, `мутация фикстуры не внесена: ${path}`);
+  writeFileSync(path, after, "utf8");
+}
+
 function overwriteSkill(root: string, skillId: string, transform: (content: string) => string): void {
-  const path = join(root, ".claude/skills", skillId, "SKILL.md");
-  writeFileSync(path, transform(readFileSync(path, "utf8")), "utf8");
+  applyMutation(join(root, ".claude/skills", skillId, "SKILL.md"), transform);
 }
 
 function assertMetadataError(errors: string[], pattern: RegExp): void {
