@@ -486,6 +486,7 @@ function renderAgentOutput(agentName: string, artifactName: string, artifactCont
     `summary: Тестовый ${artifactName} сформирован по контракту.`,
     "inputs_used:",
     ...inputs.map((input) => `  - ${input}`),
+    "skills_used: []",
     "outputs:",
     `  ${artifactName}: |`,
     ...artifactContent.split("\n").map((line) => `    ${line}`),

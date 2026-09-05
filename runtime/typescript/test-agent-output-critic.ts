@@ -388,6 +388,10 @@ function envelopeReport(options: {
     "summary: Работа выполнена.",
     "inputs_used:",
     inputs,
+    // Поле стало обязательным вместе с нормой записи применённых навыков
+    // (skill `run-ledger`, отчёт `yarn workflow:skill-usage`): пустой список —
+    // законный ответ, отсутствие поля — нет.
+    "skills_used: []",
     "outputs:",
     outputs,
     "assumptions: []",

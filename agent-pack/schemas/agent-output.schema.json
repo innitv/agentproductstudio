@@ -3,19 +3,72 @@
   "$id": "https://agent-product-studio.local/schemas/agent-output.schema.json",
   "title": "Agent Output",
   "type": "object",
-  "required": ["agent_name", "status", "summary", "inputs_used", "outputs", "assumptions", "risks", "open_questions", "recommended_next_step"],
+  "required": [
+    "agent_name",
+    "status",
+    "summary",
+    "inputs_used",
+    "skills_used",
+    "outputs",
+    "assumptions",
+    "risks",
+    "open_questions",
+    "recommended_next_step"
+  ],
   "properties": {
-    "agent_name": { "type": "string", "minLength": 1 },
-    "status": { "enum": ["success", "partial", "blocked"] },
-    "summary": { "type": "string" },
-    "inputs_used": { "type": "array", "items": { "type": "string" } },
-    "skills_used": { "type": "array", "items": { "type": "string" } },
-    "outputs": { "type": "object" },
-    "surface_output": { "type": "object" },
-    "assumptions": { "type": "array", "items": { "type": "string" } },
-    "risks": { "type": "array", "items": { "type": "string" } },
-    "open_questions": { "type": "array", "items": { "type": "string" } },
-    "recommended_next_step": { "type": "string" }
+    "agent_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "success",
+        "partial",
+        "blocked"
+      ]
+    },
+    "summary": {
+      "type": "string"
+    },
+    "inputs_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "skills_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "outputs": {
+      "type": "object"
+    },
+    "surface_output": {
+      "type": "object"
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recommended_next_step": {
+      "type": "string"
+    }
   },
   "additionalProperties": false
 }

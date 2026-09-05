@@ -70,7 +70,7 @@
 
 - Затрагивает ли правка нормативный слой или только прошлый run artifact.
 - Есть ли один владелец итогового результата.
-- Есть ли structured inputs/outputs и `inputs_used`.
+- Есть ли structured inputs/outputs, `inputs_used` и `skills_used`.
 - Есть ли gate для validation и human approval.
 - Не появляется ли дублирование правил в `AGENTS.md`, workflow, agent и skill одновременно.
 - Обновлены ли templates/SOP, если процедура стала повторяемой.
