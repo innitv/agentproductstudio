@@ -28,6 +28,7 @@ import {
 import { approvalActions } from "./approval-gate";
 import { validateAgentMetadata } from "./agent-metadata";
 import { validateSkillMetadata, validateSkillWrappers } from "./skill-metadata";
+import { validateContractConsistency } from "./contract-consistency";
 import { validateInstructionTexts } from "./instruction-lint";
 import { describeKnownGraphDeviations, validateWorkflowGraph } from "./workflow-graph";
 
@@ -106,6 +107,10 @@ export function validateConfigSemantics(root = process.cwd()): string[] {
   validateArtifactTemplates(root, errors);
   errors.push(...validateAgentMetadata(root));
   errors.push(...validateSkillMetadata(root));
+  // Проза о полях контракта не имеет права противоречить самой схеме:
+  // «обязателен» против «опционален» об одном имени ломает проверки, которые
+  // на это поле опираются (повод — skills_used, 2026-09-04).
+  errors.push(...validateContractConsistency(root));
   errors.push(...validateSkillWrappers());
   errors.push(...validateWorkflowGraph());
   errors.push(...validateInstructionTexts(root));
